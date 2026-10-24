@@ -295,10 +295,10 @@ function Shell() {
 
 export default function App() {
   return (
-    <I18nProvider>
-      <StoreProvider>
+    <StoreProvider>
+      <I18nProvider>
         <Shell />
-      </StoreProvider>
-    </I18nProvider>
+      </I18nProvider>
+    </StoreProvider>
   );
 }
