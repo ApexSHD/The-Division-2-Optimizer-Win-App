@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Frontend (TypeScript + Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: d2-build-optimizer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: d2-build-optimizer/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  windows:
+    name: Windows-Build (Tauri)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: d2-build-optimizer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: d2-build-optimizer/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: d2-build-optimizer/src-tauri
+      - run: npm ci
+      - run: npx tauri build --no-bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: d2-build-optimizer-windows
+          path: d2-build-optimizer/src-tauri/target/release/d2-build-optimizer.exe
+          retention-days: 7
