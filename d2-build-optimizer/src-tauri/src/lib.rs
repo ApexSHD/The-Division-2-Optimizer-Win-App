@@ -15,7 +15,7 @@ fn load_user_data(app: tauri::AppHandle) -> Result<Option<String>, String> {
     match fs::read_to_string(&path) {
         Ok(content) => Ok(Some(content)),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
-        Err(_) => {
+        Err(e) => {
             let backup = path.with_extension("json.bak");
             match fs::read_to_string(&backup) {
                 Ok(content) => Ok(Some(content)),
