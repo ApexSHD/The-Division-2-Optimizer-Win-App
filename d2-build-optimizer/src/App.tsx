@@ -196,7 +196,7 @@ function StatusBar() {
   const { t } = useContext(I18nContext);
   return (
     <footer className="statusbar">
-      <span>{t.status.dbVersion}: {DB_VERSION}</span>
+      <span>{t.status.dbVersion}: {store.db ? `${store.db.versions.weapons} · ${store.db.versions.gear} · ${store.db.versions.mods}` : DB_VERSION}</span>
       <span>
         {store.loadError
           ? `⚠ ${t.status.storageOk}: ${store.loadError}`

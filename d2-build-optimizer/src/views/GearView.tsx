@@ -1,9 +1,12 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
+import { PresetPicker } from "../components/PresetPicker";
+import { getDb } from "../data/db";
+import type { GearPreset } from "../data/db";
 import type { GearPiece, GearSlot } from "../data/sampleData";
 
 function newGear(id: string): GearPiece {
@@ -17,6 +20,11 @@ export function GearView() {
   const [editing, setEditing] = useState<GearPiece | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [slotFilter, setSlotFilter] = useState<string>("all");
+  const [presets, setPresets] = useState<GearPreset[]>([]);
+
+  useEffect(() => {
+    getDb().then((db) => setPresets(db.gear)).catch(() => setPresets([]));
+  }, []);
 
   const gear = slotFilter === "all" ? store.gear : store.gear.filter((g) => g.slot === slotFilter);
 
@@ -61,6 +69,20 @@ export function GearView() {
     setEditing(newGear(`g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`));
     setIsNew(true);
     setPanelOpen(true);
+  }
+
+  function applyPreset(p: GearPreset) {
+    if (!editing) return;
+    setEditing({
+      ...editing,
+      slot: p.slot,
+      brand: p.brand ? `${p.name} (${p.brand})` : p.name,
+      brandType: p.cls === "exotic" ? "exotic" : "named",
+      core: p.core,
+      attributes: p.fixedAttributes,
+      talent: p.perk || null,
+      prototype: p.proto,
+    });
   }
 
   function onSave() {
@@ -124,6 +146,15 @@ export function GearView() {
       >
         {editing && (
           <>
+            {isNew && presets.length > 0 && (
+              <PresetPicker
+                label="Aus Datenbank übernehmen (Gear)"
+                items={presets}
+                getItemLabel={(p) => p.name}
+                getItemGroup={(p) => t.gear.slots[p.slot]}
+                onPick={applyPreset}
+              />
+            )}
             <Field label={t.gear.slot}>
               <select
                 value={editing.slot}

@@ -1,0 +1,2905 @@
+{
+  "version": "gear_v1",
+  "source": "GEAR_DB / NAMED_ITEM_CONFIGS / GREEN_SET_INFO aus dem Build-Optimierer (1:1 übernommen)",
+  "note": "Struktur identisch zur GEAR_DB im Code: slot/brand/cls/proto/core/fixed/free/mods/perk. fixed = [attribut, wert]-Paare. brand_set_info.bonuses_pve = Y8S3 \"Red Horizon\" Live-Werte (PvE), green_set_info.bonuses = typisierte 2p/3p-Boni (Liste aus {attr, val, weapon?}), Quelle: Ubisoft Canopy-PDF \"Gear Set, Brand Set, and Talent changes (After PvE Updates)\" (24.08.2026).",
+  "named_item_configs": {
+    "Contractor's Gloves": {
+      "label": "Contractor's Gloves (+% Rüstungsschaden / DTA)",
+      "defaultVal": 8,
+      "attrKey": "dta"
+    },
+    "Fox's Prayer": {
+      "label": "Fox's Prayer (+% Schuss geg. Ungedeckte / DTToOC)",
+      "defaultVal": 8,
+      "attrKey": "dttooc"
+    },
+    "The Hollow Man": {
+      "label": "The Hollow Man (+% Lebensenergieschaden / DTH)",
+      "defaultVal": 14,
+      "attrKey": "dth"
+    },
+    "Punch Drunk": {
+      "label": "Punch Drunk (+% Kopfschussschaden / HSD)",
+      "defaultVal": 20,
+      "attrKey": "hsd"
+    },
+    "Picaro's Holster": {
+      "label": "Picaro's Holster (+10% Waffenschaden als Minor-Attribut)",
+      "defaultVal": 10,
+      "attrKey": "wd"
+    },
+    "Coyote's Mask": {
+      "label": "Coyote's Mask (Annahme Distanz 15–25 m: +10% CHC & CHD zusätzlich zu den Attributen)",
+      "defaultVal": 10,
+      "attrKey": "chcchd"
+    },
+    "Emperor's Guard": {
+      "label": "Emperor's Guard (Rüstungsregeneration %)",
+      "defaultVal": 1,
+      "attrKey": "armorregen"
+    }
+  },
+  "gear_db": {
+    "Punch Drunk": {
+      "slot": "Maske",
+      "brand": "Douglas & Harding",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 1,
+      "mods": 0,
+      "perk": "+20% Kopfschussschaden (fixes Minor-Attribut)"
+    },
+    "Nightwatcher": {
+      "slot": "Maske",
+      "brand": "Gila Guard",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [
+        [
+          "pulsehaste",
+          100
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+100% Scanner-Puls-Tempo (fix)"
+    },
+    "Chill Out": {
+      "slot": "Maske",
+      "brand": "Gila Guard",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 1,
+      "mods": 2,
+      "perk": "2 Mod-Slots statt Minor 2/3"
+    },
+    "Visionario": {
+      "slot": "Maske",
+      "brand": "Legatus S.p.A.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "range",
+          50
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+50% optimale Reichweite (fix)"
+    },
+    "The Hollow Man": {
+      "slot": "Maske",
+      "brand": "Yaahl Gear",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 1,
+      "mods": 0,
+      "perk": "+14% Lebenspunktschaden (DTH, fix)"
+    },
+    "Vile": {
+      "slot": "Maske",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "skill",
+      "fixed": [
+        [
+          "status",
+          10
+        ],
+        [
+          "hazard",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Status-Effekte fügen zusätzlich einen DoT zu (10s, 50% des Blendgranaten-Schadens)"
+    },
+    "Catharsis": {
+      "slot": "Maske",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "armour",
+      "fixed": [
+        [
+          "incomrepair",
+          20
+        ],
+        [
+          "armorregen",
+          4925
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "30 Stacks à +1,5% WD durch erlittenen Schaden; bei Max-Stacks Purge + Heilwolke (5% max. Rüstung, 10s)"
+    },
+    "Coyote's Mask": {
+      "slot": "Maske",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Distanz-Bonus: 0–15m +25% CHD · 15–25m +10% CHC/CHD · 25m+ +25% CHC"
+    },
+    "Catalyst": {
+      "slot": "Maske",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "hazard",
+          10
+        ],
+        [
+          "status",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Catalysis: max. 12 Stacks à +2% WD & +2% Status (Aufbau durch Status-Effekte); Reactant: +25% Bonus-Rüstung, +20% Nachladetempo"
+    },
+    "Tinkerer": {
+      "slot": "Maske",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Talent der Sekundärwaffe wirkt auch auf die Primärwaffe (gleiche Gattung, keine Exoten/Named)"
+    },
+    "Investor": {
+      "slot": "Maske",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "any",
+      "fixed": [],
+      "free": 2,
+      "mods": 0,
+      "perk": "Bonus je Nicht-Kern-Attribut: Rot +10% CHD · Gelb +5% Skill-Effizienz · Blau +1% Rüstungsregeneration; 3. Attribut statt Mod-Slot"
+    },
+    "Liquid Engineer": {
+      "slot": "Rucksack",
+      "brand": "Belstone Armory",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfektes Blutsauger: Kill gewährt +12% Bonus-Rüstung/Stack (10s), max. 10"
+    },
+    "Hermano": {
+      "slot": "Rucksack",
+      "brand": "Brazos de Arcabuz",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfektes Über-Takt: +30% Nachladetempo & 0,6s Cooldown-Reduktion/s nahe Fähigkeiten"
+    },
+    "The Courier": {
+      "slot": "Rucksack",
+      "brand": "Habsburg Guard",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Kriechende Tod: Status-Effekte werden auf Gegner im 10m-Radius übertragen"
+    },
+    "Backbone": {
+      "slot": "Rucksack",
+      "brand": "Lengmo",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Unaufhaltsame Gewalt: Kill +7% WD für 15s, max. 5 Stacks (Granaten-Kill: 2 Stacks)"
+    },
+    "Anarchist's Cookbook": {
+      "slot": "Rucksack",
+      "brand": "Golan Gear Ltd",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Boshaft: Status-Anwendung +18% WD für 27s"
+    },
+    "Strategic Alignment": {
+      "slot": "Rucksack",
+      "brand": "China Light Industries Corporation",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfektes Schock und Ehrfurcht: Status-Anwendung +20% Skill-Schaden/-Reparatur für 27s"
+    },
+    "Lavoisier": {
+      "slot": "Rucksack",
+      "brand": "Electrique",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Galvanisieren: Blind/Fesseln/Verwirren/Schock gewährt 50% Rüstung als Bonus-Rüstung (30m, 10s)"
+    },
+    "Matador": {
+      "slot": "Rucksack",
+      "brand": "Walker, Harris & Co.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Adrenalinschub: +23% Bonus-Rüstung für 5s innerhalb 10m, max. 3 Stacks"
+    },
+    "The Gift": {
+      "slot": "Rucksack",
+      "brand": "Providence Defense",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Wachsamkeit: +25% WD; bei erlittenem Schaden 3s deaktiviert"
+    },
+    "Percussive Maintenance": {
+      "slot": "Rucksack",
+      "brand": "Alps Summit Armaments",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Tech-Support: Skill-Kill +25% Skill-Schaden für 27s"
+    },
+    "Vigil": {
+      "slot": "Rucksack",
+      "brand": "Legatus S.p.A.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Vielseitig: Waffenwechsel-Verstärker (Shotgun/SMG 45% <15m, Rifle/MMR 45% >25m, LMG/AR 20% 15–25m)"
+    },
+    "Devil's Due": {
+      "slot": "Rucksack",
+      "brand": "Česká Výroba S.R.O.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Kupplung: Krit-Treffer reparieren Rüstung unter 20% Rüstung"
+    },
+    "Battery Pack": {
+      "slot": "Rucksack",
+      "brand": "Empress International",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Berechnend: Kills aus Deckung reduzieren Skill-Cooldowns um 15%"
+    },
+    "The Setup": {
+      "slot": "Rucksack",
+      "brand": "Uzina Getica",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Opportunistisch: Shotgun/MMR-Treffer verstärken erlittenen Schaden des Ziels um 15% (5s)"
+    },
+    "Force Multiplier": {
+      "slot": "Rucksack",
+      "brand": "Hana U Corporation",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Vereinte Waffen: Schießen +30% Skill-Schaden für 3s"
+    },
+    "Proxy": {
+      "slot": "Rucksack",
+      "brand": "Palisade Steelworks",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Manipulationssicher: Gegner nahe Fähigkeiten werden geschockt"
+    },
+    "Axel": {
+      "slot": "Rucksack",
+      "brand": "Shiny Monkey Gear",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Energetisieren: Rüstungsset +1 Skill-Stufe für 15s (Überladung bei Stufe 6)"
+    },
+    "Cap'n": {
+      "slot": "Rucksack",
+      "brand": "Imminence Armaments",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Führung: Deckung-zu-Deckung +20% Rüstung als Bonus-Rüstung (10s), ×3 nah bei Gegnern"
+    },
+    "Bulldog": {
+      "slot": "Rucksack",
+      "brand": "Royal Works",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Gelassenheit: +20% WD in Deckung"
+    },
+    "Momma Badger": {
+      "slot": "Rucksack",
+      "brand": "Edelweiss GPz",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Sicherung: +160% Skill-Reparatur bei voller Rüstung"
+    },
+    "Festive Delivery": {
+      "slot": "Rucksack",
+      "brand": "Grupo Shadow S.A.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Feuerwerksshow: Blendgranaten werden zu Festtags-Granaten"
+    },
+    "Acosta's Go-Bag": {
+      "slot": "Rucksack",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "skill",
+      "fixed": [
+        [
+          "skilldmg",
+          10
+        ],
+        [
+          "skillhaste",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Granaten-Refund + +1 Skill-Stufe (15s); +1 Rüstungsset, +3 Granaten, +25% Munition"
+    },
+    "Birdie's Quick Fix Pack": {
+      "slot": "Rucksack",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "skill",
+      "fixed": [
+        [
+          "skillhaste",
+          12
+        ],
+        [
+          "repair",
+          20
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Kampfmediziner: +80% Wiederbeleben, +45% Bienenstock-Effizienz, Schadensresistenz beim Wiederbeleben"
+    },
+    "Memento": {
+      "slot": "Rucksack",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [],
+      "free": 0,
+      "mods": 1,
+      "perk": "Kill Confirmed: Trophäen-Buffs; langfristig max. 30 Stacks à +1% WD/Skill-Effizienz · 3 Cores (WD + Rüstung + Skill-Tier), keine Minor-Attribute, 1 Mod-Slot"
+    },
+    "NinjaBike Messenger Bag": {
+      "slot": "Rucksack",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [],
+      "free": 0,
+      "mods": 1,
+      "perk": "Zählt für jedes ausgerüstete Set als passendes Teil (mehrere Boni gleichzeitig)"
+    },
+    "Harrier Pride": {
+      "slot": "Rucksack",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [],
+      "free": 0,
+      "mods": 1,
+      "perk": "Red/Blue Stacks à 0,5% WD/Resistenz; ab 80 Gesamt-Stacks Kreuz-Bonus"
+    },
+    "Sarru": {
+      "slot": "Rucksack",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [],
+      "free": 0,
+      "mods": 1,
+      "perk": "Decoy King: Mondzyklus alle 5s (8 Phasen); Amplified Damage 5%-25% je Phase (Annahme: Durchschnitt +15%, siehe Hinweis); Vollmond: Decoy wird Overcharge, Zyklus pausiert 10s; 3 Cores (WD 15% + Rüstung 170k + Skill-Tier), keine Minor-Attribute"
+    },
+    "Henri": {
+      "slot": "Weste",
+      "brand": "Electrique",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Begleiter: +20% WD nahe Verbündeten/Fähigkeit (10m)"
+    },
+    "Hunter-Killer": {
+      "slot": "Weste",
+      "brand": "Golan Gear Ltd",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Einschüchterung: bis 10 Stacks à +4% WD mit Bonus-Rüstung (10m)"
+    },
+    "Everyday Carrier": {
+      "slot": "Weste",
+      "brand": "Belstone Armory",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Effizient: Rüstungsset 75% Chance nicht verbraucht zu werden"
+    },
+    "Chainkiller": {
+      "slot": "Weste",
+      "brand": "Walker, Harris & Co.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Kopfgeldjäger: Kopfschuss-Kill → nächster Treffer +150% des Kill-Schadens (Cap 800%/1250%)"
+    },
+    "Pointman": {
+      "slot": "Weste",
+      "brand": "Gila Guard",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Vorhut: Schild 5s unverwundbar + 50% Rüstung als Bonus-Rüstung für Verbündete"
+    },
+    "Vedmedytsya": {
+      "slot": "Weste",
+      "brand": "Petrov Defense Group",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Abgestützt: +50% Waffenhandhabung in Deckung"
+    },
+    "The Sacrifice": {
+      "slot": "Weste",
+      "brand": "Providence Defense",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Glaskanone: +30% Verstärker, aber +60% erlittener Schaden"
+    },
+    "Zero Fs": {
+      "slot": "Weste",
+      "brand": "Badger Tuff",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Unzerstörbar: Rüstungs-Regeneration bei Rüstungsbruch (55s Cooldown)"
+    },
+    "Ferocious Calm": {
+      "slot": "Weste",
+      "brand": "Fenris Group AB",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Überwachung: 8s in Deckung → +14% WD & Skill-Schaden (Team)"
+    },
+    "Door-Kicker's Knock": {
+      "slot": "Weste",
+      "brand": "Grupo Shadow S.A.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Funke: Skill-Schaden → +18% WD für 20s"
+    },
+    "Caesar's Guard": {
+      "slot": "Weste",
+      "brand": "Empress International",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Geschickt: 30% Chance auf Skill-Cooldown-Reset bei Skill-Kill"
+    },
+    "Closer": {
+      "slot": "Weste",
+      "brand": "Uzina Getica",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Aufklärer: +20% Verstärker gegen gepulste Gegner"
+    },
+    "Cherished": {
+      "slot": "Weste",
+      "brand": "Habsburg Guard",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfektes Trauma: Kopfschuss → Blind, Brust → Blutung (je 20s Cooldown)"
+    },
+    "Carpenter": {
+      "slot": "Weste",
+      "brand": "Lengmo",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Verrückter Bomber: +75% Granatenradius, Refund, Kochen"
+    },
+    "Bober": {
+      "slot": "Weste",
+      "brand": "Zwiadowka Sp. z o.o.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Verschanzung: unter 30% Rüstung heilen Kopfschüsse aus Deckung 30% Rüstung"
+    },
+    "Pristine Example": {
+      "slot": "Weste",
+      "brand": "Airaldi Holdings",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Fokus: +6% WD je Sekunde beim Zielen mit 8×-Zielfernrohr, max. 60%"
+    },
+    "Sleight": {
+      "slot": "Weste",
+      "brand": "Urban Lookout",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfektes Nachladen unter Schutz: +40% Bonus-Rüstung beim Nachladen"
+    },
+    "Combustor": {
+      "slot": "Weste",
+      "brand": "Palisade Steelworks",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Explosive Auslieferung: Fähigkeiten erzeugen Explosionen (25–100% Blendgranate)"
+    },
+    "Impetus": {
+      "slot": "Weste",
+      "brand": "Wyvern Wear",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Kinetische Momentum: bis 18 Stacks/Skill à +1,5% Skill-Schaden"
+    },
+    "Robin": {
+      "slot": "Weste",
+      "brand": "Royal Works",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekter Revolverheld: +28% WD für 5s nach Waffenwechsel"
+    },
+    "Benefactor": {
+      "slot": "Weste",
+      "brand": "Edelweiss GPz",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekte Empathische Entschlossenheit: Reparatur → +3–20% WD/Skill-Schaden (10s)"
+    },
+    "Equalizer": {
+      "slot": "Weste",
+      "brand": "Unit Alloys",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 1,
+      "perk": "Perfekt Auslöschen: Krit-Treffer +1% WD (10s), max. 24 Stacks"
+    },
+    "Collector": {
+      "slot": "Weste",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Hoarder: +3 Granaten, +50% Radius, +35% Granatenschaden, Regeneration"
+    },
+    "Provocator": {
+      "slot": "Weste",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "armour",
+      "fixed": [
+        [
+          "armorregen",
+          4925
+        ],
+        [
+          "hazard",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Challenger: +25% Schadensresistenz gegen Gegner innerhalb 20m"
+    },
+    "Beacon": {
+      "slot": "Weste",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Bond: +30% CHD & +15% Skill-Effizienz mit Verbündeten in 10m"
+    },
+    "Tardigrade Armor System": {
+      "slot": "Weste",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "armour",
+      "fixed": [
+        [
+          "armorregen",
+          4925
+        ],
+        [
+          "explres",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Ablative Nano-Plating: Rüstungsbruch eines Verbündeten → 80% deiner Rüstung als Bonus-Rüstung (10s)"
+    },
+    "Ridgeway's Pride": {
+      "slot": "Weste",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 1,
+      "perk": "Bleeding Edge: Blutung innerhalb 15m + Rüstungs-Reparatur je blutendem Gegner (3–48%)"
+    },
+    "Deathgrips": {
+      "slot": "Handschuhe",
+      "brand": "5.11 Tactical",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [
+        [
+          "aok",
+          10
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+10% Rüstung bei Tötung (fix)"
+    },
+    "Contractor's Gloves": {
+      "slot": "Handschuhe",
+      "brand": "Petrov Defense Group",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 1,
+      "mods": 0,
+      "perk": "+8% Rüstungsschaden (DTA, fix)"
+    },
+    "Motherly Love": {
+      "slot": "Handschuhe",
+      "brand": "Alps Summit Armaments",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [
+        [
+          "skillhealth",
+          25
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+25% Fähigkeits-Gesundheit (fix)"
+    },
+    "Eagles Grasp": {
+      "slot": "Handschuhe",
+      "brand": "Zwiadowka Sp. z o.o.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "wh",
+          15
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+15% Waffenhandhabung (fix)"
+    },
+    "Firm Handshake": {
+      "slot": "Handschuhe",
+      "brand": "Sokolov Concern",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "status",
+          16
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+16% Statuseffekte (fix)"
+    },
+    "Bloody Knuckles": {
+      "slot": "Handschuhe",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Over the Top: Granaten-/Nahkampf-Treffer → +25% WD für 20s"
+    },
+    "BTSU Datagloves": {
+      "slot": "Handschuhe",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "skill",
+      "fixed": [
+        [
+          "skillhaste",
+          12
+        ],
+        [
+          "repair",
+          20
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Transference Overclock: Bienennest-Tempo je Skill-Stufe, Zerstören → Überladung"
+    },
+    "Exodus Gloves": {
+      "slot": "Handschuhe",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Smoke Screen: Rauchbombe bei Rüstungsbruch"
+    },
+    "Overdogs": {
+      "slot": "Handschuhe",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Weakest Link: +30% Verstärker gegen niederrangige Gegner"
+    },
+    "Rugged Gauntlets": {
+      "slot": "Handschuhe",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Iron Grip: +50% Waffenhandhabung (Y8S3.2: Talent-Rework, alter Bonus −50% Rückstoß beim Hüft-/Blindfeuer)"
+    },
+    "Forge": {
+      "slot": "Holster",
+      "brand": "Richter & Kaiser GmbH",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [
+        [
+          "shieldhealth",
+          50
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+50% Schild-Gesundheit (fix)"
+    },
+    "Ammo Dump": {
+      "slot": "Holster",
+      "brand": "Badger Tuff",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [
+        [
+          "ammocap",
+          10
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+10% Munitionskapazität (fix)"
+    },
+    "Picaro's Holster": {
+      "slot": "Holster",
+      "brand": "Brazos de Arcabuz",
+      "cls": "named",
+      "proto": true,
+      "core": "armour",
+      "fixed": [],
+      "free": 1,
+      "mods": 0,
+      "perk": "+10% Waffenschaden (fixes Minor-Attribut, über Named-Attribut-Box erfasst)"
+    },
+    "Spot-On": {
+      "slot": "Holster",
+      "brand": "Urban Lookout",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "accuracy",
+          38
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+38% Genauigkeit (fix)"
+    },
+    "Salvo": {
+      "slot": "Holster",
+      "brand": "Unit Alloys",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "rof",
+          5
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+5% Feuerrate (fix)"
+    },
+    "Claws Out": {
+      "slot": "Holster",
+      "brand": "Wyvern Wear",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [
+        [
+          "meleedmg",
+          500
+        ],
+        [
+          "pistoldmg",
+          11
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "+500% Nahkampfschaden (fix); +11% Pistolenschaden"
+    },
+    "Centurion Scabbard": {
+      "slot": "Holster",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "wh",
+          8
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Counter: Waffenwechsel-Bonusgruppen (+20% RoF/WD bzw. +50% Magazin/Nachladen, 12s)"
+    },
+    "Dodge City Gunslinger's Holster": {
+      "slot": "Holster",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "wh",
+          8
+        ],
+        [
+          "hsd",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Quick Draw: Holster-Stacks → +10% Schaden pro Stack beim ersten Schuss (Pistole)"
+    },
+    "Imperial Dynasty": {
+      "slot": "Holster",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "skill",
+      "fixed": [
+        [
+          "status",
+          10
+        ],
+        [
+          "hazard",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Dragon's Glare: Brennen auf nächsten Gegner (20m, 35s Cooldown)"
+    },
+    "Shocker Punch": {
+      "slot": "Holster",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "armour",
+      "fixed": [
+        [
+          "explres",
+          10
+        ],
+        [
+          "hazard",
+          10
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Defibrillator: 50% Schock-Reduktion, Schild → 100% Nahkampfschaden"
+    },
+    "Waveform": {
+      "slot": "Holster",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "skill",
+      "fixed": [
+        [
+          "skilldmg",
+          10
+        ],
+        [
+          "skillhaste",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Alternating Current: 3% Skill-Schaden-Stacks wandern zwischen beiden Fähigkeiten"
+    },
+    "Nimble Holster": {
+      "slot": "Holster",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Bob and Weave: Deckung-zu-Deckung heilt 5% Rüstung je Meter"
+    },
+    "Fox's Prayer": {
+      "slot": "Knieschoner",
+      "brand": "Overlord Armaments",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [],
+      "free": 1,
+      "mods": 0,
+      "perk": "+8% Schaden gegen ungedeckte Ziele (DTToOC, fix)"
+    },
+    "Snow Machine": {
+      "slot": "Knieschoner",
+      "brand": "Electrique",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 3,
+      "mods": 0,
+      "perk": "Status-Effekte erzeugen Schneefall beim Ziel"
+    },
+    "Turmoil": {
+      "slot": "Knieschoner",
+      "brand": "Česká Výroba S.R.O.",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "chd",
+          12
+        ],
+        [
+          "chc",
+          6
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "50% des Waffenschadens wird auf einen weiteren Gegner (30m) übertragen"
+    },
+    "Emperor's Guard": {
+      "slot": "Knieschoner",
+      "brand": "Murakami Industries",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [],
+      "free": 1,
+      "mods": 0,
+      "perk": "+1% Rüstungsregeneration (fix)"
+    },
+    "Grease": {
+      "slot": "Knieschoner",
+      "brand": "Shiny Monkey Gear",
+      "cls": "named",
+      "proto": true,
+      "core": "skill",
+      "fixed": [
+        [
+          "status",
+          16
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "+16% Statuseffekte (fix)"
+    },
+    "Cloak": {
+      "slot": "Knieschoner",
+      "brand": "Imminence Armaments",
+      "cls": "named",
+      "proto": true,
+      "core": "wd",
+      "fixed": [
+        [
+          "reducedthreat",
+          50
+        ]
+      ],
+      "free": 1,
+      "mods": 0,
+      "perk": "−50% Bedrohung (fix)"
+    },
+    "Sawyer's Kneepads": {
+      "slot": "Knieschoner",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "armour",
+      "fixed": [
+        [
+          "explres",
+          10
+        ],
+        [
+          "health",
+          18935
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Stand Your Ground: +3% WD je Sekunde Stillstand, max. 10 Stacks"
+    },
+    "Acosta Kneepads": {
+      "slot": "Knieschoner",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [],
+      "free": 2,
+      "mods": 0,
+      "perk": "Escape Plan: +20% Bewegungsgeschwindigkeit (Y8S3.2: Kern jetzt Rot, alter Bonus Bewegungs-Boni nach Sprung/Stillstand/Status)"
+    },
+    "Blacklisters": {
+      "slot": "Knieschoner",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Ostracize: Markierter Gegner erhält 30% Verstärker von dir (Y8S3.2: 20% → 30%); du erhältst 600% von ihm"
+    },
+    "Nurse's Kneepads": {
+      "slot": "Knieschoner",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Impervious: +40% Gefahrenschutz für dich & Verbündete (10m)"
+    },
+    "NinjaBike Messenger Kneepads": {
+      "slot": "Knieschoner",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [
+        [
+          "chc",
+          6
+        ],
+        [
+          "chd",
+          12
+        ]
+      ],
+      "free": 0,
+      "mods": 0,
+      "perk": "Parkour!: Deckung-zu-Deckung/Sprung lädt Waffe nach & +25% Bonus-Rüstung (5s)"
+    },
+    "Iron Will": {
+      "slot": "Weste",
+      "brand": "",
+      "cls": "exotic",
+      "proto": false,
+      "core": "wd",
+      "fixed": [],
+      "free": 0,
+      "mods": 1,
+      "perk": "Resolved: Der nächste Körpertreffer zählt als Kopfschuss. Cooldown: 2s (PvE) / 3s (PvP). Erfordert MMR, Gewehr oder Pistole. Nicht mit Kopfgeldjäger (Headhunter) kombinierbar. Feste Attribute noch im Spiel erfassen (Issue #51)."
+    }
+  },
+  "green_set_info": {
+    "striker": {
+      "name": "Striker's Battlegear",
+      "group": "dps",
+      "n2": "+15% Waffenhandhabung",
+      "n3": "+15% Feuerrate",
+      "n4": "Striker's Gamble: Waffentreffer erhöhen den Gesamtwaffenschaden um 0,65% pro Stack (max. 100); 1 Stack/s Verlust bei 0-50, 2 Stacks/s bei 51-100. Rucksack 'Risk Management': 0,65% -> 1,05% pro Stack; Weste 'Press the Advantage': max. 100 -> 200 Stacks (3 Stacks/s Verlust bei 101-200). Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "3p numerisch (Feuerrate)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wh",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "rof",
+            "val": 15
+          }
+        ]
+      }
+    },
+    "heartbreaker": {
+      "name": "Heartbreaker",
+      "group": "dps",
+      "n2": "+15% Sturmgewehr- & +15% LMG-Schaden",
+      "n3": "+15% Waffenhandhabung",
+      "n4": "Heartstopper: Kopfschüsse pulsen 5 s; Treffer auf gepulste Gegner: +1 Stack (+1% Bonus-Rüstung & +1,1% WD auf gepulste Ziele), max. 50 Stacks, Verlust 2/s. Rucksack 'Cold': Bonus-Rüstung 1% -> 2%/Stack; Weste 'Max BPM': max. 100 Stacks",
+      "modeled": "2p numerisch (nur bei AR/LMG als Zielwaffe)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wd",
+            "val": 15,
+            "weapon": "AR"
+          },
+          {
+            "attr": "wd",
+            "val": 15,
+            "weapon": "LMG"
+          }
+        ],
+        "3": [
+          {
+            "attr": "wh",
+            "val": 15
+          }
+        ]
+      }
+    },
+    "huntersfury": {
+      "name": "Hunter's Fury",
+      "group": "dps",
+      "n2": "+15% Schrotflinten- & +15% SMG-Schaden",
+      "n3": "+20% Rüstung bei Kill & +50% Leben bei Kill",
+      "n4": "Apex Predator: Gegner im 15m-Radius: +20% WD-Debuff; Kill eines debufften Gegners desorientiert im 5m-Radius & +5% WD für 10 s (max. 5 Stacks). Rucksack 'Overwhelming Force': Desorient-Radius 5m -> 10m; Weste 'Endless Hunger': Stack-Dauer 10 s -> 30 s",
+      "modeled": "2p numerisch (nur bei Shotgun/SMG als Zielwaffe)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wd",
+            "val": 15,
+            "weapon": "Shotgun"
+          },
+          {
+            "attr": "wd",
+            "val": 15,
+            "weapon": "MP"
+          }
+        ],
+        "3": [
+          {
+            "attr": "armorOnKill",
+            "val": 20
+          },
+          {
+            "attr": "healthOnKill",
+            "val": 50
+          }
+        ]
+      }
+    },
+    "negotiator": {
+      "name": "Negotiator's Dilemma",
+      "group": "dps",
+      "n2": "+15% CHC",
+      "n3": "+20% CHD",
+      "n4": "Crowd Control: Kritische Treffer markieren Gegner 20s (max. 3); kritischer Treffer auf markiertes Ziel: alle anderen markierten Gegner erhalten 60% des Schadens; stirbt ein Markierter: +10% CHD pro Stack (max. 10, bis Kampfende). Rucksack 'Critical Measures': 60% -> 112%; Weste 'Target Rich Environment': 3 -> 5 Marken. Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "voll (2p/3p numerisch)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "chc",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "chd",
+            "val": 20
+          }
+        ]
+      }
+    },
+    "umbra": {
+      "name": "Umbra Initiative",
+      "group": "dps",
+      "n2": "+15% CHC",
+      "n3": "+30% Nachladegeschwindigkeit",
+      "n4": "From the Shadows / Into the Light: In Deckung +10 Stacks/s (max. 50), je Stack +1,2% kritischer Trefferschaden & +0,4% Feuerrate (nicht beim Schießen aus der Deckung); außer Gefecht +10 Stacks/s (max. 50), je Stack +0,8% Rüstungs-Regeneration, Verbrauch 10 Stacks/s in Deckung. Rucksack 'Into the Light': max. 50 -> 100 Stacks, +10 -> +20/s; Weste 'From the Shadows': max. 50 -> 100 Stacks, +10 -> +20/s. Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "2p numerisch (CHC)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "chc",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "reloadSpeed",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "hotshot": {
+      "name": "Hotshot",
+      "group": "dps",
+      "n2": "+30% Scharfschützengewehr-Schaden (MMR) & +30% Waffenhandhabung",
+      "n3": "+30% Kopfschuss-Schaden & +30% Waffenhandhabung",
+      "n4": "Headache: 1. Kopfschuss (MMR): nächster +80%; 2.: +10% Rüstung (bei Vollpanzer bis max. +50% als Bonus-Rüstung); 3.: Magazin-Nachfüllen; ab dem 4. alle 3 Boni pro konsekutivem Kopfschuss-Kill. Verfehlen resettet den Zyklus. Rucksack 'Lucky': 1 Fehlschuss erlaubt; Weste 'Stand Tall': Bonus-Rüstung 50% -> 100%",
+      "modeled": "2p numerisch (nur bei MMR als Zielwaffe)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wd",
+            "val": 30,
+            "weapon": "MMR"
+          },
+          {
+            "attr": "wh",
+            "val": 30
+          }
+        ],
+        "3": [
+          {
+            "attr": "hsd",
+            "val": 30
+          },
+          {
+            "attr": "wh",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "acesandeights": {
+      "name": "Aces and Eights",
+      "group": "dps",
+      "n2": "+30% MMR- & +30% Gewehr-Schaden",
+      "n3": "+30% Kopfschuss-Schaden & +30% Waffenhandhabung",
+      "n4": "Dead Man's Hand: Karte pro Treffer mit Rifle/MMR umdrehen; nach 5 Karten nächster Schuss +75% Schaden — Vierling 4 Schüsse, Full House 3, Aces & Eights 2 (Kopfschuss: Extra-Karte). Rucksack 'Ace in the Sleeve': +1 verstärkter Schuss; Weste 'No Limit': +75% -> +100%",
+      "modeled": "2p numerisch (nur bei MMR/Rifle als Zielwaffe)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wd",
+            "val": 30,
+            "weapon": "MMR"
+          },
+          {
+            "attr": "wd",
+            "val": 30,
+            "weapon": "Rifle"
+          }
+        ],
+        "3": [
+          {
+            "attr": "hsd",
+            "val": 30
+          },
+          {
+            "attr": "wh",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "breakingpoint": {
+      "name": "Breaking Point",
+      "group": "dps",
+      "n2": "+30% MMR- & +30% Gewehr-Schaden",
+      "n3": "+30% Kopfschuss-Schaden & +30% Waffenhandhabung",
+      "n4": "On Point: Treffer mit Rifle/MMR geben 1 Stack (max. Magazingröße); Nachladen: +2% Waffenhandhabung & +4% WD pro Stack für 20 s. Rucksack 'Point of Honor': +4% -> +9% WD; Weste 'Point of No Return': Timer 20 s -> 40 s",
+      "modeled": "2p numerisch (nur bei MMR/Rifle als Zielwaffe)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wd",
+            "val": 30,
+            "weapon": "MMR"
+          },
+          {
+            "attr": "wd",
+            "val": 30,
+            "weapon": "Rifle"
+          }
+        ],
+        "3": [
+          {
+            "attr": "hsd",
+            "val": 30
+          },
+          {
+            "attr": "wh",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "tipofthespear": {
+      "name": "Tip of the Spear",
+      "group": "dps",
+      "n2": "+20% Signaturwaffen-Schaden",
+      "n3": "+10% Waffenschaden (global)",
+      "n4": "Aggressive Recon: Kill mit Signaturwaffe gewährt +15% Signaturwaffen-Schaden für 10s und +25% Nachladegeschwindigkeit für den nächsten Reload (nicht stapelbar); Signaturwaffen-Munition regeneriert automatisch alle 60s. Rucksack 'Signature Moves': +50% Waffenschaden für 15s nach vollständiger Munitionsleerung & doppelte Munitions-Regeneration; Weste 'Specialized Destruction': +15% -> +30% & jeder 3. Signaturwaffen-Kill erzeugt Munition. Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "3p numerisch (globaler WD-Bonus)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "signatureDmg",
+            "val": 20
+          }
+        ],
+        "3": [
+          {
+            "attr": "wd",
+            "val": 10
+          }
+        ]
+      }
+    },
+    "virtuoso": {
+      "name": "Virtuoso",
+      "group": "dps",
+      "n2": "+15% Waffenhandhabung & +15% Magazingröße",
+      "n3": "+15% Waffenschaden (global)",
+      "n4": "Symphony: Kill jenseits 25m: +40% Waffenschaden (Shotguns/SMGs/Pistolen), +20% (ARs/LMGs), +25% Bonus-Rüstung für 15s; Kill innerhalb 25m: +40% Waffenschaden (Marksman Rifles/Rifles), +20% (ARs/LMGs), +30% Kopfschussschaden für 15s; abwechselnde Kills beider Distanzen bauen Stacks auf — bei 4 Stacks gelten alle Boni verdoppelt und gleichzeitig für 15s. Rucksack 'Accelerando': 4 -> 3 Stacks; Weste 'Fortissimo': Waffenschaden-Boni verdoppelt. Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "3p numerisch (globaler WD-Bonus)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wh",
+            "val": 15
+          },
+          {
+            "attr": "magSize",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "wd",
+            "val": 15
+          }
+        ]
+      }
+    },
+    "tippingscales": {
+      "name": "Tipping Scales",
+      "group": "dps",
+      "n2": "+30% Magazingröße",
+      "n3": "+30% LMG-Schaden",
+      "n4": "Throttle Control: Schießen baut Stacks auf (max. 50); je Stack +0,5% Waffenhandhabung & +5% kritischer Trefferschaden; 6 Stacks/s Verlust beim Nicht-Schießen (kein Verlust bei unterdrückten Gegnern). Rucksack 'Snowball': +5% -> +8% CHD pro Stack; Weste 'Sustainability': max. 50 -> 75 Stacks. Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "3p numerisch (nur bei LMG als Zielwaffe)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "magSize",
+            "val": 30
+          }
+        ],
+        "3": [
+          {
+            "attr": "wd",
+            "val": 30,
+            "weapon": "LMG"
+          }
+        ]
+      }
+    },
+    "concentratedcompany": {
+      "name": "Concentrated Company",
+      "group": "dps",
+      "n2": "+10% Waffenschaden (global)",
+      "n3": "+30% Waffenhandhabung",
+      "n4": "Camaraderie: Beschossene Gegner 10 s markiert; bei Kill 1 Stack +3% WD & +3% CHD pro beitragendem Verbündetem/Fertigkeit (max. 35, Decay alle 10 s; max. 4 Marken). Rucksack 'One for All': +3% -> +6% WD; Weste 'All for One': 4 -> 8 Marken",
+      "modeled": "2p numerisch (globaler WD-Bonus)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wd",
+            "val": 10
+          }
+        ],
+        "3": [
+          {
+            "attr": "wh",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "corestrength": {
+      "name": "Core Strength",
+      "group": "dps",
+      "n2": "+10% Waffenhandhabung",
+      "n3": "+5% WD / +5% Rüstung / +5% Skill-Effizienz",
+      "n4": "Core Exercise: Je Kern auf den Teilen 40% der Boni der anderen beiden Kerne (Skill-Stufen zählen als 15% Skill-Effizienz); alle Teile außer Rucksack haben zufällige Kerne. Rucksack 'Outer Core': 3 Kern-Attribute; Weste 'Inner Core': 40% -> 75%",
+      "modeled": "3p numerisch (nur der WD-Anteil, +5%)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wh",
+            "val": 10
+          }
+        ],
+        "3": [
+          {
+            "attr": "wd",
+            "val": 5
+          },
+          {
+            "attr": "totalArmor",
+            "val": 5
+          },
+          {
+            "attr": "skillEff",
+            "val": 5
+          }
+        ]
+      }
+    },
+    "future": {
+      "name": "Future Initiative",
+      "group": "skill",
+      "n2": "+30% Fertigkeiten-Reparatur",
+      "n3": "+15% Fertigkeiten-Tempo & +30% Fertigkeiten-Dauer",
+      "n4": "Ground Control",
+      "modeled": "nur Teile-Zähler (Skill/Support-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "repairSkills",
+            "val": 30
+          }
+        ],
+        "3": [
+          {
+            "attr": "skillHaste",
+            "val": 15
+          },
+          {
+            "attr": "skillDuration",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "eclipse": {
+      "name": "Eclipse Protocol",
+      "group": "skill",
+      "n2": "+15% Statuseffekte",
+      "n3": "+15% Fertigkeiten-Tempo & +30% Gefahrenschutz",
+      "n4": "Indirect Transmission: Statuseffekte verbreiten sich bei Kill auf alle Gegner im 10m-Radius und erneuern 50% der Dauer. Rucksack 'Symptom Aggravator': +30% Schaden an statusbeeinflussten Zielen; Weste 'Proliferation': 10m -> 15m, 50% -> 75%",
+      "modeled": "nur Teile-Zähler (Status-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "statusEffects",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "skillHaste",
+            "val": 15
+          },
+          {
+            "attr": "hazard",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "foundry": {
+      "name": "Foundry Bulwark",
+      "group": "armour",
+      "n2": "+10% Gesamtrüstung",
+      "n3": "+1% Rüstungsregen & +50% Schild-HP",
+      "n4": "Makeshift Repairs: 25% des erlittenen Schadens (an dir oder deinem Schild) werden über 15 s an beide repariert. Rucksack 'Improved Materials': 25% -> 35%; Weste 'Process Refinery': 15 s -> 10 s",
+      "modeled": "nur Teile-Zähler (Tank-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "totalArmor",
+            "val": 10
+          }
+        ],
+        "3": [
+          {
+            "attr": "armorRegen",
+            "val": 1
+          },
+          {
+            "attr": "shieldHp",
+            "val": 50
+          }
+        ]
+      }
+    },
+    "rigger": {
+      "name": "Rigger",
+      "group": "skill",
+      "n2": "+15% Fertigkeiten-Tempo",
+      "n3": "+15% Fertigkeiten-Dauer",
+      "n4": "Tend and Befriend: Interaktion mit platzierten Fertigkeiten (Einsetzen/Ziel ändern/Heilen) gewährt der Fertigkeit +25% Fertigkeitsschaden für 10s (nicht erneuerbar). Rucksack 'Complete Uptime': Abbrechen setzt den Cooldown zurück; Weste 'Best Buds': +25% -> +50%. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
+      "modeled": "nur Teile-Zähler (Skill-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "skillHaste",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "skillDuration",
+            "val": 15
+          }
+        ]
+      }
+    },
+    "hardwired": {
+      "name": "Hard Wired",
+      "group": "skill",
+      "n2": "+15% Fertigkeiten-Tempo",
+      "n3": "+15% Fertigkeitsschaden & +30% Fertigkeiten-Reparatur",
+      "n4": "Feedback Loop: Bei Nutzen/Abbrechen einer Fertigkeit wird der Cooldown der anderen um 30 s reduziert, +10% Fertigkeitsschaden & -reparatur für 20 s (alle 10 s auslösbar). Rucksack 'Short Circuit': Cooldown 10 s -> 5 s; Weste 'Positive Reinforcement': +10% -> +25%",
+      "modeled": "nur Teile-Zähler (Skill-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "skillHaste",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "skillDmg",
+            "val": 15
+          },
+          {
+            "attr": "repairSkills",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "ongoing": {
+      "name": "Ongoing Directive",
+      "group": "skill",
+      "n2": "+15% Statuseffekte",
+      "n3": "+30% Nachladegeschwindigkeit",
+      "n4": "Rules of Engagement: Schüsse auf statusbeeinflusste Gegner markieren sie (10s); Kill eines Markierten: volles Magazin Hohlspitz-Munition (Team: halbes Magazin). Hohlspitz: +40% Waffenschaden & Bluten bei Treffer. Rucksack 'Trauma Specialist': +50% Blutdauer & +100% Blutschaden; Weste 'Parabellum Rounds': +40% -> +60% (nur selbst). Alle Teile haben standardmäßig Waffenschaden als Kern",
+      "modeled": "4p numerisch (Kill-getriggerte WD-Verstärkung)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "statusEffects",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "reloadSpeed",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "truepatriot": {
+      "name": "True Patriot",
+      "group": "armour",
+      "n2": "+15% Waffenhandhabung",
+      "n3": "+30% Magazingröße",
+      "n4": "Red, White and Blue: Beschossene Gegner erhalten rotierende Debuffs (Wechsel alle 2s): Rot = +15% erlittener Schaden, Weiß = Beschuss repariert 2% Rüstung/s des Angreifers, Blau = -10% verursachter Schaden des Gegners; stirbt ein Gegner unter allen drei Debuffs: 5m-Explosion mit Schaden entsprechend seinem Gesamt-HP+Rüstung (bei Named reduziert). Rucksack 'Patriotic Boost': Rot 15% -> 30%, Weiß 2% -> 5%, Blau 10% -> 20%; Weste 'Waving the Flag': Rotationswechsel 2s -> 1s. Alle Teile haben standardmäßig Rüstung als Kern",
+      "modeled": "nur Teile-Zähler (Support-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "wh",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "magSize",
+            "val": 30
+          }
+        ]
+      }
+    },
+    "systemcorruption": {
+      "name": "System Corruption",
+      "group": "armour",
+      "n2": "+15% Rüstung bei Kill",
+      "n3": "+40% Disrupt- & +40% Pulse-Resistenz",
+      "n4": "Hackstep Protocol: Ersetzt Rüstungskits durch eine sofortige, unbegrenzte Fähigkeit (CD 20s): repariert 20% Rüstung, gewährt 50% Bonus-Rüstung und versteckt dein Namensschild 5s; +1% Waffenschaden je 5% Bonus-Rüstung (max. 20%). Rucksack 'Multithreaded Execution': 50% -> 100% Bonus-Rüstung; Weste 'Compiler Optimization': CD 20s -> 15s. Teile haben je Slot Rüstung oder Waffenschaden als Kern",
+      "modeled": "nur Teile-Zähler (Tank/Utility-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "armorOnKill",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "disruptRes",
+            "val": 40
+          },
+          {
+            "attr": "pulseRes",
+            "val": 40
+          }
+        ]
+      }
+    },
+    "cavalier": {
+      "name": "Cavalier",
+      "group": "armour",
+      "n2": "+30% Gefahrenschutz",
+      "n3": "+40% Fertigkeiten-Reparatur",
+      "n4": "Charging/Charged: pro Sekunde außerhalb der Deckung im Kampf +5% reduzierter eingehender Fertigkeits-Schaden (max. 50%); voll aufgeladen: Immunität gegen Bewegungs-Debuffs + Teilen mit Verbündeten für 10 s. Rucksack 'Safe Charging': 10%/s; Weste 'Overcharging': max. 70%",
+      "modeled": "nur Teile-Zähler (Tank-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "hazard",
+            "val": 30
+          }
+        ],
+        "3": [
+          {
+            "attr": "repairSkills",
+            "val": 40
+          }
+        ]
+      }
+    },
+    "ortizexuro": {
+      "name": "Ortiz: Exuro",
+      "group": "skill",
+      "n2": "+20% Brenndauer & +15% Fertigkeits-Leben",
+      "n3": "+40% Brandschaden",
+      "n4": "Ortiz Incinerator Turret Prototype: Waffenturm dreht 360°, eigene Feuer-Immunität, Explosion bei Deaktivierung. Rucksack 'Heatstroke': +40% verstärkter Schaden an brennenden Zielen & +25% Reichweite; Weste 'Chain Combustion': Brand springt im 10m-Radius über. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
+      "modeled": "nur Teile-Zähler (Brand-Status-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "burnDuration",
+            "val": 20
+          },
+          {
+            "attr": "skillHealth",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "burnDmg",
+            "val": 40
+          }
+        ]
+      }
+    },
+    "aegis": {
+      "name": "Aegis",
+      "group": "armour",
+      "n2": "+70% Leben",
+      "n3": "+15% Gesamtrüstung",
+      "n4": "Stoic: +4% Schadensresistenz pro Gegner, der dich ins Ziel nimmt (max. 8 Stacks; Bonus x1,X je Gruppenmitglied). Rucksack 'Polyethylene Plating': +4% -> +5%; Weste 'Deceit': Gegner auf deine Köder zählen mit",
+      "modeled": "nur Teile-Zähler (Tank-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "health",
+            "val": 70
+          }
+        ],
+        "3": [
+          {
+            "attr": "totalArmor",
+            "val": 15
+          }
+        ]
+      }
+    },
+    "refactor": {
+      "name": "Refactor",
+      "group": "skill",
+      "n2": "+15% Statuseffekte",
+      "n3": "+25% Fertigkeitsschaden",
+      "n4": "Return to Sender: Erhaltene Reparatur = 10% des Schadens deiner Fertigkeiten; Verbündete erhalten 20%. Weste 'Increased Interest': 10% -> 25% (selbst) & 20% -> 35% (Verbündete); Rucksack 'Over-engineered': Bei voller Rüstung wird Reparatur in Bonus-Rüstung umgewandelt (bis 80% der Gesamt-Rüstung, nur selbst). Teile haben je Slot Rüstung oder Fertigkeitsstufe als Kern",
+      "modeled": "nur Teile-Zähler (Skill/Status-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "statusEffects",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "skillDmg",
+            "val": 25
+          }
+        ]
+      }
+    },
+    "measuredassembly": {
+      "name": "Measured Assembly",
+      "group": "skill",
+      "n2": "+15% Fertigkeiten-Tempo",
+      "n3": "+60% Fertigkeiten-Reparatur & +40% Explosionsresistenz",
+      "n4": "Huddle: +1 Fertigkeitsstufe je Verbündetem im Radius von Hive/Smart Cover; bei Stufe 6 + 4s Verbündetem: Overcharge 15s (CD 40s). Mortars/Gegner-Skills im Radius werden zerstört (CD 10s, je Verbündetem 20% schneller). Rucksack 'Smart Cooperation': Zerstörungs-CD 10s -> 1s; Weste 'Hivemind': Overcharge-CD 40s -> 25s. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
+      "modeled": "nur Teile-Zähler (Skill-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "skillHaste",
+            "val": 15
+          }
+        ],
+        "3": [
+          {
+            "attr": "repairSkills",
+            "val": 60
+          },
+          {
+            "attr": "explRes",
+            "val": 40
+          }
+        ]
+      }
+    },
+    "ortizreficere": {
+      "name": "Ortiz: Reficere",
+      "group": "skill",
+      "n2": "+8% Fertigkeitseffizienz",
+      "n3": "+60% Fertigkeiten-Reparatur",
+      "n4": "Ortiz Rapid Application Nanite Prototype: Heil-Fertigkeiten -90% Dauer & Reichweite, dafür +150% Heil-Effizienz; Heilen eines Verbündeten: +30% Gefahrenschutz für 10s (CD 10s/Verbündetem). Rucksack 'Improved Dampeners': -90% -> -25%; Weste 'Overcharged Nanites': +150% -> +200%. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
+      "modeled": "nur Teile-Zähler (Heal-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "skillEff",
+            "val": 8
+          }
+        ],
+        "3": [
+          {
+            "attr": "repairSkills",
+            "val": 60
+          }
+        ]
+      }
+    },
+    "emberengine": {
+      "name": "Ember Engine",
+      "group": "skill",
+      "n2": "+8% Fertigkeitseffizienz",
+      "n3": "+30% Statuseffekte",
+      "n4": "Spontaneous Combustion: Jeder applizierte Statuseffekt hat 40% Chance, zusätzlich Brand zu verursachen; war es bereits Brand: +25% Brandschaden für die Dauer. Rucksack 'White Hot': Brandschaden-Debuff +50%; Weste 'Flashpoint': +20% Brand-Chance",
+      "modeled": "nur Teile-Zähler (Status/Brand-Set)",
+      "bonuses": {
+        "2": [
+          {
+            "attr": "skillEff",
+            "val": 8
+          }
+        ],
+        "3": [
+          {
+            "attr": "statusEffects",
+            "val": 30
+          }
+        ]
+      }
+    }
+  },
+  "brand_set_info": {
+    "fenris": {
+      "name": "Fenris Group AB",
+      "group": "dps",
+      "weapon_hint": "AR",
+      "wd_bonus": "1p: +12% AR-Schaden",
+      "fragments": [
+        "fenris",
+        "ferocious calm"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "AR": 12
+          }
+        },
+        "2": {
+          "magSize": 32.0
+        },
+        "3": {
+          "stability": 50.0
+        }
+      }
+    },
+    "ceska": {
+      "name": "Česká Výroba S.R.O.",
+      "group": "dps",
+      "weapon_hint": "Shotgun",
+      "fragments": [
+        "ceska",
+        "devil"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "chc": 8
+        },
+        "2": {
+          "wd_by_weapon": {
+            "Shotgun": 24
+          }
+        },
+        "3": {
+          "hazard": 30.0
+        }
+      },
+      "wd_bonus": "2p: +24% Shotgun-Schaden"
+    },
+    "grupo": {
+      "name": "Grupo Shadow S.A.",
+      "group": "dps",
+      "fragments": [
+        "grupo",
+        "door-kicker"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "chd": 13
+        },
+        "2": {
+          "explosiveDmg": 20.0
+        },
+        "3": {
+          "hsd": 39
+        }
+      }
+    },
+    "walker": {
+      "name": "Walker, Harris & Co.",
+      "group": "dps",
+      "wd_bonus": "1p: +6% Waffenschaden",
+      "fragments": [
+        "walker",
+        "matador",
+        "chainkiller"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd": 6
+        },
+        "2": {
+          "dta": 5
+        },
+        "3": {
+          "dth": 10
+        }
+      }
+    },
+    "petrov": {
+      "name": "Petrov Defense Group",
+      "group": "dps",
+      "weapon_hint": "LMG",
+      "wd_bonus": "1p: +12% LMG-Schaden",
+      "fragments": [
+        "petrov",
+        "contractor's gloves",
+        "vedmedytsya"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "LMG": 12
+          }
+        },
+        "2": {
+          "wh": 15
+        },
+        "3": {
+          "ammoCap": 50.0
+        }
+      }
+    },
+    "sokolov": {
+      "name": "Sokolov Concern",
+      "group": "dps",
+      "weapon_hint": "MP",
+      "wd_bonus": "1p: +12% MP-Schaden",
+      "fragments": [
+        "sokolov",
+        "firm handshake"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "MP": 12
+          }
+        },
+        "2": {
+          "chd": 13
+        },
+        "3": {
+          "chc": 8
+        }
+      }
+    },
+    "overlord": {
+      "name": "Overlord Armaments",
+      "group": "dps",
+      "weapon_hint": "Rifle",
+      "wd_bonus": "1p: +12% Rifle-Schaden",
+      "fragments": [
+        "overlord",
+        "fox's prayer"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "Rifle": 12
+          }
+        },
+        "2": {
+          "accuracy": 30.0
+        },
+        "3": {
+          "wh": 30
+        }
+      }
+    },
+    "airaldi": {
+      "name": "Airaldi Holdings",
+      "group": "dps",
+      "weapon_hint": "MMR",
+      "wd_bonus": "1p: +12% MMR-Schaden",
+      "fragments": [
+        "airaldi",
+        "pristine example"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "MMR": 12
+          }
+        },
+        "2": {
+          "hsd": 26
+        },
+        "3": {
+          "dta": 5
+        }
+      }
+    },
+    "providence": {
+      "name": "Providence Defense",
+      "group": "dps",
+      "fragments": [
+        "providence",
+        "the gift",
+        "the sacrifice"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "hsd": 13
+        },
+        "2": {
+          "chc": 8
+        },
+        "3": {
+          "chd": 13
+        }
+      }
+    },
+    "unitalloys": {
+      "name": "Unit Alloys",
+      "group": "dps",
+      "weapon_hint": "AR",
+      "wd_bonus": "2p: +24% AR-Schaden",
+      "fragments": [
+        "unit"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "rof": 5
+        },
+        "2": {
+          "wd_by_weapon": {
+            "AR": 24
+          }
+        },
+        "3": {
+          "magSize": 50.0
+        }
+      }
+    },
+    "douglas": {
+      "name": "Douglas & Harding",
+      "group": "dps",
+      "fragments": [
+        "douglas & harding"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "Pistol": 24
+          }
+        },
+        "2": {
+          "skillHealth": 20.0
+        },
+        "3": {
+          "accuracy": 50.0
+        }
+      },
+      "weapon_hint": "Pistole",
+      "wd_bonus": "1p: +24% Pistolen-Schaden"
+    },
+    "brazos": {
+      "name": "Brazos de Arcabuz",
+      "group": "skill",
+      "bonuses_pve": {
+        "1": {
+          "skillHaste": 10.0
+        },
+        "2": {
+          "skillTier": 1
+        },
+        "3": {
+          "magSize": 50.0
+        }
+      },
+      "fragments": [
+        "brazos"
+      ]
+    },
+    "belstone": {
+      "name": "Belstone Armory",
+      "group": "armour",
+      "fragments": [
+        "belstone"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "armorRegen": 1.0
+        },
+        "2": {
+          "threat": 100.0
+        },
+        "3": {
+          "pfe": 30.0
+        }
+      }
+    },
+    "badger": {
+      "name": "Badger Tuff",
+      "group": "dps",
+      "weapon_hint": "Shotgun",
+      "wd_bonus": "1p: +12% Shotgun-Schaden",
+      "fragments": [
+        "badger",
+        "zero f"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd_by_weapon": {
+            "Shotgun": 12
+          }
+        },
+        "2": {
+          "armorOnKill": 10.0
+        },
+        "3": {
+          "totalArmor": 15.0
+        }
+      }
+    },
+    "electrique": {
+      "name": "Electrique",
+      "group": "skill",
+      "bonuses_pve": {
+        "1": {
+          "statusEffects": 10.0
+        },
+        "2": {
+          "hazard": 20.0
+        },
+        "3": {
+          "skillEff": 8.0
+        }
+      },
+      "fragments": [
+        "electrique"
+      ]
+    },
+    "empress": {
+      "name": "Empress International",
+      "group": "skill",
+      "bonuses_pve": {
+        "1": {
+          "skillHealth": 10.0
+        },
+        "2": {
+          "skillDmg": 13.0
+        },
+        "3": {
+          "skillEff": 8.0
+        }
+      },
+      "fragments": [
+        "empress"
+      ]
+    },
+    "habsburg": {
+      "name": "Habsburg Guard",
+      "group": "dps",
+      "weapon_hint": "MMR",
+      "wd_bonus": "2p: +24% MMR-Schaden",
+      "fragments": [
+        "habsburg",
+        "courier"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "hsd": 13
+        },
+        "2": {
+          "wd_by_weapon": {
+            "MMR": 24
+          }
+        },
+        "3": {
+          "statusEffects": 25.0
+        }
+      }
+    },
+    "lengmo": {
+      "name": "Lengmo",
+      "group": "dps",
+      "bonuses_pve": {
+        "1": {
+          "reloadSpeed": 15.0
+        },
+        "2": {
+          "wd_by_weapon": {
+            "LMG": 24
+          }
+        },
+        "3": {
+          "wh": 30
+        }
+      },
+      "fragments": [
+        "lengmo"
+      ],
+      "weapon_hint": "LMG",
+      "wd_bonus": "2p: +24% LMG-Schaden"
+    },
+    "palisade": {
+      "name": "Palisade Steelworks",
+      "group": "armour",
+      "bonuses_pve": {
+        "1": {
+          "armorOnKill": 10.0
+        },
+        "2": {
+          "pfe": 20.0
+        },
+        "3": {
+          "skillTier": 1
+        }
+      },
+      "fragments": [
+        "palisade"
+      ]
+    },
+    "gila": {
+      "name": "Gila Guard",
+      "group": "armour",
+      "fragments": [
+        "gila"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "totalArmor": 5.0
+        },
+        "2": {
+          "hazard": 20.0
+        },
+        "3": {
+          "armorRegen": 2.0
+        }
+      }
+    },
+    "5.11 tactical": {
+      "name": "5.11 Tactical",
+      "group": "armour",
+      "bonuses_pve": {
+        "1": {
+          "pfe": 10.0
+        },
+        "2": {
+          "threat": 100.0
+        },
+        "3": {
+          "hazard": 30.0
+        }
+      },
+      "fragments": [
+        "5.11"
+      ]
+    },
+    "alpssummit": {
+      "name": "Alps Summit Armaments",
+      "group": "skill",
+      "fragments": [
+        "alps summit"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "repairSkills": 18.0
+        },
+        "2": {
+          "skillDuration": 30.0
+        },
+        "3": {
+          "skillHaste": 30.0
+        }
+      }
+    },
+    "chinalight": {
+      "name": "China Light Industries Corporation",
+      "group": "skill",
+      "fragments": [
+        "china light"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "explosiveDmg": 15.0
+        },
+        "2": {
+          "hazard": 20.0
+        },
+        "3": {
+          "skillHaste": 30.0
+        }
+      }
+    },
+    "murakami": {
+      "name": "Murakami Industries",
+      "group": "skill",
+      "fragments": [
+        "murakami"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "skillDuration": 15.0
+        },
+        "2": {
+          "repairSkills": 35.0
+        },
+        "3": {
+          "skillDmg": 18.0
+        }
+      }
+    },
+    "richter": {
+      "name": "Richter & Kaiser GmbH",
+      "group": "skill",
+      "fragments": [
+        "richter"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "skillHaste": 10.0
+        },
+        "2": {
+          "explRes": 40.0
+        },
+        "3": {
+          "repairSkills": 52.0
+        }
+      }
+    },
+    "hana": {
+      "name": "Hana U Corporation",
+      "group": "skill",
+      "fragments": [
+        "hana u"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "skillHaste": 10.0
+        },
+        "2": {
+          "skillDmg": 13.0
+        },
+        "3": {
+          "wd": 18
+        }
+      }
+    },
+    "wyvern": {
+      "name": "Wyvern Wear",
+      "group": "skill",
+      "fragments": [
+        "wyvern"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "skillDmg": 8.0
+        },
+        "2": {
+          "statusEffects": 20.0
+        },
+        "3": {
+          "skillDuration": 45.0
+        }
+      }
+    },
+    "shiny monkey": {
+      "name": "Shiny Monkey Gear",
+      "group": "skill",
+      "fragments": [
+        "shiny monkey"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "skillDuration": 15.0
+        },
+        "2": {
+          "skillEff": 5.0
+        },
+        "3": {
+          "repairSkills": 52.0
+        }
+      }
+    },
+    "edelweiss": {
+      "name": "Edelweiss GPz",
+      "group": "skill",
+      "fragments": [
+        "edelweiss"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "repairSkills": 18.0
+        },
+        "2": {
+          "skillHaste": 20.0
+        },
+        "3": {
+          "skillEff": 8.0
+        }
+      }
+    },
+    "golan": {
+      "name": "Golan Gear Ltd",
+      "group": "armour",
+      "fragments": [
+        "golan"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "explRes": 20.0
+        },
+        "2": {
+          "armorRegen": 1.5
+        },
+        "3": {
+          "threat": 150.0
+        }
+      }
+    },
+    "uzina": {
+      "name": "Uzina Getica",
+      "group": "armour",
+      "fragments": [
+        "uzina"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "totalArmor": 5.0
+        },
+        "2": {
+          "armorOnKill": 10.0
+        },
+        "3": {
+          "hazard": 30.0
+        }
+      }
+    },
+    "yaahl": {
+      "name": "Yaahl Gear",
+      "group": "dps",
+      "fragments": [
+        "yaahl"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "hazard": 10.0
+        },
+        "2": {
+          "wd": 12
+        },
+        "3": {
+          "pulseRes": 40.0
+        }
+      }
+    },
+    "imminence": {
+      "name": "Imminence Armaments",
+      "group": "dps",
+      "fragments": [
+        "imminence"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wd": 6
+        },
+        "2": {
+          "wd_by_weapon": {
+            "Pistol": 48
+          }
+        },
+        "3": {
+          "skillHealth": 30.0
+        }
+      },
+      "weapon_hint": "Pistole",
+      "wd_bonus": "1p: +6% WD / 2p: +48% Pistolen-Schaden"
+    },
+    "legatus": {
+      "name": "Legatus S.p.A.",
+      "group": "dps",
+      "fragments": [
+        "legatus"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "magSize": 15.0
+        },
+        "2": {
+          "wd_by_weapon": {
+            "MP": 24
+          }
+        },
+        "3": {
+          "optRange": 105.0
+        }
+      },
+      "weapon_hint": "MP",
+      "wd_bonus": "2p: +24% MP-Schaden"
+    },
+    "royalworks": {
+      "name": "Royal Works",
+      "group": "dps",
+      "fragments": [
+        "royal works"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wh": 5
+        },
+        "2": {
+          "wd_by_weapon": {
+            "LMG": 24
+          }
+        },
+        "3": {
+          "accuracy": 50.0
+        }
+      },
+      "weapon_hint": "LMG",
+      "wd_bonus": "2p: +24% LMG-Schaden"
+    },
+    "urbanlookout": {
+      "name": "Urban Lookout",
+      "group": "dps",
+      "fragments": [
+        "urban lookout"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "wh": 5
+        },
+        "2": {
+          "wd_by_weapon": {
+            "MMR": 24
+          }
+        },
+        "3": {
+          "skillDuration": 45.0
+        }
+      },
+      "weapon_hint": "MMR",
+      "wd_bonus": "2p: +24% MMR-Schaden"
+    },
+    "zwiadowka": {
+      "name": "Zwiadowka Sp. z o.o.",
+      "group": "dps",
+      "fragments": [
+        "zwiadowka"
+      ],
+      "bonuses_pve": {
+        "1": {
+          "magSize": 15.0
+        },
+        "2": {
+          "wd_by_weapon": {
+            "Rifle": 24
+          }
+        },
+        "3": {
+          "wh": 30
+        }
+      },
+      "weapon_hint": "Rifle",
+      "wd_bonus": "2p: +24% Rifle-Schaden"
+    }
+  }
+}

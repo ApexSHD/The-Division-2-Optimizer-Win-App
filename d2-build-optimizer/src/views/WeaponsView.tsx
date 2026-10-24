@@ -1,10 +1,13 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
 import { ChartPlaceholder } from "../components/ChartPlaceholder";
+import { PresetPicker } from "../components/PresetPicker";
+import { getDb } from "../data/db";
+import type { WeaponPreset } from "../data/db";
 import type { Weapon } from "../data/sampleData";
 
 function newWeapon(id: string): Weapon {
@@ -17,6 +20,11 @@ export function WeaponsView() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<Weapon | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [presets, setPresets] = useState<WeaponPreset[]>([]);
+
+  useEffect(() => {
+    getDb().then((db) => setPresets(db.weapons)).catch(() => setPresets([]));
+  }, []);
 
   function openEdit(w: Weapon) {
     setEditing(w);
@@ -28,6 +36,23 @@ export function WeaponsView() {
     setEditing(newWeapon(`w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`));
     setIsNew(true);
     setPanelOpen(true);
+  }
+
+  function applyPreset(p: WeaponPreset) {
+    if (!editing) return;
+    const slots = (["optic", "muzzle", "underbarrel", "magazine"] as const).slice(0, p.modSlotCount);
+    setEditing({
+      ...editing,
+      name: p.name,
+      type: p.typeKey,
+      rarity: p.isExotic ? "exotic" : p.isNamed ? "named" : "highend",
+      baseDamage: p.baseDamage,
+      rpm: p.rpm,
+      magSize: p.magSize,
+      talent: p.talent ?? "",
+      note: p.note,
+      modSlots: [...slots],
+    });
   }
 
   function onSave() {
@@ -126,6 +151,15 @@ export function WeaponsView() {
       >
         {editing && (
           <>
+            {isNew && presets.length > 0 && (
+              <PresetPicker
+                label="Aus Datenbank übernehmen (Waffe)"
+                items={presets}
+                getItemLabel={(p) => p.name}
+                getItemGroup={(p) => t.weapons.types[p.typeKey]}
+                onPick={applyPreset}
+              />
+            )}
             <Field label={t.weapons.name}>
               <input
                 value={editing.name}
