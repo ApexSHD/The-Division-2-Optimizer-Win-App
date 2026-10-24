@@ -35,7 +35,7 @@ export function SettingsView() {
       <h3 style={{ marginTop: 24 }}>{t.settings.section.data}</h3>
       <div className="field" style={{ marginTop: 8 }}>
         <label>{t.settings.storage}</label>
-        <input readOnly value={t.settings.storagePath} />
+        <input readOnly value={store.storagePath ?? t.settings.storagePath} />
       </div>
       <div className="field" style={{ marginTop: 12 }}>
         <label>{t.settings.backups}</label>
@@ -50,7 +50,7 @@ export function SettingsView() {
 
       <h3 style={{ marginTop: 24 }}>{t.settings.section.about}</h3>
       <div className="hint" style={{ marginTop: 8 }}>
-        D2 Build Optimizer 0.1.0 · MVP 1.0 (GUI-Prototyp) · {t.common.placeholder}
+        D2 Build Optimizer 0.1.0 · MVP 1.1 (Datenhaltung & Inventar)
       </div>
     </div>
   );

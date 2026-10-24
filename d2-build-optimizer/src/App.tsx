@@ -30,6 +30,9 @@ function useThemeEffect() {
 }
 
 function TitleBar({ t }: { t: Translation }) {
+  const store = useStore();
+  const [newProfile, setNewProfile] = useState("");
+
   async function onMinimize() {
     try {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
@@ -58,19 +61,64 @@ function TitleBar({ t }: { t: Translation }) {
     } catch { /* Browser-Dev-Modus */ }
   }
 
+  function addProfile() {
+    const name = newProfile.trim();
+    if (!name) return;
+    store.addProfile(name);
+    setNewProfile("");
+  }
+
   return (
     <div className="titlebar">
       <div className="titlebar-drag" onMouseDown={startDrag}>
-        <span className="titlebar-title">🛡 {t.appName}</span>
-        <select aria-label={t.global.profile} defaultValue="default" style={{ fontSize: 12 }}>
-          <option value="default">Profil: Standard</option>
+        <span className="titlebar-title">🏝 {t.appName}</span>
+        <select
+          aria-label={t.global.profile}
+          value={store.activeProfileId}
+          onChange={(e) => store.setActiveProfile(e.target.value)}
+          style={{ fontSize: 12 }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {store.profiles.map((p) => (
+            <option key={p.id} value={p.id}>Profil: {p.name}</option>
+          ))}
         </select>
+        <input
+          type="text"
+          placeholder="+ Profil"
+          value={newProfile}
+          onChange={(e) => setNewProfile(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") addProfile();
+          }}
+          onBlur={() => setNewProfile("")}
+          style={{ width: 90, fontSize: 12 }}
+          onMouseDown={(e) => e.stopPropagation()}
+        />
+        {store.profiles.length > 1 && (
+          <button
+            className="btn"
+            style={{ fontSize: 11, padding: "2px 8px" }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              if (confirm("Profil löschen?")) store.removeProfile(store.activeProfileId);
+            }}
+          >
+            ✕
+          </button>
+        )}
         <input type="search" placeholder={`${t.common.search}… (Strg+F)`} style={{ width: 180, fontSize: 12 }} readOnly onFocus={(e) => e.target.blur()} />
       </div>
       <div className="titlebar-btns">
-        <button className="titlebar-btn" onClick={onMinimize} aria-label="Minimieren">─</button>
-        <button className="titlebar-btn" onClick={onToggleMaximize} aria-label="Maximieren">▢</button>
-        <button className="titlebar-btn close" onClick={onClose} aria-label="Schließen">✕</button>
+        <button className="titlebar-btn" onClick={onMinimize} aria-label="Minimieren">
+          ─
+        </button>
+        <button className="titlebar-btn" onClick={onToggleMaximize} aria-label="Maximieren">
+          ▢
+        </button>
+        <button className="titlebar-btn close" onClick={onClose} aria-label="Schließen">
+          ✕
+        </button>
       </div>
     </div>
   );
@@ -83,7 +131,7 @@ function Nav() {
   const items: { id: typeof store.view; label: string; icon: string }[] = [
     { id: "global", label: t.nav.global, icon: "🌍" },
     { id: "weapons", label: t.nav.weapons, icon: "🔫" },
-    { id: "gear", label: t.nav.gear, icon: "🥼" },
+    { id: "gear", label: t.nav.gear, icon: "🧦" },
     { id: "optimizer", label: t.nav.optimizer, icon: "⚡" },
     { id: "compare", label: t.nav.compare, icon: "⚖" },
     { id: "admin", label: t.nav.admin, icon: "🗄" },
@@ -149,7 +197,13 @@ function StatusBar() {
   return (
     <footer className="statusbar">
       <span>{t.status.dbVersion}: {DB_VERSION}</span>
-      <span>{t.status.storageOk}</span>
+      <span>
+        {store.loadError
+          ? `⚠ ${t.status.storageOk}: ${store.loadError}`
+          : store.storagePath
+            ? `💾 ${store.storagePath}`
+            : t.status.storageOk}
+      </span>
       {store.progress !== null && <span>{t.status.calculating} {store.progress} %</span>}
       <span className="spacer" />
       <span>{store.status}</span>
@@ -205,18 +259,21 @@ function Shell() {
       } else if (e.key === "F9") {
         e.preventDefault();
         store.toggleSidebar();
-      } else if (e.ctrlKey && e.key.toLowerCase() === "f") {
+      } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
         store.setStatus(`${t.common.search}: Strg+F (Platzhalter)`);
-      } else if (e.ctrlKey && e.key.toLowerCase() === "n") {
+      } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "n") {
         e.preventDefault();
         store.setStatus("Strg+N: neu (Platzhalter)");
-      } else if (e.ctrlKey && e.key.toLowerCase() === "s") {
+      } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "s") {
         e.preventDefault();
         store.setStatus("Strg+S: gespeichert (Platzhalter)");
-      } else if (e.ctrlKey && e.key.toLowerCase() === "z") {
+      } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "z") {
         e.preventDefault();
-        store.setStatus("Strg+Z: rückgängig (Platzhalter)");
+        if (store.canUndo) store.undo();
+      } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (store.canRedo) store.redo();
       }
     }
     window.addEventListener("keydown", onKey);
@@ -237,9 +294,8 @@ function Shell() {
 }
 
 export default function App() {
-  const [lang, setLang] = useState<"de" | "en">("de");
   return (
-    <I18nProvider lang={lang} setLang={setLang}>
+    <I18nProvider>
       <StoreProvider>
         <Shell />
       </StoreProvider>

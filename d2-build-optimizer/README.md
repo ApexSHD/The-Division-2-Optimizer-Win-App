@@ -1,6 +1,6 @@
-# D2 Build Optimizer – Windows-App (MVP 1.0: GUI-Prototyp)
+# D2 Build Optimizer – Windows-App (MVP 1.1: Datenhaltung & Inventar)
 
-Klickbarer GUI-Prototyp der Windows-Desktop-App des [The Division 2 – Build Optimizer](https://github.com/ApexSHD/division2-build-optimizer). Grundlage ist die [Softwarebeschreibung](../docs/SOFTWAREBESCHREIBUNG.md), Stufe **MVP 1.0**.
+Windows-Desktop-App des [The Division 2 – Build Optimizer](https://github.com/ApexSHD/division2-build-optimizer). Grundlage ist die [Softwarebeschreibung](../docs/SOFTWAREBESCHREIBUNG.md), Stufe **MVP 1.1**.
 
 ## Stack
 
@@ -30,13 +30,13 @@ npm run tauri build
 
 Erzeugt Installer (NSIS/MSI) unter `src-tauri/target/release/bundle/`. Portable EXE: `src-tauri/target/release/d2-build-optimizer.exe`.
 
-## Umfang von MVP 1.0
+## Umfang von MVP 1.1
 
-- Hauptfenster: Titelleiste, linke Navigation, Arbeitsbereich, rechte Build-Werte-Leiste, Statuszeile
-- Ansichten: Global, Waffen, Gear, Optimierung, Vergleich (Waffen/Sets/Loadouts), Admin, Einstellungen
-- Tabellen mit Filter/Sortierung, Seitenpaneele, Diagramm-Platzhalter
-- Design: dunkel/hell, SHD-Orange-Akzent, Fensterzustand wird gemerkt
-- Sprachgerüst DE (EN vollständig vorbereitet)
-- Tastaturkürzel: Strg+N, Strg+S, Strg+F, Strg+Z, F5 (Optimierung), F9 (Werte-Leiste)
+- Alles aus MVP 1.0: Hauptfenster mit Titelleiste, Navigation, Arbeitsbereich, Werte-Leiste, Statuszeile; alle Ansichten; Tabellen mit Filter/Sortierung; dunkel/hell-Design; Sprachgerüst DE/EN
+- **Dauerhafte Speicherung** der Benutzerdaten (Inventar, Builds, Agentenwerte, Profile, Sprache, Design) unter `%APPDATA%\de.apexshd.d2buildoptimizer\user-data.json` – Debounce-Speicherung, Backup (`user-data.json.bak`) und Wiederherstellung aus Backup bei beschädigter Datei
+- **Waffen- und Gear-Inventar voll funktionsfähig**: anlegen, bearbeiten, löschen (mit Bestätigung und Referenzbereinigung in Builds), Filtern, Sortieren
+- **Profile/Loadouts**: mehrere Profile in der Titelleiste anlegen, umschalten und löschen
+- **Undo/Redo**: Strg+Z (rückgängig), Strg+Shift+Z (wiederholen)
+- Statusleiste zeigt den tatsächlichen Speicherpfad
 
-**Nicht enthalten (bewusst, siehe Softwarebeschreibung):** echte Berechnungen, Optimierung, dauerhafte Speicherung, Import/Export.
+**Nicht enthalten (bewusst, siehe Softwarebeschreibung):** echte Berechnungen, Optimierung, Import/Export, Admin-Datenpflege.

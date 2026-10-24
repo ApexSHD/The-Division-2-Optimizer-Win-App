@@ -4,13 +4,18 @@ import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
-import type { GearPiece } from "../data/sampleData";
+import type { GearPiece, GearSlot } from "../data/sampleData";
+
+function newGear(id: string): GearPiece {
+  return { id, slot: "mask", brand: "", brandType: "brand", core: "", attributes: [], talent: null, prototype: false };
+}
 
 export function GearView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selected, setSelected] = useState<GearPiece | null>(null);
+  const [editing, setEditing] = useState<GearPiece | null>(null);
+  const [isNew, setIsNew] = useState(false);
   const [slotFilter, setSlotFilter] = useState<string>("all");
 
   const gear = slotFilter === "all" ? store.gear : store.gear.filter((g) => g.slot === slotFilter);
@@ -47,8 +52,35 @@ export function GearView() {
   ];
 
   function openEdit(g: GearPiece) {
-    setSelected(g);
+    setEditing(g);
+    setIsNew(false);
     setPanelOpen(true);
+  }
+
+  function openNew() {
+    setEditing(newGear(`g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`));
+    setIsNew(true);
+    setPanelOpen(true);
+  }
+
+  function onSave() {
+    if (!editing) return;
+    if (!editing.brand.trim()) {
+      store.setStatus(t.gear.brand + " fehlt");
+      return;
+    }
+    if (isNew) store.addGear(editing);
+    else store.updateGear(editing);
+    setPanelOpen(false);
+    store.setStatus(isNew ? `${editing.brand} angelegt` : `${editing.brand} gespeichert`);
+  }
+
+  function onDelete() {
+    if (!editing || isNew) return;
+    if (!confirm(`${editing.brand} ${t.common.delete}?`)) return;
+    store.removeGear(editing.id);
+    setPanelOpen(false);
+    store.setStatus(`${editing.brand} gelöscht`);
   }
 
   return (
@@ -68,7 +100,7 @@ export function GearView() {
                 <option key={k} value={k}>{v}</option>
               ))}
             </select>
-            <button className="btn btn-accent" onClick={() => openEdit(store.gear[0])}>
+            <button className="btn btn-accent" onClick={openNew}>
               + {t.gear.new}
             </button>
           </>
@@ -77,38 +109,80 @@ export function GearView() {
 
       <SidePanel
         open={panelOpen}
-        title={selected ? t.gear.edit : t.gear.new}
+        title={editing && !isNew ? t.gear.edit : t.gear.new}
         onClose={() => setPanelOpen(false)}
         footer={
           <>
+            {editing && !isNew && (
+              <button className="btn btn-danger" onClick={onDelete}>{t.common.delete}</button>
+            )}
+            <span className="spacer" />
             <button className="btn" onClick={() => setPanelOpen(false)}>{t.common.cancel}</button>
-            <button className="btn btn-accent" onClick={() => setPanelOpen(false)}>{t.common.save}</button>
+            <button className="btn btn-accent" onClick={onSave}>{t.common.save}</button>
           </>
         }
       >
-        {selected && (
+        {editing && (
           <>
             <Field label={t.gear.slot}>
-              <select defaultValue={selected.slot}>
+              <select
+                value={editing.slot}
+                onChange={(e) => setEditing({ ...editing, slot: e.target.value as GearSlot })}
+              >
                 {Object.entries(t.gear.slots).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
                 ))}
               </select>
             </Field>
             <Field label={t.gear.brand}>
-              <input defaultValue={selected.brand} />
+              <input
+                value={editing.brand}
+                autoFocus
+                onChange={(e) => setEditing({ ...editing, brand: e.target.value })}
+              />
+            </Field>
+            <Field label="Kategorie">
+              <select
+                value={editing.brandType}
+                onChange={(e) => setEditing({ ...editing, brandType: e.target.value as GearPiece["brandType"] })}
+              >
+                <option value="brand">Brand-Set</option>
+                <option value="gearset">Gear-Set</option>
+                <option value="named">Named</option>
+                <option value="exotic">Exotic</option>
+              </select>
             </Field>
             <Field label={t.gear.core}>
-              <input defaultValue={selected.core} />
+              <input
+                value={editing.core}
+                onChange={(e) => setEditing({ ...editing, core: e.target.value })}
+              />
             </Field>
             <Field label={t.gear.attribute}>
-              <input defaultValue={selected.attributes.join("; ")} />
+              <input
+                value={editing.attributes.join("; ")}
+                placeholder="CHC +6 %; CHD +6 %"
+                onChange={(e) =>
+                  setEditing({
+                    ...editing,
+                    attributes: e.target.value.split(";").map((s) => s.trim()).filter(Boolean),
+                  })
+                }
+              />
             </Field>
             <Field label={t.gear.talent}>
-              <input defaultValue={selected.talent ?? ""} placeholder="—" />
+              <input
+                value={editing.talent ?? ""}
+                placeholder="—"
+                onChange={(e) => setEditing({ ...editing, talent: e.target.value || null })}
+              />
             </Field>
             <Field label={t.common.prototype}>
-              <input type="checkbox" defaultChecked={selected.prototype} />
+              <input
+                type="checkbox"
+                checked={editing.prototype}
+                onChange={(e) => setEditing({ ...editing, prototype: e.target.checked })}
+              />
             </Field>
           </>
         )}
