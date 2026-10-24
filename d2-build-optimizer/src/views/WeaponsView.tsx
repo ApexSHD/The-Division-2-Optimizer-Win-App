@@ -7,15 +7,47 @@ import { SidePanel, Field } from "../components/SidePanel";
 import { ChartPlaceholder } from "../components/ChartPlaceholder";
 import type { Weapon } from "../data/sampleData";
 
+function newWeapon(id: string): Weapon {
+  return { id, name: "", type: "ar", rarity: "highend", baseDamage: 0, rpm: 0, magSize: 0, talent: "", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] };
+}
+
 export function WeaponsView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
   const [panelOpen, setPanelOpen] = useState(false);
-  const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
+  const [editing, setEditing] = useState<Weapon | null>(null);
+  const [isNew, setIsNew] = useState(false);
 
   function openEdit(w: Weapon) {
-    setSelectedWeapon(w);
+    setEditing(w);
+    setIsNew(false);
     setPanelOpen(true);
+  }
+
+  function openNew() {
+    setEditing(newWeapon(`w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`));
+    setIsNew(true);
+    setPanelOpen(true);
+  }
+
+  function onSave() {
+    if (!editing) return;
+    if (!editing.name.trim()) {
+      store.setStatus(t.weapons.name + " fehlt");
+      return;
+    }
+    if (isNew) store.addWeapon(editing);
+    else store.updateWeapon(editing);
+    setPanelOpen(false);
+    store.setStatus(isNew ? `${editing.name} angelegt` : `${editing.name} gespeichert`);
+  }
+
+  function onDelete() {
+    if (!editing || isNew) return;
+    if (!confirm(`${editing.name} ${t.common.delete}?`)) return;
+    store.removeWeapon(editing.id);
+    setPanelOpen(false);
+    store.setStatus(`${editing.name} gelöscht`);
   }
 
   const columns: Column<Weapon>[] = [
@@ -66,7 +98,7 @@ export function WeaponsView() {
         filterFn={(w, q) => w.name.toLowerCase().includes(q) || w.talent.toLowerCase().includes(q)}
         onRowDoubleClick={openEdit}
         toolbar={
-          <button className="btn btn-accent" onClick={() => openEdit(store.weapons[0])}>
+          <button className="btn btn-accent" onClick={openNew}>
             + {t.weapons.new}
           </button>
         }
@@ -79,57 +111,110 @@ export function WeaponsView() {
 
       <SidePanel
         open={panelOpen}
-        title={selectedWeapon ? t.weapons.edit : t.weapons.new}
+        title={editing && !isNew ? t.weapons.edit : t.weapons.new}
         onClose={() => setPanelOpen(false)}
         footer={
           <>
+            {editing && !isNew && (
+              <button className="btn btn-danger" onClick={onDelete}>{t.common.delete}</button>
+            )}
+            <span className="spacer" />
             <button className="btn" onClick={() => setPanelOpen(false)}>{t.common.cancel}</button>
-            <button className="btn btn-accent" onClick={() => setPanelOpen(false)}>{t.common.save}</button>
+            <button className="btn btn-accent" onClick={onSave}>{t.common.save}</button>
           </>
         }
       >
-        {selectedWeapon && (
+        {editing && (
           <>
             <Field label={t.weapons.name}>
-              <input defaultValue={selectedWeapon.name} />
+              <input
+                value={editing.name}
+                autoFocus
+                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+              />
             </Field>
             <Field label={t.weapons.type}>
-              <select defaultValue={selectedWeapon.type}>
+              <select
+                value={editing.type}
+                onChange={(e) => setEditing({ ...editing, type: e.target.value as Weapon["type"] })}
+              >
                 {Object.entries(t.weapons.types).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
                 ))}
               </select>
             </Field>
             <Field label={t.weapons.rarity}>
-              <select defaultValue={selectedWeapon.rarity}>
+              <select
+                value={editing.rarity}
+                onChange={(e) => setEditing({ ...editing, rarity: e.target.value as Weapon["rarity"] })}
+              >
                 {Object.entries(t.weapons.rarities).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
                 ))}
               </select>
             </Field>
             <Field label={t.weapons.talent}>
-              <input defaultValue={selectedWeapon.talent} />
+              <input
+                value={editing.talent}
+                onChange={(e) => setEditing({ ...editing, talent: e.target.value })}
+              />
             </Field>
             <Field label="Basiswert (Schaden)">
-              <input type="number" defaultValue={selectedWeapon.baseDamage} />
+              <input
+                type="number"
+                min={0}
+                value={editing.baseDamage}
+                onChange={(e) => setEditing({ ...editing, baseDamage: Number(e.target.value) })}
+              />
             </Field>
             <Field label="RPM">
-              <input type="number" defaultValue={selectedWeapon.rpm} />
+              <input
+                type="number"
+                min={0}
+                value={editing.rpm}
+                onChange={(e) => setEditing({ ...editing, rpm: Number(e.target.value) })}
+              />
             </Field>
             <Field label="Magazingröße">
-              <input type="number" defaultValue={selectedWeapon.magSize} />
+              <input
+                type="number"
+                min={0}
+                value={editing.magSize}
+                onChange={(e) => setEditing({ ...editing, magSize: Number(e.target.value) })}
+              />
             </Field>
-            <Field label={t.weapons.modsAuto}>
-              <button className="btn" onClick={() => undefined}>⚡ Auto</button>
+            <Field label="Hinweis">
+              <input
+                value={editing.note ?? ""}
+                onChange={(e) => setEditing({ ...editing, note: e.target.value })}
+              />
             </Field>
             <Field label={t.weapons.mods}>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {selectedWeapon.modSlots.map((s) => (
-                  <span key={s} className="badge">{s}</span>
-                ))}
+                {(["optic", "muzzle", "underbarrel", "magazine"] as const).map((s) => {
+                  const active = editing.modSlots.includes(s);
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      className={`badge ${active ? "btn-accent" : ""}`}
+                      style={{ cursor: "pointer", opacity: active ? 1 : 0.5 }}
+                      onClick={() =>
+                        setEditing({
+                          ...editing,
+                          modSlots: active
+                            ? editing.modSlots.filter((x) => x !== s)
+                            : [...editing.modSlots, s],
+                        })
+                      }
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
               </div>
             </Field>
-            {selectedWeapon.rarity === "exotic" && (
+            {editing.rarity === "exotic" && (
               <Field label={t.weapons.exoticTalentStacks}>
                 <input type="range" min={0} max={100} defaultValue={50} style={{ width: "100%" }} />
               </Field>
