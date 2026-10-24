@@ -2,6 +2,25 @@ import type { GearSlot } from "./sampleData";
 
 export type WeaponTypeKey = "ar" | "smg" | "lmg" | "rifle" | "mmr" | "shotgun" | "pistol";
 
+export interface TalentEntry {
+  key: string;
+  name: string;
+  label: string;
+  weaponTypes: WeaponTypeKey[];
+  group: string;
+  description: string;
+}
+
+export const TALENT_TYPE_MAP: Record<string, WeaponTypeKey> = {
+  AR: "ar",
+  MP: "smg",
+  LMG: "lmg",
+  Rifle: "rifle",
+  MMR: "mmr",
+  Shotgun: "shotgun",
+  Pistol: "pistol",
+};
+
 export interface DbWeaponStats {
   "RPM"?: number;
   "Base Mag Size"?: number;
@@ -102,6 +121,11 @@ interface GearFile {
   green_set_info: Record<string, DbGreenSetInfo>;
 }
 
+interface TalentsFile {
+  version: string;
+  talents: { key: string; name: string; label: string; weapon_types: string[]; group: string; description: string }[];
+}
+
 interface ModsFile {
   version: string;
   slots: Record<string, DbSlotMod[]>;
@@ -134,6 +158,7 @@ export interface GearPreset {
 
 export interface Db {
   weapons: WeaponPreset[];
+  talents: TalentEntry[];
   gear: GearPreset[];
   brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
   gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
@@ -164,7 +189,7 @@ async function load(): Promise<Db> {
   const weaponsFile: WeaponsFile = await weaponsRes.json();
   const gearFile: GearFile = await gearRes.json();
   const modsFile: ModsFile = await modsRes.json();
-  const talentsFile: { version: string } = await talentsRes.json();
+  const talentsFile: TalentsFile = await talentsRes.json();
 
   const weapons: WeaponPreset[] = weaponsFile.weapons
     .filter((w) => w.stats && typeof w.stats["Level 40 Damage"] === "number")
@@ -227,8 +252,18 @@ async function load(): Promise<Db> {
     })),
   );
 
+  const talents: TalentEntry[] = (talentsFile.talents ?? []).map((tal) => ({
+    key: tal.key,
+    name: tal.name,
+    label: tal.label,
+    weaponTypes: (tal.weapon_types ?? []).map((w) => TALENT_TYPE_MAP[w]).filter((w): w is WeaponTypeKey => Boolean(w)),
+    group: tal.group,
+    description: tal.description,
+  }));
+
   return {
     weapons,
+    talents,
     gear,
     brandSets,
     gearSets,
