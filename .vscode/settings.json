@@ -1,0 +1,21 @@
+{
+  "editor.formatOnSave": true,
+  "files.eol": "\n",
+  "files.encoding": "utf8",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "files.associations": {
+    "*.css": "css"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/src-tauri/target": true,
+    "**/src-tauri/gen": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/src-tauri/target/**": true,
+    "**/src-tauri/gen/**": true
+  }
+}
