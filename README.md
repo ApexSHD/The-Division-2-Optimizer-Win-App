@@ -5,6 +5,7 @@ Eigenständige Windows-Desktop-App (Lastenheft-Phase) des Fan-Tools „The Divis
 ## Dokumentation
 
 - [Softwarebeschreibung / Lastenheft-Entwurf (docs/SOFTWAREBESCHREIBUNG.md)](docs/SOFTWAREBESCHREIBUNG.md) – Zweck, Zielgruppe, Ist-/Soll-Umfang, GUI-Konzept, nicht-funktionale Anforderungen, Architektur (Tauri 2) und MVP-Stufenplan (1.0 GUI-Prototyp bis 2.0 Release).
+- [Entwicklungsumgebung einrichten (docs/ENTWICKLUNGSUMGEBUNG.md)](docs/ENTWICKLUNGSUMGEBUNG.md) – benötigte Programme (VS Code, Node.js, Rust, VS Build Tools), empfohlene Extensions und Start-Befehle.
 
 ## Rechtlicher Hinweis
 
