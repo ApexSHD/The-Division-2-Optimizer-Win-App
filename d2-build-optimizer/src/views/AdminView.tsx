@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
-import { DB_VERSION } from "../data/sampleData";
 
 type AdminTab = "weapons" | "gear" | "brands" | "gearsets" | "mods";
 
@@ -22,7 +21,11 @@ export function AdminView() {
   return (
     <div>
       <div className="toolbar">
-        <span className="badge">{t.admin.dbVersion}: {DB_VERSION}</span>
+        <span className="badge">
+          {t.admin.dbVersion}: {store.db
+            ? `weapons ${store.db.versions.weapons} · gear ${store.db.versions.gear} · mods ${store.db.versions.mods} · talents ${store.db.versions.talents}`
+            : "—"}
+        </span>
         <span className="spacer" />
         <button className="btn btn-danger" onClick={() => confirm(t.admin.resetConfirm)}>
           {t.admin.reset}

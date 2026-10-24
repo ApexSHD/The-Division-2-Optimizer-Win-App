@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import type { ReactNode } from "react";
 import type { Weapon, GearPiece, Mod, BrandSet, Build, GearSlot } from "./data/sampleData";
 import { sampleWeapons, sampleGear, sampleMods, sampleBrandSets, sampleGearSets, sampleBuilds } from "./data/sampleData";
+import { getDb } from "./data/db";
+import type { Db } from "./data/db";
 
 export type ViewId = "global" | "weapons" | "gear" | "optimizer" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
@@ -88,6 +90,7 @@ export interface AppState {
   mods: Mod[];
   brandSets: BrandSet[];
   gearSets: BrandSet[];
+  db: Db | null;
   builds: Build[];
   status: string;
   setStatus: (s: string) => void;
@@ -133,6 +136,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData>(() => defaultUserData());
   const [storagePath, setStoragePath] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [db, setDb] = useState<Db | null>(null);
+
+  useEffect(() => {
+    getDb().then(setDb).catch(() => setDb(null));
+  }, []);
   const undoStack = useRef<UserData[]>([]);
   const redoStack = useRef<UserData[]>([]);
   const [undoDepth, setUndoDepth] = useState(0);
@@ -228,9 +236,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setAgent: (a) => mutate((d) => ({ ...d, agent: a })),
     weapons: userData.weapons,
     gear: userData.gear,
-    mods: sampleMods,
-    brandSets: sampleBrandSets,
-    gearSets: sampleGearSets,
+    mods: db?.mods.map((m) => ({
+      id: m.name,
+      category: (m.slot as Mod["category"]) ?? "optic",
+      compat: m.slotTypes,
+      value: [m.bonus, m.penalty].filter(Boolean).join(" · "),
+    })) ?? sampleMods,
+    brandSets: (db?.brandSets ?? sampleBrandSets.map((b) => ({ ...b, key: b.id }))).map((b) => ({
+      id: b.key,
+      name: b.name,
+      bonuses: b.bonuses,
+    })),
+    gearSets: (db?.gearSets ?? sampleGearSets.map((b) => ({ ...b, key: b.id }))).map((b) => ({
+      id: b.key,
+      name: b.name,
+      bonuses: b.bonuses,
+    })),
+    db,
     builds: userData.builds,
     status,
     setStatus,
