@@ -9,7 +9,6 @@ import type { GearPreset, BrandItemPreset, GearSetItemPreset } from "../data/db"
 import type { GearPiece, GearSlot, GearCoreType, GearAttrKey } from "../data/sampleData";
 import {
   GEAR_CORE_LABELS,
-  GEAR_CORE_MAX,
   GEAR_ATTR_TYPES,
   GEAR_REGULAR_ATTR_KEYS,
   gearAttrMax,
@@ -89,6 +88,7 @@ export function GearView() {
   function applyPreset(p: GearPreset) {
     if (!editing) return;
     const isEx = p.cls === "exotic";
+    const isProto = !isEx;
     const core = (p.core === "Waffenschaden" ? "wd" : p.core === "Panzerung" ? "armour" : p.core === "Skill-Hastung" ? "skill" : "wd") as GearCoreType;
     setEditing({
       ...editing,
@@ -96,14 +96,14 @@ export function GearView() {
       brand: p.name,
       brandType: isEx ? "exotic" : "named",
       core,
-      coreValue: core === "wd" ? GEAR_CORE_MAX.wd : core === "armour" ? GEAR_CORE_MAX.armour : GEAR_CORE_MAX.skill,
+      coreValue: gearCoreMax(core, isProto),
       attributes: isEx
         ? p.fixedAttrs.map((a) => ({ type: a.type as GearAttrKey, value: a.value }))
         : p.namedSpecialAttr
           ? [{ type: p.namedSpecialAttr.type as GearAttrKey, value: p.namedSpecialAttr.value }]
           : [],
       talent: isEx ? p.perk || null : p.namedSpecialAttr ? null : p.perk || null,
-      prototype: isEx ? false : true,
+      prototype: isProto,
     });
   }
 
@@ -342,6 +342,27 @@ export function GearView() {
       >
         {editing && (
           <>
+            {(() => {
+              const warnings: string[] = [];
+              if (editing.core !== "skill" && editing.coreValue > gearCoreMax(editing.core, editing.prototype)) {
+                warnings.push(`1. Attribut (${GEAR_CORE_LABELS[editing.core]}): ${editing.coreValue.toLocaleString("de-DE")} > Max ${gearCoreMax(editing.core, editing.prototype).toLocaleString("de-DE")}`);
+              }
+              editing.attributes.forEach((a, i) => {
+                const max = gearAttrMax(a.type, editing.prototype);
+                if (max != null && a.value > max) {
+                  warnings.push(`${i + 2}. Attribut (${GEAR_ATTR_TYPES[a.type]?.label ?? a.type}): ${a.value} > Max ${max}`);
+                }
+              });
+              if (warnings.length === 0) return null;
+              return (
+                <div className="field-warn">
+                  ⚠ Wert(e) über dem Maximalwert:
+                  <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+                    {warnings.map((w) => <li key={w}>{w}</li>)}
+                  </ul>
+                </div>
+              );
+            })()}
             <Field label={t.gear.slot}>
               <select value={editing.slot} onChange={(e) => onSelectSlot(e.target.value as GearSlot)}>
                 {Object.entries(t.gear.slots).map(([k, v]) => (
