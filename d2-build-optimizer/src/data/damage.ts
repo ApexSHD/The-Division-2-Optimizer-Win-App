@@ -1,4 +1,4 @@
-import type { Weapon } from "./sampleData";
+import type { Weapon, GearSlot } from "./sampleData";
 import type { GearPiece } from "./sampleData";
 import type { OptimizationSettings } from "../store";
 import { shdBonusFor } from "../store";
@@ -146,4 +146,120 @@ export function computeDamage(
     cappedChc: finalChc,
     finalChd,
   };
+}
+
+
+export interface OptimizerResult {
+  rank: number;
+  weapon: Weapon;
+  gear: GearPiece[];
+  stats: BuildStats;
+  damage: DamageBreakdown;
+  meetsTargetChc: boolean;
+  gearSetCount: number;
+  reason: string;
+}
+
+const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+
+export function optimizeBuilds(
+  weapons: Weapon[],
+  gear: GearPiece[],
+  shdLevel: number,
+  settings: OptimizationSettings,
+  opts: { gearSetNames?: string[]; maxResults?: number } = {},
+): OptimizerResult[] {
+  const profile = enemyProfileFromSettings(settings);
+  const maxResults = opts.maxResults ?? 10;
+  const gearSetNames = new Set((opts.gearSetNames ?? []).map((n) => n.toLowerCase()));
+
+  const bySlot = new Map<GearSlot, GearPiece[]>();
+  for (const slot of SLOTS) bySlot.set(slot, []);
+  for (const g of gear) bySlot.get(g.slot)?.push(g);
+
+  if (settings.requiredChest && (bySlot.get("chest")?.length ?? 0) === 0) return [];
+  if (settings.requiredBackpack && (bySlot.get("backpack")?.length ?? 0) === 0) return [];
+
+  const targetSet = settings.targetGearSet.trim().toLowerCase();
+  const results: OptimizerResult[] = [];
+  const seen = new Set<string>();
+
+  const gearCombos = cartesianBySlot(bySlot);
+
+  for (const w of weapons) {
+    for (const combo of gearCombos) {
+      if (combo.length === 0) continue;
+      const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
+      if (exoticGear > 1) continue;
+      if (settings.requiredChest && !combo.some((g) => g.slot === "chest")) continue;
+      if (settings.requiredBackpack && !combo.some((g) => g.slot === "backpack")) continue;
+
+      const setPieces = combo.filter((g) => g.brandType === "gearset");
+      let gearSetCount = 0;
+      if (targetSet) {
+        const matching = piecesOfSet(setPieces, targetSet, gearSetNames);
+        if (matching < 2) continue;
+        gearSetCount = matching;
+      }
+
+      const stats = aggregateBuild(combo, shdLevel);
+      const damage = computeDamage(w, stats, profile);
+      const meetsTargetChc = damage.cappedChc >= settings.targetChc;
+
+      const key = combo.map((g) => g.id).join("|") + "::" + w.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const reasonParts: string[] = [];
+      reasonParts.push(meetsTargetChc
+        ? `CHC-Ziel ${settings.targetChc} % erreicht (${damage.cappedChc} %)`
+        : `CHC ${damage.cappedChc} % unter Ziel ${settings.targetChc} %`);
+      if (targetSet && gearSetCount > 0) reasonParts.push(`${gearSetCount}× ${settings.targetGearSet}`);
+      if (exoticGear === 1) reasonParts.push("1 Exotic-Gear");
+
+      results.push({
+        rank: 0,
+        weapon: w,
+        gear: combo,
+        stats,
+        damage,
+        meetsTargetChc,
+        gearSetCount,
+        reason: reasonParts.join(" · "),
+      });
+    }
+  }
+
+  results.sort((a, b) => {
+    if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
+    return b.damage.effectiveDps - a.damage.effectiveDps;
+  });
+  const top = results.slice(0, maxResults);
+  top.forEach((r, i) => (r.rank = i + 1));
+  return top;
+}
+
+function piecesOfSet(setPieces: GearPiece[], targetSet: string, knownSets: Set<string>): number {
+  const t = targetSet.toLowerCase();
+  return setPieces.filter((g) => {
+    const brand = g.brand.toLowerCase();
+    if (brand === t) return true;
+    if (knownSets.has(brand) && brand.includes(t)) return true;
+    return t.length > 2 && brand.includes(t);
+  }).length;
+}
+
+function cartesianBySlot(bySlot: Map<GearSlot, GearPiece[]>): GearPiece[][] {
+  let combos: GearPiece[][] = [[]];
+  for (const slot of SLOTS) {
+    const items = bySlot.get(slot) ?? [];
+    const next: GearPiece[][] = [];
+    for (const c of combos) {
+      next.push(c);
+      for (const item of items) next.push([...c, item]);
+    }
+    combos = next;
+    if (combos.length > 200000) combos = combos.slice(0, 200000);
+  }
+  return combos.filter((c) => c.length > 0);
 }
