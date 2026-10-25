@@ -1,6 +1,6 @@
 import { useStore, shdBonusFor, SHD_WATCH_ATTRIBUTES } from "../store";
 import { I18nContext } from "../i18n";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 
 function WatchBonusTable({ shdLevel }: { shdLevel: number }) {
@@ -40,6 +40,7 @@ export function GlobalView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
   const a = store.agent;
+  const [showWatch, setShowWatch] = useState(false);
 
   return (
     <div style={{ maxWidth: 640 }}>
@@ -61,10 +62,25 @@ export function GlobalView() {
           </span>
         </div>
       </div>
-      <div style={{ margin: "12px 0 4px", fontSize: 12, color: "var(--text-dim, #aaa)" }}>
-        Aktuelle Watch-Boni aus dem SHD-Level (fließen später in die Kalkulation ein):
+      <div style={{ margin: "10px 0 0" }}>
+        <button
+          type="button"
+          className="btn"
+          title="Aktuelle Watch-Boni aus dem SHD-Level anzeigen"
+          onClick={() => setShowWatch((v) => !v)}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, padding: "4px 10px" }}
+        >
+          ℹ Watch-Boni anzeigen
+        </button>
+        {showWatch && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ margin: "0 0 6px", fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+              Aktuelle Watch-Boni aus dem SHD-Level (fließen später in die Kalkulation ein):
+            </div>
+            <WatchBonusTable shdLevel={a.shdLevel} />
+          </div>
+        )}
       </div>
-      <WatchBonusTable shdLevel={a.shdLevel} />
 
       <div className="field" style={{ marginTop: 12 }}>
         <label>{t.global.spec}</label>
