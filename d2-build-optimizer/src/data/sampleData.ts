@@ -1,5 +1,16 @@
 export type WeaponType = "ar" | "smg" | "lmg" | "rifle" | "mmr" | "shotgun" | "pistol";
 export type Rarity = "exotic" | "named" | "highend";
+export type WeaponAttrKey =
+  | "dth" | "chc" | "chd" | "dttooc" | "hsd" | "dta" | "rof"
+  | "magSize" | "handling" | "range" | "reloadSpeed" | "armorOnKill";
+
+export interface WeaponAttributes {
+  core1: number;
+  core2Type: WeaponAttrKey;
+  core2Val: number;
+  minorType: WeaponAttrKey;
+  minorVal: number;
+}
 
 export interface Weapon {
   id: string;
@@ -12,6 +23,86 @@ export interface Weapon {
   talent: string;
   modSlots: ("optic" | "muzzle" | "underbarrel" | "magazine")[];
   note?: string;
+  knowHow: number;
+  isPrototype: boolean;
+  attributes: WeaponAttributes;
+}
+
+export const WEAPON_ATTR_LABELS: Record<WeaponAttrKey, string> = {
+  dth: "Lebenspunktschaden (DTH)",
+  chc: "Kritische Trefferchance (CHC)",
+  chd: "Kritischer Trefferschaden (CHD)",
+  dttooc: "Schaden gg. ungedeckte Ziele (DTToOC)",
+  hsd: "Kopfschussschaden (HSD)",
+  dta: "R\u00fcstungsschaden (DTA)",
+  rof: "Feuerrate (RoF)",
+  magSize: "Magazingr\u00f6\u00dfe",
+  handling: "Waffenhandling",
+  range: "Optimale Reichweite",
+  reloadSpeed: "Nachladetempo",
+  armorOnKill: "Gegner bei T\u00f6tung reparieren (AoK)",
+};
+
+export const WEAPON_MINOR_MAX: Record<WeaponAttrKey, number> = {
+  dttooc: 10, dta: 6, dth: 10, chc: 9.5, chd: 10, hsd: 10,
+  magSize: 12.5, handling: 14, range: 24, rof: 5, reloadSpeed: 15, armorOnKill: 10,
+};
+
+export const WEAPON_CORE1_MAX = 15;
+
+export const WEAPON_CORE2_BY_TYPE: Record<WeaponType, { type: WeaponAttrKey; max: number } | null> = {
+  ar: { type: "dth", max: 21 },
+  smg: { type: "chc", max: 21 },
+  lmg: { type: "dttooc", max: 12 },
+  rifle: { type: "chd", max: 34 },
+  mmr: { type: "hsd", max: 111 },
+  shotgun: { type: "dta", max: 12 },
+  pistol: null,
+};
+
+export function weaponAttrMax(baseMax: number, isPrototype: boolean): number {
+  return isPrototype ? baseMax * 1.5 : baseMax;
+}
+
+export function godRollAttributes(type: WeaponType, isPrototype: boolean): WeaponAttributes {
+  const core2 = WEAPON_CORE2_BY_TYPE[type];
+  return {
+    core1: weaponAttrMax(WEAPON_CORE1_MAX, isPrototype),
+    core2Type: core2?.type ?? "dth",
+    core2Val: core2 ? weaponAttrMax(core2.max, isPrototype) : weaponAttrMax(WEAPON_MINOR_MAX.dttooc, isPrototype),
+    minorType: "dttooc",
+    minorVal: weaponAttrMax(WEAPON_MINOR_MAX.dttooc, isPrototype),
+  };
+}
+
+export function normalizeWeapon(
+  w: Partial<Weapon> & Pick<Weapon, "id" | "name" | "type">,
+): Weapon {
+  const type = w.type;
+  const attrs = (w.attributes ?? {}) as Partial<WeaponAttributes>;
+  const isPrototype = w.isPrototype ?? false;
+  const god = godRollAttributes(type, isPrototype);
+  return {
+    id: w.id,
+    name: w.name,
+    type,
+    rarity: w.rarity ?? "highend",
+    baseDamage: w.baseDamage ?? 0,
+    rpm: w.rpm ?? 0,
+    magSize: w.magSize ?? 0,
+    talent: w.talent ?? "",
+    modSlots: w.modSlots ?? ["optic", "muzzle", "underbarrel", "magazine"],
+    note: w.note,
+    knowHow: isPrototype ? 30 : w.knowHow ?? 30,
+    isPrototype,
+    attributes: {
+      core1: attrs.core1 ?? god.core1,
+      core2Type: attrs.core2Type ?? god.core2Type,
+      core2Val: attrs.core2Val ?? god.core2Val,
+      minorType: attrs.minorType ?? god.minorType,
+      minorVal: attrs.minorVal ?? god.minorVal,
+    },
+  };
 }
 
 export type GearSlot = "mask" | "chest" | "holster" | "backpack" | "gloves" | "kneepads";
@@ -52,22 +143,22 @@ export interface Build {
 export const DB_VERSION = "weapons_v1 · gear_v1 · mods_v1";
 
 export const sampleWeapons: Weapon[] = [
-  { id: "w1", name: "Eagle Bearer", type: "ar", rarity: "exotic", baseDamage: 32480, rpm: 760, magSize: 30, talent: "Eagle Bearer (Exotic)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"], note: "Chest+Backpack-Bonus aktiv" },
-  { id: "w2", name: "Famas 2010 (Perfectly Vindictive)", type: "ar", rarity: "named", baseDamage: 27960, rpm: 900, magSize: 30, talent: "Perfectly Vindictive", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w3", name: "Police M4", type: "ar", rarity: "highend", baseDamage: 26100, rpm: 760, magSize: 30, talent: "Strained", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w4", name: "Dark Winter", type: "smg", rarity: "exotic", baseDamage: 24380, rpm: 725, magSize: 32, talent: "Vindictive (Exotic)", modSlots: ["optic", "muzzle", "magazine"] },
-  { id: "w5", name: "Chatterbox", type: "smg", rarity: "exotic", baseDamage: 19420, rpm: 800, magSize: 32, talent: "Chatterbox (In sync)", modSlots: ["optic", "muzzle", "magazine"], note: "Magazin-Nachladung bei Kill" },
-  { id: "w6", name: "St Elmo's Engine", type: "ar", rarity: "exotic", baseDamage: 29150, rpm: 760, magSize: 60, talent: "Feedback Loop (Exotic)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w7", name: "Classic M1A", type: "rifle", rarity: "highend", baseDamage: 68440, rpm: 260, magSize: 20, talent: "Boomerang", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w8", name: "The White Death", type: "mmr", rarity: "named", baseDamage: 98720, rpm: 55, magSize: 5, talent: "Headhunter (Perfect)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w9", name: "Nemesis", type: "mmr", rarity: "exotic", baseDamage: 88560, rpm: 55, magSize: 5, talent: "Nemesis (Exotic)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w10", name: "Sasg-12", type: "shotgun", rarity: "highend", baseDamage: 8820, rpm: 260, magSize: 8, talent: "Percussive Maintenance", modSlots: ["optic", "muzzle", "magazine"] },
-  { id: "w11", name: "Bullet King", type: "lmg", rarity: "named", baseDamage: 24950, rpm: 550, magSize: 100, talent: "Bullet King (Perfect)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"], note: "Kein Nachladen nötig" },
-  { id: "w12", name: "M870", type: "shotgun", rarity: "highend", baseDamage: 11270, rpm: 70, magSize: 5, talent: "Intimidate", modSlots: ["optic", "muzzle", "underbarrel"] },
-  { id: "w13", name: "P416 Gutter", type: "ar", rarity: "highend", baseDamage: 25540, rpm: 800, magSize: 30, talent: "Fast Hands", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w14", name: "Lady Death", type: "smg", rarity: "exotic", baseDamage: 19880, rpm: 900, magSize: 20, talent: "Vital Point Targeting", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w15", name: "M700 Carbon", type: "mmr", rarity: "highend", baseDamage: 74300, rpm: 45, magSize: 5, talent: "Boomerang", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
-  { id: "w16", name: "Tactical AUG A3", type: "smg", rarity: "highend", baseDamage: 17890, rpm: 750, magSize: 32, talent: "Preservation", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] },
+  { id: "w1", name: "Eagle Bearer", type: "ar", rarity: "exotic", baseDamage: 32480, rpm: 760, magSize: 30, talent: "Eagle Bearer (Exotic)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"], note: "Chest+Backpack-Bonus aktiv" , knowHow: 30, isPrototype: false, attributes: godRollAttributes("ar", false) },
+  { id: "w2", name: "Famas 2010 (Perfectly Vindictive)", type: "ar", rarity: "named", baseDamage: 27960, rpm: 900, magSize: 30, talent: "Perfectly Vindictive", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("ar", false) },
+  { id: "w3", name: "Police M4", type: "ar", rarity: "highend", baseDamage: 26100, rpm: 760, magSize: 30, talent: "Strained", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("ar", false) },
+  { id: "w4", name: "Dark Winter", type: "smg", rarity: "exotic", baseDamage: 24380, rpm: 725, magSize: 32, talent: "Vindictive (Exotic)", modSlots: ["optic", "muzzle", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("smg", false) },
+  { id: "w5", name: "Chatterbox", type: "smg", rarity: "exotic", baseDamage: 19420, rpm: 800, magSize: 32, talent: "Chatterbox (In sync)", modSlots: ["optic", "muzzle", "magazine"], note: "Magazin-Nachladung bei Kill" , knowHow: 30, isPrototype: false, attributes: godRollAttributes("smg", false) },
+  { id: "w6", name: "St Elmo's Engine", type: "ar", rarity: "exotic", baseDamage: 29150, rpm: 760, magSize: 60, talent: "Feedback Loop (Exotic)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("ar", false) },
+  { id: "w7", name: "Classic M1A", type: "rifle", rarity: "highend", baseDamage: 68440, rpm: 260, magSize: 20, talent: "Boomerang", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("rifle", false) },
+  { id: "w8", name: "The White Death", type: "mmr", rarity: "named", baseDamage: 98720, rpm: 55, magSize: 5, talent: "Headhunter (Perfect)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("mmr", false) },
+  { id: "w9", name: "Nemesis", type: "mmr", rarity: "exotic", baseDamage: 88560, rpm: 55, magSize: 5, talent: "Nemesis (Exotic)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("mmr", false) },
+  { id: "w10", name: "Sasg-12", type: "shotgun", rarity: "highend", baseDamage: 8820, rpm: 260, magSize: 8, talent: "Percussive Maintenance", modSlots: ["optic", "muzzle", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("shotgun", false) },
+  { id: "w11", name: "Bullet King", type: "lmg", rarity: "named", baseDamage: 24950, rpm: 550, magSize: 100, talent: "Bullet King (Perfect)", modSlots: ["optic", "muzzle", "underbarrel", "magazine"], note: "Kein Nachladen nötig" , knowHow: 30, isPrototype: false, attributes: godRollAttributes("lmg", false) },
+  { id: "w12", name: "M870", type: "shotgun", rarity: "highend", baseDamage: 11270, rpm: 70, magSize: 5, talent: "Intimidate", modSlots: ["optic", "muzzle", "underbarrel"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("shotgun", false) },
+  { id: "w13", name: "P416 Gutter", type: "ar", rarity: "highend", baseDamage: 25540, rpm: 800, magSize: 30, talent: "Fast Hands", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("ar", false) },
+  { id: "w14", name: "Lady Death", type: "smg", rarity: "exotic", baseDamage: 19880, rpm: 900, magSize: 20, talent: "Vital Point Targeting", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("smg", false) },
+  { id: "w15", name: "M700 Carbon", type: "mmr", rarity: "highend", baseDamage: 74300, rpm: 45, magSize: 5, talent: "Boomerang", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("mmr", false) },
+  { id: "w16", name: "Tactical AUG A3", type: "smg", rarity: "highend", baseDamage: 17890, rpm: 750, magSize: 32, talent: "Preservation", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("smg", false) },
 ];
 
 export const sampleGear: GearPiece[] = [

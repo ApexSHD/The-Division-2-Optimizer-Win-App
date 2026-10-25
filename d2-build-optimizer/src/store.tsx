@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Weapon, GearPiece, Mod, BrandSet, Build, GearSlot } from "./data/sampleData";
-import { sampleWeapons, sampleGear, sampleMods, sampleBrandSets, sampleGearSets, sampleBuilds } from "./data/sampleData";
+import { sampleWeapons, sampleGear, sampleMods, sampleBrandSets, sampleGearSets, sampleBuilds, normalizeWeapon } from "./data/sampleData";
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
@@ -61,7 +61,11 @@ function sanitize(raw: unknown): UserData {
     theme: r.theme === "light" || r.theme === "system" ? r.theme : "dark",
     lang: r.lang === "en" ? "en" : "de",
     agent: r.agent ?? fallback.agent,
-    weapons: Array.isArray(r.weapons) ? r.weapons : [],
+    weapons: Array.isArray(r.weapons)
+      ? (r.weapons as unknown[]).map((w) =>
+          normalizeWeapon(w as Parameters<typeof normalizeWeapon>[0]),
+        )
+      : [],
     gear: Array.isArray(r.gear) ? r.gear : [],
     builds: Array.isArray(r.builds) ? r.builds : [],
   };
