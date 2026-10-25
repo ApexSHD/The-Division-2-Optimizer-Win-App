@@ -1,7 +1,7 @@
 import type { Weapon } from "./sampleData";
 import { normalizeWeapon } from "./sampleData";
 import { WEAPON_ATTR_LABELS } from "./sampleData";
-import type { WeaponType, Rarity } from "./sampleData";
+import type { WeaponType, Rarity, WeaponAttrKey } from "./sampleData";
 
 const CSV_SEPARATOR = ";";
 
@@ -14,8 +14,11 @@ const HEADERS = [
   "Attribut 2",
   "Attribut 3",
   "Talent",
-  "DPS",
+  "Basis-DPS",
   "Schaden/Magazin",
+  "Grundschaden",
+  "Feuerrate",
+  "Magazingröße",
   "Know-How",
 ];
 
@@ -67,6 +70,9 @@ export function weaponsToCsv(weapons: Weapon[]): string {
         w.talent,
         formatNumberDe(Math.round(dps)),
         formatNumberDe(Math.round(dmgMag)),
+        String(w.baseDamage),
+        String(w.rpm),
+        String(w.magSize),
         String(w.knowHow),
       ]
         .map(csvEscape)
@@ -112,6 +118,24 @@ function parseGermanNumber(raw: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+function parseAttrValue(cell: string): number {
+  const match = cell.match(/\+\s*([\d.,]+)\s*%/);
+  return match ? parseGermanNumber(match[1]) : 0;
+}
+
+function parseAttrCell(cell: string): { type: WeaponAttrKey; value: number } | null {
+  const trimmed = cell.trim();
+  if (!trimmed) return null;
+  const value = parseAttrValue(trimmed);
+  const label = trimmed.replace(/\+\s*[\d.,]+\s*%/, "").trim();
+  for (const [key, cfg] of Object.entries(WEAPON_ATTR_LABELS) as [WeaponAttrKey, string][]) {
+    if (label.toLowerCase().startsWith(cfg.toLowerCase().slice(0, 8))) {
+      return { type: key, value };
+    }
+  }
+  return null;
+}
+
 function parseTypeLabel(label: string): WeaponType {
   const l = label.trim().toLowerCase();
   if (l.startsWith("sturm")) return "ar";
@@ -150,6 +174,12 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
   const protoIdx = col("prototyp");
   const talentIdx = col("talent");
   const khIdx = col("know-how");
+  const a1Idx = col("attribut 1");
+  const a2Idx = col("attribut 2");
+  const a3Idx = col("attribut 3");
+  const baseDmgIdx = col("grundschaden");
+  const rpmIdx = col("feuerrate");
+  const magIdx = col("magazingr");
 
   const weapons: Weapon[] = [];
   let skippedRows = 0;
@@ -166,6 +196,17 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
       rarity !== "exotic" && (protoIdx >= 0 ? (cells[protoIdx] ?? "").trim().toLowerCase().startsWith("j") : false);
     const knowHow = khIdx >= 0 ? Math.max(0, Math.min(30, parseGermanNumber(cells[khIdx] ?? "30"))) : 30;
 
+    const a1Cell = a1Idx >= 0 ? (cells[a1Idx] ?? "").trim() : "";
+    const core1Parsed = a1Cell ? parseAttrValue(a1Cell) : undefined;
+    const a2 = a2Idx >= 0 ? parseAttrCell(cells[a2Idx] ?? "") : null;
+    const a3 = a3Idx >= 0 ? parseAttrCell(cells[a3Idx] ?? "") : null;
+
+    const core1 = core1Parsed !== undefined ? core1Parsed : undefined;
+    const core2Type = a2 ? a2.type : undefined;
+    const core2Val = a2 ? a2.value : undefined;
+    const minorType = a3 ? a3.type : undefined;
+    const minorVal = a3 ? a3.value : undefined;
+
     weapons.push(
       normalizeWeapon({
         id: makeId(),
@@ -175,6 +216,19 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
         talent: talentIdx >= 0 ? (cells[talentIdx] ?? "").trim() : "",
         knowHow: isPrototype ? 30 : knowHow,
         isPrototype,
+        baseDamage: baseDmgIdx >= 0 ? parseGermanNumber(cells[baseDmgIdx] ?? "0") : undefined,
+        rpm: rpmIdx >= 0 ? parseGermanNumber(cells[rpmIdx] ?? "0") : undefined,
+        magSize: magIdx >= 0 ? parseGermanNumber(cells[magIdx] ?? "0") : undefined,
+        attributes:
+          core1 !== undefined || core2Type !== undefined || minorType !== undefined
+            ? {
+                core1: core1 ?? 0,
+                core2Type: (core2Type ?? "dth") as Weapon["attributes"]["core2Type"],
+                core2Val: core2Val ?? 0,
+                minorType: (minorType ?? "dttooc") as Weapon["attributes"]["minorType"],
+                minorVal: minorVal ?? 0,
+              }
+            : undefined,
       }),
     );
   }

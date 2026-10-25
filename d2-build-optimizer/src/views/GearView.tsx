@@ -82,7 +82,7 @@ export function GearView() {
   function onDeleteRow(g: GearPiece) {
     if (!confirm(`${g.brand} ${t.common.delete}?`)) return;
     store.removeGear(g.id);
-    store.setStatus(`${g.brand} gel\u00f6scht`);
+    store.setStatus(`${g.brand} gelöscht`);
   }
 
   function applyPreset(p: GearPreset) {
@@ -126,6 +126,19 @@ export function GearView() {
       store.setStatus(t.gear.brand + " fehlt");
       return;
     }
+    if (editing.brandType === "gearset" && editing.attributes.length < 1) {
+      store.setStatus("Gear-Set: 1 Nebenattribut erforderlich");
+      return;
+    }
+    if (editing.brandType === "brand" && editing.attributes.length < 2) {
+      store.setStatus("Brand-Set: 2 unterschiedliche Nebenattribute erforderlich");
+      return;
+    }
+    const types = editing.attributes.map((a) => a.type);
+    if (new Set(types).size !== types.length) {
+      store.setStatus("Nebenattribute müssen unterschiedlich sein");
+      return;
+    }
     if (isNew) store.addGear(editing);
     else store.updateGear(editing);
     setPanelOpen(false);
@@ -137,7 +150,7 @@ export function GearView() {
     if (!confirm(`${editing.brand} ${t.common.delete}?`)) return;
     store.removeGear(editing.id);
     setPanelOpen(false);
-    store.setStatus(`${editing.brand} gel\u00f6scht`);
+    store.setStatus(`${editing.brand} gelöscht`);
   }
 
   async function onExportCsv() {
@@ -149,7 +162,7 @@ export function GearView() {
     const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
     const suggestedName = `gear-inventar-${new Date().toISOString().slice(0, 10)}.csv`;
     if (isTauri) {
-      const path = prompt(`Dateipfad f\u00fcr den CSV-Export eingeben`, `${store.storagePath ?? "."}${store.storagePath ? "/" : ""}${suggestedName}`);
+      const path = prompt(`Dateipfad für den CSV-Export eingeben`, `${store.storagePath ?? "."}${store.storagePath ? "/" : ""}${suggestedName}`);
       if (!path) return;
       try {
         const { invoke } = await import("@tauri-apps/api/core");
@@ -180,11 +193,11 @@ export function GearView() {
         `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       );
       if (gear.length === 0) {
-        store.setStatus("CSV-Import: keine g\u00fcltigen Gear-Teile gefunden");
+        store.setStatus("CSV-Import: keine gültigen Gear-Teile gefunden");
         return;
       }
       for (const g of gear) store.addGear(g);
-      store.setStatus(`${gear.length} Gear-Teil(e) importiert${skippedRows ? `, ${skippedRows} Zeile(n) \u00fcbersprungen` : ""}`);
+      store.setStatus(`${gear.length} Gear-Teil(e) importiert${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}`);
     } catch (err) {
       store.setStatus(`CSV-Import fehlgeschlagen: ${err}`);
     }
@@ -234,13 +247,13 @@ export function GearView() {
     {
       key: "attributes",
       label: "2. / 3. Attribut",
-      render: (g) => attrText(g) || "\u2013",
+      render: (g) => attrText(g) || "–",
       sortValue: (g) => attrText(g),
     },
     {
       key: "talent",
       label: "Talent / Perk",
-      render: (g) => g.talent ?? "\u2013",
+      render: (g) => g.talent ?? "–",
       sortValue: (g) => g.talent ?? "",
     },
   ];
@@ -260,8 +273,8 @@ export function GearView() {
         }
         onRowDoubleClick={openEdit}
         rowActions={[
-          { label: "\u270e", title: "Gear-Teil bearbeiten", onAction: (g) => openEdit(g) },
-          { label: "\u2715", title: "Gear-Teil l\u00f6schen", className: "btn-danger", onAction: (g) => onDeleteRow(g) },
+          { label: "✎", title: "Gear-Teil bearbeiten", onAction: (g) => openEdit(g) },
+          { label: "✕", title: "Gear-Teil löschen", className: "btn-danger", onAction: (g) => onDeleteRow(g) },
         ]}
         toolbar={
           <>
@@ -367,7 +380,7 @@ export function GearView() {
                 }}
               >
                 <option value="brand">Brand-Set (High-End)</option>
-                <option value="gearset">Gear-Set (gr\u00fcn)</option>
+                <option value="gearset">Gear-Set (grün)</option>
                 <option value="named">Named</option>
                 <option value="exotic">Exotic</option>
               </select>
@@ -381,7 +394,7 @@ export function GearView() {
                     if (p) applyPreset(p);
                   }}
                 >
-                  {!isDbItem && <option value="">\u2013 Bitte ausw\u00e4hlen \u2013</option>}
+                  {!isDbItem && <option value="">– Bitte auswählen –</option>}
                   {presetsForSlot(editing.slot)
                     .filter((p) => (editing.brandType === "exotic" ? p.cls === "exotic" : p.cls === "named"))
                     .map((p) => (
@@ -399,7 +412,7 @@ export function GearView() {
                   value={editing.brand}
                   onChange={(e) => setEditing({ ...editing, brand: e.target.value })}
                 >
-                  <option value="">\u2013 Bitte ausw\u00e4hlen \u2013</option>
+                  <option value="">– Bitte auswählen –</option>
                   {brands.map((b) => (
                     <option key={b.brand} value={b.brand}>{b.brand}</option>
                   ))}
@@ -412,7 +425,7 @@ export function GearView() {
                   value={editing.brand}
                   onChange={(e) => setEditing({ ...editing, brand: e.target.value })}
                 >
-                  <option value="">\u2013 Bitte ausw\u00e4hlen \u2013</option>
+                  <option value="">– Bitte auswählen –</option>
                   {gearSets.map((gs) => (
                     <option key={gs.key} value={gs.name}>{gs.name}</option>
                   ))}
@@ -438,7 +451,7 @@ export function GearView() {
             </label>
 
             <Field label="1. Attribut (Kern)">
-              {isDbItem ? (
+              {isDbItem && isExotic ? (
                 <>
                   <div style={{ display: "flex", gap: 6 }}>
                     <input value={GEAR_CORE_LABELS[editing.core]} readOnly style={{ flex: 1 }} />
@@ -451,7 +464,7 @@ export function GearView() {
                       onChange={(e) => setEditing({ ...editing, coreValue: Number(e.target.value) })}
                     />
                   </div>
-                  {isExotic && <p className="settings-hint">Exotische Items: Attributstyp fix, Wert editierbar (mit Max-Wert vorbelegt).</p>}
+                  <p className="settings-hint">Exotische Items: Attributstyp fix, Wert editierbar (mit Max-Wert vorbelegt).</p>
                 </>
               ) : (
                 <div style={{ display: "flex", gap: 6 }}>
@@ -476,14 +489,23 @@ export function GearView() {
                   />
                 </div>
               )}
-              {!isDbItem && (
-                <p className="settings-hint">
-                  Max (God Roll{editing.prototype ? ", Prototyp +50 %" : ""}):{" "}
-                  {editing.core === "skill"
-                    ? `Skill-Tier ${editing.prototype ? "1,5" : "1"}`
-                    : gearCoreMax(editing.core, editing.prototype).toLocaleString("de-DE")}
-                </p>
-              )}
+              <p
+                className="settings-hint"
+                style={{
+                  color:
+                    editing.core !== "skill" && editing.coreValue > gearCoreMax(editing.core, editing.prototype)
+                      ? "#e5544b"
+                      : undefined,
+                }}
+              >
+                {editing.core !== "skill" && editing.coreValue > gearCoreMax(editing.core, editing.prototype)
+                  ? "⚠ Wert über Max: "
+                  : ""}
+                Max (God Roll{editing.prototype ? ", Prototyp +50 %" : ""}):{" "}
+                {editing.core === "skill"
+                  ? `Skill-Tier ${editing.prototype ? "1,5" : "1"}`
+                  : gearCoreMax(editing.core, editing.prototype).toLocaleString("de-DE")}
+              </p>
             </Field>
 
             {Array.from({ length: editing.brandType === "gearset" ? 1 : 2 }).map((_, idx) => {
@@ -517,7 +539,7 @@ export function GearView() {
                       />
                     </div>
                   ) : lockedType && !attr ? (
-                    <input value={`\u2013 nicht m\u00f6glich (fix) \u2013`} readOnly />
+                    <input value={`– nicht möglich (fix) –`} readOnly />
                   ) : (
                     <div style={{ display: "flex", gap: 6 }}>
                       <select
@@ -535,7 +557,7 @@ export function GearView() {
                           setEditing({ ...editing, attributes: attrs.filter(Boolean) });
                         }}
                       >
-                        <option value="">\u2013 nicht belegt \u2013</option>
+                        <option value="">– nicht belegt –</option>
                         {(Object.keys(GEAR_ATTR_TYPES) as GearAttrKey[])
                           .filter((k) => k === attr?.type || !usedAttrTypes.has(k))
                           .map((k) => (
@@ -581,7 +603,7 @@ export function GearView() {
                   value={editing.talent ?? ""}
                   onChange={(e) => setEditing({ ...editing, talent: e.target.value || null })}
                 >
-                  <option value="">\u2013 kein Talent \u2013</option>
+                  <option value="">– kein Talent –</option>
                   {talentOptions.map((tal) => (
                     <option key={tal.key} value={tal.label}>{tal.label}</option>
                   ))}

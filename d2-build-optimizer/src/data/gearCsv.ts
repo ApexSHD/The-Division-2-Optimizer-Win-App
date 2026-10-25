@@ -122,7 +122,7 @@ function parseRarity(label: string): GearPiece["brandType"] {
 
 function parseCore(label: string): GearCoreType {
   const l = label.trim().toLowerCase();
-  if (l.startsWith("r\u00fcstung") || l.startsWith("armor") || l.startsWith("armour")) return "armour";
+  if (l.startsWith("rüstung") || l.startsWith("armor") || l.startsWith("armour")) return "armour";
   if (l.startsWith("skill")) return "skill";
   return "wd";
 }

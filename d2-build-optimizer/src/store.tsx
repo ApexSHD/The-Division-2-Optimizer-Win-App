@@ -34,16 +34,16 @@ export const SHD_WATCH_ATTRIBUTES = {
     { key: "chd", label: "Kritischer Trefferschaden (CHD)", base: 20, perLevel: 0.4 },
   ],
   defensive: [
-    { key: "armor", label: "Gesamte R\u00fcstung", base: 10, perLevel: 0.2 },
+    { key: "armor", label: "Gesamte Rüstung", base: 10, perLevel: 0.2 },
     { key: "health", label: "Lebensenergie", base: 10, perLevel: 0.2 },
     { key: "hazard", label: "Gefahrenschutz (Hazard Protection)", base: 10, perLevel: 0.2 },
     { key: "explosive", label: "Explosionswiderstand", base: 10, perLevel: 0.2 },
   ],
   handling: [
-    { key: "accuracy", label: "Pr\u00e4zision", base: 10, perLevel: 0.2 },
-    { key: "stability", label: "Stabilit\u00e4t", base: 10, perLevel: 0.2 },
+    { key: "accuracy", label: "Präzision", base: 10, perLevel: 0.2 },
+    { key: "stability", label: "Stabilität", base: 10, perLevel: 0.2 },
     { key: "reloadSpeed", label: "Nachladetempo", base: 10, perLevel: 0.2 },
-    { key: "ammoCapacity", label: "Munitionskapazit\u00e4t", base: 20, perLevel: 0.4 },
+    { key: "ammoCapacity", label: "Munitionskapazität", base: 20, perLevel: 0.4 },
   ],
   utility: [
     { key: "skillDamage", label: "Fertigkeitenschaden", base: 10, perLevel: 0.2 },
