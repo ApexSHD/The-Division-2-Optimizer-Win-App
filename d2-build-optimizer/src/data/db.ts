@@ -3,6 +3,7 @@ import weaponsJson from "../db/weapons.json";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 import talentsJson from "../db/talent.json";
+import talentsDisplayJson from "../db/talents-display.json";
 
 export type WeaponTypeKey = "ar" | "smg" | "lmg" | "rifle" | "mmr" | "shotgun" | "pistol";
 
@@ -13,6 +14,58 @@ export interface TalentEntry {
   weaponTypes: WeaponTypeKey[];
   group: string;
   description: string;
+}
+
+export interface DisplayTalent {
+  name: string;
+  description: string;
+  group: string;
+}
+
+export const TALENT_DISPLAY_TYPE_MAP: Record<WeaponTypeKey, string> = {
+  ar: "Sturmgewehre",
+  smg: "Maschinenpistolen",
+  lmg: "Leichte Maschinengewehre",
+  rifle: "Gewehre",
+  mmr: "Pr\u00e4zisionsgewehre",
+  shotgun: "Schrotflinten",
+  pistol: "Pistolen",
+};
+
+export const NAMED_TALENT_CARRIERS: Record<string, string> = {
+  "Perfekter Optimist": "Shield Splinterer & Diceros Special",
+  "Perfekt strapaziert": "Dark Winter & Cold Relations",
+  "Perfekt synchronisiert": "Test Subject & Harmony",
+  "Perfekter Killer": "The Apartment & Caretaker",
+  "Perfekte Flachlage": "Kingbreaker & Dare",
+  "Perfekter Sadist": "Carnage & Survivalist D50",
+  "Perfekt entz\u00fcndet": "Pyromaniac",
+  "Perfekt blind": "The Darkness",
+  "Perfekter Druckpunkt": "Goalie & Rusty",
+  "Perfekt entschlossen": "Prophet & Relic",
+  "Perfekter Sch\u00fctze": "The Archivist & Ekim's Long Stick",
+  "Perfektes Erstblut": "Pinprick",
+  "Perfekt von hinten": "Whisper & Brutus",
+  "Perfekte flinke H\u00e4nde": "Good Times",
+  "Perfekte Bewahrung": "Emeline's Guard & P320 XCompact",
+  "Perfekt stabil": "Tabula Rasa",
+};
+
+export function talentsAllowedForWeapon(
+  weaponName: string,
+  isNamed: boolean,
+): (t: string) => boolean {
+  const carriers = Object.entries(NAMED_TALENT_CARRIERS)
+    .filter(([, c]) => c.split("&").map((x) => x.trim()).includes(weaponName))
+    .map(([t]) => t);
+  return (talentName: string) => {
+    if (!talentName.startsWith("Perfekt")) return true;
+    return isNamed && carriers.includes(talentName);
+  };
+}
+
+export function carrierForTalent(talentName: string): string | null {
+  return NAMED_TALENT_CARRIERS[talentName] ?? null;
 }
 
 export const TALENT_TYPE_MAP: Record<string, WeaponTypeKey> = {
@@ -163,6 +216,8 @@ export interface GearPreset {
 export interface Db {
   weapons: WeaponPreset[];
   talents: TalentEntry[];
+  displayTalents: DisplayTalent[];
+  talentDisplayByType: Record<string, DisplayTalent[]>;
   gear: GearPreset[];
   brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
   gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
@@ -250,6 +305,11 @@ function load(): Db {
     })),
   );
 
+  const displayFile = talentsDisplayJson as unknown as Record<string, DisplayTalent[]>;
+  const displayTalents: DisplayTalent[] = [
+    ...(displayFile["Allgemeine Waffen"] ?? []),
+  ];
+
   const talents: TalentEntry[] = (talentsFile.talents ?? []).map((tal) => ({
     key: tal.key,
     name: tal.name,
@@ -262,6 +322,10 @@ function load(): Db {
   return {
     weapons,
     talents,
+    displayTalents,
+    talentDisplayByType: Object.fromEntries(
+      Object.entries(displayFile).filter(([k]) => k !== "Allgemeine Waffen"),
+    ) as Record<string, DisplayTalent[]>,
     gear,
     brandSets,
     gearSets,
