@@ -56,15 +56,18 @@ export const SHD_WATCH_ATTRIBUTES = {
   ],
 } as const;
 
-export function shdBonus(level: number, base: number, perLevel: number): number {
+export const SHD_WATCH_MAX_STAGES = 50;
+
+export function shdBonus(level: number, perStage: number): number {
   const lvl = Math.max(0, Math.min(1000, level));
-  return Number((base + lvl * perLevel).toFixed(2));
+  const stages = Math.min(lvl, SHD_WATCH_MAX_STAGES);
+  return Number((stages * perStage).toFixed(2));
 }
 
 export function shdBonusFor(level: number, key: string): number {
   for (const list of Object.values(SHD_WATCH_ATTRIBUTES)) {
     const attr = list.find((a) => a.key === key);
-    if (attr) return shdBonus(level, attr.base, attr.perLevel);
+    if (attr) return shdBonus(level, attr.perLevel);
   }
   return 0;
 }
