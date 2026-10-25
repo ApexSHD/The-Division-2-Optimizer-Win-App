@@ -5,7 +5,7 @@ import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalize
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
-export type ViewId = "global" | "weapons" | "gear" | "optimizer" | "compare" | "admin" | "settings";
+export type ViewId = "global" | "weapons" | "gear" | "optimizer" | "wizard" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
 
 export interface AgentValues {
@@ -16,6 +16,7 @@ export interface AgentValues {
 }
 
 export interface OptimizationSettings {
+  role: import("./data/roles").RoleId | "";
   targetChc: number;
   considerWeaponTalents: boolean;
   considerGearTalents: boolean;
@@ -73,6 +74,7 @@ export function shdBonusFor(level: number, key: string): number {
 }
 
 export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
+  role: "",
   targetChc: 50,
   considerWeaponTalents: true,
   considerGearTalents: true,
