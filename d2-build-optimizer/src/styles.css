@@ -127,6 +127,17 @@ input[type="checkbox"] {
   color: var(--accent);
 }
 
+.field-warn {
+  margin: 6px 0 0;
+  padding: 6px 10px;
+  border: 1px solid #e5544b;
+  border-radius: 6px;
+  background: rgba(229, 84, 75, 0.12);
+  color: #e5544b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .settings-hint {
   margin: 4px 0 0;
   font-size: 11px;

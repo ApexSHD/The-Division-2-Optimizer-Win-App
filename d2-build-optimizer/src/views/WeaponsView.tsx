@@ -376,6 +376,28 @@ export function WeaponsView() {
       >
         {editing && (
           <>
+            {(() => {
+              const warnings: string[] = [];
+              const max1 = weaponAttrMax(WEAPON_CORE1_MAX, editing.isPrototype);
+              if (editing.attributes.core1 > max1) warnings.push(`Kern 1: ${editing.attributes.core1} % > Max ${max1} %`);
+              const core2 = WEAPON_CORE2_BY_TYPE[editing.type];
+              const max2 = core2
+                ? weaponAttrMax(core2.max, editing.isPrototype)
+                : weaponAttrMax(WEAPON_MINOR_MAX[editing.attributes.core2Type], editing.isPrototype);
+              if (editing.attributes.core2Val > max2) warnings.push(`Kern 2: ${editing.attributes.core2Val} % > Max ${max2} %`);
+              const max3 = weaponAttrMax(WEAPON_MINOR_MAX[editing.attributes.minorType], editing.isPrototype);
+              if (editing.attributes.minorVal > max3) warnings.push(`Attribut 3: ${editing.attributes.minorVal} % > Max ${max3} %`);
+              if (editing.knowHow > 30) warnings.push(`Know-How: ${editing.knowHow} > Max 30`);
+              if (warnings.length === 0) return null;
+              return (
+                <div className="field-warn">
+                  ⚠ Wert(e) über dem Maximalwert:
+                  <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+                    {warnings.map((w) => <li key={w}>{w}</li>)}
+                  </ul>
+                </div>
+              );
+            })()}
             {!presets.some((p) => p.name === editing.name && p.typeKey === editing.type) && (
               <Field label={t.weapons.name}>
                 <input
