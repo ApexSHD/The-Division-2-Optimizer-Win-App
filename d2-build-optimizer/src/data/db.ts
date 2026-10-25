@@ -1,4 +1,8 @@
 import type { GearSlot } from "./sampleData";
+import weaponsJson from "../db/weapons.json";
+import gearJson from "../db/gear.json";
+import modsJson from "../db/mod.json";
+import talentsJson from "../db/talent.json";
 
 export type WeaponTypeKey = "ar" | "smg" | "lmg" | "rifle" | "mmr" | "shotgun" | "pistol";
 
@@ -52,7 +56,7 @@ export interface DbGearEntry {
   cls: "named" | "exotic";
   proto?: boolean;
   core: string;
-  fixed: [string, number][];
+  fixed: (string | number)[][];
   free: number;
   mods: number;
   perk?: string;
@@ -129,7 +133,7 @@ interface TalentsFile {
 interface ModsFile {
   version: string;
   slots: Record<string, DbSlotMod[]>;
-  exotic_mods: Record<string, Record<string, { name: string; bonus: { type: string; val: number } }>>;
+  exotic_mods: Record<string, Record<string, { name: string; bonus: { type: string; val: number } | null }>>;
 }
 
 export interface WeaponPreset {
@@ -179,17 +183,11 @@ export function coreLabel(core: string): string {
 
 let dbPromise: Promise<Db> | null = null;
 
-async function load(): Promise<Db> {
-  const [weaponsRes, gearRes, modsRes, talentsRes] = await Promise.all([
-    fetch("db/weapons.json"),
-    fetch("db/gear.json"),
-    fetch("db/mod.json"),
-    fetch("db/talent.json"),
-  ]);
-  const weaponsFile: WeaponsFile = await weaponsRes.json();
-  const gearFile: GearFile = await gearRes.json();
-  const modsFile: ModsFile = await modsRes.json();
-  const talentsFile: TalentsFile = await talentsRes.json();
+function load(): Db {
+  const weaponsFile = weaponsJson as unknown as WeaponsFile;
+  const gearFile = gearJson as unknown as GearFile;
+  const modsFile = modsJson as unknown as ModsFile;
+  const talentsFile = talentsJson as unknown as TalentsFile;
 
   const weapons: WeaponPreset[] = weaponsFile.weapons
     .filter((w) => w.stats && typeof w.stats["Level 40 Damage"] === "number")
@@ -278,6 +276,6 @@ async function load(): Promise<Db> {
 }
 
 export function getDb(): Promise<Db> {
-  if (!dbPromise) dbPromise = load();
+  if (!dbPromise) dbPromise = Promise.resolve(load());
   return dbPromise;
 }
