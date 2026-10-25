@@ -1,6 +1,7 @@
 import { useStore, shdBonusFor, SHD_WATCH_ATTRIBUTES } from "../store";
 import { I18nContext } from "../i18n";
 import { useContext } from "react";
+import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 
 function WatchBonusTable({ shdLevel }: { shdLevel: number }) {
   const categories: { key: keyof typeof SHD_WATCH_ATTRIBUTES; label: string }[] = [
@@ -19,8 +20,11 @@ function WatchBonusTable({ shdLevel }: { shdLevel: number }) {
               {SHD_WATCH_ATTRIBUTES[cat.key].map((attr) => (
                 <tr key={attr.key}>
                   <td style={{ padding: "2px 8px 2px 0" }}>{attr.label}</td>
-                  <td style={{ padding: "2px 0", textAlign: "right", whiteSpace: "nowrap" }}>
+                  <td style={{ padding: "2px 0", textAlign: "right", whiteSpace: "nowrap", color: "var(--text-dim, #aaa)" }}>
                     +{shdBonusFor(shdLevel, attr.key).toLocaleString("de-DE")} %
+                  </td>
+                  <td style={{ padding: "2px 0 2px 10px", textAlign: "right", whiteSpace: "nowrap", color: "var(--text-dim, #aaa)", width: 1 }}>
+                    (+{attr.perLevel.toLocaleString("de-DE")} % pro Stufe)
                   </td>
                 </tr>
               ))}
@@ -53,7 +57,7 @@ export function GlobalView() {
             style={{ width: 100 }}
           />
           <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>
-            Level ≥ 1.000 = maximale Watch-Boni (Kappung bei 1.000)
+            Watch-Boni steigen bis Stufe 50 pro Attribut, danach bei weiterem Level keine Zusatzboni
           </span>
         </div>
       </div>
@@ -126,6 +130,12 @@ export function GlobalView() {
           onChange={(e) => store.setAgent({ ...a, wd: Number(e.target.value) })}
         />
       </div>
+
+      <h3 style={{ margin: "22px 0 8px" }}>Einstellungen für Optimierung</h3>
+      <OptimizationSettingsPanel
+        optimization={store.optimization}
+        onChange={store.setOptimization}
+      />
     </div>
   );
 }
