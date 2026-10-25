@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { StoreProvider, useStore } from "./store";
+import { StoreProvider, useStore, shdBonusFor } from "./store";
 import { I18nContext, I18nProvider } from "./i18n";
 import type { Translation } from "./i18n/de";
 import { GlobalView } from "./views/GlobalView";
@@ -165,16 +165,16 @@ function ValuesSidebar() {
     <aside className="sidebar" aria-label={t.sidebar.title}>
       <h3>{t.sidebar.title}</h3>
       <div className="stat">
-        <div className="stat-label">{t.sidebar.chc}</div>
-        <div className="stat-value accent">{store.agent.chc} %</div>
+        <div className="stat-label">{t.sidebar.chc} (SHD-Uhr)</div>
+        <div className="stat-value accent">+{shdBonusFor(store.agent.shdLevel, "chc")} %</div>
       </div>
       <div className="stat">
-        <div className="stat-label">{t.sidebar.chd}</div>
-        <div className="stat-value accent">+{store.agent.chd} %</div>
+        <div className="stat-label">{t.sidebar.chd} (SHD-Uhr)</div>
+        <div className="stat-value accent">+{shdBonusFor(store.agent.shdLevel, "chd")} %</div>
       </div>
       <div className="stat">
-        <div className="stat-label">{t.sidebar.wd}</div>
-        <div className="stat-value accent">+{store.agent.wd} %</div>
+        <div className="stat-label">{t.sidebar.wd} (SHD-Uhr)</div>
+        <div className="stat-value accent">+{shdBonusFor(store.agent.shdLevel, "wd")} %</div>
       </div>
       <div className="stat">
         <div className="stat-label">{t.sidebar.dps}</div>
