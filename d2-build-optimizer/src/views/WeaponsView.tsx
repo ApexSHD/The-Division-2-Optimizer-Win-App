@@ -139,6 +139,12 @@ export function WeaponsView() {
     store.setStatus(`${editing.name} gelöscht`);
   }
 
+  function onDeleteRow(w: Weapon) {
+    if (!confirm(`${w.name} ${t.common.delete}?`)) return;
+    store.removeWeapon(w.id);
+    store.setStatus(`${w.name} gelöscht`);
+  }
+
   async function onExportCsv() {
     if (store.weapons.length === 0) {
       store.setStatus("Keine Waffen zum Exportieren");
@@ -277,6 +283,10 @@ export function WeaponsView() {
           (!filterTalent || w.talent === filterTalent)
         }
         onRowDoubleClick={openEdit}
+        rowActions={[
+          { label: "✎", title: "Waffe bearbeiten", onAction: (w) => openEdit(w) },
+          { label: "✕", title: "Waffe löschen", className: "btn-danger", onAction: (w) => onDeleteRow(w) },
+        ]}
         toolbar={
           <>
             <select
