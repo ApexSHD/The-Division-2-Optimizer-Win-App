@@ -171,6 +171,11 @@ export interface SlotExplanation {
   calibrationHint: CalibrationHint | null;
 }
 
+export interface OptimizerWarning {
+  level: "yellow" | "red";
+  message: string;
+}
+
 export interface OptimizerResult {
   rank: number;
   weapon: Weapon;
@@ -181,6 +186,7 @@ export interface OptimizerResult {
   gearSetCount: number;
   reason: string;
   slotExplanations: SlotExplanation[];
+  warnings: OptimizerWarning[];
 }
 
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
@@ -290,59 +296,64 @@ export function optimizeBuilds(
   for (const slot of SLOTS) bySlot.set(slot, []);
   for (const g of gear) bySlot.get(g.slot)?.push(g);
 
-  if (settings.requiredChest && (bySlot.get("chest")?.length ?? 0) === 0) return [];
-  if (settings.requiredBackpack && (bySlot.get("backpack")?.length ?? 0) === 0) return [];
-
   const targetSet = settings.targetGearSet.trim().toLowerCase();
-  const results: OptimizerResult[] = [];
-  const seen = new Set<string>();
+
+  const fallbackWarnings: OptimizerWarning[] = [];
+
+  let requireChest = settings.requiredChest;
+  if (requireChest && (bySlot.get("chest")?.length ?? 0) === 0) {
+    requireChest = false;
+    fallbackWarnings.push({
+      level: "yellow",
+      message: "Keine Weste im Inventar — Pflicht-Weste wurde übergangen, bester Ersatz gewählt.",
+    });
+  }
+  let requireBackpack = settings.requiredBackpack;
+  if (requireBackpack && (bySlot.get("backpack")?.length ?? 0) === 0) {
+    requireBackpack = false;
+    fallbackWarnings.push({
+      level: "yellow",
+      message: "Kein Rucksack im Inventar — Pflicht-Rucksack wurde übergangen, bester Ersatz gewählt.",
+    });
+  }
+
+  interface PassConfig {
+    minSetPieces: number;
+    warnings: OptimizerWarning[];
+  }
+  const passes: PassConfig[] = [{ minSetPieces: 2, warnings: [] }];
+  if (targetSet) {
+    passes.push({
+      minSetPieces: 1,
+      warnings: [{
+        level: "yellow",
+        message: `Nur 1 statt 2 Teile von „${settings.targetGearSet}“ im Inventar gefunden — es wurde stattdessen ein Teil mit ähnlichen Stats ergänzt.`,
+      }],
+    });
+    passes.push({
+      minSetPieces: 0,
+      warnings: [{
+        level: "yellow",
+        message: `Set-Ziel „${settings.targetGearSet}“ nicht erfüllbar — es wurden die nächstbesten Teile aus dem Inventar gewählt.`,
+      }],
+    });
+  }
 
   const gearCombos = cartesianBySlot(bySlot);
 
-  for (const w of weapons) {
-    for (const combo of gearCombos) {
-      if (combo.length === 0) continue;
-      const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
-      if (exoticGear > 1) continue;
-      if (settings.requiredChest && !combo.some((g) => g.slot === "chest")) continue;
-      if (settings.requiredBackpack && !combo.some((g) => g.slot === "backpack")) continue;
-
-      const setPieces = combo.filter((g) => g.brandType === "gearset");
-      let gearSetCount = 0;
-      if (targetSet) {
-        const matching = piecesOfSet(setPieces, targetSet, gearSetNames);
-        if (matching < 2) continue;
-        gearSetCount = matching;
-      }
-
-      const stats = aggregateBuild(combo, shdLevel);
-      const damage = computeDamage(w, stats, profile);
-      const meetsTargetChc = damage.cappedChc >= settings.targetChc;
-
-      const key = combo.map((g) => g.id).join("|") + "::" + w.id;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      const reasonParts: string[] = [];
-      reasonParts.push(meetsTargetChc
-        ? `CHC-Ziel ${settings.targetChc} % erreicht (${damage.cappedChc} %)`
-        : `CHC ${damage.cappedChc} % unter Ziel ${settings.targetChc} %`);
-      if (targetSet && gearSetCount > 0) reasonParts.push(`${gearSetCount}× ${settings.targetGearSet}`);
-      if (exoticGear === 1) reasonParts.push("1 Exotic-Gear");
-
-      results.push({
-        rank: 0,
-        weapon: w,
-        gear: combo,
-        stats,
-        damage,
-        meetsTargetChc,
-        gearSetCount,
-        reason: reasonParts.join(" · "),
-        slotExplanations: [],
-      });
-    }
-  }
+  const results = runOptimizerPasses(
+    weapons,
+    gearCombos,
+    shdLevel,
+    settings,
+    profile,
+    gearSetNames,
+    targetSet,
+    requireChest,
+    requireBackpack,
+    passes,
+    fallbackWarnings,
+  );
 
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
@@ -361,6 +372,73 @@ export function optimizeBuilds(
     );
   });
   return top;
+}
+
+function runOptimizerPasses(
+  weapons: Weapon[],
+  gearCombos: GearPiece[][],
+  shdLevel: number,
+  settings: OptimizationSettings,
+  profile: EnemyProfile,
+  gearSetNames: Set<string>,
+  targetSet: string,
+  requireChest: boolean,
+  requireBackpack: boolean,
+  passes: { minSetPieces: number; warnings: OptimizerWarning[] }[],
+  fallbackWarnings: OptimizerWarning[],
+): OptimizerResult[] {
+  const seen = new Set<string>();
+
+  for (const pass of passes) {
+    const results: OptimizerResult[] = [];
+    for (const w of weapons) {
+      for (const combo of gearCombos) {
+        if (combo.length === 0) continue;
+        const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
+        if (exoticGear > 1) continue;
+        if (requireChest && !combo.some((g) => g.slot === "chest")) continue;
+        if (requireBackpack && !combo.some((g) => g.slot === "backpack")) continue;
+
+        const setPieces = combo.filter((g) => g.brandType === "gearset");
+        let gearSetCount = 0;
+        if (targetSet && pass.minSetPieces > 0) {
+          const matching = piecesOfSet(setPieces, targetSet, gearSetNames);
+          if (matching < pass.minSetPieces) continue;
+          gearSetCount = matching;
+        }
+
+        const stats = aggregateBuild(combo, shdLevel);
+        const damage = computeDamage(w, stats, profile);
+        const meetsTargetChc = damage.cappedChc >= settings.targetChc;
+
+        const key = combo.map((g) => g.id).join("|") + "::" + w.id;
+        if (seen.has(key)) continue;
+
+        const reasonParts: string[] = [];
+        reasonParts.push(meetsTargetChc
+          ? `CHC-Ziel ${settings.targetChc} % erreicht (${damage.cappedChc} %)`
+          : `CHC ${damage.cappedChc} % unter Ziel ${settings.targetChc} %`);
+        if (targetSet && gearSetCount > 0) reasonParts.push(`${gearSetCount}\u00d7 ${settings.targetGearSet}`);
+        if (exoticGear === 1) reasonParts.push("1 Exotic-Gear");
+
+        results.push({
+          rank: 0,
+          weapon: w,
+          gear: combo,
+          stats,
+          damage,
+          meetsTargetChc,
+          gearSetCount,
+          reason: reasonParts.join(" \u00b7 "),
+          slotExplanations: [],
+          warnings: [...fallbackWarnings, ...pass.warnings],
+        });
+        seen.add(key);
+      }
+    }
+    if (results.length > 0) return results;
+  }
+  return [];
 }
 
 function piecesOfSet(setPieces: GearPiece[], targetSet: string, knownSets: Set<string>): number {
