@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Weapon, GearPiece, Mod, BrandSet, Build, GearSlot } from "./data/sampleData";
-import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon } from "./data/sampleData";
+import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalizeGear } from "./data/sampleData";
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
@@ -144,7 +144,11 @@ function sanitize(raw: unknown): UserData {
           normalizeWeapon(w as Parameters<typeof normalizeWeapon>[0]),
         )
       : [],
-    gear: Array.isArray(r.gear) ? r.gear : [],
+    gear: Array.isArray(r.gear)
+      ? (r.gear as unknown[]).map((g) =>
+          normalizeGear(g as Parameters<typeof normalizeGear>[0]),
+        )
+      : [],
     builds: Array.isArray(r.builds) ? r.builds : [],
   };
 }
