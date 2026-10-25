@@ -116,36 +116,6 @@ export function GlobalView() {
         </select>
       </div>
 
-      <div className="field" style={{ marginTop: 12 }}>
-        <label>{t.global.chc} (%)</label>
-        <input
-          type="number"
-          min={0}
-          max={60}
-          value={a.chc}
-          onChange={(e) => store.setAgent({ ...a, chc: Number(e.target.value) })}
-        />
-      </div>
-      <div className="field" style={{ marginTop: 12 }}>
-        <label>{t.global.chd} (%)</label>
-        <input
-          type="number"
-          min={0}
-          max={200}
-          value={a.chd}
-          onChange={(e) => store.setAgent({ ...a, chd: Number(e.target.value) })}
-        />
-      </div>
-      <div className="field" style={{ marginTop: 12 }}>
-        <label>{t.global.wd} (%)</label>
-        <input
-          type="number"
-          min={0}
-          max={100}
-          value={a.wd}
-          onChange={(e) => store.setAgent({ ...a, wd: Number(e.target.value) })}
-        />
-      </div>
 
       <h3 style={{ margin: "22px 0 8px" }}>Einstellungen für Optimierung</h3>
       <OptimizationSettingsPanel

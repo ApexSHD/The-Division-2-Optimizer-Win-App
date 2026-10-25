@@ -9,9 +9,6 @@ export type ViewId = "global" | "weapons" | "gear" | "optimizer" | "compare" | "
 export type Theme = "dark" | "light" | "system";
 
 export interface AgentValues {
-  chc: number;
-  chd: number;
-  wd: number;
   shdLevel: number;
   spec: string;
   mode: "pve" | "pvp";
@@ -112,7 +109,7 @@ function defaultUserData(): UserData {
     activeProfileId: STANDARD_PROFILE.id,
     theme: "dark",
     lang: "de",
-    agent: { chc: 40, chd: 95, wd: 15, shdLevel: 1000, spec: "sharpshooter", mode: "pve", season: "y8s3" },
+    agent: { shdLevel: 1000, spec: "sharpshooter", mode: "pve", season: "y8s3" },
     optimization: DEFAULT_OPTIMIZATION,
     weapons: sampleWeapons,
     gear: sampleGear,
