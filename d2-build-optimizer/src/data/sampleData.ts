@@ -123,6 +123,7 @@ export interface GearPiece {
   brand: string;
   brandType: "brand" | "gearset" | "named" | "exotic";
   core: GearCoreType;
+  coreValue: number;
   attributes: GearAttr[];
   talent: string | null;
   prototype: boolean;
@@ -156,6 +157,20 @@ export const GEAR_ATTR_TYPES: Record<GearAttrKey, { label: string; group: string
   incomrepair: { label: "Erhaltene Reparatur", group: "Defensiv (Blau)", max: 20 },
 };
 
+export const GEAR_CORE_MAX: Record<GearCoreType, number> = {
+  wd: 15,
+  armour: 170000,
+  skill: 1,
+};
+
+export function gearCoreMax(core: GearCoreType, isPrototype: boolean): number {
+  return core === "skill" ? GEAR_CORE_MAX.skill : isPrototype ? GEAR_CORE_MAX[core] * 1.5 : GEAR_CORE_MAX[core];
+}
+
+export function gearCoreDisplay(core: GearCoreType, value: number): string {
+  return core === "skill" ? `Skill-Tier ${value}` : `${value.toLocaleString("de-DE")}`;
+}
+
 export function gearAttrMax(key: GearAttrKey, isPrototype: boolean): number | null {
   const cfg = GEAR_ATTR_TYPES[key];
   if (!cfg || cfg.max == null) return null;
@@ -180,6 +195,7 @@ export function normalizeGear(g: Partial<GearPiece> & Pick<GearPiece, "id" | "sl
     brand: g.brand,
     brandType,
     core: g.core ?? "wd",
+    coreValue: g.coreValue ?? gearCoreMax(g.core ?? "wd", prototype),
     attributes,
     talent: g.talent ?? null,
     prototype,
