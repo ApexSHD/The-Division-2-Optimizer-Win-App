@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { StoreProvider, useStore, shdBonusFor } from "./store";
+import { StoreProvider, useStore } from "./store";
+import { aggregateBuild } from "./data/damage";
 import { I18nContext, I18nProvider } from "./i18n";
 import type { Translation } from "./i18n/de";
 import { GlobalView } from "./views/GlobalView";
@@ -164,18 +165,25 @@ function ValuesSidebar() {
   return (
     <aside className="sidebar" aria-label={t.sidebar.title}>
       <h3>{t.sidebar.title}</h3>
-      <div className="stat">
-        <div className="stat-label">{t.sidebar.chc} (SHD-Uhr)</div>
-        <div className="stat-value accent">+{shdBonusFor(store.agent.shdLevel, "chc")} %</div>
-      </div>
-      <div className="stat">
-        <div className="stat-label">{t.sidebar.chd} (SHD-Uhr)</div>
-        <div className="stat-value accent">+{shdBonusFor(store.agent.shdLevel, "chd")} %</div>
-      </div>
-      <div className="stat">
-        <div className="stat-label">{t.sidebar.wd} (SHD-Uhr)</div>
-        <div className="stat-value accent">+{shdBonusFor(store.agent.shdLevel, "wd")} %</div>
-      </div>
+      {(() => {
+        const stats = aggregateBuild(store.gear, store.agent.shdLevel);
+        return (
+          <>
+            <div className="stat">
+              <div className="stat-label">{t.sidebar.chc}</div>
+              <div className="stat-value accent">{stats.chc.toLocaleString("de-DE")} %</div>
+            </div>
+            <div className="stat">
+              <div className="stat-label">{t.sidebar.chd}</div>
+              <div className="stat-value accent">+{stats.chd.toLocaleString("de-DE")} %</div>
+            </div>
+            <div className="stat">
+              <div className="stat-label">{t.sidebar.wd}</div>
+              <div className="stat-value accent">+{stats.wd.toLocaleString("de-DE")} %</div>
+            </div>
+          </>
+        );
+      })()}
       <div className="stat">
         <div className="stat-label">{t.sidebar.dps}</div>
         <div className="stat-value">—</div>
