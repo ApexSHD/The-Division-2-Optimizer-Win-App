@@ -470,7 +470,7 @@ export function GearView() {
               )}
             </Field>
 
-            {[0, 1].map((idx) => {
+            {Array.from({ length: editing.brandType === "gearset" ? 1 : 2 }).map((_, idx) => {
               const attr = editing.attributes[idx];
               const isFixed = isDbItem && isExotic;
               return (
