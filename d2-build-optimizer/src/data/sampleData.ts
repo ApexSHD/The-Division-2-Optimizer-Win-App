@@ -164,11 +164,12 @@ export const GEAR_CORE_MAX: Record<GearCoreType, number> = {
 };
 
 export function gearCoreMax(core: GearCoreType, isPrototype: boolean): number {
-  return core === "skill" ? GEAR_CORE_MAX.skill : isPrototype ? GEAR_CORE_MAX[core] * 1.5 : GEAR_CORE_MAX[core];
+  if (core === "skill") return isPrototype ? 1.5 : 1;
+  return isPrototype ? GEAR_CORE_MAX[core] * 1.5 : GEAR_CORE_MAX[core];
 }
 
 export function gearCoreDisplay(core: GearCoreType, value: number): string {
-  return core === "skill" ? `Skill-Tier ${value}` : `${value.toLocaleString("de-DE")}`;
+  return core === "skill" ? `Skill-Tier ${value.toLocaleString("de-DE")}` : `${value.toLocaleString("de-DE")}`;
 }
 
 export function gearAttrMax(key: GearAttrKey, isPrototype: boolean): number | null {

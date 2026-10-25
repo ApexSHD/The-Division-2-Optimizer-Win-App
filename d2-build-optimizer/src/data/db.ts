@@ -260,8 +260,37 @@ export interface GearPreset {
   cls: "named" | "exotic";
   core: string;
   fixedAttrs: { type: string; value: number }[];
+  namedSpecialAttr: { type: string; value: number } | null;
   perk: string;
   proto: boolean;
+}
+
+const NAMED_ATTR_PATTERNS: { key: string; pattern: RegExp }[] = [
+  { key: "dth", pattern: /Lebenspunktschaden/ },
+  { key: "dttooc", pattern: /ungedeckte Ziele/ },
+  { key: "dta", pattern: /R\u00fcstungsschaden/ },
+  { key: "hsd", pattern: /Kopfschussschaden/ },
+  { key: "chc", pattern: /Trefferchance/ },
+  { key: "chd", pattern: /Trefferschaden/ },
+  { key: "wd", pattern: /Waffenschaden/ },
+  { key: "pulsehaste", pattern: /Scanner-Puls/ },
+  { key: "range", pattern: /Reichweite/ },
+  { key: "aok", pattern: /T\u00f6tung/ },
+  { key: "wh", pattern: /Waffenhandhabung/ },
+  { key: "skillhealth", pattern: /F\u00e4higkeits-Gesundheit/ },
+  { key: "status", pattern: /Statuseffekte/ },
+  { key: "rof", pattern: /Feuerrate/ },
+];
+
+function parseNamedSpecialAttr(perk: string): { type: string; value: number } | null {
+  const m = perk.match(/\+([\d.,]+)\s*%\s*(.+?)\s*\((?:[^)]*fix)/i);
+  if (!m) return null;
+  const value = Number(m[1].replace(",", "."));
+  const label = m[2];
+  for (const { key, pattern } of NAMED_ATTR_PATTERNS) {
+    if (pattern.test(label)) return { type: key, value };
+  }
+  return null;
 }
 
 export interface BrandItemPreset {
@@ -339,6 +368,7 @@ function load(): Db {
     cls: g.cls,
     core: coreLabel(g.core),
     fixedAttrs: (g.fixed ?? []).map(([k, v]) => ({ type: String(k), value: Number(v) })),
+    namedSpecialAttr: g.cls === "named" ? parseNamedSpecialAttr(g.perk ?? "") : null,
     perk: g.perk ?? "",
     proto: g.proto ?? false,
   }));

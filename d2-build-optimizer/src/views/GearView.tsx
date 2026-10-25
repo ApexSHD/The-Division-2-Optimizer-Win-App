@@ -96,8 +96,12 @@ export function GearView() {
       brandType: isEx ? "exotic" : "named",
       core,
       coreValue: core === "wd" ? GEAR_CORE_MAX.wd : core === "armour" ? GEAR_CORE_MAX.armour : GEAR_CORE_MAX.skill,
-      attributes: p.fixedAttrs.map((a) => ({ type: a.type as GearAttrKey, value: a.value })),
-      talent: p.perk || null,
+      attributes: isEx
+        ? p.fixedAttrs.map((a) => ({ type: a.type as GearAttrKey, value: a.value }))
+        : p.namedSpecialAttr
+          ? [{ type: p.namedSpecialAttr.type as GearAttrKey, value: p.namedSpecialAttr.value }]
+          : [],
+      talent: isEx ? p.perk || null : p.namedSpecialAttr ? null : p.perk || null,
       prototype: isEx ? false : true,
     });
   }
@@ -436,8 +440,18 @@ export function GearView() {
             <Field label="1. Attribut (Kern)">
               {isDbItem ? (
                 <>
-                  <input value={`${GEAR_CORE_LABELS[editing.core]}: ${coreText(editing).split(": ")[1]}`} readOnly />
-                  {isExotic && <p className="settings-hint">Exotische Items haben fixe Werte.</p>}
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input value={GEAR_CORE_LABELS[editing.core]} readOnly style={{ flex: 1 }} />
+                    <input
+                      type="number"
+                      min={0}
+                      step={editing.core === "armour" ? 1000 : 0.5}
+                      value={editing.coreValue}
+                      style={{ width: 110 }}
+                      onChange={(e) => setEditing({ ...editing, coreValue: Number(e.target.value) })}
+                    />
+                  </div>
+                  {isExotic && <p className="settings-hint">Exotische Items: Attributstyp fix, Wert editierbar (mit Max-Wert vorbelegt).</p>}
                 </>
               ) : (
                 <div style={{ display: "flex", gap: 6 }}>
@@ -465,21 +479,45 @@ export function GearView() {
               {!isDbItem && (
                 <p className="settings-hint">
                   Max (God Roll{editing.prototype ? ", Prototyp +50 %" : ""}):{" "}
-                  {editing.core === "skill" ? "Tier 1" : gearCoreMax(editing.core, editing.prototype).toLocaleString("de-DE")}
+                  {editing.core === "skill"
+                    ? `Skill-Tier ${editing.prototype ? "1,5" : "1"}`
+                    : gearCoreMax(editing.core, editing.prototype).toLocaleString("de-DE")}
                 </p>
               )}
             </Field>
 
             {Array.from({ length: editing.brandType === "gearset" ? 1 : 2 }).map((_, idx) => {
               const attr = editing.attributes[idx];
-              const isFixed = isDbItem && isExotic;
+              const lockedType =
+                isDbItem && isExotic
+                  ? true
+                  : isDbItem && editing.brandType === "named"
+                    ? attr !== undefined
+                    : false;
               return (
                 <Field key={idx} label={`${idx + 2}. Attribut${attr ? "" : " (optional)"}`}>
-                  {isFixed ? (
-                    <input
-                      value={attr ? `${GEAR_ATTR_TYPES[attr.type as GearAttrKey]?.label ?? attr.type} +${attr.value}` : "\u2013 nicht m\u00f6glich \u2013"}
-                      readOnly
-                    />
+                  {lockedType && attr ? (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <input
+                        value={`${GEAR_ATTR_TYPES[attr.type as GearAttrKey]?.label ?? attr.type} (fix)`}
+                        readOnly
+                        style={{ flex: 1 }}
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={attr.value}
+                        style={{ width: 90 }}
+                        onChange={(e) => {
+                          const attrs = [...editing.attributes];
+                          attrs[idx] = { ...attr, value: Number(e.target.value) };
+                          setEditing({ ...editing, attributes: attrs });
+                        }}
+                      />
+                    </div>
+                  ) : lockedType && !attr ? (
+                    <input value={`\u2013 nicht m\u00f6glich (fix) \u2013`} readOnly />
                   ) : (
                     <div style={{ display: "flex", gap: 6 }}>
                       <select
@@ -520,9 +558,12 @@ export function GearView() {
                       )}
                     </div>
                   )}
-                  {attr && !isFixed && gearAttrMax(attr.type, editing.prototype) != null && (
+                  {attr && (
                     <p className="settings-hint">
-                      Max (God Roll{editing.prototype ? ", Prototyp +50 %" : ""}): {gearAttrMax(attr.type, editing.prototype)}
+                      {lockedType ? "Fixer Attributstyp; Wert ist rollbar und editierbar. " : ""}
+                      {gearAttrMax(attr.type, editing.prototype) != null
+                        ? `Max (God Roll${editing.prototype ? ", Prototyp +50 %" : ""}): ${gearAttrMax(attr.type, editing.prototype)}`
+                        : "Named-Spezialattribut (kein Standard-Roll-Max hinterlegt)."}
                     </p>
                   )}
                 </Field>
