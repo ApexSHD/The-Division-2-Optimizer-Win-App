@@ -366,7 +366,7 @@ function load(): Db {
     slot: SLOT_DE_LABELS[g.slot] ?? "mask",
     brand: g.brand || (g.cls === "exotic" ? "Exotic" : "Named"),
     cls: g.cls,
-    core: coreLabel(g.core),
+    core: g.core,
     fixedAttrs: (g.fixed ?? []).map(([k, v]) => ({ type: String(k), value: Number(v) })),
     namedSpecialAttr: g.cls === "named" ? parseNamedSpecialAttr(g.perk ?? "") : null,
     perk: g.perk ?? "",

@@ -127,25 +127,29 @@ function parseAttrCell(cell: string): { type: WeaponAttrKey; value: number } | n
   const trimmed = cell.trim();
   if (!trimmed) return null;
   const value = parseAttrValue(trimmed);
-  const label = trimmed.replace(/\+\s*[\d.,]+\s*%/, "").trim();
+  const label = trimmed.replace(/\+\s*[\d.,]+\s*%/, "").trim().toLowerCase();
+  let best: { key: WeaponAttrKey; len: number } | null = null;
   for (const [key, cfg] of Object.entries(WEAPON_ATTR_LABELS) as [WeaponAttrKey, string][]) {
-    if (label.toLowerCase().startsWith(cfg.toLowerCase().slice(0, 8))) {
-      return { type: key, value };
+    const l = cfg.toLowerCase();
+    if (label.startsWith(l) && (!best || l.length > best.len)) {
+      best = { key, len: l.length };
     }
   }
-  return null;
+  return best ? { type: best.key, value } : null;
 }
 
-function parseTypeLabel(label: string): WeaponType {
+function parseTypeLabel(label: string): WeaponType | null {
   const l = label.trim().toLowerCase();
   if (l.startsWith("sturm")) return "ar";
-  if (l.startsWith("mp") || l.startsWith("maschinenp")) return "smg";
+  if (l.startsWith("maschinenp")) return "smg";
+  if (l.startsWith("mp")) return "smg";
   if (l.startsWith("lmg") || l.startsWith("leicht")) return "lmg";
-  if (l.startsWith("gewehr") || l === "rifle") return "rifle";
+  if (l.startsWith("gewehr")) return "rifle";
+  if (l === "rifle") return "rifle";
   if (l.startsWith("dmr") || l.startsWith("scharf") || l.startsWith("präz")) return "mmr";
   if (l.startsWith("schrot")) return "shotgun";
   if (l.startsWith("pistol")) return "pistol";
-  return "ar";
+  return null;
 }
 
 function parseRarityLabel(label: string): Rarity {
@@ -190,7 +194,12 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
       skippedRows++;
       continue;
     }
-    const type = typeIdx >= 0 ? parseTypeLabel(cells[typeIdx] ?? "") : "ar";
+    const parsedType = typeIdx >= 0 ? parseTypeLabel(cells[typeIdx] ?? "") : "ar";
+    if (!parsedType) {
+      skippedRows++;
+      continue;
+    }
+    const type = parsedType;
     const rarity = rarityIdx >= 0 ? parseRarityLabel(cells[rarityIdx] ?? "") : "highend";
     const isPrototype =
       rarity !== "exotic" && (protoIdx >= 0 ? (cells[protoIdx] ?? "").trim().toLowerCase().startsWith("j") : false);
@@ -198,8 +207,14 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
 
     const a1Cell = a1Idx >= 0 ? (cells[a1Idx] ?? "").trim() : "";
     const core1Parsed = a1Cell ? parseAttrValue(a1Cell) : undefined;
-    const a2 = a2Idx >= 0 ? parseAttrCell(cells[a2Idx] ?? "") : null;
-    const a3 = a3Idx >= 0 ? parseAttrCell(cells[a3Idx] ?? "") : null;
+    const a2Cell = a2Idx >= 0 ? (cells[a2Idx] ?? "").trim() : "";
+    const a3Cell = a3Idx >= 0 ? (cells[a3Idx] ?? "").trim() : "";
+    if ((a2Cell && !parseAttrCell(a2Cell)) || (a3Cell && !parseAttrCell(a3Cell))) {
+      skippedRows++;
+      continue;
+    }
+    const a2 = a2Cell ? parseAttrCell(a2Cell) : null;
+    const a3 = a3Cell ? parseAttrCell(a3Cell) : null;
 
     const core1 = core1Parsed !== undefined ? core1Parsed : undefined;
     const core2Type = a2 ? a2.type : undefined;
