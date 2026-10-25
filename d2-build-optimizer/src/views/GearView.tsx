@@ -89,7 +89,7 @@ export function GearView() {
     if (!editing) return;
     const isEx = p.cls === "exotic";
     const isProto = !isEx;
-    const core = (p.core === "Waffenschaden" ? "wd" : p.core === "Panzerung" ? "armour" : p.core === "Skill-Hastung" ? "skill" : "wd") as GearCoreType;
+    const core = (p.core === "armour" ? "armour" : p.core === "skill" ? "skill" : "wd") as GearCoreType;
     setEditing({
       ...editing,
       slot: p.slot,
@@ -125,6 +125,11 @@ export function GearView() {
     if (!editing) return;
     if (!editing.brand.trim()) {
       store.setStatus(t.gear.brand + " fehlt");
+      return;
+    }
+    const maxAttrs = editing.brandType === "gearset" ? 1 : 2;
+    if (editing.attributes.length > maxAttrs) {
+      store.setStatus(`Maximal ${maxAttrs} Nebenattribut(e) erlaubt`);
       return;
     }
     if (editing.brandType === "gearset" && editing.attributes.length < 1) {

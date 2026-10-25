@@ -101,7 +101,7 @@ function parseGermanNumber(raw: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function parseSlot(label: string): GearSlot {
+function parseSlot(label: string): GearSlot | null {
   const l = label.trim().toLowerCase();
   if (l.startsWith("mask")) return "mask";
   if (l.startsWith("west")) return "chest";
@@ -109,7 +109,7 @@ function parseSlot(label: string): GearSlot {
   if (l.startsWith("rucksack") || l.startsWith("backpack")) return "backpack";
   if (l.startsWith("handschuh") || l.startsWith("glove")) return "gloves";
   if (l.startsWith("knie")) return "kneepads";
-  return "mask";
+  return null;
 }
 
 function parseRarity(label: string): GearPiece["brandType"] {
@@ -130,13 +130,17 @@ function parseCore(label: string): GearCoreType {
 function parseAttr(cell: string): { type: GearAttrKey; value: number } | null {
   const trimmed = cell.trim();
   if (!trimmed) return null;
+  const lower = trimmed.toLowerCase();
+  let best: { key: GearAttrKey; len: number } | null = null;
   for (const [key, cfg] of Object.entries(GEAR_ATTR_TYPES) as [GearAttrKey, { label: string }][]) {
-    if (trimmed.toLowerCase().startsWith(cfg.label.toLowerCase().slice(0, 8))) {
-      const match = trimmed.match(/([+-]?[\d.,]+)\s*%?$/);
-      return { type: key, value: match ? parseGermanNumber(match[1]) : 0 };
+    const l = cfg.label.toLowerCase();
+    if (lower.startsWith(l) && (!best || l.length > best.len)) {
+      best = { key, len: l.length };
     }
   }
-  return null;
+  if (!best) return null;
+  const match = trimmed.match(/([+-]?[\d.,]+)\s*%?$/);
+  return { type: best.key, value: match ? parseGermanNumber(match[1]) : 0 };
 }
 
 export interface GearCsvImportResult {
@@ -163,7 +167,7 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
 
   const gear: GearPiece[] = [];
   let skippedRows = 0;
-  for (const line of lines.slice(1)) {
+  outer: for (const line of lines.slice(1)) {
     const cells = splitCsvLine(line);
     const brand = (cells[brandIdx] ?? "").trim();
     if (!brand) {
@@ -172,14 +176,27 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
     }
     const brandType = rarityIdx >= 0 ? parseRarity(cells[rarityIdx] ?? "") : "brand";
     const isExotic = brandType === "exotic";
+    for (const i of [a2Idx, a3Idx]) {
+      if (i < 0) continue;
+      const cell = (cells[i] ?? "").trim();
+      if (cell && !parseAttr(cell)) {
+        skippedRows++;
+        continue outer;
+      }
+    }
     const attrs = [a2Idx, a3Idx]
       .map((i) => (i >= 0 ? parseAttr(cells[i] ?? "") : null))
       .filter((a): a is { type: GearAttrKey; value: number } => a !== null);
 
+    const parsedSlot = parseSlot(cells[slotIdx] ?? "");
+    if (!parsedSlot) {
+      skippedRows++;
+      continue;
+    }
     gear.push(
       normalizeGear({
         id: makeId(),
-        slot: parseSlot(cells[slotIdx] ?? ""),
+        slot: parsedSlot,
         brand,
         brandType,
         core: coreIdx >= 0 ? parseCore(cells[coreIdx] ?? "") : "wd",
