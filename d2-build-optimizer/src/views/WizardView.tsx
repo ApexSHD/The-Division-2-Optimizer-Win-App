@@ -155,6 +155,16 @@ export function WizardView() {
               Keine passende Kombination gefunden — Inventar erfassen oder Bedingungen lockern.
             </div>
           )}
+          {results !== null && results.length > 0 && results.some((r) => r.warnings.length > 0) && (
+            <div className="optimizer-warnings" style={{ marginBottom: 10 }}>
+              {Array.from(new Set(results.flatMap((r) => r.warnings.map((wn) => wn.message))))
+                .filter((msg, idx, arr) => arr.indexOf(msg) === idx)
+                .slice(0, 3)
+                .map((msg) => (
+                  <div key={msg} className="warn-banner warn-yellow">⚠ {msg}</div>
+                ))}
+            </div>
+          )}
           {results !== null && results.length > 0 && (
             <div className="table-wrap" style={{ maxHeight: 420 }}>
               <table>

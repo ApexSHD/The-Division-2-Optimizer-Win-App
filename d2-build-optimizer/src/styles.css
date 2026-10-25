@@ -808,3 +808,25 @@ kbd {
   font-size: 11px;
   color: var(--text-dim);
 }
+
+/* ===== Fallback-Warnungen (gelbe Banner) ===== */
+.optimizer-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.warn-banner {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.warn-yellow {
+  border: 1px solid #e6b800;
+  border-left: 4px solid #e6b800;
+  background: rgba(230, 184, 0, 0.1);
+  color: #e6b800;
+}
