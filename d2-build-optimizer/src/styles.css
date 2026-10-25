@@ -700,6 +700,24 @@ kbd {
   background: var(--bg-hover);
 }
 
+/* ===== Slot-Erklärung (Transparenz) ===== */
+.slot-explanation {
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  font-size: 12px;
+}
+
+.slot-calibration {
+  margin-top: 4px;
+  padding: 6px 8px;
+  border-left: 3px solid #e6b800;
+  background: rgba(230, 184, 0, 0.08);
+  border-radius: 4px;
+  font-size: 12px;
+
 /* ===== Build-Assistent (Wizard) ===== */
 .wizard-steps {
   display: flex;
