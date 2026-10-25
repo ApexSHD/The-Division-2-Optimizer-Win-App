@@ -83,7 +83,7 @@ export interface DbGreenSetInfo {
 export interface DbSlotMod {
   name: string;
   slotTypes: string[];
-  bonus: { type: string; val: number };
+  bonus: { type: string; val: number } | null;
   penalty: { type: string; val: number } | null;
 }
 
@@ -245,7 +245,7 @@ function load(): Db {
       name: m.name,
       slot,
       slotTypes: m.slotTypes,
-      bonus: `${m.bonus.type} +${m.bonus.val}`,
+      bonus: m.bonus ? `${m.bonus.type} +${m.bonus.val}` : "\u2013",
       penalty: m.penalty ? `${m.penalty.type} -${Math.abs(m.penalty.val)}` : null,
     })),
   );
