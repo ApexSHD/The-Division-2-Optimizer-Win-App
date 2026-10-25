@@ -106,16 +106,84 @@ export function normalizeWeapon(
 }
 
 export type GearSlot = "mask" | "chest" | "holster" | "backpack" | "gloves" | "kneepads";
+export type GearCoreType = "wd" | "armour" | "skill";
+export type GearAttrKey =
+  | "chc" | "chd" | "hsd" | "wh" | "armorregen" | "explres" | "hazard" | "health"
+  | "skilldmg" | "skillhaste" | "repair" | "status"
+  | "wd" | "dta" | "dttooc" | "dth" | "rof" | "aok" | "incomrepair";
+
+export interface GearAttr {
+  type: GearAttrKey;
+  value: number;
+}
 
 export interface GearPiece {
   id: string;
   slot: GearSlot;
   brand: string;
   brandType: "brand" | "gearset" | "named" | "exotic";
-  core: string;
-  attributes: string[];
+  core: GearCoreType;
+  attributes: GearAttr[];
   talent: string | null;
   prototype: boolean;
+}
+
+export const GEAR_CORE_LABELS: Record<GearCoreType, string> = {
+  wd: "Waffenschaden",
+  armour: "Rüstung",
+  skill: "Skill-Tier",
+};
+
+export const GEAR_ATTR_TYPES: Record<GearAttrKey, { label: string; group: string; max: number | null }> = {
+  chc: { label: "Kritische Trefferchance", group: "Offensiv (Rot)", max: 6 },
+  chd: { label: "Kritischer Trefferschaden", group: "Offensiv (Rot)", max: 12 },
+  hsd: { label: "Kopfschussschaden", group: "Offensiv (Rot)", max: 11 },
+  wh: { label: "Waffenhandhabung", group: "Offensiv (Rot)", max: 8 },
+  armorregen: { label: "Rüstungsregeneration", group: "Defensiv (Blau)", max: 4925 },
+  explres: { label: "Explosionswiderstand", group: "Defensiv (Blau)", max: 10 },
+  hazard: { label: "Gefahrenschutz", group: "Defensiv (Blau)", max: 10 },
+  health: { label: "Lebenspunkte", group: "Defensiv (Blau)", max: 18935 },
+  skilldmg: { label: "Fertigkeitenschaden", group: "Hilfsmittel (Gelb)", max: 10 },
+  skillhaste: { label: "Fertigkeiten-Tempo", group: "Hilfsmittel (Gelb)", max: 12 },
+  repair: { label: "Reparatur-Fertigkeiten", group: "Hilfsmittel (Gelb)", max: 20 },
+  status: { label: "Statuseffekte", group: "Hilfsmittel (Gelb)", max: 10 },
+  wd: { label: "Waffenschaden (Minor)", group: "Offensiv (Rot)", max: 15 },
+  dta: { label: "Rüstungsschaden", group: "Offensiv (Rot)", max: 8 },
+  dttooc: { label: "Schaden gg. ungedeckte Ziele", group: "Offensiv (Rot)", max: 8 },
+  dth: { label: "Lebenspunktschaden", group: "Offensiv (Rot)", max: 10 },
+  rof: { label: "Feuerrate", group: "Offensiv (Rot)", max: 5 },
+  aok: { label: "Rüstung bei Tötung", group: "Defensiv (Blau)", max: 10 },
+  incomrepair: { label: "Erhaltene Reparatur", group: "Defensiv (Blau)", max: 20 },
+};
+
+export function gearAttrMax(key: GearAttrKey, isPrototype: boolean): number | null {
+  const cfg = GEAR_ATTR_TYPES[key];
+  if (!cfg || cfg.max == null) return null;
+  return isPrototype ? cfg.max * 1.5 : cfg.max;
+}
+
+export function normalizeGear(g: Partial<GearPiece> & Pick<GearPiece, "id" | "slot" | "brand">): GearPiece {
+  const brandType = g.brandType ?? "brand";
+  const isExotic = brandType === "exotic";
+  const prototype = isExotic ? false : g.prototype ?? true;
+  const attributes = Array.isArray(g.attributes)
+    ? g.attributes
+        .map((a) => {
+          if (typeof a === "string") return null;
+          return a as GearAttr;
+        })
+        .filter((a): a is GearAttr => a !== null && Boolean(GEAR_ATTR_TYPES[a.type]))
+    : [];
+  return {
+    id: g.id,
+    slot: g.slot,
+    brand: g.brand,
+    brandType,
+    core: g.core ?? "wd",
+    attributes,
+    talent: g.talent ?? null,
+    prototype,
+  };
 }
 
 export interface Mod {
@@ -161,28 +229,8 @@ export const sampleWeapons: Weapon[] = [
   { id: "w16", name: "Tactical AUG A3", type: "smg", rarity: "highend", baseDamage: 17890, rpm: 750, magSize: 32, talent: "Preservation", modSlots: ["optic", "muzzle", "underbarrel", "magazine"] , knowHow: 30, isPrototype: false, attributes: godRollAttributes("smg", false) },
 ];
 
-export const sampleGear: GearPiece[] = [
-  { id: "g1", slot: "mask", brand: "Fox's Prayer", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHD +12 %"], talent: null, prototype: false },
-  { id: "g2", slot: "mask", brand: "Grupo Sombra", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHC +6 %"], talent: null, prototype: false },
-  { id: "g3", slot: "mask", brand: "Coyote's Mask", brandType: "exotic", core: "Waffenschaden +15 %", attributes: ["Fix: CHC +8 %"], talent: "Coyote's Discipline (Exotic)", prototype: false },
-  { id: "g4", slot: "chest", brand: "Umbra Initiative", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHC +6 %", "CHD +6 %"], talent: "Obliterate", prototype: false },
-  { id: "g5", slot: "chest", brand: "Catharaxis (Named)", brandType: "named", core: "Panzerung +15 %", attributes: ["CHD +12 %"], talent: "Intimidate (Perfect)", prototype: false },
-  { id: "g6", slot: "chest", brand: "Tip of the Spear", brandType: "gearset", core: "Waffenschaden +15 %", attributes: ["CHC +6 %"], talent: "Vigilance", prototype: false },
-  { id: "g7", slot: "holster", brand: "Walker, Harris & Co.", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHD +6 %"], talent: null, prototype: false },
-  { id: "g8", slot: "holster", brand: "Foundry Bulwark", brandType: "gearset", core: "Panzerung +15 %", attributes: ["Panzerung +6 %"], talent: null, prototype: false },
-  { id: "g9", slot: "holster", brand: "Grupo Sombra", brandType: "brand", core: "Kritischer Trefferschaden +15 %", attributes: ["CHC +6 %"], talent: null, prototype: false },
-  { id: "g10", slot: "backpack", brand: "Umbra Initiative", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHC +6 %"], talent: "Vigilance", prototype: false },
-  { id: "g11", slot: "backpack", brand: "Ryang & Sachs (Named: Phantom)", brandType: "named", core: "Waffenschaden +15 %", attributes: ["CHD +12 %"], talent: "Composure (Perfect)", prototype: false },
-  { id: "g12", slot: "backpack", brand: "Future Initiative", brandType: "gearset", core: "Panzerung +15 %", attributes: ["Skill-Hastung +6 %"], talent: "Skilled", prototype: false },
-  { id: "g13", slot: "gloves", brand: "Contractor's Gloves", brandType: "named", core: "Waffenschaden +15 %", attributes: ["CHD +12 %"], talent: null, prototype: false },
-  { id: "g14", slot: "gloves", brand: "Fox's Prayer", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHC +6 %"], talent: null, prototype: false },
-  { id: "g15", slot: "gloves", brand: "Petrov Defense Group", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["LMG-Schaden +6 %"], talent: null, prototype: false },
-  { id: "g16", slot: "kneepads", brand: "Walker, Harris & Co.", brandType: "brand", core: "Waffenschaden +15 %", attributes: ["CHD +6 %"], talent: null, prototype: false },
-  { id: "g17", slot: "kneepads", brand: "Fenris Group AB (Named: Vault)", brandType: "named", core: "Panzerung +15 %", attributes: ["CHC +6 %"], talent: "Perfect Adrenaline Rush", prototype: false },
-  { id: "g18", slot: "kneepads", brand: "Eclipse Protocol", brandType: "gearset", core: "Kritischer Trefferschaden +15 %", attributes: ["Status-Effekte +6 %"], talent: null, prototype: false },
-  { id: "g19", slot: "chest", brand: "Gila Guard (Prototype)", brandType: "brand", core: "Panzerung +15 %", attributes: ["Prototyp-Attribut"], talent: "Endlessly (Prototype)", prototype: true },
-  { id: "g20", slot: "backpack", brand: "Memento", brandType: "exotic", core: "Waffenschaden +15 %", attributes: ["Fix: CHD +10 %"], talent: "Got Your Back (Exotic)", prototype: false },
-];
+export const sampleGear: GearPiece[] = [];
+
 
 export const sampleMods: Mod[] = [
   { id: "m1", category: "optic", compat: ["ar", "smg", "lmg"], value: "CHC +5 %" },

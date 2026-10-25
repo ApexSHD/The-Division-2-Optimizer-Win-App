@@ -202,20 +202,54 @@ export interface WeaponPreset {
   note: string;
 }
 
+export interface GearTalentEntry {
+  key: string;
+  slot: "chest" | "backpack";
+  label: string;
+  note: string;
+}
+
+export const GEAR_TALENTS: GearTalentEntry[] = [
+  { key: "obliterate", slot: "chest", label: "Vernichten", note: "Kritische Treffer: +1 % Waffenschaden für 10s, bis zu 20 Stacks." },
+  { key: "glasscannon", slot: "chest", label: "Glaskanone", note: "+25 % verstärkter Schaden – ABER du erleidest 50 % mehr Schaden." },
+  { key: "intimidate", slot: "chest", label: "Einschüchtern", note: "Mit Bonus-Rüstung: +4 % Schaden gegen Ziele in 10m pro Stack (max. 9)." },
+  { key: "spotter", slot: "chest", label: "Späher", note: "+15 % verstärkter Schaden gegen gepulste Gegner." },
+  { key: "focus", slot: "chest", label: "Fokus", note: "+5 % Waffenschaden pro Sekunde beim Zielen mit 8x+ Scope, bis max. +50 %." },
+  { key: "spark", slot: "chest", label: "Funke", note: "Skill-Treffer: +15 % Waffenschaden für 15s." },
+  { key: "gunslinger", slot: "chest", label: "Gunslinger", note: "Waffenwechsel: +23 % Waffenschaden für 5s." },
+  { key: "headhunter", slot: "chest", label: "Kopfgeldjäger", note: "Nach Kopfschuss-Kill: nächster Treffer +125 % des Todesstoß-Schadens." },
+  { key: "unbreakable", slot: "chest", label: "Unzerstörbar", note: "Repariert 95 % Rüstung bei Rüstungsverlust (60s CD)." },
+  { key: "vigilance", slot: "backpack", label: "Wachsamkeit", note: "+25 % Waffenschaden, deaktiviert 4s nach erlittenem Schaden." },
+  { key: "composure", slot: "backpack", label: "Gelassenheit", note: "+15 % Waffenschaden in Deckung." },
+  { key: "companion", slot: "backpack", label: "Gefährte", note: "+15 % Waffenschaden, wenn Verbündeter/Fähigkeit in 5m Nähe." },
+  { key: "concussion", slot: "backpack", label: "Gehirnerschütterung", note: "Kopftreffer +10 %, Kopfschuss-Kill +15 % Waffenschaden." },
+  { key: "wicked", slot: "backpack", label: "Böse", note: "Status-Effekt anwenden: +18 % Waffenschaden für 20s." },
+  { key: "unstoppable", slot: "backpack", label: "Unaufhaltsame Kraft", note: "Kill: +5 % Waffenschaden für 15s, bis 5 Stacks." },
+  { key: "versatile", slot: "backpack", label: "Vielseitig", note: "Waffengattungsabhängig +10–35 % Schaden nach Waffenwechsel." },
+  { key: "clutch", slot: "backpack", label: "Kupplung", note: "Kritische Treffer reparieren Rüstung unter 15 % Rüstung." },
+  { key: "bloodsucker", slot: "backpack", label: "Blutsauger", note: "Kill: +10 % Bonus-Rüstung pro Stack (10 Stacks)." },
+];
+
 export interface GearPreset {
   name: string;
   slot: GearSlot;
   brand: string;
   cls: "named" | "exotic";
   core: string;
-  fixedAttributes: string[];
+  fixedAttrs: { type: string; value: number }[];
   perk: string;
   proto: boolean;
+}
+
+export interface BrandItemPreset {
+  brand: string;
+  slots: GearSlot[];
 }
 
 export interface Db {
   weapons: WeaponPreset[];
   talents: TalentEntry[];
+  brandItems: BrandItemPreset[];
   displayTalents: DisplayTalent[];
   talentDisplayByType: Record<string, DisplayTalent[]>;
   gear: GearPreset[];
@@ -274,7 +308,7 @@ function load(): Db {
     brand: g.brand || (g.cls === "exotic" ? "Exotic" : "Named"),
     cls: g.cls,
     core: coreLabel(g.core),
-    fixedAttributes: (g.fixed ?? []).map(([k, v]) => `${k} +${v}`),
+    fixedAttrs: (g.fixed ?? []).map(([k, v]) => ({ type: String(k), value: Number(v) })),
     perk: g.perk ?? "",
     proto: g.proto ?? false,
   }));
@@ -319,9 +353,15 @@ function load(): Db {
     description: tal.description,
   }));
 
+  const brandItems: BrandItemPreset[] = Object.values(gearFile.brand_set_info).map((b) => ({
+    brand: b.name,
+    slots: ["mask", "chest", "holster", "backpack", "gloves", "kneepads"],
+  }));
+
   return {
     weapons,
     talents,
+    brandItems,
     displayTalents,
     talentDisplayByType: Object.fromEntries(
       Object.entries(displayFile).filter(([k]) => k !== "Allgemeine Waffen"),
