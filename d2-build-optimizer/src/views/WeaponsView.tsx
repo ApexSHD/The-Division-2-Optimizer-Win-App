@@ -6,7 +6,8 @@ import type { Column } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
 import { ChartPlaceholder } from "../components/ChartPlaceholder";
 import { getDb } from "../data/db";
-import type { WeaponPreset, TalentEntry } from "../data/db";
+import type { WeaponPreset, DisplayTalent } from "../data/db";
+import { TALENT_DISPLAY_TYPE_MAP, talentsAllowedForWeapon, carrierForTalent } from "../data/db";
 import type { Weapon, WeaponType, WeaponAttrKey } from "../data/sampleData";
 import {
   WEAPON_ATTR_LABELS,
@@ -43,30 +44,43 @@ export function WeaponsView() {
   const [editing, setEditing] = useState<Weapon | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [presets, setPresets] = useState<WeaponPreset[]>([]);
-  const [talents, setTalents] = useState<TalentEntry[]>([]);
+  const [displayTalents, setDisplayTalents] = useState<DisplayTalent[]>([]);
+  const [talentDisplayByType, setTalentDisplayByType] = useState<Record<string, DisplayTalent[]>>({});
 
   useEffect(() => {
     getDb()
       .then((db) => {
         setPresets(db.weapons);
-        setTalents(db.talents);
+        setDisplayTalents(db.displayTalents);
+        setTalentDisplayByType(db.talentDisplayByType);
       })
       .catch(() => {
         setPresets([]);
-        setTalents([]);
+        setDisplayTalents([]);
+        setTalentDisplayByType({});
       });
   }, []);
 
   const presetsForType = (type: WeaponType) => presets.filter((p) => p.typeKey === type);
-  const talentsForType = (type: WeaponType) => {
-    const applicable = talents.filter((tal) => tal.weaponTypes.includes(type));
-    const preset = presets.find((p) => p.name === editing?.name);
-    const fixedTalent = preset?.talent ?? null;
-    if (fixedTalent) {
-      const known = applicable.some((tal) => tal.name === fixedTalent || tal.label === fixedTalent);
-      if (!known) return [{ name: fixedTalent, label: fixedTalent } as TalentEntry, ...applicable];
-    }
-    return applicable;
+  const currentPreset = presets.find((p) => p.name === editing?.name && p.typeKey === editing?.type);
+  const fixedTalent =
+    editing?.rarity === "exotic" || editing?.rarity === "named"
+      ? currentPreset?.talent ?? null
+      : null;
+  const talentDescription = (() => {
+    const all = [
+      ...displayTalents,
+      ...(talentDisplayByType[TALENT_DISPLAY_TYPE_MAP[editing?.type ?? "ar"]] ?? []),
+    ];
+    const name = editing?.talent;
+    const found = all.find((tal) => tal.name === name);
+    return found?.description ?? null;
+  })();
+  const talentOptions = (type: WeaponType) => {
+    const general = displayTalents;
+    const cat = talentDisplayByType[TALENT_DISPLAY_TYPE_MAP[type]] ?? [];
+    const allowed = talentsAllowedForWeapon(editing?.name ?? "", editing?.rarity === "named");
+    return { general: general.filter((x) => allowed(x.name)), cat: cat.filter((x) => allowed(x.name)) };
   };
 
   function openEdit(w: Weapon) {
@@ -95,9 +109,9 @@ export function WeaponsView() {
       talent: p.talent ?? "",
       note: p.note,
       modSlots: [...slots],
-      isPrototype: !p.isExotic && p.isNamed,
+      isPrototype: !p.isExotic,
       knowHow: 30,
-      attributes: godRollAttributes(p.typeKey, !p.isExotic && p.isNamed),
+      attributes: godRollAttributes(p.typeKey, !p.isExotic),
     });
   }
 
@@ -298,7 +312,7 @@ export function WeaponsView() {
                 )}
               </Field>
             )}
-            <Field label="Know-How-Level (0–30)">
+            <Field label="Know-How-Level (0–30): Standard 30 % Waffenschaden">
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input
                   type="number"
@@ -319,17 +333,6 @@ export function WeaponsView() {
                   <span style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>fix 30</span>
                 )}
               </div>
-            </Field>
-            <Field label={t.weapons.talent}>
-              <select
-                value={editing.talent}
-                onChange={(e) => setEditing({ ...editing, talent: e.target.value })}
-              >
-                <option value="">– Kein Talent –</option>
-                {talentsForType(editing.type).map((tal) => (
-                  <option key={tal.name} value={tal.name}>{tal.label}</option>
-                ))}
-              </select>
             </Field>
             <Field label={`Kern 1: +${weaponAttrMax(WEAPON_CORE1_MAX, editing.isPrototype)} % ${t.weapons.types[editing.type]}-Schaden (WD)`}>
               <input
@@ -441,30 +444,54 @@ export function WeaponsView() {
                 {editing.rarity === "exotic" ? " — Exote: Werte fix" : ""}
               </p>
             </Field>
-            <Field label={t.weapons.mods}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {ALL_MOD_SLOTS.map((s) => {
-                  const active = editing.modSlots.includes(s);
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      className={`badge ${active ? "btn-accent" : ""}`}
-                      style={{ cursor: "pointer", opacity: active ? 1 : 0.5 }}
-                      onClick={() =>
-                        setEditing({
-                          ...editing,
-                          modSlots: active
-                            ? editing.modSlots.filter((x) => x !== s)
-                            : [...editing.modSlots, s],
-                        })
-                      }
-                    >
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
+            <Field label="Talent">
+              {fixedTalent ? (
+                <>
+                  <input value={editing.talent} readOnly />
+                  <p style={{ margin: "4px 0 0", fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+                    {editing.rarity === "exotic"
+                      ? "Fixes exotisches Talent – nicht veränderbar."
+                      : `Fixes Named-Talent – nicht veränderbar.${carrierForTalent(editing.talent) ? ` (Träger: ${carrierForTalent(editing.talent)})` : ""}`}
+                  </p>
+                </>
+              ) : (
+                <select
+                  value={editing.talent}
+                  onChange={(e) => setEditing({ ...editing, talent: e.target.value })}
+                >
+                  <option value="">– Kein Talent –</option>
+                  <optgroup label="Allgemeine Waffen">
+                    {talentOptions(editing.type).general.map((tal) => (
+                      <option key={tal.name} value={tal.name}>
+                        {tal.name.startsWith("Perfekt") ? `★ ${tal.name}` : tal.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label={`${TALENT_DISPLAY_TYPE_MAP[editing.type]} (Gattungs-Talente)`}>
+                    {talentOptions(editing.type).cat.map((tal) => (
+                      <option key={tal.name} value={tal.name}>
+                        {tal.name.startsWith("Perfekt") ? `★ ${tal.name}` : tal.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+              )}
+              {talentDescription && (
+                <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+                  {talentDescription}
+                </p>
+              )}
+            </Field>
+            <Field label="Mods">
+              {editing.rarity === "exotic" ? (
+                <p style={{ margin: 0, fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+                  Exotische Waffen haben fixe Mods aus der Datenbank.
+                </p>
+              ) : (
+                <p style={{ margin: 0, fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+                  Mod-Erfassung folgt in einer Ausbaustufe.
+                </p>
+              )}
             </Field>
             <hr style={{ border: 0, borderTop: "1px solid var(--border, #555)", margin: "10px 0" }} />
             <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text-dim, #aaa)" }}>

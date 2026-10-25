@@ -12,7 +12,73 @@ export interface AgentValues {
   chc: number;
   chd: number;
   wd: number;
+  shdLevel: number;
+  spec: string;
+  mode: "pve" | "pvp";
+  season: string;
 }
+
+export interface OptimizationSettings {
+  targetChc: number;
+  considerWeaponTalents: boolean;
+  considerGearTalents: boolean;
+  considerExoticPerks: boolean;
+  enemyArmorShare: number;
+  enemyHealthShare: number;
+  enemyOocShare: number;
+  enemyHeadshotShare: number;
+}
+
+export const SHD_WATCH_ATTRIBUTES = {
+  offensive: [
+    { key: "wd", label: "Waffenschaden", base: 10, perLevel: 0.2 },
+    { key: "hsd", label: "Kopfschussschaden", base: 20, perLevel: 0.4 },
+    { key: "chc", label: "Kritische Trefferchance (CHC)", base: 10, perLevel: 0.2 },
+    { key: "chd", label: "Kritischer Trefferschaden (CHD)", base: 20, perLevel: 0.4 },
+  ],
+  defensive: [
+    { key: "armor", label: "Gesamte R\u00fcstung", base: 10, perLevel: 0.2 },
+    { key: "health", label: "Lebensenergie", base: 10, perLevel: 0.2 },
+    { key: "hazard", label: "Gefahrenschutz (Hazard Protection)", base: 10, perLevel: 0.2 },
+    { key: "explosive", label: "Explosionswiderstand", base: 10, perLevel: 0.2 },
+  ],
+  handling: [
+    { key: "accuracy", label: "Pr\u00e4zision", base: 10, perLevel: 0.2 },
+    { key: "stability", label: "Stabilit\u00e4t", base: 10, perLevel: 0.2 },
+    { key: "reloadSpeed", label: "Nachladetempo", base: 10, perLevel: 0.2 },
+    { key: "ammoCapacity", label: "Munitionskapazit\u00e4t", base: 20, perLevel: 0.4 },
+  ],
+  utility: [
+    { key: "skillDamage", label: "Fertigkeitenschaden", base: 10, perLevel: 0.2 },
+    { key: "skillHaste", label: "Fertigkeiten-Eile (Skill Haste)", base: 10, perLevel: 0.2 },
+    { key: "repairSkills", label: "Reparatur-Fertigkeit", base: 10, perLevel: 0.2 },
+    { key: "skillDuration", label: "Fertigkeiten-Dauer", base: 10, perLevel: 0.2 },
+  ],
+} as const;
+
+export function shdBonus(level: number, base: number, perLevel: number): number {
+  const lvl = Math.max(0, Math.min(1000, level));
+  return Number((base + lvl * perLevel).toFixed(2));
+}
+
+export function shdBonusFor(level: number, key: string): number {
+  for (const list of Object.values(SHD_WATCH_ATTRIBUTES)) {
+    const attr = list.find((a) => a.key === key);
+    if (attr) return shdBonus(level, attr.base, attr.perLevel);
+  }
+  return 0;
+}
+
+export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
+  targetChc: 50,
+  considerWeaponTalents: true,
+  considerGearTalents: true,
+  considerExoticPerks: true,
+  enemyArmorShare: 80,
+  enemyHealthShare: 20,
+  enemyOocShare: 70,
+  enemyHeadshotShare: 0,
+};
 
 export interface Profile {
   id: string;
@@ -26,6 +92,7 @@ export interface UserData {
   theme: Theme;
   lang: "de" | "en";
   agent: AgentValues;
+  optimization: OptimizationSettings;
   weapons: Weapon[];
   gear: GearPiece[];
   builds: Build[];
@@ -42,7 +109,8 @@ function defaultUserData(): UserData {
     activeProfileId: STANDARD_PROFILE.id,
     theme: "dark",
     lang: "de",
-    agent: { chc: 40, chd: 95, wd: 15 },
+    agent: { chc: 40, chd: 95, wd: 15, shdLevel: 1000, spec: "sharpshooter", mode: "pve", season: "y8s3" },
+    optimization: DEFAULT_OPTIMIZATION,
     weapons: sampleWeapons,
     gear: sampleGear,
     builds: sampleBuilds,
@@ -60,7 +128,17 @@ function sanitize(raw: unknown): UserData {
     activeProfileId: r.activeProfileId ?? r.profiles[0].id,
     theme: r.theme === "light" || r.theme === "system" ? r.theme : "dark",
     lang: r.lang === "en" ? "en" : "de",
-    agent: r.agent ?? fallback.agent,
+    agent: (() => {
+      const a = { ...fallback.agent, ...(r.agent ?? {}) };
+      return {
+        ...a,
+        shdLevel: typeof a.shdLevel === "number" ? a.shdLevel : 1000,
+        spec: a.spec ?? "sharpshooter",
+        mode: a.mode === "pvp" ? "pvp" : "pve",
+        season: a.season ?? "y8s3",
+      };
+    })(),
+    optimization: { ...DEFAULT_OPTIMIZATION, ...(r.optimization ?? {}) },
     weapons: Array.isArray(r.weapons)
       ? (r.weapons as unknown[]).map((w) =>
           normalizeWeapon(w as Parameters<typeof normalizeWeapon>[0]),
@@ -89,6 +167,8 @@ export interface AppState {
   toggleSidebar: () => void;
   agent: AgentValues;
   setAgent: (a: AgentValues) => void;
+  optimization: OptimizationSettings;
+  setOptimization: (o: OptimizationSettings) => void;
   weapons: Weapon[];
   gear: GearPiece[];
   mods: Mod[];
@@ -238,6 +318,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleSidebar: () => setSidebarVisible((v) => !v),
     agent: userData.agent,
     setAgent: (a) => mutate((d) => ({ ...d, agent: a })),
+    optimization: userData.optimization,
+    setOptimization: (o) => mutate((d) => ({ ...d, optimization: o })),
     weapons: userData.weapons,
     gear: userData.gear,
     mods: db?.mods.map((m) => ({
