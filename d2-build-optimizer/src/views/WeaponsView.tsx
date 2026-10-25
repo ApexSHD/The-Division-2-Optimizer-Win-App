@@ -427,24 +427,22 @@ export function WeaponsView() {
               </>
             )}
             {editing.rarity !== "exotic" && (
-              <div className="field">
-                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                  <input
-                    type="checkbox"
-                    checked={editing.isPrototype}
-                    onChange={(e) => {
-                      const isPrototype = e.target.checked;
-                      setEditing({
-                        ...editing,
-                        isPrototype,
-                        knowHow: isPrototype ? 30 : editing.knowHow,
-                        attributes: godRollAttributes(editing.type, isPrototype),
-                      });
-                    }}
-                  />
-                  <span>Prototyp</span>
-                </label>
-              </div>
+              <label className="check-row">
+                <input
+                  type="checkbox"
+                  checked={editing.isPrototype}
+                  onChange={(e) => {
+                    const isPrototype = e.target.checked;
+                    setEditing({
+                      ...editing,
+                      isPrototype,
+                      knowHow: isPrototype ? 30 : editing.knowHow,
+                      attributes: godRollAttributes(editing.type, isPrototype),
+                    });
+                  }}
+                />
+                <span className="check-text">Prototyp</span>
+              </label>
             )}
             <Field label="Know-How-Level (0–30): Standard 30 % Waffenschaden">
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
