@@ -11,6 +11,7 @@ import {
   GEAR_CORE_LABELS,
   GEAR_CORE_MAX,
   GEAR_ATTR_TYPES,
+  GEAR_REGULAR_ATTR_KEYS,
   gearAttrMax,
   gearCoreMax,
 } from "../data/sampleData";
@@ -532,8 +533,11 @@ export function GearView() {
                         value={attr.value}
                         style={{ width: 90 }}
                         onChange={(e) => {
+                          const raw = Number(e.target.value);
+                          const max = gearAttrMax(attr.type, editing.prototype);
+                          const value = max != null ? Math.min(raw, max) : raw;
                           const attrs = [...editing.attributes];
-                          attrs[idx] = { ...attr, value: Number(e.target.value) };
+                          attrs[idx] = { ...attr, value };
                           setEditing({ ...editing, attributes: attrs });
                         }}
                       />
@@ -558,11 +562,15 @@ export function GearView() {
                         }}
                       >
                         <option value="">– nicht belegt –</option>
-                        {(Object.keys(GEAR_ATTR_TYPES) as GearAttrKey[])
-                          .filter((k) => k === attr?.type || !usedAttrTypes.has(k))
-                          .map((k) => (
-                            <option key={k} value={k}>{GEAR_ATTR_TYPES[k].label}</option>
-                          ))}
+                        {["Offensiv (Rot)", "Defensiv (Blau)", "Hilfsmittel (Gelb)"].map((group) => (
+                          <optgroup key={group} label={group}>
+                            {GEAR_REGULAR_ATTR_KEYS.filter((k) => GEAR_ATTR_TYPES[k].group === group)
+                              .filter((k) => k === attr?.type || !usedAttrTypes.has(k))
+                              .map((k) => (
+                                <option key={k} value={k}>{GEAR_ATTR_TYPES[k].label}</option>
+                              ))}
+                          </optgroup>
+                        ))}
                       </select>
                       {attr && (
                         <input
@@ -572,8 +580,11 @@ export function GearView() {
                           value={attr.value}
                           style={{ width: 90 }}
                           onChange={(e) => {
+                            const raw = Number(e.target.value);
+                            const max = gearAttrMax(attr.type, editing.prototype);
+                            const value = max != null ? Math.min(raw, max) : raw;
                             const attrs = [...editing.attributes];
-                            attrs[idx] = { ...attr, value: Number(e.target.value) };
+                            attrs[idx] = { ...attr, value };
                             setEditing({ ...editing, attributes: attrs });
                           }}
                         />

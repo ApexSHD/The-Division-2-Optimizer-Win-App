@@ -138,7 +138,7 @@ export const GEAR_CORE_LABELS: Record<GearCoreType, string> = {
 export const GEAR_ATTR_TYPES: Record<GearAttrKey, { label: string; group: string; max: number | null }> = {
   chc: { label: "Kritische Trefferchance", group: "Offensiv (Rot)", max: 6 },
   chd: { label: "Kritischer Trefferschaden", group: "Offensiv (Rot)", max: 12 },
-  hsd: { label: "Kopfschussschaden", group: "Offensiv (Rot)", max: 11 },
+  hsd: { label: "Kopfschussschaden", group: "Offensiv (Rot)", max: 10 },
   wh: { label: "Waffenhandhabung", group: "Offensiv (Rot)", max: 8 },
   armorregen: { label: "Rüstungsregeneration", group: "Defensiv (Blau)", max: 4925 },
   explres: { label: "Explosionswiderstand", group: "Defensiv (Blau)", max: 10 },
@@ -171,6 +171,12 @@ export function gearCoreMax(core: GearCoreType, isPrototype: boolean): number {
 export function gearCoreDisplay(core: GearCoreType, value: number): string {
   return core === "skill" ? `Skill-Tier ${value.toLocaleString("de-DE")}` : `${value.toLocaleString("de-DE")}`;
 }
+
+export const GEAR_REGULAR_ATTR_KEYS: GearAttrKey[] = [
+  "chc", "chd", "hsd", "wh",
+  "armorregen", "health", "explres", "hazard",
+  "skillhaste", "repair", "skilldmg", "status",
+];
 
 export function gearAttrMax(key: GearAttrKey, isPrototype: boolean): number | null {
   const cfg = GEAR_ATTR_TYPES[key];
