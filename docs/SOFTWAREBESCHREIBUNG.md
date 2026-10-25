@@ -43,9 +43,10 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 
 ### 4.1 Globale Einstellungen / Charakter
 
-- Basiswerte des Agenten (z. B. Kritische Trefferchance CHC, Kritischer Trefferschaden CHD, Waffenschaden WD).
-- Auswahl von Spezialisierung, Spielmodus (PvE/PvP) und aktivem Saisonstand (z. B. Y8S3).
-- Live-Zusammenfassung der Gesamtwerte in einer Seitenleiste.
+- SHD-Level (Standard 1.000) als Basis der Watch-Boni: 16 Attribute in den Kategorien Angriff (Offensive), Verteidigung (Defensive), Handhabung (Weapon Handling) und Nutzen (Utility); die Boni steigen mit bis zu 50 Stufen pro Attribut (z. B. Waffenschaden +10,0 % bei +0,2 % pro Stufe) und fließen in die spätere Kalkulation ein.
+- Auswahl von Spezialisierung, Spielmodus (PvE/PvP; PvP wird später integriert) und aktivem Saisonstand (z. B. Y8S3).
+- Einstellungen für Optimierung: Zielwert kritische Trefferchance (Standard 50 %, Bereich 10–60 %), Schalter für Waffen-Talente, Ausrüstungs-Talente (Weste/Rucksack) und exotische Gear-Perks sowie Gegnerprofil (Rüstungs-/Lebensenergie-/Ungedeckt-/Kopfschuss-Anteile für DTA / DTH / DTToOC / HSD).
+- Live-Zusammenfassung der Gesamtwerte in einer Seitenleiste (vollständig mit der Berechnungs-Engine; bis dahin Anzeige der SHD-Uhr-Boni).
 
 ### 4.2 Waffen-Inventar
 
