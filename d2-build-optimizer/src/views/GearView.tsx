@@ -5,12 +5,14 @@ import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
 import { getDb, GEAR_TALENTS } from "../data/db";
-import type { GearPreset } from "../data/db";
+import type { GearPreset, BrandItemPreset, GearSetItemPreset } from "../data/db";
 import type { GearPiece, GearSlot, GearCoreType, GearAttrKey } from "../data/sampleData";
 import {
   GEAR_CORE_LABELS,
+  GEAR_CORE_MAX,
   GEAR_ATTR_TYPES,
   gearAttrMax,
+  gearCoreMax,
 } from "../data/sampleData";
 import { gearToCsv, gearFromCsv } from "../data/gearCsv";
 
@@ -21,6 +23,7 @@ function newGear(id: string): GearPiece {
     brand: "",
     brandType: "brand",
     core: "wd",
+    coreValue: gearCoreMax("wd", true),
     attributes: [],
     talent: null,
     prototype: true,
@@ -34,23 +37,31 @@ export function GearView() {
   const [editing, setEditing] = useState<GearPiece | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [presets, setPresets] = useState<GearPreset[]>([]);
+  const [brands, setBrands] = useState<BrandItemPreset[]>([]);
+  const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
   const [filterSlot, setFilterSlot] = useState<"" | GearSlot>("");
   const [filterBrand, setFilterBrand] = useState("");
   const [filterRarity, setFilterRarity] = useState<"" | "brand" | "gearset" | "named" | "exotic">("");
 
   useEffect(() => {
-    getDb().then((db) => setPresets(db.gear)).catch(() => setPresets([]));
+    getDb()
+      .then((db) => {
+        setPresets(db.gear);
+        setBrands(db.brandItems);
+        setGearSets(db.gearSetItems);
+      })
+      .catch(() => {
+        setPresets([]);
+        setBrands([]);
+        setGearSets([]);
+      });
   }, []);
 
   const presetsForSlot = (slot: GearSlot) => presets.filter((p) => p.slot === slot);
-  const isDbItem = editing ? presets.some((p) => p.name === editing.brand && p.slot === editing.slot) : false;
+  const dbItem = editing ? presets.find((p) => p.name === editing.brand && p.slot === editing.slot) : undefined;
+  const isDbItem = Boolean(dbItem);
   const isExotic = editing?.brandType === "exotic";
-  const fixedAttrs = isDbItem
-    ? presets.find((p) => p.name === editing!.brand && p.slot === editing!.slot)?.fixedAttrs ?? []
-    : [];
-  const fixedPerk = isDbItem
-    ? presets.find((p) => p.name === editing!.brand && p.slot === editing!.slot)?.perk ?? ""
-    : "";
+  const usedAttrTypes = new Set(editing?.attributes.map((a) => a.type) ?? []);
   const talentOptions =
     editing && (editing.slot === "chest" || editing.slot === "backpack") && editing.brandType === "brand"
       ? GEAR_TALENTS.filter((tal) => tal.slot === editing.slot)
@@ -77,12 +88,14 @@ export function GearView() {
   function applyPreset(p: GearPreset) {
     if (!editing) return;
     const isEx = p.cls === "exotic";
+    const core = (p.core === "Waffenschaden" ? "wd" : p.core === "Panzerung" ? "armour" : p.core === "Skill-Hastung" ? "skill" : "wd") as GearCoreType;
     setEditing({
       ...editing,
       slot: p.slot,
       brand: p.name,
       brandType: isEx ? "exotic" : "named",
-      core: (p.core === "Waffenschaden" ? "wd" : p.core === "Panzerung" ? "armour" : p.core === "Skill-Hastung" ? "skill" : "wd") as GearCoreType,
+      core,
+      coreValue: core === "wd" ? GEAR_CORE_MAX.wd : core === "armour" ? GEAR_CORE_MAX.armour : GEAR_CORE_MAX.skill,
       attributes: p.fixedAttrs.map((a) => ({ type: a.type as GearAttrKey, value: a.value })),
       talent: p.perk || null,
       prototype: isEx ? false : true,
@@ -91,7 +104,7 @@ export function GearView() {
 
   function onSelectSlot(slot: GearSlot) {
     if (!editing) return;
-    const stillValid = editing.brandType !== "brand" && presets.some((p) => p.name === editing.brand && p.slot === slot);
+    const stillValid = editing.brandType !== "brand" && editing.brandType !== "gearset" && presets.some((p) => p.name === editing.brand && p.slot === slot);
     setEditing({
       ...editing,
       slot,
@@ -176,6 +189,9 @@ export function GearView() {
   const attrText = (g: GearPiece) =>
     g.attributes.map((a) => `${GEAR_ATTR_TYPES[a.type]?.label ?? a.type} +${a.value}`).join(", ");
 
+  const coreText = (g: GearPiece) =>
+    `${GEAR_CORE_LABELS[g.core]}: ${g.core === "skill" ? `Tier ${g.coreValue}` : `+${g.coreValue.toLocaleString("de-DE")}${g.core === "wd" ? " %" : ""}`}`;
+
   const columns: Column<GearPiece>[] = [
     {
       key: "slot",
@@ -208,8 +224,8 @@ export function GearView() {
     {
       key: "core",
       label: "1. Attribut",
-      render: (g) => GEAR_CORE_LABELS[g.core],
-      sortValue: (g) => GEAR_CORE_LABELS[g.core],
+      render: (g) => coreText(g),
+      sortValue: (g) => g.coreValue,
     },
     {
       key: "attributes",
@@ -219,7 +235,7 @@ export function GearView() {
     },
     {
       key: "talent",
-      label: "Talent",
+      label: "Talent / Perk",
       render: (g) => g.talent ?? "\u2013",
       sortValue: (g) => g.talent ?? "",
     },
@@ -333,19 +349,21 @@ export function GearView() {
                     const first = presetsForSlot(editing.slot).find((p) =>
                       brandType === "exotic" ? p.cls === "exotic" : p.cls === "named",
                     );
-                    setEditing({
-                      ...editing,
-                      brandType,
-                      brand: first ? first.name : "",
-                      attributes: first ? first.fixedAttrs.map((a) => ({ type: a.type as GearAttrKey, value: a.value })) : [],
-                      talent: first?.perk || null,
-                      prototype: brandType === "exotic" ? false : true,
-                      core: first ? ((first.core === "Waffenschaden" ? "wd" : first.core === "Panzerung" ? "armour" : first.core === "Skill-Hastung" ? "skill" : "wd") as GearCoreType) : editing.core,
-                    });
+                    if (first) applyPreset(first);
+                    else
+                      setEditing({
+                        ...editing,
+                        brandType,
+                        brand: "",
+                        attributes: [],
+                        talent: null,
+                        prototype: brandType === "exotic" ? false : true,
+                      });
                   }
                 }}
               >
                 <option value="brand">Brand-Set (High-End)</option>
+                <option value="gearset">Gear-Set (gr\u00fcn)</option>
                 <option value="named">Named</option>
                 <option value="exotic">Exotic</option>
               </select>
@@ -359,26 +377,42 @@ export function GearView() {
                     if (p) applyPreset(p);
                   }}
                 >
-                  {!isDbItem && <option value="">\u2013 Bitte w\u00e4hlen \u2013</option>}
+                  {!isDbItem && <option value="">\u2013 Bitte ausw\u00e4hlen \u2013</option>}
                   {presetsForSlot(editing.slot)
                     .filter((p) => (editing.brandType === "exotic" ? p.cls === "exotic" : p.cls === "named"))
                     .map((p) => (
                       <option key={p.name} value={p.name}>{p.name}</option>
                     ))}
                 </select>
-                {isDbItem && fixedPerk && (
-                  <p className="settings-hint">Perk: {fixedPerk}</p>
+                {isDbItem && dbItem?.perk && (
+                  <p className="settings-hint">{dbItem.perk}</p>
                 )}
               </Field>
             )}
             {editing.brandType === "brand" && (
               <Field label="Marke">
-                <input
+                <select
                   value={editing.brand}
-                  autoFocus
-                  placeholder="z. B. Ceska, Fenris, Walker"
                   onChange={(e) => setEditing({ ...editing, brand: e.target.value })}
-                />
+                >
+                  <option value="">\u2013 Bitte ausw\u00e4hlen \u2013</option>
+                  {brands.map((b) => (
+                    <option key={b.brand} value={b.brand}>{b.brand}</option>
+                  ))}
+                </select>
+              </Field>
+            )}
+            {editing.brandType === "gearset" && (
+              <Field label="Gear-Set">
+                <select
+                  value={editing.brand}
+                  onChange={(e) => setEditing({ ...editing, brand: e.target.value })}
+                >
+                  <option value="">\u2013 Bitte ausw\u00e4hlen \u2013</option>
+                  {gearSets.map((gs) => (
+                    <option key={gs.key} value={gs.name}>{gs.name}</option>
+                  ))}
+                </select>
               </Field>
             )}
 
@@ -387,7 +421,14 @@ export function GearView() {
                 type="checkbox"
                 checked={editing.prototype}
                 disabled={isExotic}
-                onChange={(e) => setEditing({ ...editing, prototype: isExotic ? false : e.target.checked })}
+                onChange={(e) => {
+                  const prototype = isExotic ? false : e.target.checked;
+                  setEditing({
+                    ...editing,
+                    prototype,
+                    coreValue: isDbItem ? editing.coreValue : gearCoreMax(editing.core, prototype),
+                  });
+                }}
               />
               <span className="check-text">Prototyp</span>
             </label>
@@ -395,29 +436,48 @@ export function GearView() {
             <Field label="1. Attribut (Kern)">
               {isDbItem ? (
                 <>
-                  <input value={GEAR_CORE_LABELS[editing.core]} readOnly />
+                  <input value={`${GEAR_CORE_LABELS[editing.core]}: ${coreText(editing).split(": ")[1]}`} readOnly />
                   {isExotic && <p className="settings-hint">Exotische Items haben fixe Werte.</p>}
                 </>
               ) : (
-                <select
-                  value={editing.core}
-                  onChange={(e) => setEditing({ ...editing, core: e.target.value as GearCoreType })}
-                >
-                  {(Object.keys(GEAR_CORE_LABELS) as GearCoreType[]).map((k) => (
-                    <option key={k} value={k}>{GEAR_CORE_LABELS[k]}</option>
-                  ))}
-                </select>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <select
+                    value={editing.core}
+                    onChange={(e) => {
+                      const core = e.target.value as GearCoreType;
+                      setEditing({ ...editing, core, coreValue: gearCoreMax(core, editing.prototype) });
+                    }}
+                  >
+                    {(Object.keys(GEAR_CORE_LABELS) as GearCoreType[]).map((k) => (
+                      <option key={k} value={k}>{GEAR_CORE_LABELS[k]}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={0}
+                    step={editing.core === "armour" ? 1000 : 0.5}
+                    value={editing.coreValue}
+                    style={{ width: 110 }}
+                    onChange={(e) => setEditing({ ...editing, coreValue: Number(e.target.value) })}
+                  />
+                </div>
+              )}
+              {!isDbItem && (
+                <p className="settings-hint">
+                  Max (God Roll{editing.prototype ? ", Prototyp +50 %" : ""}):{" "}
+                  {editing.core === "skill" ? "Tier 1" : gearCoreMax(editing.core, editing.prototype).toLocaleString("de-DE")}
+                </p>
               )}
             </Field>
 
             {[0, 1].map((idx) => {
               const attr = editing.attributes[idx];
-              const isFixed = isDbItem && isExotic && fixedAttrs[idx];
+              const isFixed = isDbItem && isExotic;
               return (
                 <Field key={idx} label={`${idx + 2}. Attribut${attr ? "" : " (optional)"}`}>
                   {isFixed ? (
                     <input
-                      value={`${GEAR_ATTR_TYPES[attr.type as GearAttrKey]?.label ?? attr.type} +${attr.value}`}
+                      value={attr ? `${GEAR_ATTR_TYPES[attr.type as GearAttrKey]?.label ?? attr.type} +${attr.value}` : "\u2013 nicht m\u00f6glich \u2013"}
                       readOnly
                     />
                   ) : (
@@ -437,10 +497,12 @@ export function GearView() {
                           setEditing({ ...editing, attributes: attrs.filter(Boolean) });
                         }}
                       >
-                        <option value="">\u2013 keins \u2013</option>
-                        {(Object.keys(GEAR_ATTR_TYPES) as GearAttrKey[]).map((k) => (
-                          <option key={k} value={k}>{GEAR_ATTR_TYPES[k].label}</option>
-                        ))}
+                        <option value="">\u2013 nicht belegt \u2013</option>
+                        {(Object.keys(GEAR_ATTR_TYPES) as GearAttrKey[])
+                          .filter((k) => k === attr?.type || !usedAttrTypes.has(k))
+                          .map((k) => (
+                            <option key={k} value={k}>{GEAR_ATTR_TYPES[k].label}</option>
+                          ))}
                       </select>
                       {attr && (
                         <input
@@ -469,7 +531,10 @@ export function GearView() {
 
             <Field label="Talent">
               {isDbItem ? (
-                <input value={editing.talent ?? ""} readOnly />
+                <>
+                  <input value={editing.talent ?? ""} readOnly />
+                  {dbItem?.perk && <p className="settings-hint">{dbItem.perk}</p>}
+                </>
               ) : talentOptions.length > 0 ? (
                 <select
                   value={editing.talent ?? ""}
@@ -482,7 +547,11 @@ export function GearView() {
                 </select>
               ) : (
                 <p className="settings-hint" style={{ margin: 0 }}>
-                  Freie Talente nur bei High-End Weste/Rucksack; Named/Exotic-Perks kommen fix aus der Datenbank.
+                  {isExotic
+                    ? "Exotische Items haben immer ein besonderes Talent/Perk aus der Datenbank."
+                    : editing.brandType === "named"
+                      ? "Named-Items haben einen fixen Perk aus der Datenbank (oder ein besonderes Attribut statt Talent)."
+                      : "Freie Talente nur bei High-End Weste/Rucksack."}
                 </p>
               )}
               {editing.talent && talentOptions.some((tal) => tal.label === editing.talent) && (

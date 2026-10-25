@@ -246,10 +246,17 @@ export interface BrandItemPreset {
   slots: GearSlot[];
 }
 
+export interface GearSetItemPreset {
+  key: string;
+  name: string;
+  slots: GearSlot[];
+}
+
 export interface Db {
   weapons: WeaponPreset[];
   talents: TalentEntry[];
   brandItems: BrandItemPreset[];
+  gearSetItems: GearSetItemPreset[];
   displayTalents: DisplayTalent[];
   talentDisplayByType: Record<string, DisplayTalent[]>;
   gear: GearPreset[];
@@ -358,10 +365,17 @@ function load(): Db {
     slots: ["mask", "chest", "holster", "backpack", "gloves", "kneepads"],
   }));
 
+  const gearSetItems: GearSetItemPreset[] = Object.entries(gearFile.green_set_info).map(([key, gs]) => ({
+    key,
+    name: gs.name,
+    slots: ["mask", "chest", "holster", "backpack", "gloves", "kneepads"],
+  }));
+
   return {
     weapons,
     talents,
     brandItems,
+    gearSetItems,
     displayTalents,
     talentDisplayByType: Object.fromEntries(
       Object.entries(displayFile).filter(([k]) => k !== "Allgemeine Waffen"),
