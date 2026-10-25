@@ -9,6 +9,7 @@ import { getDb } from "../data/db";
 import type { WeaponPreset, DisplayTalent } from "../data/db";
 import { TALENT_DISPLAY_TYPE_MAP, talentsAllowedForWeapon, carrierForTalent } from "../data/db";
 import type { Weapon, WeaponType, WeaponAttrKey } from "../data/sampleData";
+import { weaponsToCsv, weaponsFromCsv } from "../data/weaponCsv";
 import {
   WEAPON_ATTR_LABELS,
   WEAPON_CORE2_BY_TYPE,
@@ -32,8 +33,8 @@ function newWeapon(id: string): Weapon {
     talent: "",
     modSlots: [...ALL_MOD_SLOTS],
     knowHow: 30,
-    isPrototype: false,
-    attributes: godRollAttributes("ar", false),
+    isPrototype: true,
+    attributes: godRollAttributes("ar", true),
   };
 }
 
@@ -46,6 +47,9 @@ export function WeaponsView() {
   const [presets, setPresets] = useState<WeaponPreset[]>([]);
   const [displayTalents, setDisplayTalents] = useState<DisplayTalent[]>([]);
   const [talentDisplayByType, setTalentDisplayByType] = useState<Record<string, DisplayTalent[]>>({});
+  const [filterType, setFilterType] = useState<"" | WeaponType>("");
+  const [filterRarity, setFilterRarity] = useState<"" | "highend" | "named" | "exotic">("");
+  const [filterTalent, setFilterTalent] = useState("");
 
   useEffect(() => {
     getDb()
@@ -135,6 +139,56 @@ export function WeaponsView() {
     store.setStatus(`${editing.name} gelöscht`);
   }
 
+  async function onExportCsv() {
+    if (store.weapons.length === 0) {
+      store.setStatus("Keine Waffen zum Exportieren");
+      return;
+    }
+    const csv = weaponsToCsv(store.weapons);
+    const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+    const suggestedName = `waffen-inventar-${new Date().toISOString().slice(0, 10)}.csv`;
+    if (isTauri) {
+      const path = prompt(`Dateipfad für den CSV-Export eingeben`, `${store.storagePath ?? "."}${store.storagePath ? "/" : ""}${suggestedName}`);
+      if (!path) return;
+      try {
+        const { invoke } = await import("@tauri-apps/api/core");
+        await invoke("write_text_file", { path, content: csv });
+        store.setStatus(`CSV exportiert: ${path}`);
+      } catch (e) {
+        store.setStatus(`CSV-Export fehlgeschlagen: ${e}`);
+      }
+    } else {
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = suggestedName;
+      a.click();
+      URL.revokeObjectURL(url);
+      store.setStatus("CSV exportiert (Download)");
+    }
+  }
+
+  async function onImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const { weapons, skippedRows } = weaponsFromCsv(text, () =>
+        `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+      );
+      if (weapons.length === 0) {
+        store.setStatus("CSV-Import: keine gültigen Waffen gefunden");
+        return;
+      }
+      for (const w of weapons) store.addWeapon(w);
+      store.setStatus(`${weapons.length} Waffe(n) importiert${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}`);
+    } catch (err) {
+      store.setStatus(`CSV-Import fehlgeschlagen: ${err}`);
+    }
+  }
+
   const columns: Column<Weapon>[] = [
     {
       key: "name",
@@ -160,9 +214,34 @@ export function WeaponsView() {
       sortValue: (w) => w.rarity,
     },
     {
+      key: "prototype",
+      label: "Prototyp",
+      render: (w) => (w.isPrototype ? "ja" : "nein"),
+      sortValue: (w) => (w.isPrototype ? 1 : 0),
+    },
+    {
+      key: "attr1",
+      label: "Attribut 1",
+      render: (w) => `WD +${w.attributes.core1} %`,
+      sortValue: (w) => w.attributes.core1,
+    },
+    {
+      key: "attr2",
+      label: "Attribut 2",
+      render: (w) => `${WEAPON_ATTR_LABELS[w.attributes.core2Type]} +${w.attributes.core2Val} %`,
+      sortValue: (w) => w.attributes.core2Val,
+    },
+    {
+      key: "attr3",
+      label: "Attribut 3",
+      render: (w) => `${WEAPON_ATTR_LABELS[w.attributes.minorType]} +${w.attributes.minorVal} %`,
+      sortValue: (w) => w.attributes.minorVal,
+    },
+    {
       key: "talent",
       label: t.weapons.columns.talent,
       render: (w) => w.talent,
+      sortValue: (w) => w.talent,
     },
     {
       key: "dps",
@@ -191,12 +270,62 @@ export function WeaponsView() {
         columns={columns}
         rowKey={(w) => w.id}
         searchPlaceholder={t.weapons.search}
-        filterFn={(w, q) => w.name.toLowerCase().includes(q) || w.talent.toLowerCase().includes(q)}
+        filterFn={(w, q) =>
+          (w.name.toLowerCase().includes(q) || w.talent.toLowerCase().includes(q)) &&
+          (!filterType || w.type === filterType) &&
+          (!filterRarity || w.rarity === filterRarity) &&
+          (!filterTalent || w.talent === filterTalent)
+        }
         onRowDoubleClick={openEdit}
         toolbar={
-          <button className="btn btn-accent" onClick={openNew}>
-            + {t.weapons.new}
-          </button>
+          <>
+            <select
+              aria-label="Typ-Filter"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as "" | WeaponType)}
+              style={{ minWidth: 130 }}
+            >
+              <option value="">{t.weapons.filterType}</option>
+              {Object.entries(t.weapons.types).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Art-Filter"
+              value={filterRarity}
+              onChange={(e) => setFilterRarity(e.target.value as "" | "highend" | "named" | "exotic")}
+              style={{ minWidth: 120 }}
+            >
+              <option value="">{t.weapons.filterRarity}</option>
+              <option value="highend">High-End</option>
+              <option value="named">Named</option>
+              <option value="exotic">Exotic</option>
+            </select>
+            <select
+              aria-label="Talent-Filter"
+              value={filterTalent}
+              onChange={(e) => setFilterTalent(e.target.value)}
+              style={{ minWidth: 140 }}
+            >
+              <option value="">Alle Talente</option>
+              {[...new Set(store.weapons.map((w) => w.talent).filter(Boolean))].sort().map((tal) => (
+                <option key={tal} value={tal}>{tal}</option>
+              ))}
+            </select>
+            <button className="btn" onClick={onExportCsv}>CSV exportieren</button>
+            <label className="btn" style={{ cursor: "pointer" }}>
+              CSV importieren
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                style={{ display: "none" }}
+                onChange={onImportCsv}
+              />
+            </label>
+            <button className="btn btn-accent" onClick={openNew}>
+              + {t.weapons.new}
+            </button>
+          </>
         }
       />
 
