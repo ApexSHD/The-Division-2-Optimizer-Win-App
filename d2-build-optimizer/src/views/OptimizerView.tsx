@@ -3,7 +3,31 @@ import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 import { optimizeBuilds } from "../data/damage";
-import type { OptimizerResult } from "../data/damage";
+import type { OptimizerResult, SlotExplanation } from "../data/damage";
+import { GEAR_CORE_LABELS } from "../data/sampleData";
+import type { GearCoreType } from "../data/sampleData";
+
+function SlotExplanationBox({ exp }: { exp: SlotExplanation }) {
+  const g = exp.chosen;
+  return (
+    <div className="slot-explanation">
+      <div><strong>{g.brand}</strong> · {GEAR_CORE_LABELS[g.core as GearCoreType]}{g.talent ? ` · Talent ${g.talent}` : ""} · <span className="accent">Score {exp.score} %</span></div>
+      <div style={{ color: "var(--text-dim, #aaa)", fontSize: 12 }}>
+        Warum gewählt? {exp.reason}.
+      </div>
+      {exp.runnerUp && (
+        <div style={{ color: "var(--text-dim, #aaa)", fontSize: 12 }}>
+          Zweitbeste Alternative: {exp.runnerUp.item.brand} ({exp.runnerUp.reason}) — ergäbe {exp.runnerUp.dpsDelta.toLocaleString("de-DE", { maximumFractionDigits: 0 })} weniger DPS.
+        </div>
+      )}
+      {exp.calibrationHint && (
+        <div className="slot-calibration">
+          🔧 Kalibrierung: {exp.calibrationHint.attributeLabel} liegt bei {exp.calibrationHint.currentPercent} % ({exp.calibrationHint.currentValue.toLocaleString("de-DE")} / {exp.calibrationHint.maxValue.toLocaleString("de-DE")}) — ziehe das Attribut auf Max, um das volle Potenzial zu entfalten.
+        </div>
+      )}
+    </div>
+  );
+}
 import { getDb } from "../data/db";
 import type { GearSetItemPreset } from "../data/db";
 
@@ -170,7 +194,15 @@ export function OptimizerView() {
                   <td>+{r.stats.chd.toLocaleString("de-DE")} %</td>
                   <td>{r.damage.avgBulletDmg.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</td>
                   <td><strong>{r.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</strong></td>
-                  <td style={{ fontSize: 11 }}>{r.reason}</td>
+                  <td style={{ fontSize: 11 }}>
+                    {r.reason}
+                    <details style={{ marginTop: 4 }}>
+                      <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Warum diese Teile?</summary>
+                      {r.slotExplanations.map((exp) => (
+                        <SlotExplanationBox key={exp.chosen.id} exp={exp} />
+                      ))}
+                    </details>
+                  </td>
                 </tr>
               ))}
             </tbody>

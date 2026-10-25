@@ -1,5 +1,6 @@
-import type { Weapon, GearSlot } from "./sampleData";
+import type { Weapon, GearSlot, GearAttr, GearAttrKey } from "./sampleData";
 import type { GearPiece } from "./sampleData";
+import { GEAR_ATTR_TYPES, gearAttrMax } from "./sampleData";
 import type { OptimizationSettings } from "../store";
 import { shdBonusFor } from "../store";
 
@@ -149,6 +150,27 @@ export function computeDamage(
 }
 
 
+export interface CalibrationHint {
+  attribute: string;
+  attributeLabel: string;
+  currentPercent: number;
+  currentValue: number;
+  maxValue: number;
+}
+
+export interface SlotExplanation {
+  slot: GearSlot;
+  chosen: GearPiece;
+  score: number;
+  reason: string;
+  runnerUp: {
+    item: GearPiece;
+    dpsDelta: number;
+    reason: string;
+  } | null;
+  calibrationHint: CalibrationHint | null;
+}
+
 export interface OptimizerResult {
   rank: number;
   weapon: Weapon;
@@ -158,9 +180,100 @@ export interface OptimizerResult {
   meetsTargetChc: boolean;
   gearSetCount: number;
   reason: string;
+  slotExplanations: SlotExplanation[];
 }
 
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+
+const DMG_ATTR_KEYS: GearAttrKey[] = ["chc", "chd", "hsd", "dta", "dth", "dttooc", "wd"];
+
+function bestDamageAttr(g: GearPiece): { attr: GearAttr; percent: number } | null {
+  const attrs = g.attributes.filter((a) => (DMG_ATTR_KEYS as string[]).includes(a.type));
+  if (attrs.length === 0) return null;
+  let best: { attr: GearAttr; percent: number } | null = null;
+  for (const attr of attrs) {
+    const max = gearAttrMax(attr.type, g.prototype);
+    if (max == null || max <= 0) continue;
+    const percent = (attr.value / max) * 100;
+    if (!best || percent > best.percent) best = { attr, percent };
+  }
+  return best;
+}
+
+function calibrationHintFor(g: GearPiece): CalibrationHint | null {
+  const best = bestDamageAttr(g);
+  if (!best) return null;
+  const max = gearAttrMax(best.attr.type, g.prototype);
+  if (max == null || max <= 0) return null;
+  if (best.percent >= 99.5) return null;
+  return {
+    attribute: best.attr.type,
+    attributeLabel: GEAR_ATTR_TYPES[best.attr.type].label,
+    currentPercent: Number(best.percent.toFixed(1)),
+    currentValue: best.attr.value,
+    maxValue: max,
+  };
+}
+
+function slotExplanationsFor(
+  combo: GearPiece[],
+  weapon: Weapon,
+  shdLevel: number,
+  profile: EnemyProfile,
+  bySlot: Map<GearSlot, GearPiece[]>,
+  settings: OptimizationSettings,
+): SlotExplanation[] {
+  const chosenIds = new Set(combo.map((g) => g.id));
+  return combo.map((chosen) => {
+    const others = (bySlot.get(chosen.slot) ?? []).filter((g) => !chosenIds.has(g.id));
+    const baseStats = aggregateBuild(combo, shdLevel);
+    const baseDamage = computeDamage(weapon, baseStats, profile);
+
+    let runnerUp: SlotExplanation["runnerUp"] = null;
+    for (const other of others) {
+      const stats = aggregateBuild(
+        combo.map((g) => (g.slot === chosen.slot ? other : g)),
+        shdLevel,
+      );
+      const damage = computeDamage(weapon, stats, profile);
+      const delta = baseDamage.effectiveDps - damage.effectiveDps;
+      if (!runnerUp || delta > runnerUp.dpsDelta) {
+        runnerUp = {
+          item: other,
+          dpsDelta: delta,
+          reason: other.brand === chosen.brand ? "gleiche Marke" : "andere Marke",
+        };
+      }
+    }
+
+    const bestAttr = bestDamageAttr(chosen);
+    let reason = bestAttr
+      ? `${GEAR_ATTR_TYPES[bestAttr.attr.type].label} ${bestAttr.percent.toFixed(0)} % vom Maximalwert`
+      : chosen.talent
+        ? `Talent ${chosen.talent}`
+        : `Bester verfügbarbarer ${chosen.slot}-Kandidat`;
+
+    let score = 100;
+    if (runnerUp && baseDamage.effectiveDps > 0) {
+      score = Number(
+        ((baseDamage.effectiveDps / (baseDamage.effectiveDps + runnerUp.dpsDelta)) * 100).toFixed(1),
+      );
+    }
+    if (settings.targetGearSet && chosen.brandType === "gearset") {
+      const t = settings.targetGearSet.trim().toLowerCase();
+      if (chosen.brand.toLowerCase().includes(t)) reason += ` · passt zum Set-Ziel ${settings.targetGearSet}`;
+    }
+
+    return {
+      slot: chosen.slot,
+      chosen,
+      score,
+      reason,
+      runnerUp,
+      calibrationHint: calibrationHintFor(chosen),
+    };
+  });
+}
 
 export function optimizeBuilds(
   weapons: Weapon[],
@@ -226,6 +339,7 @@ export function optimizeBuilds(
         meetsTargetChc,
         gearSetCount,
         reason: reasonParts.join(" · "),
+        slotExplanations: [],
       });
     }
   }
@@ -235,7 +349,17 @@ export function optimizeBuilds(
     return b.damage.effectiveDps - a.damage.effectiveDps;
   });
   const top = results.slice(0, maxResults);
-  top.forEach((r, i) => (r.rank = i + 1));
+  top.forEach((r, i) => {
+    r.rank = i + 1;
+    r.slotExplanations = slotExplanationsFor(
+      r.gear,
+      r.weapon,
+      shdLevel,
+      profile,
+      bySlot,
+      settings,
+    );
+  });
   return top;
 }
 
