@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Weapon, GearPiece, Mod, BrandSet, Build, GearSlot } from "./data/sampleData";
-import { sampleWeapons, sampleGear, sampleMods, sampleBrandSets, sampleGearSets, sampleBuilds, normalizeWeapon } from "./data/sampleData";
+import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon } from "./data/sampleData";
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
@@ -111,9 +111,9 @@ function defaultUserData(): UserData {
     lang: "de",
     agent: { shdLevel: 1000, spec: "sharpshooter", mode: "pve", season: "y8s3" },
     optimization: DEFAULT_OPTIMIZATION,
-    weapons: sampleWeapons,
-    gear: sampleGear,
-    builds: sampleBuilds,
+    weapons: [],
+    gear: [],
+    builds: [],
   };
 }
 
@@ -197,6 +197,7 @@ export interface AppState {
   undo: () => void;
   redo: () => void;
   storagePath: string | null;
+  setStoragePath: (path: string) => void;
   loadError: string | null;
 }
 
@@ -393,6 +394,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     undo,
     redo,
     storagePath,
+    setStoragePath,
     loadError,
   };
 

@@ -1,10 +1,40 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 
 export function SettingsView() {
   const store = useStore();
   const { t, lang, setLang } = useContext(I18nContext);
+  const [changingDir, setChangingDir] = useState(false);
+
+  async function onChangeStorageDir() {
+    const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+    if (!isTauri) {
+      store.setStatus("Speicherort ändern nur in der Desktop-App möglich");
+      return;
+    }
+    const input = prompt(
+      "Neues Speicherverzeichnis (vollständiger Pfad):",
+      store.storagePath ?? "",
+    );
+    if (!input || !input.trim()) return;
+    setChangingDir(true);
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const newDir = await invoke<string>("set_data_dir", { path: input.trim() });
+      store.setStoragePath(newDir);
+      const raw = await invoke<string | null>("load_user_data");
+      if (raw !== null) {
+        store.setStatus(`Speicherort geändert: ${newDir} (Daten übernommen)`);
+      } else {
+        store.setStatus(`Speicherort geändert: ${newDir} (leeres Inventar)`);
+      }
+    } catch (e) {
+      store.setStatus(`Speicherort ändern fehlgeschlagen: ${e}`);
+    } finally {
+      setChangingDir(false);
+    }
+  }
 
   return (
     <div style={{ maxWidth: 640 }}>
@@ -35,7 +65,16 @@ export function SettingsView() {
       <h3 style={{ marginTop: 24 }}>{t.settings.section.data}</h3>
       <div className="field" style={{ marginTop: 8 }}>
         <label>{t.settings.storage}</label>
-        <input readOnly value={store.storagePath ?? t.settings.storagePath} />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input readOnly value={store.storagePath ?? t.settings.storagePath} />
+          <button className="btn" onClick={onChangeStorageDir} disabled={changingDir}>
+            {changingDir ? "Ändere…" : "Ändern…"}
+          </button>
+        </div>
+        <p className="settings-hint">
+          Die Benutzerdaten liegen als "user-data.json" in diesem Verzeichnis (inkl. .bak-Sicherung).
+          Beim Ändern werden vorhandene Daten übernommen, falls im neuen Verzeichnis noch keine liegen.
+        </p>
       </div>
       <div className="field" style={{ marginTop: 12 }}>
         <label>{t.settings.backups}</label>
