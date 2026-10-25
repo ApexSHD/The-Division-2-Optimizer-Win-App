@@ -185,8 +185,9 @@ function ValuesSidebar() {
         <div className="stat-value">—</div>
       </div>
       <h3>{t.sidebar.setBonuses}</h3>
-      <div className="set-bonus">2× Walker: Panzerung +15 %</div>
-      <div className="set-bonus">3× Grupo Sombra: CHC +10 %</div>
+      <div className="set-bonus" style={{ opacity: 0.6 }}>
+        Werden automatisch aus dem erfassten Inventar berechnet (mit der Berechnungs-Engine).
+      </div>
     </aside>
   );
 }
