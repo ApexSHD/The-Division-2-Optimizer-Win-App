@@ -188,8 +188,23 @@ export function WeaponsView() {
         store.setStatus("CSV-Import: keine gültigen Waffen gefunden");
         return;
       }
-      for (const w of weapons) store.addWeapon(w);
-      store.setStatus(`${weapons.length} Waffe(n) importiert${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}`);
+      const seen = new Set(store.weapons.map((w) => `${w.name}::${w.type}`));
+      let imported = 0;
+      let duplicates = 0;
+      for (const w of weapons) {
+        const key = `${w.name}::${w.type}`;
+        if (seen.has(key)) {
+          duplicates++;
+          continue;
+        }
+        seen.add(key);
+        store.addWeapon(w);
+        imported++;
+      }
+      const parts = [`${imported} Waffe(n) importiert`];
+      if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen`);
+      if (skippedRows) parts.push(`${skippedRows} Zeile(n) ungültig`);
+      store.setStatus(parts.join(", "));
     } catch (err) {
       store.setStatus(`CSV-Import fehlgeschlagen: ${err}`);
     }
@@ -251,7 +266,7 @@ export function WeaponsView() {
     },
     {
       key: "dps",
-      label: t.weapons.columns.dps,
+      label: "Basis-DPS",
       render: (w) => (w.baseDamage * w.rpm / 60).toLocaleString("de-DE", { maximumFractionDigits: 0 }),
       sortValue: (w) => (w.baseDamage * w.rpm) / 60,
     },
@@ -479,10 +494,16 @@ export function WeaponsView() {
                   })
                 }
               />
-              <p style={{ margin: "4px 0 0", fontSize: 11, color: "var(--text-dim, #aaa)" }}>
-                Max (God Roll{editing.isPrototype ? ", Prototyp +50 %" : ""}): {weaponAttrMax(WEAPON_CORE1_MAX, editing.isPrototype)} %
-                {editing.rarity === "exotic" ? " — Exote: Werte fix" : ""}
-              </p>
+              {(() => {
+                const max1 = weaponAttrMax(WEAPON_CORE1_MAX, editing.isPrototype);
+                const over1 = editing.attributes.core1 > max1;
+                return (
+                  <p style={{ margin: "4px 0 0", fontSize: 11, color: over1 ? "#e5544b" : "var(--text-dim, #aaa)" }}>
+                    {over1 ? "⚠ Wert über Max: " : ""}Max (God Roll{editing.isPrototype ? ", Prototyp +50 %" : ""}): {max1} %
+                    {editing.rarity === "exotic" ? " — Exote: Werte fix" : ""}
+                  </p>
+                );
+              })()}
             </Field>
             <Field label={`Kern 2: ${WEAPON_ATTR_LABELS[editing.attributes.core2Type]}`}>
               {WEAPON_CORE2_BY_TYPE[editing.type] === null ? (
@@ -572,7 +593,7 @@ export function WeaponsView() {
                 style={{ marginTop: 6 }}
               />
               <p style={{ margin: "4px 0 0", fontSize: 11, color: editing.attributes.minorVal > weaponAttrMax(WEAPON_MINOR_MAX[editing.attributes.minorType], editing.isPrototype) ? "#e5544b" : "var(--text-dim, #aaa)" }}>
-                Max (God Roll{editing.isPrototype ? ", Prototyp +50 %" : ""}): {weaponAttrMax(WEAPON_MINOR_MAX[editing.attributes.minorType], editing.isPrototype)} %
+                {editing.attributes.minorVal > weaponAttrMax(WEAPON_MINOR_MAX[editing.attributes.minorType], editing.isPrototype) ? "⚠ Wert über Max: " : ""}Max (God Roll{editing.isPrototype ? ", Prototyp +50 %" : ""}): {weaponAttrMax(WEAPON_MINOR_MAX[editing.attributes.minorType], editing.isPrototype)} %
                 {editing.rarity === "exotic" ? " — Exote: Werte fix" : ""}
               </p>
             </Field>

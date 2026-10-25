@@ -34,13 +34,13 @@ export const WEAPON_ATTR_LABELS: Record<WeaponAttrKey, string> = {
   chd: "Kritischer Trefferschaden (CHD)",
   dttooc: "Schaden gg. ungedeckte Ziele (DTToOC)",
   hsd: "Kopfschussschaden (HSD)",
-  dta: "R\u00fcstungsschaden (DTA)",
+  dta: "Rüstungsschaden (DTA)",
   rof: "Feuerrate (RoF)",
-  magSize: "Magazingr\u00f6\u00dfe",
+  magSize: "Magazingröße",
   handling: "Waffenhandling",
   range: "Optimale Reichweite",
   reloadSpeed: "Nachladetempo",
-  armorOnKill: "Gegner bei T\u00f6tung reparieren (AoK)",
+  armorOnKill: "Gegner bei Tötung reparieren (AoK)",
 };
 
 export const WEAPON_MINOR_MAX: Record<WeaponAttrKey, number> = {
