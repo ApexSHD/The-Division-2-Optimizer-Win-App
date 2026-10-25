@@ -24,6 +24,9 @@ export interface OptimizationSettings {
   enemyHealthShare: number;
   enemyOocShare: number;
   enemyHeadshotShare: number;
+  requiredChest: boolean;
+  requiredBackpack: boolean;
+  targetGearSet: string;
 }
 
 export const SHD_WATCH_ATTRIBUTES = {
@@ -78,6 +81,9 @@ export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
   enemyHealthShare: 20,
   enemyOocShare: 70,
   enemyHeadshotShare: 0,
+  requiredChest: false,
+  requiredBackpack: false,
+  targetGearSet: "",
 };
 
 export interface Profile {
