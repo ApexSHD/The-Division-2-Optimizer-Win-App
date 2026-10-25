@@ -427,7 +427,7 @@ export function WeaponsView() {
               </>
             )}
             {editing.rarity !== "exotic" && (
-              <Field label="Prototyp">
+              <div className="field">
                 <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
                   <input
                     type="checkbox"
@@ -442,14 +442,9 @@ export function WeaponsView() {
                       });
                     }}
                   />
-                  <span>Prototyp — alle Max-Werte +50 %</span>
+                  <span>Prototyp</span>
                 </label>
-                {editing.isPrototype && (
-                  <p style={{ margin: "4px 0 0", fontSize: 11, color: "var(--text-dim, #aaa)" }}>
-                    Prototyp: Know-How-Level fix 30
-                  </p>
-                )}
-              </Field>
+              </div>
             )}
             <Field label="Know-How-Level (0–30): Standard 30 % Waffenschaden">
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
