@@ -699,3 +699,94 @@ kbd {
 .dropdown-item:hover {
   background: var(--bg-hover);
 }
+
+/* ===== Build-Assistent (Wizard) ===== */
+.wizard-steps {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.wizard-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 12px;
+  background: var(--bg-panel);
+}
+
+.wizard-step.active {
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.wizard-step.done {
+  color: var(--text);
+}
+
+.wizard-step-num {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.wizard-step.active .wizard-step-num {
+  background: var(--accent);
+  color: #fff;
+}
+
+.role-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.role-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.role-tile:hover {
+  background: var(--bg-hover);
+}
+
+.role-tile.active {
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.role-tile-icon {
+  font-size: 20px;
+}
+
+.role-tile-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.role-tile-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+}
