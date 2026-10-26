@@ -846,3 +846,60 @@ kbd {
 .lock-row {
   margin: 0;
 }
+
+/* ===== Rechenweg / Herleitbarkeit ===== */
+.calc-path {
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  font-size: 12px;
+}
+
+.calc-formula {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+  font-family: Consolas, monospace;
+}
+
+.calc-table {
+  width: 100%;
+  font-size: 12px;
+}
+
+.calc-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.calc-val {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.calc-sources summary {
+  cursor: pointer;
+  color: var(--accent, #f57c1f);
+  font-size: 11px;
+}
+
+.source-list {
+  list-style: none;
+  padding: 4px 0 0;
+  margin: 0;
+}
+
+.source-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 0;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.source-val {
+  white-space: nowrap;
+}

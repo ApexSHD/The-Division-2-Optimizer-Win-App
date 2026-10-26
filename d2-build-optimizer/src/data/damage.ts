@@ -11,6 +11,12 @@ export interface EnemyProfile {
   headshot: number;
 }
 
+export interface StatSource {
+  itemId: string;
+  label: string;
+  value: number;
+}
+
 export interface BuildStats {
   wd: number;
   chc: number;
@@ -21,6 +27,7 @@ export interface BuildStats {
   dttooc: number;
   totalWd: number;
   amp: number[];
+  sources: Record<string, StatSource[]>;
 }
 
 export interface DamageBreakdown {
@@ -65,22 +72,37 @@ export function aggregateBuild(
     dttooc: 0,
     totalWd: 0,
     amp: [],
+    sources: {},
+  };
+  const addSource = (key: string, src: StatSource) => {
+    (stats.sources[key] ??= []).push(src);
   };
   for (const g of gear) {
-    if (g.core === "wd") stats.wd += g.coreValue;
+    const label = `${g.brand} (${g.slot})`;
+    if (g.core === "wd") {
+      stats.wd += g.coreValue;
+      addSource("wd", { itemId: g.id, label: `${label} — Kern`, value: g.coreValue });
+    }
     for (const a of g.attributes) {
+      const attrLabel = `${label} — ${GEAR_ATTR_TYPES[a.type]?.label ?? a.type}`;
       switch (a.type) {
-        case "chc": stats.chc += a.value; break;
-        case "chd": stats.chd += a.value; break;
-        case "hsd": stats.hsd += a.value; break;
-        case "dta": stats.dta += a.value; break;
-        case "dth": stats.dth += a.value; break;
-        case "dttooc": stats.dttooc += a.value; break;
-        case "wd": stats.wd += a.value; break;
+        case "chc": stats.chc += a.value; addSource("chc", { itemId: g.id, label: attrLabel, value: a.value }); break;
+        case "chd": stats.chd += a.value; addSource("chd", { itemId: g.id, label: attrLabel, value: a.value }); break;
+        case "hsd": stats.hsd += a.value; addSource("hsd", { itemId: g.id, label: attrLabel, value: a.value }); break;
+        case "dta": stats.dta += a.value; addSource("dta", { itemId: g.id, label: attrLabel, value: a.value }); break;
+        case "dth": stats.dth += a.value; addSource("dth", { itemId: g.id, label: attrLabel, value: a.value }); break;
+        case "dttooc": stats.dttooc += a.value; addSource("dttooc", { itemId: g.id, label: attrLabel, value: a.value }); break;
+        case "wd": stats.wd += a.value; addSource("wd", { itemId: g.id, label: attrLabel, value: a.value }); break;
         default: break;
       }
     }
   }
+  const shd = (key: string, val: number) => {
+    if (val > 0) addSource(key, { itemId: "shd-watch", label: "SHD-Uhr", value: val });
+  };
+  shd("wd", shdBonusFor(shdLevel, "wd"));
+  shd("chc", shdBonusFor(shdLevel, "chc"));
+  shd("chd", shdBonusFor(shdLevel, "chd"));
   stats.wd += shdBonusFor(shdLevel, "wd");
   stats.chc += shdBonusFor(shdLevel, "chc");
   stats.chd += shdBonusFor(shdLevel, "chd");
