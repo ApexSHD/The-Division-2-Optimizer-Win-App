@@ -20,6 +20,7 @@ export interface OptimizationSettings {
   targetChc: number;
   lockedGearIds: string[];
   anchorWeaponId: string;
+  weaponTypeFilter: import("./data/sampleData").WeaponType | "";
   qualityFilter: "all" | "godRoll";
   preferredBrand: string;
   considerWeaponTalents: boolean;
@@ -82,6 +83,7 @@ export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
   targetChc: 50,
   lockedGearIds: [],
   anchorWeaponId: "",
+  weaponTypeFilter: "",
   qualityFilter: "all",
   preferredBrand: "",
   considerWeaponTalents: true,

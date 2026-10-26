@@ -231,6 +231,22 @@ export function WizardView() {
             </select>
             <p className="settings-hint">{t.wizard.anchor.hint}</p>
           </div>
+
+          <div className="field" style={{ marginTop: 12 }}>
+            <label>Waffengattung optimieren (optional)</label>
+            <select
+              value={o.weaponTypeFilter}
+              onChange={(e) => store.setOptimization({ ...o, weaponTypeFilter: e.target.value as typeof o.weaponTypeFilter })}
+            >
+              <option value="">– Alle Gattungen –</option>
+              {(Object.keys(t.weapons.types) as Array<keyof typeof t.weapons.types>).map((wt) => (
+                <option key={wt} value={wt}>{t.weapons.types[wt]}</option>
+              ))}
+            </select>
+            <p className="settings-hint">
+              Begrenzt die Berechnung auf Waffen dieser Gattung. Ein gewählter Anker hat Vorrang.
+            </p>
+          </div>
         </section>
       )}
 

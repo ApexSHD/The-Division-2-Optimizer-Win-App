@@ -332,7 +332,17 @@ export function optimizeBuilds(
   const fallbackWarnings: OptimizerWarning[] = [];
 
   const anchorWeapon = weapons.find((w) => w.id === settings.anchorWeaponId) ?? null;
-  const candidateWeapons = anchorWeapon ? [anchorWeapon] : weapons;
+  let candidateWeapons = anchorWeapon ? [anchorWeapon] : weapons;
+  if (!anchorWeapon && settings.weaponTypeFilter) {
+    candidateWeapons = candidateWeapons.filter((w) => w.type === settings.weaponTypeFilter);
+    if (candidateWeapons.length === 0) {
+      fallbackWarnings.push({
+        level: "yellow",
+        message: `Keine Waffe der Gattung \u201e${settings.weaponTypeFilter.toUpperCase()}\u201c im Inventar \u2014 Filter wurde zur\u00fcckgesetzt.`,
+      });
+      candidateWeapons = weapons;
+    }
+  }
   if (anchorWeapon) {
     fallbackWarnings.push({
       level: "yellow",
