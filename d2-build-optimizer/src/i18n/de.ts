@@ -116,9 +116,13 @@ export const de = {
     steps: {
       role: "Rolle",
       rules: "Regeln",
+      inventory: "Inventar",
       result: "Ergebnis",
       tuning: "Feintuning",
     },
+    inventoryQuestion: "Welche Teile dürfen nie ausgetauscht werden?",
+    inventoryHint: "Klick auf eine Karte, um das Teil zu sperren (🔒) oder zu entsperren (🔓). Gesperrte Teile bleiben in jedem Build enthalten.",
+    locksLocked: "gesperrt",
     roleQuestion: "Was willst du spielen?",
     roleHint: "Die Wahl legt die Zielwerte der Optimierung als Vorlage fest — alles bleibt anpassbar.",
     anchor: {
