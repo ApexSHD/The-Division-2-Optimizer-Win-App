@@ -43,7 +43,7 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 
 ### 4.1 Globale Einstellungen / Charakter
 
-- SHD-Level (Standard 1.000) als Basis der Watch-Boni: 16 Attribute in den Kategorien Angriff (Offensive), Verteidigung (Defensive), Handhabung (Weapon Handling) und Nutzen (Utility); die Boni steigen mit bis zu 50 Stufen pro Attribut (z. B. Waffenschaden +10,0 % bei +0,2 % pro Stufe) und fließen in die spätere Kalkulation ein.
+- SHD-Level (Standard 1.000) als Basis der SHD-Uhr-Boni: 16 Attribute in den Kategorien Angriff (Offensive), Verteidigung (Defensive), Handhabung (Weapon Handling) und Nutzen (Utility); die Boni steigen mit bis zu 50 Stufen pro Attribut (z. B. Waffenschaden +10,0 % bei +0,2 % pro Stufe) und fließen in die spätere Kalkulation ein.
 - Auswahl von Spezialisierung, Spielmodus (PvE/PvP; PvP wird später integriert) und aktivem Saisonstand (z. B. Y8S3).
 - Einstellungen für Optimierung: Zielwert kritische Trefferchance (Standard 50 %, Bereich 10–60 %), Schalter für Waffen-Talente, Ausrüstungs-Talente (Weste/Rucksack) und exotische Gear-Perks sowie Gegnerprofil (Rüstungs-/Lebensenergie-/Ungedeckt-/Kopfschuss-Anteile für DTA / DTH / DTToOC / HSD).
 - Live-Zusammenfassung der Gesamtwerte in einer Seitenleiste (vollständig mit der Berechnungs-Engine; bis dahin Anzeige der SHD-Uhr-Boni).
@@ -204,6 +204,18 @@ Alle Standard-Datenbanken tragen eine Versionskennung (z. B. `gear_v1`, `mods_v1
 
 **Grundsatz:** Zuerst entsteht die vollständige Bedienoberfläche (GUI) als lauffähige Windows-App mit Beispieldaten. Die fachlichen Funktionen (Berechnung, Optimierung, Datenpflege) werden danach Schritt für Schritt nachgebaut bzw. neu gebaut und an die fertige Oberfläche angeschlossen. So lässt sich das Bedienkonzept früh testen und abstimmen, bevor Aufwand in die Logik fließt.
 
+> **Review-Korrektur 2026-10:** Die Berechnung ist der fachlich unsichere Teil — sie bestimmt Datenmodell und Eingabemasken (Felder eines Gear-Teils, Talent-Stacks, Bonus-Kategorien). Daher wird **MVP 0 (Berechnungskern) vor MVP 1.0** gesetzt: Der Berechnungskern entsteht als reines TypeScript-Modul mit Unit- und Referenztests, ohne Oberfläche. Die GUI wird danach auf dem dabei entstandenen, getesteten Datenmodell aufgebaut. MVP 1.0 (GUI-Prototyp) bleibt unverändert inhaltlich, baut aber auf dem fertigen Datenmodell auf.
+
+### MVP 0 – Berechnungskern (reines TS-Modul mit Tests)
+
+- Schadensformel als eigenes Modul (`src/data/damage.ts`), ohne GUI-Abhängigkeiten: Bonus-Kategorien additiv innerhalb, multiplikativ zwischen den Gruppen — dokumentiert in `docs/FORMELN.md` (siehe Issue #63).
+- Unit-Tests für `aggregateBuild`/`computeDamage` (vitest) plus Referenztests: (a) Parität mit der Web-Version, (b) **Spiel-Referenzwerte** aus Screenshots bekannter Builds (Issue #62) — bekannte Abweichungen werden dokumentiert, nicht versteckt.
+- Optimierungs\-Zielfunktion: ein Hauptziel (z. B. DPS) mit Mindestwerten; Überschuss über Caps wird bestraft (Issue #64).
+- Performance-Konzept für große Inventare: Dominanz-Vorfilterung + Pruning statt Brute-Force-Cap (Issue #61); Benchmark mit ~150 Teilen.
+- SHD-Watch-Verteilung: vorgegeben (nicht mitoptimiert), als Annahme im Ergebnis ausgewiesen.
+
+**Abnahme:** Tests grün in CI; Formeldokument reviewt; Benchmark-Ziel erreicht.
+
 ### MVP 1.0 – GUI-Prototyp (klickbare Oberfläche)
 
 **Ziel:** Die App sieht aus und lässt sich bedienen wie das Endprodukt; Werte sind noch Platzhalter.
@@ -230,7 +242,7 @@ Alle Standard-Datenbanken tragen eine Versionskennung (z. B. `gear_v1`, `mods_v1
 ### MVP 1.2 – Berechnungskern
 
 - Berechnungslogik aus `app.js`/`app2.js` herauslösen, als eigenes Modul neu aufbauen bzw. übernehmen.
-- Übernahme der bestehenden Referenzwert-Tests; Abweichungen zur Web-Version = 0.
+- Übernahme der bestehenden Referenzwert-Tests; Abweichungen zur Web-Version = 0 **plus** Spiel-Referenzwerte aus MVP 0 (Issue #62). Parität mit der Web-Version übernimmt deren Fehler nicht kommentarlos: bekannte Web-Bugs werden als dokumentierte, tolerierte Abweichungen geführt.
 - Live-Werte in der Werte-Leiste (CHC, CHD, WD, DPS, Panzerung, Set-Boni).
 - Talente inkl. Exotic-Talente mit Stack-Reglern, automatische Mod-Auswahl.
 
