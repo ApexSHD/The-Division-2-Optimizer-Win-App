@@ -18,6 +18,10 @@ export interface AgentValues {
 export interface OptimizationSettings {
   role: import("./data/roles").RoleId | "";
   targetChc: number;
+  lockedGearIds: string[];
+  anchorWeaponId: string;
+  qualityFilter: "all" | "godRoll";
+  preferredBrand: string;
   considerWeaponTalents: boolean;
   considerGearTalents: boolean;
   considerExoticPerks: boolean;
@@ -76,6 +80,10 @@ export function shdBonusFor(level: number, key: string): number {
 export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
   role: "",
   targetChc: 50,
+  lockedGearIds: [],
+  anchorWeaponId: "",
+  qualityFilter: "all",
+  preferredBrand: "",
   considerWeaponTalents: true,
   considerGearTalents: true,
   considerExoticPerks: true,

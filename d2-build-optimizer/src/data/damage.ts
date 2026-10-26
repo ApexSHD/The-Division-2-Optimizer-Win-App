@@ -281,6 +281,19 @@ function slotExplanationsFor(
   });
 }
 
+function brandScoreBonusForCombo(combo: GearPiece[], preferredBrand: string): number {
+  const pref = preferredBrand.trim().toLowerCase();
+  if (!pref) return 0;
+  return combo.filter((g) => g.brand.toLowerCase().includes(pref)).length;
+}
+
+function isGodRoll(g: GearPiece): boolean {
+  return g.attributes.every((a) => {
+    const max = gearAttrMax(a.type, g.prototype);
+    return max == null || max <= 0 || a.value >= max * 0.999;
+  });
+}
+
 export function optimizeBuilds(
   weapons: Weapon[],
   gear: GearPiece[],
@@ -292,13 +305,38 @@ export function optimizeBuilds(
   const maxResults = opts.maxResults ?? 10;
   const gearSetNames = new Set((opts.gearSetNames ?? []).map((n) => n.toLowerCase()));
 
-  const bySlot = new Map<GearSlot, GearPiece[]>();
-  for (const slot of SLOTS) bySlot.set(slot, []);
-  for (const g of gear) bySlot.get(g.slot)?.push(g);
-
   const targetSet = settings.targetGearSet.trim().toLowerCase();
 
   const fallbackWarnings: OptimizerWarning[] = [];
+
+  const anchorWeapon = weapons.find((w) => w.id === settings.anchorWeaponId) ?? null;
+  const candidateWeapons = anchorWeapon ? [anchorWeapon] : weapons;
+  if (anchorWeapon) {
+    fallbackWarnings.push({
+      level: "yellow",
+      message: `Anker aktiv: Alle Builds werden um \u201e${anchorWeapon.name}\u201c herum berechnet.`,
+    });
+  }
+
+  const lockedSet = new Set(settings.lockedGearIds.filter((id) => gear.some((g) => g.id === id)));
+  for (const id of settings.lockedGearIds) {
+    if (!lockedSet.has(id)) {
+      fallbackWarnings.push({
+        level: "yellow",
+        message: "Gesperrtes Teil nicht (mehr) im Inventar \u2014 Lock wurde \u00fcbergangen.",
+      });
+    }
+  }
+  const lockedGear = gear.filter((g) => lockedSet.has(g.id));
+
+  let candidateGear = gear;
+  if (settings.qualityFilter === "godRoll") {
+    candidateGear = gear.filter((g) => lockedSet.has(g.id) || isGodRoll(g));
+  }
+
+  const bySlot = new Map<GearSlot, GearPiece[]>();
+  for (const slot of SLOTS) bySlot.set(slot, []);
+  for (const g of candidateGear) bySlot.get(g.slot)?.push(g);
 
   let requireChest = settings.requiredChest;
   if (requireChest && (bySlot.get("chest")?.length ?? 0) === 0) {
@@ -342,7 +380,7 @@ export function optimizeBuilds(
   const gearCombos = cartesianBySlot(bySlot);
 
   const results = runOptimizerPasses(
-    weapons,
+    candidateWeapons,
     gearCombos,
     shdLevel,
     settings,
@@ -353,10 +391,15 @@ export function optimizeBuilds(
     requireBackpack,
     passes,
     fallbackWarnings,
+    lockedGear,
   );
 
+  const brandBonus = (r: OptimizerResult) =>
+    brandScoreBonusForCombo(r.gear, settings.preferredBrand);
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
+    const brandDiff = brandBonus(b) - brandBonus(a);
+    if (brandDiff !== 0) return brandDiff;
     return b.damage.effectiveDps - a.damage.effectiveDps;
   });
   const top = results.slice(0, maxResults);
@@ -386,6 +429,7 @@ function runOptimizerPasses(
   requireBackpack: boolean,
   passes: { minSetPieces: number; warnings: OptimizerWarning[] }[],
   fallbackWarnings: OptimizerWarning[],
+  lockedGear: GearPiece[],
 ): OptimizerResult[] {
   const seen = new Set<string>();
 
@@ -394,6 +438,7 @@ function runOptimizerPasses(
     for (const w of weapons) {
       for (const combo of gearCombos) {
         if (combo.length === 0) continue;
+        if (lockedGear.some((lg) => !combo.some((g) => g.id === lg.id))) continue;
         const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
         if (exoticGear > 1) continue;
         if (requireChest && !combo.some((g) => g.slot === "chest")) continue;

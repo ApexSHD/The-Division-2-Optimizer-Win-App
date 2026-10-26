@@ -15,11 +15,15 @@ export function WizardView() {
   const { t, lang } = useContext(I18nContext) as { t: typeof import("../i18n/de").de; lang: Language };
   const [step, setStep] = useState<Step>(0);
   const [role, setRole] = useState<RoleId | "">("");
-  const [anchorWeaponId, setAnchorWeaponId] = useState("");
+  const [anchorWeaponId, setAnchorWeaponId] = useState<string>("init-from-settings");
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
   const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
   const o = store.optimization;
+
+  useEffect(() => {
+    setAnchorWeaponId(store.optimization.anchorWeaponId);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getDb().then((db) => setGearSets(db.gearSetItems)).catch(() => setGearSets([]));
@@ -118,7 +122,13 @@ export function WizardView() {
 
           <div className="field" style={{ marginTop: 18 }}>
             <label>{t.wizard.anchor.label}</label>
-            <select value={anchorWeaponId} onChange={(e) => setAnchorWeaponId(e.target.value)}>
+            <select
+              value={anchorWeaponId}
+              onChange={(e) => {
+                setAnchorWeaponId(e.target.value);
+                store.setOptimization({ ...o, anchorWeaponId: e.target.value });
+              }}
+            >
               <option value="">{t.wizard.anchor.none}</option>
               {anchorCandidates.map((w) => (
                 <option key={w.id} value={w.id}>{w.name} ({w.type})</option>
@@ -133,6 +143,61 @@ export function WizardView() {
         <section style={{ marginTop: 18 }}>
           <h3 style={{ margin: "0 0 4px" }}>{t.wizard.rulesQuestion}</h3>
           <OptimizationSettingsPanel optimization={o} onChange={store.setOptimization} />
+
+          <section className="settings-section">
+            <h4 className="settings-section-title">Einschränkungen &amp; Inventar-Regeln</h4>
+            <label className="check-row" style={{ marginTop: 8 }}>
+              <input
+                type="checkbox"
+                checked={o.qualityFilter === "godRoll"}
+                onChange={(e) => store.setOptimization({ ...o, qualityFilter: e.target.checked ? "godRoll" : "all" })}
+              />
+              <span className="check-text">
+                <span style={{ fontWeight: 600 }}>Nur God-Rolls / Max-Stats einbeziehen</span>
+                <p className="settings-hint">
+                  Aus: alle Inventar-Items nutzen (auch mit Kalibrierungs-Potenzial). Gesperrte Teile bleiben immer dabei.
+                </p>
+              </span>
+            </label>
+            <div className="field" style={{ marginTop: 10 }}>
+              <label>Marken-Präferenz (optional)</label>
+              <input
+                type="text"
+                placeholder="z. B. Česká / Grupo"
+                value={o.preferredBrand}
+                onChange={(e) => store.setOptimization({ ...o, preferredBrand: e.target.value })}
+              />
+              <p className="settings-hint">
+                Builds mit dieser Marke werden im Ranking bevorzugt (kein harter Ausschluss — verhindert Dead Ends).
+              </p>
+            </div>
+            {store.gear.length > 0 && (
+              <div className="field" style={{ marginTop: 10 }}>
+                <label>Gesperrte Items (Locks) — diese Teile werden nie ausgetauscht</label>
+                <div className="lock-list">
+                  {store.gear.map((g) => (
+                    <label key={g.id} className="check-row lock-row">
+                      <input
+                        type="checkbox"
+                        checked={o.lockedGearIds.includes(g.id)}
+                        onChange={(e) =>
+                          store.setOptimization({
+                            ...o,
+                            lockedGearIds: e.target.checked
+                              ? [...o.lockedGearIds, g.id]
+                              : o.lockedGearIds.filter((id) => id !== g.id),
+                          })
+                        }
+                      />
+                      <span className="check-text">
+                        <span>{g.brand} ({g.slot})</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
           <section className="settings-section">
             <h4 className="settings-section-title">Gear-Set als optionales Zusatzziel</h4>
             <div className="field" style={{ marginTop: 6 }}>
@@ -224,6 +289,7 @@ export function WizardView() {
               setStep(0);
               setResults(null);
               setAnchorWeaponId("");
+              store.setOptimization({ ...o, anchorWeaponId: "" });
             }}
           >
             {t.wizard.startOver}
