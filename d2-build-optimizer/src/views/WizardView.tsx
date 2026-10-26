@@ -196,7 +196,7 @@ export function WizardView() {
   const anchorCandidates = store.weapons;
 
   return (
-    <div style={{ maxWidth: 860 }}>
+    <div style={step === 2 ? { maxWidth: 1200 } : { maxWidth: 860 }}>
       <div className="wizard-steps" role="tablist" aria-label={t.wizard.subtitle}>
         {stepLabels.map((label, i) => (
           <div key={label} className={`wizard-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}>
@@ -312,10 +312,29 @@ export function WizardView() {
 
       {step === 2 && (
         <section style={{ marginTop: 18 }}>
-          <h3 style={{ margin: "0 0 4px" }}>{t.wizard.inventoryQuestion}</h3>
-          <p className="settings-hint" style={{ marginTop: 0, marginBottom: 10 }}>{t.wizard.inventoryHint}</p>
+          <div className="inv-header">
+            <div>
+              <h3 style={{ margin: "0 0 4px" }}>{t.wizard.inventoryQuestion}</h3>
+              <p className="settings-hint" style={{ margin: 0 }}>{t.wizard.inventoryHint}</p>
+            </div>
+            <div className="inv-header-actions">
+              {o.lockedGearIds.length > 0 && (
+                <button
+                  className="btn"
+                  style={{ fontSize: 12 }}
+                  onClick={() => store.setOptimization({ ...o, lockedGearIds: [] })}
+                >
+                  Alle entsperren
+                </button>
+              )}
+              <span className="inv-total">
+                {o.lockedGearIds.filter((id) => store.gear.some((g) => g.id === id)).length} / {store.gear.length} {"🔒"}
+              </span>
+            </div>
+          </div>
+
           {store.gear.length === 0 && <div className="hint">Kein Gear im Inventar erfasst.</div>}
-          <div className="inv-groups">
+          <div className="inv-columns">
             {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => {
               const slotItems = store.gear.filter((g) => g.slot === slot);
               if (slotItems.length === 0) return null;
@@ -325,41 +344,47 @@ export function WizardView() {
               };
               const lockedHere = slotItems.filter((g) => o.lockedGearIds.includes(g.id)).length;
               return (
-                <div key={slot} className="inv-group">
-                  <h4 className="inv-group-title">{slotLabel[slot]} <span className="lock-count">{lockedHere}/{slotItems.length} {t.wizard.locksLocked}</span></h4>
-                  <div className="inv-cards">
-                    {slotItems.map((g) => {
-                      const locked = o.lockedGearIds.includes(g.id);
-                      return (
-                        <button
-                          key={g.id}
-                          type="button"
-                          className={"inv-card" + (locked ? " locked" : "")}
-                          onClick={() =>
-                            store.setOptimization({
-                              ...o,
-                              lockedGearIds: locked
-                                ? o.lockedGearIds.filter((id) => id !== g.id)
-                                : [...o.lockedGearIds, g.id],
-                            })
-                          }
-                          aria-pressed={locked}
-                        >
-                          <div className="inv-card-head">
-                            <span className="inv-card-brand">{g.brand}</span>
-                            <span aria-hidden>{locked ? "🔒" : "🔓"}</span>
-                          </div>
-                          <div className="inv-card-core">{GEAR_CORE_LABELS[g.core as GearCoreType]} +{g.coreValue.toLocaleString("de-DE")}</div>
-                          <ul className="inv-card-attrs">
-                            {g.attributes.map((a, i) => (
-                              <li key={i}>{GEAR_ATTR_TYPES[a.type]?.label ?? a.type} +{a.value.toLocaleString("de-DE")}</li>
-                            ))}
-                          </ul>
-                          {g.talent && <div className="inv-card-talent">{"✦"} {g.talent}</div>}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div key={slot} className="inv-column">
+                  <h4 className="inv-col-title">{slotLabel[slot]}<span className="lock-count">{lockedHere > 0 ? ` ${lockedHere}` : ""}</span></h4>
+                  {slotItems.map((g) => {
+                    const locked = o.lockedGearIds.includes(g.id);
+                    const coreClass = g.core === "wd" ? "core-red" : g.core === "armour" ? "core-blue" : "core-yellow";
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        className={"inv-card compact" + (locked ? " locked" : "")}
+                        onClick={() =>
+                          store.setOptimization({
+                            ...o,
+                            lockedGearIds: locked
+                              ? o.lockedGearIds.filter((id) => id !== g.id)
+                              : [...o.lockedGearIds, g.id],
+                          })
+                        }
+                        aria-pressed={locked}
+                      >
+                        <div className="inv-card-head">
+                          <span className="inv-card-brand">{g.brand}</span>
+                          <span aria-hidden>{locked ? "🔒" : ""}</span>
+                        </div>
+                        <div className={"inv-core-bar " + coreClass} />
+                        <div className="inv-card-core">{GEAR_CORE_LABELS[g.core as GearCoreType]} +{g.coreValue.toLocaleString("de-DE")}</div>
+                        <div className="inv-chips">
+                          {g.attributes.map((a, i) => {
+                            const grp = GEAR_ATTR_TYPES[a.type]?.group ?? "";
+                            const chipClass = grp.includes("Rot") ? "chip-red" : grp.includes("Blau") ? "chip-blue" : grp.includes("Gelb") ? "chip-yellow" : "";
+                            return (
+                              <span key={i} className={"inv-chip " + chipClass}>
+                                {GEAR_ATTR_TYPES[a.type]?.label ?? a.type} +{a.value.toLocaleString("de-DE")}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        {g.talent && <div className="inv-card-talent">{"✦"} {g.talent}</div>}
+                      </button>
+                    );
+                  })}
                 </div>
               );
             })}
