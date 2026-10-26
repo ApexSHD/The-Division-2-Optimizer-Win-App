@@ -2,13 +2,106 @@ import { useContext, useEffect, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext, type Language } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
-import { optimizeBuilds } from "../data/damage";
+import { optimizeBuilds, aggregateBuild, computeDamage, enemyProfileFromSettings } from "../data/damage";
 import type { OptimizerResult } from "../data/damage";
 import { getDb } from "../data/db";
 import type { GearSetItemPreset } from "../data/db";
 import { ROLE_PRESETS, rolePreset, type RoleId } from "../data/roles";
 
 type Step = 0 | 1 | 2 | 3;
+
+function QuickSwapPanel({
+  base,
+  gear,
+  shdLevel,
+  settings,
+  adjusted,
+  onAdjusted,
+}: {
+  base: OptimizerResult;
+  gear: import("../data/sampleData").GearPiece[];
+  shdLevel: number;
+  settings: import("../store").OptimizationSettings;
+  adjusted: string[] | null;
+  onAdjusted: (ids: string[] | null) => void;
+}) {
+  const current = adjusted ?? base.gear.map((g) => g.id);
+  const items = current
+    .map((id) => gear.find((g) => g.id === id))
+    .filter((g): g is import("../data/sampleData").GearPiece => Boolean(g));
+
+  const stats = aggregateBuild(items, shdLevel);
+  const profile = enemyProfileFromSettings(settings);
+  const damage = computeDamage(base.weapon, stats, profile);
+
+  const cores = { wd: 0, armour: 0, skill: 0 };
+  for (const g of items) cores[g.core] += 1;
+
+  const swap = (slot: string, newId: string) => {
+    const slotItem = items.find((g) => g.slot === slot);
+    if (!slotItem) return;
+    onAdjusted(current.map((id) => (id === slotItem.id ? newId : id)));
+  };
+
+  const fmt = (n: number) => n.toLocaleString("de-DE", { maximumFractionDigits: 0 });
+
+  return (
+    <div>
+      <h3 style={{ margin: "0 0 4px" }}>Feintuning: {base.weapon.name}</h3>
+      <p className="settings-hint" style={{ marginTop: 0 }}>
+        Anderes Teil wählen — Gesamtwerte werden in Echtzeit neu berechnet.
+      </p>
+
+      <div className="core-bar">
+        <span className="core-chip core-red">{cores.wd} × Rot</span>
+        <span className="core-chip core-blue">{cores.armour} × Blau</span>
+        <span className="core-chip core-yellow">{cores.skill} × Gelb</span>
+      </div>
+
+      <div className="quickswap-grid">
+        {items.map((g) => {
+          const alternatives = gear
+            .filter((c) => c.slot === g.slot && c.id !== g.id)
+            .map((c) => {
+              const altStats = aggregateBuild(
+                items.map((x) => (x.slot === g.slot ? c : x)),
+                shdLevel,
+              );
+              const altDmg = computeDamage(base.weapon, altStats, profile);
+              return { item: c, dps: altDmg.effectiveDps };
+            })
+            .sort((a, b) => b.dps - a.dps);
+          return (
+            <div key={g.id} className="quickswap-slot">
+              <label>{g.slot}</label>
+              <select value={g.id} onChange={(e) => swap(g.slot, e.target.value)}>
+                <option value={g.id}>{g.brand} — aktuell</option>
+                {alternatives.map((alt) => (
+                  <option key={alt.item.id} value={alt.item.id}>
+                    {alt.item.brand} ({fmt(alt.dps)} DPS)
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="quickswap-stats">
+        <span>CHC: <strong>{damage.cappedChc} %</strong></span>
+        <span>WD: <strong>+{fmt(stats.wd)} %</strong></span>
+        <span>CHD: <strong>+{fmt(stats.chd)} %</strong></span>
+        <span>Ø Schaden: <strong>{fmt(damage.avgBulletDmg)}</strong></span>
+        <span>DPS: <strong>{fmt(damage.effectiveDps)}</strong></span>
+        {adjusted && (
+          <button className="btn" style={{ marginLeft: "auto" }} onClick={() => onAdjusted(null)}>
+            Zurücksetzen
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function WizardView() {
   const store = useStore();
@@ -19,6 +112,7 @@ export function WizardView() {
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
   const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
+  const [adjusted, setAdjusted] = useState<string[] | null>(null);
   const o = store.optimization;
 
   useEffect(() => {
@@ -57,6 +151,7 @@ export function WizardView() {
           },
         );
         setResults(res);
+        setAdjusted(null);
         store.setStatus(
           res.length > 0
             ? `${res.length} beste Build(s) berechnet`
@@ -267,7 +362,18 @@ export function WizardView() {
 
       {step === 3 && (
         <section style={{ marginTop: 18 }}>
-          <div className="hint">{t.wizard.phasePlanned} — Issue #41 (Quick-Swap).</div>
+          {results === null || results.length === 0 ? (
+            <div className="hint">Erst berechnen (Schritt 3), dann hier feintunen.</div>
+          ) : (
+            <QuickSwapPanel
+              base={results[0]}
+              gear={store.gear}
+              shdLevel={store.agent.shdLevel}
+              settings={o}
+              adjusted={adjusted}
+              onAdjusted={setAdjusted}
+            />
+          )}
         </section>
       )}
 
