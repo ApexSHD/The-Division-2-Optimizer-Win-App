@@ -84,7 +84,7 @@ export function WizardView() {
   }
 
   const stepLabels = [t.wizard.steps.role, t.wizard.steps.rules, t.wizard.steps.result, t.wizard.steps.tuning];
-  const anchorCandidates = store.weapons.filter((w) => !w.isPrototype || w.rarity === "exotic");
+  const anchorCandidates = store.weapons;
 
   return (
     <div style={{ maxWidth: 860 }}>
