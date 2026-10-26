@@ -315,6 +315,7 @@ export interface Db {
   brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
   gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
   mods: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }[];
+  modSlots: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]>;
   versions: { weapons: string; gear: string; mods: string; talents: string };
 }
 
@@ -389,6 +390,13 @@ function load(): Db {
       .map((text, i) => ({ pieces: i + 2, bonus: text })),
   }));
 
+  const modSlots = Object.fromEntries(
+    Object.entries(modsFile.slots).map(([slot, list]) => [
+      slot,
+      list.map((m) => ({ name: m.name, slotTypes: m.slotTypes, bonus: m.bonus, penalty: m.penalty })),
+    ]),
+  );
+
   const mods = Object.entries(modsFile.slots).flatMap(([slot, list]) =>
     list.map((m) => ({
       name: m.name,
@@ -437,6 +445,7 @@ function load(): Db {
     brandSets,
     gearSets,
     mods,
+    modSlots,
     versions: {
       weapons: weaponsFile._meta?.version ?? "unbekannt",
       gear: gearFile.version,
