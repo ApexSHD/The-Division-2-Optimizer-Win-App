@@ -830,3 +830,19 @@ kbd {
   background: rgba(230, 184, 0, 0.1);
   color: #e6b800;
 }
+
+/* ===== Locks (Phase 2) ===== */
+.lock-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+}
+
+.lock-row {
+  margin: 0;
+}
