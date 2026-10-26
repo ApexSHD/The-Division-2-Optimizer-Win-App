@@ -903,3 +903,64 @@ kbd {
 .source-val {
   white-space: nowrap;
 }
+
+/* ===== Quick-Swap (Phase 4) ===== */
+.core-bar {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.core-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.core-red {
+  background: rgba(229, 84, 75, 0.18);
+  color: #ff6b6b;
+}
+
+.core-blue {
+  background: rgba(90, 160, 255, 0.18);
+  color: #7ab0ff;
+}
+
+.core-yellow {
+  background: rgba(230, 184, 0, 0.16);
+  color: #e6b800;
+}
+
+.quickswap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.quickswap-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quickswap-slot label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: capitalize;
+}
+
+.quickswap-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
