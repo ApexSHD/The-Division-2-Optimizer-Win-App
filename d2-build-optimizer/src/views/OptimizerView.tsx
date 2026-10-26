@@ -3,9 +3,65 @@ import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 import { optimizeBuilds } from "../data/damage";
-import type { OptimizerResult, SlotExplanation } from "../data/damage";
+import type { OptimizerResult, SlotExplanation, StatSource } from "../data/damage";
 import { GEAR_CORE_LABELS } from "../data/sampleData";
 import type { GearCoreType } from "../data/sampleData";
+
+function SourceList({ sources }: { sources: StatSource[] }) {
+  if (!sources || sources.length === 0) return <div style={{ color: "var(--text-faint, #777)" }}>keine Quelle</div>;
+  return (
+    <ul className="source-list">
+      {sources.map((src, i) => (
+        <li key={`${src.itemId}-${i}`}>
+          <span>{src.label}</span>
+          <span className="source-val">+{src.value.toLocaleString("de-DE")} %</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CalcPathBox({ r }: { r: OptimizerResult }) {
+  const d = r.damage;
+  const st = r.stats;
+  const fmt = (n: number) => n.toLocaleString("de-DE", { maximumFractionDigits: 0 });
+  const rows: { label: string; value: string; sourcesKey?: string }[] = [
+    { label: "Waffenschaden (WD) gesamt", value: `+${fmt(st.wd)} %`, sourcesKey: "wd" },
+    { label: "Kritische Trefferchance (CHC) — gedeckelt bei 60 %", value: `${d.cappedChc} %`, sourcesKey: "chc" },
+    { label: "Kritischer Trefferschaden (CHD)", value: `+${fmt(st.chd)} %`, sourcesKey: "chd" },
+    { label: "Kopfschussschaden (HSD)", value: `+${fmt(st.hsd)} %`, sourcesKey: "hsd" },
+    { label: "Rüstungsschaden (DTA)", value: `+${fmt(st.dta)} %`, sourcesKey: "dta" },
+    { label: "Lebenspunktschaden (DTH)", value: `+${fmt(st.dth)} %`, sourcesKey: "dth" },
+    { label: "Schaden gg. ungedeckte Ziele (DTTOOC)", value: `+${fmt(st.dttooc)} %`, sourcesKey: "dttooc" },
+    { label: "Ø Schaden pro Treffer", value: fmt(d.avgBulletDmg) },
+    { label: "Effektiver DPS (RPM eingerechnet)", value: fmt(d.effectiveDps) },
+  ];
+  return (
+    <div className="calc-path">
+      <div className="calc-formula">
+        Basis × WD × TWD × DTA/DTH/DTTOOC × Situativ × Amp × Crit/HSD
+      </div>
+      <table className="calc-table">
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label}>
+              <td>{row.label}</td>
+              <td className="calc-val">{row.value}</td>
+              <td className="calc-sources">
+                {row.sourcesKey && (
+                  <details>
+                    <summary>Quellen</summary>
+                    <SourceList sources={st.sources?.[row.sourcesKey] ?? []} />
+                  </details>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function SlotExplanationBox({ exp }: { exp: SlotExplanation }) {
   const g = exp.chosen;
@@ -206,6 +262,10 @@ export function OptimizerView() {
                   <td><strong>{r.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</strong></td>
                   <td style={{ fontSize: 11 }}>
                     {r.reason}
+                    <details style={{ marginTop: 4 }}>
+                      <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Rechenweg</summary>
+                      <CalcPathBox r={r} />
+                    </details>
                     <details style={{ marginTop: 4 }}>
                       <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Warum diese Teile?</summary>
                       {r.slotExplanations.map((exp) => (
