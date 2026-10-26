@@ -194,6 +194,38 @@ function ValuesSidebar() {
         <div className="stat-label">{t.sidebar.armor}</div>
         <div className="stat-value">—</div>
       </div>
+      <h3>Wertzusammensetzung</h3>
+      {(() => {
+        const stats = aggregateBuild(store.gear, store.agent.shdLevel);
+        const src = (key: string) => stats.sources[key] ?? [];
+        const renderSources = (key: string) => {
+          const list = src(key);
+          if (list.length === 0) return <div className="stat" style={{ fontSize: 11, color: "var(--text-faint)" }}>—</div>;
+          return (
+            <details className="stat" style={{ padding: "6px 10px" }}>
+              <summary style={{ cursor: "pointer", fontSize: 11 }}>{list.length} Quelle(n)</summary>
+              <ul style={{ listStyle: "none", padding: 0, margin: "4px 0 0", fontSize: 11 }}>
+                {list.map((s2, i) => (
+                  <li key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <span>{s2.label}</span>
+                    <span>+{s2.value.toLocaleString("de-DE")}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          );
+        };
+        return (
+          <>
+            <div className="set-bonus">CHC {stats.chc.toLocaleString("de-DE")} %</div>
+            {renderSources("chc")}
+            <div className="set-bonus">WD +{stats.wd.toLocaleString("de-DE")} %</div>
+            {renderSources("wd")}
+            <div className="set-bonus">CHD +{stats.chd.toLocaleString("de-DE")} %</div>
+            {renderSources("chd")}
+          </>
+        );
+      })()}
       <h3>{t.sidebar.setBonuses}</h3>
       <div className="set-bonus" style={{ opacity: 0.6 }}>
         Werden automatisch aus dem erfassten Inventar berechnet (mit der Berechnungs-Engine).

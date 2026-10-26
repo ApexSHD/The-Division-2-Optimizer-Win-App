@@ -93,6 +93,7 @@ export function GlobalView() {
           <option value="sharpshooter">Scharfschütze</option>
           <option value="survivalist">Überlebenskünstler</option>
           <option value="technician">Techniker</option>
+          <option value="firewall">Firewall</option>
         </select>
       </div>
       <div className="field" style={{ marginTop: 12 }}>

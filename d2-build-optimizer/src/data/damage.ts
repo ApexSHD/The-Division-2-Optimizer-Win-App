@@ -17,6 +17,10 @@ export interface StatSource {
   value: number;
 }
 
+function addStatSource(stats: BuildStats, key: string, label: string, value: number, itemId = "misc") {
+  (stats.sources[key] ??= []).push({ itemId, label, value });
+}
+
 export interface BuildStats {
   wd: number;
   chc: number;
@@ -43,6 +47,80 @@ export interface DamageBreakdown {
 }
 
 const CHC_CAP = 60;
+
+export type SpecId = "demolitionist" | "gunner" | "sharpshooter" | "survivalist" | "technician" | "firewall";
+
+export interface SpecBonuses {
+  hsd?: number;
+  weaponTypeWd: Partial<Record<import("./sampleData").WeaponType, number>>;
+}
+
+export const SPEC_PASSIVE_BONUSES: Record<SpecId, SpecBonuses> = {
+  demolitionist: { weaponTypeWd: { lmg: 15, smg: 15 } },
+  gunner: { weaponTypeWd: { ar: 10, lmg: 10, shotgun: 10 } },
+  sharpshooter: { hsd: 25, weaponTypeWd: { mmr: 15, rifle: 15 } },
+  survivalist: { weaponTypeWd: { rifle: 15, shotgun: 15 } },
+  technician: { weaponTypeWd: { smg: 10, rifle: 10 } },
+  firewall: { weaponTypeWd: { shotgun: 15, smg: 10 } },
+};
+
+export interface ModContribution {
+  slot: string;
+  modName: string;
+  attr: string;
+  value: number;
+}
+
+const MOD_DAMAGE_ATTRS = new Set(["chc", "chd", "hsd", "wd", "rof"]);
+
+export function bestModsForWeapon(
+  weapon: import("./sampleData").Weapon,
+  modsBySlot: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>,
+): ModContribution[] {
+  const result: ModContribution[] = [];
+  for (const category of weapon.modSlots) {
+    const pool = (modsBySlot[category] ?? []).filter((m) => m.bonus && MOD_DAMAGE_ATTRS.has(m.bonus.type));
+    let best: { name: string; bonus: { type: string; val: number } } | null = null;
+    for (const m of pool) {
+      const penaltyBad = m.penalty && MOD_DAMAGE_ATTRS.has(m.penalty.type) ? Math.abs(m.penalty.val) : 0;
+      const score = (m.bonus?.val ?? 0) - penaltyBad;
+      if (!best || score > ((best.bonus?.val ?? 0) - 0)) {
+        if (m.bonus) best = { name: m.name, bonus: m.bonus };
+      }
+    }
+    if (best) {
+      result.push({ slot: category, modName: best.name, attr: best.bonus.type, value: best.bonus.val });
+    }
+  }
+  return result;
+}
+
+export function applyModContributions(stats: BuildStats, mods: ModContribution[]): BuildStats {
+  const next: BuildStats = {
+    ...stats,
+    sources: { ...stats.sources },
+  };
+  for (const m of mods) {
+    const label = `Mod (${m.modName})`;
+    switch (m.attr) {
+      case "chc": next.chc += m.value; addStatSource(next, "chc", label, m.value); break;
+      case "chd": next.chd += m.value; addStatSource(next, "chd", label, m.value); break;
+      case "hsd": next.hsd += m.value; addStatSource(next, "hsd", label, m.value); break;
+      case "wd": next.wd += m.value; addStatSource(next, "wd", label, m.value); break;
+      default: break;
+    }
+  }
+  return next;
+}
+
+export function specBonusFor(weapon: import("./sampleData").Weapon, spec: string): { hsd: number; weaponTypeWd: number } {
+  const bonuses = SPEC_PASSIVE_BONUSES[spec as SpecId];
+  if (!bonuses) return { hsd: 0, weaponTypeWd: 0 };
+  return {
+    hsd: bonuses.hsd ?? 0,
+    weaponTypeWd: bonuses.weaponTypeWd[weapon.type] ?? 0,
+  };
+}
 
 export function enemyProfileFromSettings(o: OptimizationSettings): EnemyProfile {
   const armor = Math.max(0, Math.min(100, o.enemyArmorShare)) / 100;
@@ -321,7 +399,13 @@ export function optimizeBuilds(
   gear: GearPiece[],
   shdLevel: number,
   settings: OptimizationSettings,
-  opts: { gearSetNames?: string[]; maxResults?: number } = {},
+  opts: {
+    gearSetNames?: string[];
+    maxResults?: number;
+    spec?: string;
+    considerMods?: boolean;
+    modsBySlot?: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>;
+  } = {},
 ): OptimizerResult[] {
   const profile = enemyProfileFromSettings(settings);
   const maxResults = opts.maxResults ?? 10;
@@ -424,6 +508,8 @@ export function optimizeBuilds(
     passes,
     fallbackWarnings,
     lockedGear,
+    opts.spec ?? "",
+    opts.modsBySlot,
   );
 
   const brandBonus = (r: OptimizerResult) =>
@@ -462,6 +548,8 @@ function runOptimizerPasses(
   passes: { minSetPieces: number; warnings: OptimizerWarning[] }[],
   fallbackWarnings: OptimizerWarning[],
   lockedGear: GearPiece[],
+  spec0: string,
+  modsBySlot: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]> | undefined,
 ): OptimizerResult[] {
   const seen = new Set<string>();
 
@@ -484,8 +572,22 @@ function runOptimizerPasses(
           gearSetCount = matching;
         }
 
-        const stats = aggregateBuild(combo, shdLevel);
-        const damage = computeDamage(w, stats, profile);
+        let stats = aggregateBuild(combo, shdLevel);
+        const spec = specBonusFor(w, spec0);
+        if (spec.weaponTypeWd > 0) {
+          stats.wd += spec.weaponTypeWd;
+          addStatSource(stats, "wd", "Spezialisierung", spec.weaponTypeWd, "spec");
+        }
+        if (spec.hsd > 0) {
+          stats.hsd += spec.hsd;
+          addStatSource(stats, "hsd", "Spezialisierung", spec.hsd, "spec");
+        }
+        let modsUsed: ModContribution[] = [];
+        if (modsBySlot) {
+          modsUsed = bestModsForWeapon(w, modsBySlot);
+          stats = applyModContributions(stats, modsUsed);
+        }
+        const damage = computeDamage(w, stats, profile, { weaponTypeWd: 0 });
         const meetsTargetChc = damage.cappedChc >= settings.targetChc;
 
         const key = combo.map((g) => g.id).join("|") + "::" + w.id;
