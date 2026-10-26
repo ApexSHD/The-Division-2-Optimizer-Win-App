@@ -118,9 +118,13 @@ export const en: Translation = {
     steps: {
       role: "Role",
       rules: "Rules",
+      inventory: "Inventory",
       result: "Result",
       tuning: "Tuning",
     },
+    inventoryQuestion: "Which pieces must never be replaced?",
+    inventoryHint: "Click a card to lock (🔒) or unlock (🔓) a piece. Locked pieces stay in every build.",
+    locksLocked: "locked",
     roleQuestion: "What do you want to play?",
     roleHint: "The choice pre-fills optimization targets — everything stays adjustable.",
     anchor: {

@@ -1002,3 +1002,77 @@ kbd {
   gap: 2px;
   padding: 2px 4px 6px;
 }
+
+/* ===== Inventar-Schritt (Lock-Karten) ===== */
+.inv-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.inv-group-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.inv-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 8px;
+}
+
+.inv-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+}
+
+.inv-card:hover {
+  border-color: var(--accent);
+}
+
+.inv-card.locked {
+  border-color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+  background: var(--bg-hover);
+}
+
+.inv-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.inv-card-brand {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.inv-card-core {
+  color: var(--text-dim);
+}
+
+.inv-card-attrs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.inv-card-talent {
+  color: #d4a017;
+  font-size: 11px;
+}

@@ -7,8 +7,10 @@ import type { OptimizerResult } from "../data/damage";
 import { getDb } from "../data/db";
 import type { GearSetItemPreset } from "../data/db";
 import { ROLE_PRESETS, rolePreset, type RoleId } from "../data/roles";
+import { GEAR_CORE_LABELS, GEAR_ATTR_TYPES } from "../data/sampleData";
+import type { GearCoreType } from "../data/sampleData";
 
-type Step = 0 | 1 | 2 | 3;
+type Step = 0 | 1 | 2 | 3 | 4;
 
 function QuickSwapPanel({
   base,
@@ -182,13 +184,15 @@ export function WizardView() {
       setStep(1);
     } else if (step === 1) {
       setStep(2);
-      startOptimization();
     } else if (step === 2) {
       setStep(3);
+      startOptimization();
+    } else if (step === 3) {
+      setStep(4);
     }
   }
 
-  const stepLabels = [t.wizard.steps.role, t.wizard.steps.rules, t.wizard.steps.result, t.wizard.steps.tuning];
+  const stepLabels = [t.wizard.steps.role, t.wizard.steps.rules, t.wizard.steps.inventory, t.wizard.steps.result, t.wizard.steps.tuning];
   const anchorCandidates = store.weapons;
 
   return (
@@ -288,50 +292,9 @@ export function WizardView() {
                 Builds mit dieser Marke werden im Ranking bevorzugt (kein harter Ausschluss — verhindert Dead Ends).
               </p>
             </div>
-            {store.gear.length > 0 && (
-              <div className="field" style={{ marginTop: 10 }}>
-                <label>Gesperrte Items (Locks) — diese Teile werden nie ausgetauscht ({o.lockedGearIds.filter((id) => store.gear.some((g) => g.id === id)).length} gesperrt)</label>
-                <div className="lock-list">
-                  {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => {
-                    const slotItems = store.gear.filter((g) => g.slot === slot);
-                    if (slotItems.length === 0) return null;
-                    const lockedCount = slotItems.filter((g) => o.lockedGearIds.includes(g.id)).length;
-                    const slotLabel: Record<string, string> = {
-                      mask: "Maske", chest: "Weste", holster: "Holster",
-                      backpack: "Rucksack", gloves: "Handschuhe", kneepads: "Knieschoner",
-                    };
-                    return (
-                      <details key={slot} className="lock-slot" open={lockedCount > 0}>
-                        <summary>
-                          {slotLabel[slot]} <span className="lock-count">{lockedCount}/{slotItems.length} gesperrt</span>
-                        </summary>
-                        <div className="lock-slot-items">
-                          {slotItems.map((g) => (
-                            <label key={g.id} className="check-row lock-row">
-                              <input
-                                type="checkbox"
-                                checked={o.lockedGearIds.includes(g.id)}
-                                onChange={(e) =>
-                                  store.setOptimization({
-                                    ...o,
-                                    lockedGearIds: e.target.checked
-                                      ? [...o.lockedGearIds, g.id]
-                                      : o.lockedGearIds.filter((id) => id !== g.id),
-                                  })
-                                }
-                              />
-                              <span className="check-text">
-                                <span>{g.brand}{g.talent ? ` · ${g.talent}` : ""}</span>
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </details>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <p className="settings-hint">
+              🔒 Gesperrte Items (Locks) werden im nächsten Schritt „Inventar“ per Karte ausgewählt — aktuell {o.lockedGearIds.filter((id) => store.gear.some((g) => g.id === id)).length} gesperrt.
+            </p>
           </section>
           <section className="settings-section">
             <h4 className="settings-section-title">Gear-Set als optionales Zusatzziel</h4>
@@ -348,6 +311,63 @@ export function WizardView() {
       )}
 
       {step === 2 && (
+        <section style={{ marginTop: 18 }}>
+          <h3 style={{ margin: "0 0 4px" }}>{t.wizard.inventoryQuestion}</h3>
+          <p className="settings-hint" style={{ marginTop: 0, marginBottom: 10 }}>{t.wizard.inventoryHint}</p>
+          {store.gear.length === 0 && <div className="hint">Kein Gear im Inventar erfasst.</div>}
+          <div className="inv-groups">
+            {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => {
+              const slotItems = store.gear.filter((g) => g.slot === slot);
+              if (slotItems.length === 0) return null;
+              const slotLabel: Record<string, string> = {
+                mask: "Maske", chest: "Weste", holster: "Holster",
+                backpack: "Rucksack", gloves: "Handschuhe", kneepads: "Knieschoner",
+              };
+              const lockedHere = slotItems.filter((g) => o.lockedGearIds.includes(g.id)).length;
+              return (
+                <div key={slot} className="inv-group">
+                  <h4 className="inv-group-title">{slotLabel[slot]} <span className="lock-count">{lockedHere}/{slotItems.length} {t.wizard.locksLocked}</span></h4>
+                  <div className="inv-cards">
+                    {slotItems.map((g) => {
+                      const locked = o.lockedGearIds.includes(g.id);
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          className={"inv-card" + (locked ? " locked" : "")}
+                          onClick={() =>
+                            store.setOptimization({
+                              ...o,
+                              lockedGearIds: locked
+                                ? o.lockedGearIds.filter((id) => id !== g.id)
+                                : [...o.lockedGearIds, g.id],
+                            })
+                          }
+                          aria-pressed={locked}
+                        >
+                          <div className="inv-card-head">
+                            <span className="inv-card-brand">{g.brand}</span>
+                            <span aria-hidden>{locked ? "🔒" : "🔓"}</span>
+                          </div>
+                          <div className="inv-card-core">{GEAR_CORE_LABELS[g.core as GearCoreType]} +{g.coreValue.toLocaleString("de-DE")}</div>
+                          <ul className="inv-card-attrs">
+                            {g.attributes.map((a, i) => (
+                              <li key={i}>{GEAR_ATTR_TYPES[a.type]?.label ?? a.type} +{a.value.toLocaleString("de-DE")}</li>
+                            ))}
+                          </ul>
+                          {g.talent && <div className="inv-card-talent">{"✦"} {g.talent}</div>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {step === 3 && (
         <section style={{ marginTop: 18 }}>
           {results === null && <div className="hint">{t.wizard.resultPlaceholder}</div>}
           {results !== null && results.length === 0 && (
@@ -400,7 +420,7 @@ export function WizardView() {
         </section>
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <section style={{ marginTop: 18 }}>
           {results === null || results.length === 0 ? (
             <div className="hint">Erst berechnen (Schritt 3), dann hier feintunen.</div>
@@ -424,11 +444,11 @@ export function WizardView() {
           </button>
         )}
         {step < 3 && (
-          <button className="btn btn-accent" onClick={goNext} disabled={step === 1 && running}>
-            {step === 1 ? (running ? "Berechne…" : t.wizard.calculate) : `${t.wizard.next} →`}
+          <button className="btn btn-accent" onClick={goNext} disabled={step === 2 && running}>
+            {step === 2 ? (running ? "Berechne…" : t.wizard.calculate) : `${t.wizard.next} →`}
           </button>
         )}
-        {step === 3 && (
+        {step === 4 && (
           <button
             className="btn"
             onClick={() => {
