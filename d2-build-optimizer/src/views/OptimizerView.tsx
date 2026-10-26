@@ -143,11 +143,12 @@ export function OptimizerView() {
     <div style={{ maxWidth: 860 }}>
       <div className="field">
         <label>{t.optimizer.goal}</label>
-        <select defaultValue="weaponDamage">
-          <option value="weaponDamage">{t.optimizer.goals.weaponDamage}</option>
-          <option value="critBalance">{t.optimizer.goals.critBalance}</option>
-          <option value="armor">{t.optimizer.goals.armor}</option>
+        <select value={o.role || "weaponDps"} disabled>
+          <option value="weaponDps">{t.optimizer.goals.weaponDamage}</option>
         </select>
+        <p className="settings-hint">
+          Das Ziel wird im Assistenten über die Rollenwahl gesetzt (optimiert aktuell: Waffen-DPS).
+        </p>
       </div>
 
       <h3 style={{ margin: "18px 0 8px" }}>Einstellungen für Optimierung</h3>
@@ -183,10 +184,9 @@ export function OptimizerView() {
           />
           <span className="check-text">Rucksack zwingend erforderlich</span>
         </label>
-        <label className="check-row">
-          <input type="checkbox" defaultChecked />
-          <span className="check-text">{t.optimizer.exoticLimit}</span>
-        </label>
+        <div className="hint" style={{ marginTop: 8 }}>
+          {t.optimizer.exoticLimit} — aktiv (max. 1 Exotic-Gear pro Build, fest erzwungen)
+        </div>
       </section>
 
       <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
