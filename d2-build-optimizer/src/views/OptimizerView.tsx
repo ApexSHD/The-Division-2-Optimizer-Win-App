@@ -93,10 +93,14 @@ export function OptimizerView() {
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
   const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
+  const [modSlots, setModSlots] = useState<Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]> | null>(null);
   const o = store.optimization;
 
   useEffect(() => {
-    getDb().then((db) => setGearSets(db.gearSetItems)).catch(() => setGearSets([]));
+    getDb().then((db) => {
+      setGearSets(db.gearSetItems);
+      setModSlots(db.modSlots);
+    }).catch(() => setGearSets([]));
   }, []);
 
   function startOptimization() {
@@ -113,6 +117,8 @@ export function OptimizerView() {
           {
             gearSetNames: gearSets.map((gs) => gs.name),
             maxResults: 10,
+            spec: store.agent.spec,
+            modsBySlot: modSlots ?? undefined,
           },
         );
         setResults(res);

@@ -71,7 +71,7 @@ export interface ModContribution {
   value: number;
 }
 
-const MOD_DAMAGE_ATTRS = new Set(["chc", "chd", "hsd", "wd", "rof"]);
+const MOD_DAMAGE_ATTRS = new Set(["chc", "chd", "hsd", "wd"]);
 
 export function bestModsForWeapon(
   weapon: import("./sampleData").Weapon,
@@ -80,12 +80,13 @@ export function bestModsForWeapon(
   const result: ModContribution[] = [];
   for (const category of weapon.modSlots) {
     const pool = (modsBySlot[category] ?? []).filter((m) => m.bonus && MOD_DAMAGE_ATTRS.has(m.bonus.type));
-    let best: { name: string; bonus: { type: string; val: number } } | null = null;
+    let best: { name: string; bonus: { type: string; val: number }; score: number } | null = null;
     for (const m of pool) {
+      if (!m.bonus) continue;
       const penaltyBad = m.penalty && MOD_DAMAGE_ATTRS.has(m.penalty.type) ? Math.abs(m.penalty.val) : 0;
-      const score = (m.bonus?.val ?? 0) - penaltyBad;
-      if (!best || score > ((best.bonus?.val ?? 0) - 0)) {
-        if (m.bonus) best = { name: m.name, bonus: m.bonus };
+      const score = m.bonus.val - penaltyBad;
+      if (!best || score > best.score) {
+        best = { name: m.name, bonus: m.bonus, score };
       }
     }
     if (best) {
@@ -98,7 +99,9 @@ export function bestModsForWeapon(
 export function applyModContributions(stats: BuildStats, mods: ModContribution[]): BuildStats {
   const next: BuildStats = {
     ...stats,
-    sources: { ...stats.sources },
+    sources: Object.fromEntries(
+      Object.entries(stats.sources).map(([k, v]) => [k, [...v]]),
+    ),
   };
   for (const m of mods) {
     const label = `Mod (${m.modName})`;
@@ -181,9 +184,11 @@ export function aggregateBuild(
   shd("wd", shdBonusFor(shdLevel, "wd"));
   shd("chc", shdBonusFor(shdLevel, "chc"));
   shd("chd", shdBonusFor(shdLevel, "chd"));
+  shd("hsd", shdBonusFor(shdLevel, "hsd"));
   stats.wd += shdBonusFor(shdLevel, "wd");
   stats.chc += shdBonusFor(shdLevel, "chc");
   stats.chd += shdBonusFor(shdLevel, "chd");
+  stats.hsd += shdBonusFor(shdLevel, "hsd");
   return stats;
 }
 
@@ -223,8 +228,7 @@ export function computeDamage(
   const nonCritBody = rawHit * dtaMult * dthMult * dttoocMult * ampMult;
 
   const hsdShare = profile.headshot;
-  const hsdMult = 1 + (build.hsd / 100) * hsdShare;
-  const nonCritHit = nonCritBody * ((1 - hsdShare) + hsdShare * hsdMult);
+  const nonCritHit = nonCritBody * (1 + (build.hsd / 100) * hsdShare);
 
   const finalChc = Math.min(build.chc, CHC_CAP);
   const finalChd = build.chd;
@@ -343,7 +347,8 @@ function slotExplanationsFor(
       );
       const damage = computeDamage(weapon, stats, profile);
       const delta = baseDamage.effectiveDps - damage.effectiveDps;
-      if (!runnerUp || delta > runnerUp.dpsDelta) {
+      if (!Number.isFinite(delta)) continue;
+      if (!runnerUp || delta < runnerUp.dpsDelta) {
         runnerUp = {
           item: other,
           dpsDelta: delta,
@@ -493,7 +498,10 @@ export function optimizeBuilds(
     });
   }
 
-  const gearCombos = cartesianBySlot(bySlot);
+  const searchWarnings: OptimizerWarning[] = [];
+  const gearCombos = cartesianBySlot(bySlot, lockedGear, (msg) => {
+    searchWarnings.push({ level: "yellow", message: msg });
+  });
 
   const results = runOptimizerPasses(
     candidateWeapons,
@@ -506,7 +514,7 @@ export function optimizeBuilds(
     requireChest,
     requireBackpack,
     passes,
-    fallbackWarnings,
+    [...fallbackWarnings, ...searchWarnings],
     lockedGear,
     opts.spec ?? "",
     opts.modsBySlot,
@@ -630,17 +638,89 @@ function piecesOfSet(setPieces: GearPiece[], targetSet: string, knownSets: Set<s
   }).length;
 }
 
-function cartesianBySlot(bySlot: Map<GearSlot, GearPiece[]>): GearPiece[][] {
-  let combos: GearPiece[][] = [[]];
+const MAX_CANDIDATES_PER_SLOT = 12;
+
+function attrVector(g: GearPiece): Record<string, number> {
+  const v: Record<string, number> = { core: g.core === "wd" ? g.coreValue : 0 };
+  for (const a of g.attributes) v[a.type] = (v[a.type] ?? 0) + a.value;
+  return v;
+}
+
+function dominates(a: GearPiece, b: GearPiece): boolean {
+  if (a.id === b.id) return false;
+  const va = attrVector(a);
+  const vb = attrVector(b);
+  const keys = new Set([...Object.keys(va), ...Object.keys(vb)]);
+  let better = false;
+  for (const k of keys) {
+    const av = va[k] ?? 0;
+    const bv = vb[k] ?? 0;
+    if (av < bv) return false;
+    if (av > bv) better = true;
+  }
+  return better;
+}
+
+function pruneSlotCandidates(items: GearPiece[], locked: GearPiece[]): GearPiece[] {
+  if (items.length <= MAX_CANDIDATES_PER_SLOT) return items;
+  const lockedIds = new Set(locked.map((g) => g.id));
+  const kept: GearPiece[] = items.filter((g) => lockedIds.has(g.id));
+  let pool = items.filter((g) => !lockedIds.has(g.id));
+  const nonDominated: GearPiece[] = [];
+  for (const g of pool) {
+    if (pool.some((o) => o !== g && dominates(o, g))) continue;
+    nonDominated.push(g);
+  }
+  if (nonDominated.length > MAX_CANDIDATES_PER_SLOT) {
+    pool = nonDominated
+      .map((g) => ({ g, sum: Object.values(attrVector(g)).reduce((a, b) => a + b, 0) }))
+      .sort((a, b) => b.sum - a.sum)
+      .slice(0, MAX_CANDIDATES_PER_SLOT)
+      .map((x) => x.g);
+  } else {
+    pool = nonDominated;
+  }
+  return [...kept, ...pool];
+}
+
+function cartesianBySlot(
+  bySlot: Map<GearSlot, GearPiece[]>,
+  lockedGear: GearPiece[] = [],
+  warn?: (msg: string) => void,
+): GearPiece[][] {
+  const slotLists: GearPiece[][] = [];
   for (const slot of SLOTS) {
     const items = bySlot.get(slot) ?? [];
+    if (items.length === 0) {
+      slotLists.push([]);
+      continue;
+    }
+    const pruned = pruneSlotCandidates(items, lockedGear);
+    if (pruned.length < items.length && warn) {
+      warn(`Slot ${slot}: ${items.length} Teile auf ${pruned.length} Kandidaten reduziert (Dominanz-Filter + Top-${MAX_CANDIDATES_PER_SLOT}).`);
+    }
+    slotLists.push(pruned);
+  }
+  const total = slotLists.reduce((acc, l) => acc * Math.max(1, l.length), 1);
+  const FULL_LIMIT = 2_000_000;
+  if (total > FULL_LIMIT) {
+    slotLists.forEach((l, i) => {
+      const lockedIds = new Set(lockedGear.map((g) => g.id));
+      const kept = l.filter((g) => lockedIds.has(g.id));
+      const free = l.filter((g) => !lockedIds.has(g.id));
+      const keep = Math.max(1, Math.floor(Math.pow(FULL_LIMIT / Math.max(1, total), 1 / slotLists.length) * l.length));
+      slotLists[i] = [...kept, ...free.slice(0, keep)];
+    });
+    if (warn) warn(`Suchraum zu groß (${total.toLocaleString("de-DE")} Kombinationen) — Kandidaten pro Slot begrenzt.`);
+  }
+  let combos: GearPiece[][] = [[]];
+  for (const items of slotLists) {
+    if (items.length === 0) continue;
     const next: GearPiece[][] = [];
     for (const c of combos) {
-      next.push(c);
       for (const item of items) next.push([...c, item]);
     }
     combos = next;
-    if (combos.length > 200000) combos = combos.slice(0, 200000);
   }
-  return combos.filter((c) => c.length > 0);
+  return combos;
 }
