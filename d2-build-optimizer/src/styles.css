@@ -964,3 +964,41 @@ kbd {
   border-radius: var(--radius);
   font-size: 13px;
 }
+
+/* ===== Locks kompakt ===== */
+.lock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px;
+}
+
+.lock-slot summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 6px;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.lock-slot summary:hover {
+  background: var(--bg-hover);
+}
+
+.lock-count {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.lock-slot-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2px;
+  padding: 2px 4px 6px;
+}

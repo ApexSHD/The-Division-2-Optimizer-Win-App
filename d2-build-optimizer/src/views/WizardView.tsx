@@ -268,27 +268,45 @@ export function WizardView() {
             </div>
             {store.gear.length > 0 && (
               <div className="field" style={{ marginTop: 10 }}>
-                <label>Gesperrte Items (Locks) — diese Teile werden nie ausgetauscht</label>
+                <label>Gesperrte Items (Locks) — diese Teile werden nie ausgetauscht ({o.lockedGearIds.filter((id) => store.gear.some((g) => g.id === id)).length} gesperrt)</label>
                 <div className="lock-list">
-                  {store.gear.map((g) => (
-                    <label key={g.id} className="check-row lock-row">
-                      <input
-                        type="checkbox"
-                        checked={o.lockedGearIds.includes(g.id)}
-                        onChange={(e) =>
-                          store.setOptimization({
-                            ...o,
-                            lockedGearIds: e.target.checked
-                              ? [...o.lockedGearIds, g.id]
-                              : o.lockedGearIds.filter((id) => id !== g.id),
-                          })
-                        }
-                      />
-                      <span className="check-text">
-                        <span>{g.brand} ({g.slot})</span>
-                      </span>
-                    </label>
-                  ))}
+                  {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => {
+                    const slotItems = store.gear.filter((g) => g.slot === slot);
+                    if (slotItems.length === 0) return null;
+                    const lockedCount = slotItems.filter((g) => o.lockedGearIds.includes(g.id)).length;
+                    const slotLabel: Record<string, string> = {
+                      mask: "Maske", chest: "Weste", holster: "Holster",
+                      backpack: "Rucksack", gloves: "Handschuhe", kneepads: "Knieschoner",
+                    };
+                    return (
+                      <details key={slot} className="lock-slot" open={lockedCount > 0}>
+                        <summary>
+                          {slotLabel[slot]} <span className="lock-count">{lockedCount}/{slotItems.length} gesperrt</span>
+                        </summary>
+                        <div className="lock-slot-items">
+                          {slotItems.map((g) => (
+                            <label key={g.id} className="check-row lock-row">
+                              <input
+                                type="checkbox"
+                                checked={o.lockedGearIds.includes(g.id)}
+                                onChange={(e) =>
+                                  store.setOptimization({
+                                    ...o,
+                                    lockedGearIds: e.target.checked
+                                      ? [...o.lockedGearIds, g.id]
+                                      : o.lockedGearIds.filter((id) => id !== g.id),
+                                  })
+                                }
+                              />
+                              <span className="check-text">
+                                <span>{g.brand}{g.talent ? ` · ${g.talent}` : ""}</span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </details>
+                    );
+                  })}
                 </div>
               </div>
             )}
