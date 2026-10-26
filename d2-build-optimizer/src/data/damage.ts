@@ -524,9 +524,9 @@ export function optimizeBuilds(
     brandScoreBonusForCombo(r.gear, settings.preferredBrand);
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
-    const brandDiff = brandBonus(b) - brandBonus(a);
-    if (brandDiff !== 0) return brandDiff;
-    return b.damage.effectiveDps - a.damage.effectiveDps;
+    const dpsDiff = b.damage.effectiveDps - a.damage.effectiveDps;
+    if (Math.abs(dpsDiff) > 1e-9) return dpsDiff;
+    return brandBonus(b) - brandBonus(a);
   });
   const top = results.slice(0, maxResults);
   top.forEach((r, i) => {
