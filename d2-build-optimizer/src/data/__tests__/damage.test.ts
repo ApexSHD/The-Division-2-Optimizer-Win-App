@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   optimizeBuilds,
+  analyzeGaps,
   computeDamage,
   aggregateBuild,
   bestModsForWeapon,
@@ -338,5 +339,80 @@ describe("optimizeBuilds — Set-Boni (Issue #67)", () => {
     const res = optimizeBuilds(sampleWeapons, gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
     const setSrc = (res[0].stats.sources.chc ?? []).find((x) => x.itemId === "set" && x.label.includes("striker"));
     expect(setSrc?.value).toBe(10);
+  });
+});
+
+describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
+  const mk64 = (slot: GearSlot, brand: string, chc = 6, chd = 12): GearPiece => ({
+    id: `${slot}-${brand}`,
+    slot,
+    brand,
+    brandType: "brand",
+    core: "wd",
+    coreValue: 15,
+    attributes: [{ type: "chc", value: chc }, { type: "chd", value: chd }],
+    talent: null,
+    prototype: true,
+  });
+
+  it("Cap-Bestrafung: Build mit CHC ueber 60 % rangiert hinter sauberem Build", () => {
+    const overCap: GearPiece[] = [
+      mk64("mask", "Over1", 20), mk64("chest", "Over2", 20), mk64("holster", "Over3", 20),
+      mk64("backpack", "Over4", 20), mk64("gloves", "Over5", 20), mk64("kneepads", "Over6", 20),
+    ];
+    const clean: GearPiece[] = [
+      mk64("mask", "Ok1", 7), mk64("chest", "Ok2", 7), mk64("holster", "Ok3", 7),
+      mk64("backpack", "Ok4", 7), mk64("gloves", "Ok5", 7), mk64("kneepads", "Ok6", 7),
+    ];
+    const res = optimizeBuilds(sampleWeapons, [...overCap, ...clean], 1000, DEFAULT_OPTIMIZATION, { maxResults: 5 });
+    const cleanTop = res[0];
+    expect(cleanTop.assumptions.wastedChc).toBe(0);
+    const wastedRanks = res.map((r, i) => ({ i, w: r.assumptions.wastedChc }));
+    for (const { i, w } of wastedRanks) {
+      if (w > 0) {
+        const anyCleanAbove = res.slice(0, i).some((x) => x.assumptions.wastedChc === 0);
+        expect(anyCleanAbove || i === 0).toBe(true);
+      }
+    }
+  });
+
+  it("Annahmen: wastedChc wird korrekt berechnet (CHC 130 % -> 70 verschwendet)", () => {
+    const res = optimizeBuilds(sampleWeapons, [
+      mk64("mask", "A", 20), mk64("chest", "B", 20), mk64("holster", "C", 20),
+      mk64("backpack", "D", 20), mk64("gloves", "E", 20), mk64("kneepads", "F", 20),
+    ], 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
+    // 6x20 + SHD 10 = 130; Cap 60 -> 70 verschwendet
+    expect(res[0].assumptions.wastedChc).toBe(70);
+    expect(res[0].assumptions.items.length).toBeGreaterThan(3);
+  });
+
+  it("Top-N-Diversitaet: Builds unterscheiden sich in mindestens 2 Teilen (oder Waffe)", () => {
+    const res = optimizeBuilds(sampleWeapons, [
+      mk64("mask", "M1"), mk64("mask", "M2"),
+      mk64("chest", "C1"), mk64("chest", "C2"),
+      mk64("holster", "H1"), mk64("backpack", "B1"),
+      mk64("gloves", "G1"), mk64("kneepads", "K1"),
+    ], 1000, DEFAULT_OPTIMIZATION, { maxResults: 4 });
+    for (let i = 1; i < res.length; i++) {
+      const diff = res[0].gear.filter((g, idx) => res[i].gear[idx]?.id !== g.id).length;
+      const weaponDiff = res[i].weapon.id !== res[0].weapon.id;
+      expect(diff >= 2 || weaponDiff).toBe(true);
+    }
+  });
+
+  it("Gaps-Analyse: schlaegt Verbesserungen mit Gewinn vor", () => {
+    const gear: GearPiece[] = [
+      mk64("mask", "Schwach", 2, 4),
+      mk64("chest", "C1"), mk64("holster", "H1"),
+      mk64("backpack", "B1"), mk64("gloves", "G1"), mk64("kneepads", "K1"),
+      mk64("mask", "Besser", 6, 12),
+    ];
+    const res = optimizeBuilds(sampleWeapons, gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
+    expect(res[0].gear.find((g) => g.slot === "mask")?.brand).toBe("Besser");
+    // Gap: zurueck auf Schwach waere Verlust; pruefe stattdessen Schwach-Basis:
+    const resWeak = optimizeBuilds(sampleWeapons, gear.filter((g) => g.brand !== "Besser"), 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
+    const gaps = analyzeGaps(resWeak[0], gear, 1000, DEFAULT_OPTIMIZATION);
+    expect(gaps.length).toBeGreaterThan(0);
+    expect(gaps.some((g) => g.slot === "mask" && g.improvement.includes("Besser"))).toBe(true);
   });
 });

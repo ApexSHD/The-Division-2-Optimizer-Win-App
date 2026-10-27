@@ -289,6 +289,24 @@ export function OptimizerView() {
                       <div key={part} className="reason-line">{part}</div>
                     ))}
                     <details style={{ marginTop: 4 }}>
+                      <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Annahmen</summary>
+                      <div className="calc-path">
+                        {r.assumptions.wastedChc > 0 && (
+                          <div className="warn-banner warn-yellow" style={{ marginBottom: 6 }}>
+                            {"\u26a0"} {r.assumptions.wastedChc} Prozentpunkte CHC ueber dem Cap (60 %) — verschwendeter Stat
+                          </div>
+                        )}
+                        <ul className="source-list">
+                          {r.assumptions.items.map((a) => (
+                            <li key={a.label}>
+                              <span>{a.label}</span>
+                              <span style={{ color: "var(--text-dim, #aaa)" }}>{a.detail}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </details>
+                    <details style={{ marginTop: 4 }}>
                       <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Rechenweg</summary>
                       <CalcPathBox r={r} />
                     </details>
