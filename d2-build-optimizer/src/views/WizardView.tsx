@@ -411,7 +411,7 @@ export function WizardView() {
             </div>
           )}
           {results !== null && results.length > 0 && (
-            <div className="table-wrap" style={{ maxHeight: 420 }}>
+            <div className="table-wrap optimizer-results">
               <table>
                 <thead>
                   <tr>

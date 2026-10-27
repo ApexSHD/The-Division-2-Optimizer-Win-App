@@ -232,7 +232,7 @@ export function OptimizerView() {
         </div>
       )}
       {results !== null && results.length > 0 && (
-        <div className="table-wrap" style={{ maxHeight: 420 }}>
+        <div className="table-wrap optimizer-results">
           <table>
             <thead>
               <tr>
@@ -278,7 +278,9 @@ export function OptimizerView() {
                     )}
                   </td>
                   <td style={{ fontSize: 11 }}>
-                    {r.reason}
+                    {r.reasonParts.map((part) => (
+                      <div key={part} className="reason-line">{part}</div>
+                    ))}
                     <details style={{ marginTop: 4 }}>
                       <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Rechenweg</summary>
                       <CalcPathBox r={r} />
