@@ -452,6 +452,87 @@ function isGodRoll(g: GearPiece): boolean {
   });
 }
 
+export interface SetBonusCatalog {
+  brands: Record<string, Record<string, Record<string, unknown>>>;
+  greens: Record<string, Record<string, { attr: string; val: number }[]>>;
+}
+
+const SET_BONUS_ATTR_MAP: Record<string, "chc" | "chd" | "hsd" | "wd" | "dta" | "dth" | "dttooc"> = {
+  chc: "chc",
+  chd: "chd",
+  hsd: "hsd",
+  wd: "wd",
+};
+
+export function applySetBonuses(
+  stats: BuildStats,
+  combo: GearPiece[],
+  weapon: import("./sampleData").Weapon,
+  catalog: SetBonusCatalog | null,
+): BuildStats {
+  if (!catalog) return stats;
+  const next: BuildStats = {
+    ...stats,
+    sources: Object.fromEntries(
+      Object.entries(stats.sources).map(([k, v]) => [k, [...v]]),
+    ),
+  };
+
+  const brandCounts = new Map<string, number>();
+  for (const g of combo) {
+    if (g.brandType === "brand") {
+      const key = g.brand.toLowerCase().split(" ")[0];
+      brandCounts.set(key, (brandCounts.get(key) ?? 0) + 1);
+    }
+  }
+  for (const [brandKey, count] of brandCounts) {
+    const tiers = catalog.brands[brandKey];
+    if (!tiers) continue;
+    for (const [pieces, bonusObj] of Object.entries(tiers)) {
+      if (count < Number(pieces)) continue;
+      for (const [attr, rawVal] of Object.entries(bonusObj)) {
+        if (attr === "wd_by_weapon") {
+          const byWeapon = rawVal as Record<string, number>;
+          const weaponKey = weapon.type.toUpperCase();
+          const val = byWeapon[weaponKey];
+          if (val) {
+            next.wd += val;
+            addStatSource(next, "wd", `Set: ${brandKey} (${pieces} Teile, ${weaponKey})`, val, "set");
+          }
+          continue;
+        }
+        const mapped = SET_BONUS_ATTR_MAP[attr];
+        const val = Number(rawVal);
+        if (!mapped || !Number.isFinite(val)) continue;
+        next[mapped] += val;
+        addStatSource(next, mapped, `Set: ${brandKey} (${pieces} Teile)`, val, "set");
+      }
+    }
+  }
+
+  const greenCounts = new Map<string, number>();
+  for (const g of combo) {
+    if (g.brandType === "gearset") {
+      const key = g.brand.toLowerCase();
+      greenCounts.set(key, (greenCounts.get(key) ?? 0) + 1);
+    }
+  }
+  for (const [greenKey, count] of greenCounts) {
+    const tiers = catalog.greens[greenKey];
+    if (!tiers) continue;
+    for (const [pieces, bonuses] of Object.entries(tiers)) {
+      if (count < Number(pieces)) continue;
+      for (const b of bonuses) {
+        const mapped = SET_BONUS_ATTR_MAP[b.attr];
+        if (!mapped) continue;
+        next[mapped] += b.val;
+        addStatSource(next, mapped, `Set: ${greenKey} (${pieces} Teile)`, b.val, "set");
+      }
+    }
+  }
+  return next;
+}
+
 export function optimizeBuilds(
   weapons: Weapon[],
   gear: GearPiece[],
@@ -462,6 +543,7 @@ export function optimizeBuilds(
     maxResults?: number;
     spec?: string;
     considerMods?: boolean;
+    setBonusCatalog?: SetBonusCatalog | null;
     modsBySlot?: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>;
   } = {},
 ): OptimizerResult[] {
@@ -570,6 +652,7 @@ export function optimizeBuilds(
     [...fallbackWarnings, ...searchWarnings],
     lockedGear,
     opts.spec ?? "",
+    opts.setBonusCatalog ?? null,
     opts.modsBySlot,
   );
 
@@ -615,6 +698,7 @@ function runOptimizerPasses(
   fallbackWarnings: OptimizerWarning[],
   lockedGear: GearPiece[],
   spec0: string,
+  setBonusCatalog: SetBonusCatalog | null,
   modsBySlot: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]> | undefined,
 ): OptimizerResult[] {
   const seen = new Set<string>();
@@ -653,6 +737,7 @@ function runOptimizerPasses(
           modsUsed = bestModsForWeapon(w, modsBySlot);
           stats = applyModContributions(stats, modsUsed);
         }
+        stats = applySetBonuses(stats, combo, w, setBonusCatalog);
         const damage = computeDamage(w, stats, profile, { weaponTypeWd: 0 });
         const meetsTargetChc = damage.cappedChc >= settings.targetChc;
 

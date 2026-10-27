@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
-import { optimizeBuilds } from "../data/damage";
+import { optimizeBuilds, type SetBonusCatalog } from "../data/damage";
 import type { OptimizerResult, SlotExplanation, StatSource } from "../data/damage";
 import { GEAR_CORE_LABELS } from "../data/sampleData";
 import type { GearCoreType } from "../data/sampleData";
@@ -93,6 +93,7 @@ export function OptimizerView() {
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
   const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
+  const [setBonusCatalog, setSetBonusCatalog] = useState<SetBonusCatalog | null>(null);
   const [modSlots, setModSlots] = useState<Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]> | null>(null);
   const o = store.optimization;
 
@@ -100,6 +101,11 @@ export function OptimizerView() {
     getDb().then((db) => {
       setGearSets(db.gearSetItems);
       setModSlots(db.modSlots);
+      const brands: Record<string, Record<string, Record<string, unknown>>> = {};
+      for (const b of db.brandSets) brands[b.key] = b.numericBonusesPve ?? {};
+      const greens: Record<string, Record<string, { attr: string; val: number }[]>> = {};
+      for (const g of db.gearSets) greens[g.key] = g.numericBonuses ?? {};
+      setSetBonusCatalog({ brands, greens });
     }).catch(() => setGearSets([]));
   }, []);
 
@@ -119,6 +125,7 @@ export function OptimizerView() {
             maxResults: 10,
             spec: store.agent.spec,
             modsBySlot: modSlots ?? undefined,
+            setBonusCatalog,
           },
         );
         setResults(res);

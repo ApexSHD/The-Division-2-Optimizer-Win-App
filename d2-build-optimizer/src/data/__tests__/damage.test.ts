@@ -264,3 +264,79 @@ describe("optimizeBuilds — Rollen-Scorer (Issue #56)", () => {
     expect(res[0].gear.filter((g) => g.brand.startsWith("Skill")).length).toBe(6);
   });
 });
+
+describe("optimizeBuilds — Set-Boni (Issue #67)", () => {
+  const catalog = {
+    brands: {
+      ceska: {
+        "1": { chc: 8 },
+        "2": { wd_by_weapon: { SHOTGUN: 24 } },
+        "3": { hazard: 30 },
+      },
+    },
+    greens: {
+      striker: {
+        "2": [{ attr: "wh", val: 15 }],
+        "3": [{ attr: "chc", val: 10 }],
+      },
+    },
+  };
+
+  const mkSet = (slot: GearSlot, brand: string, brandType: GearPiece["brandType"] = "brand"): GearPiece => ({
+    id: `${slot}-${brand}`,
+    slot,
+    brand,
+    brandType,
+    core: "wd",
+    coreValue: 15,
+    attributes: [{ type: "chc", value: 6 }, { type: "chd", value: 12 }],
+    talent: null,
+    prototype: true,
+  });
+
+  it("Brand-Set-Bonus (1 Teil Ceska): +8 CHC mit Quellen-Eintrag", () => {
+    const gear: GearPiece[] = [
+      mkSet("mask", "Ceska"),
+      mkSet("chest", "Grupo"),
+      mkSet("holster", "Overlord"),
+      mkSet("backpack", "Fenris"),
+      mkSet("gloves", "Petrov"),
+      mkSet("kneepads", "Walker"),
+    ];
+    const res = optimizeBuilds(sampleWeapons, gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
+    const setSrc = (res[0].stats.sources.chc ?? []).find((x) => x.itemId === "set");
+    expect(setSrc?.value).toBe(8);
+    expect(setSrc?.label).toContain("ceska");
+  });
+
+  it("wd_by_weapon greift nur bei passender Waffengattung", () => {
+    const gear: GearPiece[] = [
+      mkSet("mask", "Ceska"),
+      mkSet("chest", "Ceska"),
+      mkSet("holster", "Overlord"),
+      mkSet("backpack", "Fenris"),
+      mkSet("gloves", "Petrov"),
+      mkSet("kneepads", "Walker"),
+    ];
+    const shotgun = sampleWeapons.find((w) => w.type === "shotgun")!;
+    const ar = sampleWeapons.find((w) => w.type === "ar")!;
+    const resSg = optimizeBuilds([shotgun], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
+    const resAr = optimizeBuilds([ar], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
+    expect((resSg[0].stats.sources.wd ?? []).some((x) => x.label.includes("SHOTGUN") && x.value === 24)).toBe(true);
+    expect((resAr[0].stats.sources.wd ?? []).some((x) => x.label.includes("SHOTGUN"))).toBe(false);
+  });
+
+  it("Green-Set-Bonus (3 Teile Striker): CHC-Bonus aus Katalog", () => {
+    const gear: GearPiece[] = [
+      mkSet("mask", "Striker", "gearset"),
+      mkSet("chest", "Striker", "gearset"),
+      mkSet("holster", "Striker", "gearset"),
+      mkSet("backpack", "Fenris"),
+      mkSet("gloves", "Petrov"),
+      mkSet("kneepads", "Walker"),
+    ];
+    const res = optimizeBuilds(sampleWeapons, gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
+    const setSrc = (res[0].stats.sources.chc ?? []).find((x) => x.itemId === "set" && x.label.includes("striker"));
+    expect(setSrc?.value).toBe(10);
+  });
+});
