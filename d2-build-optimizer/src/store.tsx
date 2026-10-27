@@ -203,9 +203,11 @@ export interface AppState {
   progress: number | null;
   setProgress: (p: number | null) => void;
   addWeapon: (w: Weapon) => void;
+  addWeaponBulk: (ws: Weapon[]) => void;
   updateWeapon: (w: Weapon) => void;
   removeWeapon: (id: string) => void;
   addGear: (g: GearPiece) => void;
+  addGearBulk: (gs: GearPiece[]) => void;
   updateGear: (g: GearPiece) => void;
   removeGear: (id: string) => void;
   profiles: Profile[];
@@ -256,11 +258,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (restored) return;
-    setRestored(true);
-    if (!isTauri) return;
+    if (!isTauri) {
+      setRestored(true);
+      return;
+    }
+    let cancelled = false;
     (async () => {
       try {
         const raw = await tauriInvoke<string | null>("load_user_data");
+        if (cancelled) return;
         if (raw !== null) {
           setUserData(sanitize(JSON.parse(raw)));
           setStatus("Benutzerdaten geladen");
@@ -268,17 +274,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setStatus("Neue Benutzerdatenbank angelegt");
         }
         const dir = await tauriInvoke<string>("data_dir");
-        setStoragePath(dir);
+        if (!cancelled) setStoragePath(dir);
+        setRestored(true);
       } catch (e) {
+        if (cancelled) return;
         setLoadError(String(e));
-        setStatus("Fehler beim Laden der Benutzerdaten");
+        setStatus("Fehler beim Laden der Benutzerdaten — automatisches Speichern deaktiviert (Originaldatei bleibt unangetastet)");
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [restored]);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!isTauri || !restored) return;
+    if (!isTauri || !restored || loadError) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       tauriInvoke("save_user_data", { json: JSON.stringify(userData, null, 2) }).catch((e) => {
@@ -368,6 +379,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     progress,
     setProgress,
     addWeapon: (w) => mutate((d) => ({ ...d, weapons: [...d.weapons, w] })),
+    addWeaponBulk: (ws) => mutate((d) => (ws.length === 0 ? d : { ...d, weapons: [...d.weapons, ...ws] })),
     updateWeapon: (w) =>
       mutate((d) => ({ ...d, weapons: d.weapons.map((x) => (x.id === w.id ? w : x)) })),
     removeWeapon: (id) =>
@@ -377,6 +389,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         builds: d.builds.map((b) => ({ ...b, weaponIds: b.weaponIds.filter((wid) => wid !== id) })),
       })),
     addGear: (g) => mutate((d) => ({ ...d, gear: [...d.gear, g] })),
+    addGearBulk: (gs) => mutate((d) => (gs.length === 0 ? d : { ...d, gear: [...d.gear, ...gs] })),
     updateGear: (g) =>
       mutate((d) => ({ ...d, gear: d.gear.map((x) => (x.id === g.id ? g : x)) })),
     removeGear: (id) =>

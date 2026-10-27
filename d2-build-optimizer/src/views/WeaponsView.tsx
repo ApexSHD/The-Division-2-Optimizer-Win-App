@@ -188,21 +188,23 @@ export function WeaponsView() {
         store.setStatus("CSV-Import: keine gültigen Waffen gefunden");
         return;
       }
-      const seen = new Set(store.weapons.map((w) => `${w.name}::${w.type}`));
-      let imported = 0;
+      const weaponKey = (w: import("../data/sampleData").Weapon) =>
+        `${w.name}::${w.type}::${w.baseDamage}::${w.knowHow}::${w.modSlots.join(",")}::${w.attributes.core1}::${w.attributes.core2Type ?? ""}::${w.attributes.core2Val ?? 0}`;
+      const seen = new Set(store.weapons.map(weaponKey));
+      const toImport: import("../data/sampleData").Weapon[] = [];
       let duplicates = 0;
       for (const w of weapons) {
-        const key = `${w.name}::${w.type}`;
+        const key = weaponKey(w);
         if (seen.has(key)) {
           duplicates++;
           continue;
         }
         seen.add(key);
-        store.addWeapon(w);
-        imported++;
+        toImport.push(w);
       }
-      const parts = [`${imported} Waffe(n) importiert`];
-      if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen`);
+      store.addWeaponBulk(toImport);
+      const parts = [`${toImport.length} Waffe(n) importiert`];
+      if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen (nur bei identischen Werten)`);
       if (skippedRows) parts.push(`${skippedRows} Zeile(n) ungültig`);
       store.setStatus(parts.join(", "));
     } catch (err) {
