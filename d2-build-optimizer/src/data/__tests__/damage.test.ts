@@ -8,7 +8,7 @@ import {
 } from "../damage";
 import { sampleWeapons } from "../sampleData";
 import { DEFAULT_OPTIMIZATION } from "../../store";
-import type { GearPiece, GearSlot } from "../sampleData";
+import type { GearPiece, GearSlot, GearAttrKey } from "../sampleData";
 
 const mk = (
   slot: GearSlot,
@@ -182,7 +182,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
 });
 
 describe("optimizeBuilds — Rollen-Scorer (Issue #56)", () => {
-  const mkRole = (slot: GearSlot, brand: string, attrs: { type: string; value: number }[], core: "wd" | "armour" | "skill" = "wd"): GearPiece => ({
+  const mkRole = (slot: GearSlot, brand: string, attrs: { type: GearAttrKey; value: number }[], core: "wd" | "armour" | "skill" = "wd"): GearPiece => ({
     id: `${slot}-${brand}`,
     slot,
     brand,
