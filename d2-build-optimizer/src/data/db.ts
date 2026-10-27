@@ -130,6 +130,7 @@ export interface DbGreenSetInfo {
   n3?: string;
   n4?: string;
   modeled?: string;
+  bonuses?: Record<string, { attr: string; val: number }[]>;
   [k: string]: unknown;
 }
 
@@ -312,8 +313,8 @@ export interface Db {
   displayTalents: DisplayTalent[];
   talentDisplayByType: Record<string, DisplayTalent[]>;
   gear: GearPreset[];
-  brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
-  gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }[];
+  brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[]; numericBonusesPve?: Record<string, Record<string, unknown>> }[];
+  gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[]; numericBonuses?: Record<string, { attr: string; val: number }[]> }[];
   mods: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }[];
   modSlots: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]>;
   versions: { weapons: string; gear: string; mods: string; talents: string };
@@ -380,6 +381,7 @@ function load(): Db {
     bonuses: [b.weapon_hint ?? null, b["1p"] as string | undefined, b["2p"] as string | undefined, b["3p"] as string | undefined]
       .filter((x): x is string => typeof x === "string" && x.length > 0)
       .map((text, i) => ({ pieces: i + 1, bonus: text })),
+    numericBonusesPve: (b.bonuses_pve ?? {}) as Record<string, Record<string, unknown>>,
   }));
 
   const gearSets = Object.entries(gearFile.green_set_info).map(([key, s]) => ({
@@ -388,6 +390,7 @@ function load(): Db {
     bonuses: [s.n2, s.n3, s.n4]
       .filter((x): x is string => typeof x === "string" && x.length > 0)
       .map((text, i) => ({ pieces: i + 2, bonus: text })),
+    numericBonuses: (s.bonuses ?? {}) as Record<string, { attr: string; val: number }[]>,
   }));
 
   const modSlots = Object.fromEntries(
