@@ -1,5 +1,5 @@
 import type { GearPiece, GearSlot, GearCoreType, GearAttrKey } from "./sampleData";
-import { GEAR_CORE_LABELS, GEAR_ATTR_TYPES, normalizeGear } from "./sampleData";
+import { GEAR_CORE_LABELS, GEAR_ATTR_TYPES, normalizeGear, gearCoreMax } from "./sampleData";
 
 const CSV_SEPARATOR = ";";
 
@@ -53,7 +53,7 @@ export function gearToCsv(gear: GearPiece[]): string {
         g.brand,
         RARITY_LABELS[g.brandType],
         g.prototype ? "ja" : "nein",
-        GEAR_CORE_LABELS[g.core],
+        `${GEAR_CORE_LABELS[g.core]} +${formatNumberDe(g.coreValue)}`,
         attrs[0] ?? "",
         attrs[1] ?? "",
         g.talent ?? "",
@@ -96,8 +96,18 @@ function splitCsvLine(line: string): string[] {
 }
 
 function parseGermanNumber(raw: string): number {
-  const cleaned = raw.replace(/\s|\u00a0/g, "").replace(/\./g, "").replace(",", ".");
-  const n = Number(cleaned);
+  const cleaned = raw.replace(/[\s\u00a0]/g, "");
+  if (cleaned.includes(".") && cleaned.includes(",")) {
+    const n = Number(cleaned.replace(/\./g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+  if (cleaned.includes(",")) {
+    const n = Number(cleaned.replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+  const parts = cleaned.split(".");
+  const isThousands = parts.length > 2 || (parts.length === 2 && parts[1].length === 3 && parts[0].length <= 3);
+  const n = Number(isThousands ? cleaned.replace(/\./g, "") : cleaned);
   return Number.isFinite(n) ? n : 0;
 }
 
@@ -116,7 +126,7 @@ function parseRarity(label: string): GearPiece["brandType"] {
   const l = label.trim().toLowerCase();
   if (l.startsWith("exot") || l === "exotic") return "exotic";
   if (l.startsWith("named")) return "named";
-  if (l.includes("gear-set") || l.includes("gearset") || l.includes("set")) return "gearset";
+  if (l.includes("gear-set") || l.includes("gearset") || l === "set" || l === "gear set" || l.startsWith("gear-set")) return "gearset";
   return "brand";
 }
 
@@ -125,6 +135,13 @@ function parseCore(label: string): GearCoreType {
   if (l.startsWith("rüstung") || l.startsWith("armor") || l.startsWith("armour")) return "armour";
   if (l.startsWith("skill")) return "skill";
   return "wd";
+}
+
+function parseCoreValue(cell: string, core: GearCoreType, prototype: boolean): number {
+  const match = cell.match(/([+-]?[\d.,]+)\s*%?/);
+  if (!match) return gearCoreMax(core, prototype);
+  const v = parseGermanNumber(match[1]);
+  return Number.isFinite(v) && v > 0 ? v : gearCoreMax(core, prototype);
 }
 
 function parseAttr(cell: string): { type: GearAttrKey; value: number } | null {
@@ -200,6 +217,13 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
         brand,
         brandType,
         core: coreIdx >= 0 ? parseCore(cells[coreIdx] ?? "") : "wd",
+        coreValue: coreIdx >= 0
+          ? parseCoreValue(
+              cells[coreIdx] ?? "",
+              parseCore(cells[coreIdx] ?? ""),
+              !isExotic && (protoIdx < 0 || (cells[protoIdx] ?? "").trim().toLowerCase().startsWith("j")),
+            )
+          : undefined,
         attributes: attrs,
         talent: talentIdx >= 0 && (cells[talentIdx] ?? "").trim() ? (cells[talentIdx] ?? "").trim() : null,
         prototype: protoIdx >= 0

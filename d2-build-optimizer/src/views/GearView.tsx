@@ -202,8 +202,22 @@ export function GearView() {
         store.setStatus("CSV-Import: keine gültigen Gear-Teile gefunden");
         return;
       }
-      for (const g of gear) store.addGear(g);
-      store.setStatus(`${gear.length} Gear-Teil(e) importiert${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}`);
+      const gearKey = (g: GearPiece) =>
+        `${g.slot}::${g.brand}::${g.brandType}::${g.core}::${g.coreValue}::${g.attributes.map((a) => `${a.type}:${a.value}`).join(",")}::${g.talent ?? ""}::${g.prototype ? 1 : 0}`;
+      const seen = new Set(store.gear.map(gearKey));
+      const toImport: GearPiece[] = [];
+      let duplicates = 0;
+      for (const g of gear) {
+        const key = gearKey(g);
+        if (seen.has(key)) {
+          duplicates++;
+          continue;
+        }
+        seen.add(key);
+        toImport.push(g);
+      }
+      store.addGearBulk(toImport);
+      store.setStatus(`${toImport.length} Gear-Teil(e) importiert${duplicates ? `, ${duplicates} Duplikat(e) übersprungen` : ""}${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}`);
     } catch (err) {
       store.setStatus(`CSV-Import fehlgeschlagen: ${err}`);
     }
