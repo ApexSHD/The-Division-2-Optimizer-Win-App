@@ -1,9 +1,11 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext, type Language } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 import { type SetBonusCatalog, aggregateBuild, computeDamage, enemyProfileFromSettings } from "../data/damage";
 import { runOptimizerAsync } from "../data/optimizerClient";
+import { analyzeGaps } from "../data/damage";
+import type { GapSuggestion } from "../data/damage";
 import type { OptimizerResult } from "../data/damage";
 import { getDb } from "../data/db";
 import type { GearSetItemPreset } from "../data/db";
@@ -12,6 +14,42 @@ import { GEAR_CORE_LABELS, GEAR_ATTR_TYPES } from "../data/sampleData";
 import type { GearCoreType } from "../data/sampleData";
 
 type Step = 0 | 1 | 2 | 3 | 4;
+
+function GapPanel({ base }: { base: OptimizerResult }) {
+  const store = useStore();
+  const o = store.optimization;
+  const gaps = useMemo<GapSuggestion[]>(() => {
+    try {
+      return analyzeGaps(base, store.gear, store.agent.shdLevel, o);
+    } catch {
+      return [];
+    }
+  }, [base, store.gear, store.agent.shdLevel, o]);
+
+  if (gaps.length === 0) {
+    return <div className="hint" style={{ marginTop: 12 }}>Keine Verbesserungen im Inventar gefunden — der Build ist bereits das Beste aus deinen Teilen.</div>;
+  }
+
+  return (
+    <div style={{ marginTop: 14 }}>
+      <h4 className="inv-group-title">Lückenanalyse — was bringt am meisten?</h4>
+      <table className="calc-table">
+        <tbody>
+          {gaps.slice(0, 6).map((g) => (
+            <tr key={g.slot}>
+              <td>{g.slot}</td>
+              <td>{g.improvement}</td>
+              <td className="calc-val">+{g.gainPercent.toLocaleString("de-DE")} % DPS</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="settings-hint">
+        Tauschvorschläge innerhalb deines Inventars. Für Farm-Entscheidungen: der Slot mit dem höchsten Gewinn lohnt als Erstes — bedenke Rekalibrierung (Werkbank), die hier noch nicht eingerechnet ist.
+      </p>
+    </div>
+  );
+}
 
 function QuickSwapPanel({
   base,
@@ -482,14 +520,17 @@ export function WizardView() {
           {results === null || results.length === 0 ? (
             <div className="hint">Erst berechnen (Schritt 3), dann hier feintunen.</div>
           ) : (
-            <QuickSwapPanel
-              base={results[0]}
-              gear={store.gear}
-              shdLevel={store.agent.shdLevel}
-              settings={o}
-              adjusted={adjusted}
-              onAdjusted={setAdjusted}
-            />
+            <>
+              <QuickSwapPanel
+                base={results[0]}
+                gear={store.gear}
+                shdLevel={store.agent.shdLevel}
+                settings={o}
+                adjusted={adjusted}
+                onAdjusted={setAdjusted}
+              />
+              <GapPanel base={results[0]} />
+            </>
           )}
         </section>
       )}

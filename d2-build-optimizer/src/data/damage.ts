@@ -331,6 +331,22 @@ export interface OptimizerWarning {
   message: string;
 }
 
+export interface OptimizerAssumptions {
+  /** Nicht modellierte Effekte, die das Ergebnis beeinflussen koennen */
+  items: { label: string; detail: string }[];
+  /** CHC ueber dem Cap: verschwendeter Stat */
+  wastedChc: number;
+  /** CHC ueber dem Zielwert: ungenutzter Puffer */
+  overTargetChc: number;
+}
+
+export interface GapSuggestion {
+  slot: GearSlot;
+  current: GearPiece | null;
+  improvement: string;
+  gainPercent: number;
+}
+
 export interface OptimizerResult {
   rank: number;
   weapon: Weapon;
@@ -344,6 +360,7 @@ export interface OptimizerResult {
   slotExplanations: SlotExplanation[];
   warnings: OptimizerWarning[];
   roleScore: RoleScore;
+  assumptions: OptimizerAssumptions;
 }
 
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
@@ -665,11 +682,27 @@ export function optimizeBuilds(
       const roleDiff = b.roleScore.score - a.roleScore.score;
       if (Math.abs(roleDiff) > 1e-9) return roleDiff;
     }
+    const wasteDiff = a.assumptions.wastedChc - b.assumptions.wastedChc;
+    if (Math.abs(wasteDiff) > 1e-9) return wasteDiff;
     const dpsDiff = b.damage.effectiveDps - a.damage.effectiveDps;
     if (Math.abs(dpsDiff) > 1e-9) return dpsDiff;
     return brandBonus(b) - brandBonus(a);
   });
-  const top = results.slice(0, maxResults);
+
+  const top: OptimizerResult[] = [];
+  for (const r of results) {
+    if (top.length >= maxResults) break;
+    const diverseEnough = top.every(
+      (t) => t.gear.filter((g, i) => r.gear[i]?.id !== g.id).length >= 2 || t.weapon.id !== r.weapon.id,
+    );
+    if (top.length === 0 || diverseEnough || results.length <= maxResults) top.push(r);
+    else {
+      const next = results.find(
+        (x) => !top.includes(x) && top.every((t) => t.gear.filter((g, i) => x.gear[i]?.id !== g.id).length >= 2 || t.weapon.id !== x.weapon.id),
+      );
+      if (next) top.push(next);
+    }
+  }
   top.forEach((r, i) => {
     r.rank = i + 1;
     r.slotExplanations = slotExplanationsFor(
@@ -755,6 +788,20 @@ function runOptimizerPasses(
           ? roleScoreFor(combo, settings.role)
           : { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" };
 
+        const wastedChc = Math.max(0, stats.chc - CHC_CAP);
+        const overTargetChc = Math.max(0, Math.min(stats.chc, CHC_CAP) - settings.targetChc);
+        const assumptions: OptimizerAssumptions = {
+          items: [
+            { label: "CHC-Cap 60 %", detail: wastedChc > 0 ? `${wastedChc.toFixed(1)} Prozentpunkte ueber dem Cap — verschwendeter Stat` : "kein Verschwendeter CHC" },
+            { label: "Know-How", detail: `${w.knowHow} % auf den Grundschaden` },
+            { label: "Gegnerprofil", detail: `Ruestung ${Math.round(profile.armor * 100)} %, Kopf ${Math.round(profile.headshot * 100)} %, ungedeckt ${Math.round(profile.ooc * 100)} %` },
+            { label: "Talente/Exotic-Perks", detail: "nicht modelliert (siehe docs/FORMELN.md Abschnitt 8)" },
+            { label: "SHD-Uhr", detail: "Verteilung pauschal angenommen (nicht mitoptimiert)" },
+          ],
+          wastedChc: Number(wastedChc.toFixed(1)),
+          overTargetChc: Number(overTargetChc.toFixed(1)),
+        };
+
         results.push({
           rank: 0,
           weapon: w,
@@ -768,6 +815,7 @@ function runOptimizerPasses(
           slotExplanations: [],
           warnings: [...fallbackWarnings, ...pass.warnings],
           roleScore,
+          assumptions,
         });
         seen.add(key);
       }
@@ -775,6 +823,57 @@ function runOptimizerPasses(
     if (results.length > 0) return results;
   }
   return [];
+}
+
+export function analyzeGaps(
+  best: OptimizerResult,
+  gear: GearPiece[],
+  shdLevel: number,
+  settings: OptimizationSettings,
+  opts: {
+    gearSetNames?: string[];
+    spec?: string;
+    considerMods?: boolean;
+    modsBySlot?: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>;
+    setBonusCatalog?: SetBonusCatalog | null;
+  } = {},
+): GapSuggestion[] {
+  const profile = enemyProfileFromSettings(settings);
+  const baseDps = best.damage.effectiveDps;
+  const suggestions: GapSuggestion[] = [];
+
+  const perSlotBest = new Map<GearSlot, { dps: number; item: GearPiece }>();
+  for (const slot of SLOTS) {
+    const current = best.gear.find((g) => g.slot === slot);
+    if (!current) continue;
+    const candidates = gear.filter((g) => g.slot === slot && g.id !== current.id);
+    for (const cand of candidates) {
+      const combo = best.gear.map((g) => (g.slot === slot ? cand : g));
+      const stats = aggregateBuild(combo, shdLevel);
+      const spec = specBonusFor(best.weapon, opts.spec ?? "");
+      stats.wd += spec.weaponTypeWd;
+      stats.hsd += spec.hsd;
+      const dmg = computeDamage(best.weapon, stats, profile, { weaponTypeWd: 0 });
+      const gain = ((dmg.effectiveDps - baseDps) / (baseDps || 1)) * 100;
+      const prev = perSlotBest.get(slot);
+      if (gain > 0 && (!prev || dmg.effectiveDps > prev.dps)) {
+        perSlotBest.set(slot, { dps: dmg.effectiveDps, item: cand });
+        suggestions.push({
+          slot,
+          current,
+          improvement: `${current.brand} → ${cand.brand}`,
+          gainPercent: Number(gain.toFixed(1)),
+        });
+      }
+    }
+  }
+
+  const bySlot = new Map<GearSlot, GapSuggestion>();
+  for (const sug of suggestions) {
+    const prev = bySlot.get(sug.slot);
+    if (!prev || sug.gainPercent > prev.gainPercent) bySlot.set(sug.slot, sug);
+  }
+  return [...bySlot.values()].sort((a, b) => b.gainPercent - a.gainPercent);
 }
 
 function piecesOfSet(setPieces: GearPiece[], targetSet: string, knownSets: Set<string>): number {
