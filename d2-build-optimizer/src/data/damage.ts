@@ -340,6 +340,7 @@ export interface OptimizerResult {
   meetsTargetChc: boolean;
   gearSetCount: number;
   reason: string;
+  reasonParts: string[];
   slotExplanations: SlotExplanation[];
   warnings: OptimizerWarning[];
   roleScore: RoleScore;
@@ -677,7 +678,8 @@ function runOptimizerPasses(
           damage,
           meetsTargetChc,
           gearSetCount,
-          reason: reasonParts.join(" × "),
+          reason: reasonParts.join(" · "),
+          reasonParts,
           slotExplanations: [],
           warnings: [...fallbackWarnings, ...pass.warnings],
           roleScore,
