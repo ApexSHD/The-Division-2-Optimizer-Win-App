@@ -8,7 +8,7 @@ import {
 } from "../damage";
 import { sampleWeapons } from "../sampleData";
 import { DEFAULT_OPTIMIZATION } from "../../store";
-import type { GearPiece, GearSlot } from "../sampleData";
+import type { GearPiece, GearSlot, GearAttrKey } from "../sampleData";
 
 const mk = (
   slot: GearSlot,
@@ -178,5 +178,89 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
     );
     expect(res.length).toBeGreaterThan(1);
     expect(res[0].damage.effectiveDps).toBeGreaterThanOrEqual(res[1].damage.effectiveDps);
+  });
+});
+
+describe("optimizeBuilds — Rollen-Scorer (Issue #56)", () => {
+  const mkRole = (slot: GearSlot, brand: string, attrs: { type: GearAttrKey; value: number }[], core: "wd" | "armour" | "skill" = "wd"): GearPiece => ({
+    id: `${slot}-${brand}`,
+    slot,
+    brand,
+    brandType: "brand",
+    core,
+    coreValue: core === "wd" ? 15 : core === "armour" ? 170000 : 1,
+    attributes: attrs,
+    talent: null,
+    prototype: true,
+  });
+
+  it("skillBurst: Skill-Gear schlägt DPS-Gear beim Rollen-Score", () => {
+    const skillGear: GearPiece[] = [
+      mkRole("mask", "SkillM", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("chest", "SkillC", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("holster", "SkillH", [{ type: "skillhaste", value: 12 }], "skill"),
+      mkRole("backpack", "SkillB", [{ type: "skilldmg", value: 10 }]),
+      mkRole("gloves", "SkillG", [{ type: "skilldmg", value: 10 }]),
+      mkRole("kneepads", "SkillK", [{ type: "skillhaste", value: 12 }]),
+    ];
+    const res = optimizeBuilds(sampleWeapons, skillGear, 1000, { ...DEFAULT_OPTIMIZATION, role: "skillBurst" }, { maxResults: 3 });
+    expect(res.length).toBeGreaterThan(0);
+    expect(res[0].roleScore.key).toBe("skillBurst");
+    expect(res[0].roleScore.score).toBeGreaterThan(0);
+    expect(res[0].roleScore.label).toContain("Skill-Tier");
+  });
+
+  it("tankRegen: Rüstungs-Gear mit Regen-Attributen gewinnt", () => {
+    const tankGear: GearPiece[] = [
+      mkRole("mask", "TankM", [{ type: "armorregen", value: 4925 }], "armour"),
+      mkRole("chest", "TankC", [{ type: "health", value: 18935 }], "armour"),
+      mkRole("holster", "TankH", [{ type: "hazard", value: 10 }], "armour"),
+      mkRole("backpack", "TankB", [{ type: "explres", value: 10 }]),
+      mkRole("gloves", "TankG", [{ type: "aok", value: 10 }]),
+      mkRole("kneepads", "TankK", [{ type: "incomrepair", value: 20 }]),
+    ];
+    const res = optimizeBuilds(sampleWeapons, tankGear, 1000, { ...DEFAULT_OPTIMIZATION, role: "tankRegen" }, { maxResults: 3 });
+    expect(res[0].roleScore.key).toBe("tankRegen");
+    expect(res[0].roleScore.score).toBeGreaterThan(0);
+  });
+
+  it("statusCc: Status-Attribute fließen in den Score", () => {
+    const ccGear: GearPiece[] = [
+      mkRole("mask", "CcM", [{ type: "status", value: 10 }]),
+      mkRole("chest", "CcC", [{ type: "status", value: 10 }]),
+      mkRole("holster", "CcH", [{ type: "status", value: 10 }]),
+      mkRole("backpack", "CcB", [{ type: "skillhaste", value: 12 }]),
+      mkRole("gloves", "CcG", [{ type: "status", value: 10 }]),
+      mkRole("kneepads", "CcK", [{ type: "status", value: 10 }]),
+    ];
+    const res = optimizeBuilds(sampleWeapons, ccGear, 1000, { ...DEFAULT_OPTIMIZATION, role: "statusCc" }, { maxResults: 3 });
+    expect(res[0].roleScore.key).toBe("statusCc");
+    expect(res[0].roleScore.label).toContain("Statuseffekte");
+  });
+
+  it("weaponDps-Rolle: kein Rollen-Score, DPS-Ranking bleibt", () => {
+    const res = optimizeBuilds(sampleWeapons, fullGear(), 1000, { ...DEFAULT_OPTIMIZATION, role: "weaponDps" }, { maxResults: 3 });
+    expect(res[0].roleScore.key).toBe("");
+    expect(res[0].roleScore.label).toBe("Waffen-DPS");
+  });
+
+  it("Rollen-Ranking: skillBurst sortiert nach Rollen-Score, nicht DPS", () => {
+    const mixed: GearPiece[] = [
+      mkRole("mask", "SkillA", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("mask", "DpsA", [{ type: "chc", value: 6 }, { type: "chd", value: 12 }]),
+      mkRole("chest", "SkillB", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("chest", "DpsB", [{ type: "chc", value: 6 }, { type: "chd", value: 12 }]),
+      mkRole("holster", "SkillC", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("holster", "DpsC", [{ type: "chc", value: 6 }, { type: "chd", value: 12 }]),
+      mkRole("backpack", "SkillD", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("backpack", "DpsD", [{ type: "chc", value: 6 }, { type: "chd", value: 12 }]),
+      mkRole("gloves", "SkillE", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("gloves", "DpsE", [{ type: "chc", value: 6 }, { type: "chd", value: 12 }]),
+      mkRole("kneepads", "SkillF", [{ type: "skilldmg", value: 10 }], "skill"),
+      mkRole("kneepads", "DpsF", [{ type: "chc", value: 6 }, { type: "chd", value: 12 }]),
+    ];
+    const res = optimizeBuilds(sampleWeapons, mixed, 1000, { ...DEFAULT_OPTIMIZATION, role: "skillBurst" }, { maxResults: 3 });
+    expect(res[0].roleScore.score).toBeGreaterThanOrEqual(res[1].roleScore.score);
+    expect(res[0].gear.filter((g) => g.brand.startsWith("Skill")).length).toBe(6);
   });
 });

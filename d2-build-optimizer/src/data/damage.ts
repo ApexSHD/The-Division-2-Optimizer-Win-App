@@ -125,6 +125,57 @@ export function specBonusFor(weapon: import("./sampleData").Weapon, spec: string
   };
 }
 
+export type RoleScoreKey = "weaponDps" | "skillBurst" | "statusCc" | "tankRegen";
+
+export interface RoleScore {
+  key: RoleScoreKey | "";
+  score: number;
+  label: string;
+}
+
+function roleScoreFor(gear: GearPiece[], key: string): RoleScore {
+  const sumAttr = (types: string[]) =>
+    gear.reduce(
+      (acc, g) =>
+        acc + g.attributes.filter((a) => types.includes(a.type)).reduce((x, a) => x + a.value, 0),
+      0,
+    );
+  const coreCount = (core: "wd" | "armour" | "skill") => gear.filter((g) => g.core === core).length;
+
+  switch (key) {
+    case "skillBurst": {
+      const skillDmg = sumAttr(["skilldmg"]);
+      const skillHaste = sumAttr(["skillhaste"]);
+      const tiers = coreCount("skill");
+      return {
+        key: "skillBurst",
+        score: Number((skillDmg + skillHaste * 0.5 + tiers * 10).toFixed(2)),
+        label: `Skill-Schaden +${skillDmg} % · Tempo +${skillHaste} % · ${tiers} Skill-Tier(s)`,
+      };
+    }
+    case "statusCc": {
+      const status = sumAttr(["status"]);
+      const haste = sumAttr(["skillhaste"]);
+      return {
+        key: "statusCc",
+        score: Number((status + haste * 0.25).toFixed(2)),
+        label: `Statuseffekte +${status} % · Skill-Tempo +${haste} %`,
+      };
+    }
+    case "tankRegen": {
+      const regen = sumAttr(["armorregen", "health", "hazard", "explres", "aok", "incomrepair"]);
+      const armors = coreCount("armour");
+      return {
+        key: "tankRegen",
+        score: Number((regen / 100 + armors * 10).toFixed(2)),
+        label: `Defensiv ${regen.toLocaleString("de-DE")} · ${armors} Rüstungs-Core(s)`,
+      };
+    }
+    default:
+      return { key: "", score: 0, label: "" };
+  }
+}
+
 export function enemyProfileFromSettings(o: OptimizationSettings): EnemyProfile {
   const armor = Math.max(0, Math.min(100, o.enemyArmorShare)) / 100;
   const health = Math.max(0, Math.min(100, o.enemyHealthShare)) / 100;
@@ -291,6 +342,7 @@ export interface OptimizerResult {
   reason: string;
   slotExplanations: SlotExplanation[];
   warnings: OptimizerWarning[];
+  roleScore: RoleScore;
 }
 
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
@@ -522,8 +574,13 @@ export function optimizeBuilds(
 
   const brandBonus = (r: OptimizerResult) =>
     brandScoreBonusForCombo(r.gear, settings.preferredBrand);
+  const roleDriven = Boolean(settings.role) && settings.role !== "weaponDps";
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
+    if (roleDriven) {
+      const roleDiff = b.roleScore.score - a.roleScore.score;
+      if (Math.abs(roleDiff) > 1e-9) return roleDiff;
+    }
     const dpsDiff = b.damage.effectiveDps - a.damage.effectiveDps;
     if (Math.abs(dpsDiff) > 1e-9) return dpsDiff;
     return brandBonus(b) - brandBonus(a);
@@ -608,6 +665,10 @@ function runOptimizerPasses(
         if (targetSet && gearSetCount > 0) reasonParts.push(`${gearSetCount}\u00d7 ${settings.targetGearSet}`);
         if (exoticGear === 1) reasonParts.push("1 Exotic-Gear");
 
+        const roleScore = settings.role && settings.role !== "weaponDps"
+          ? roleScoreFor(combo, settings.role)
+          : { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" };
+
         results.push({
           rank: 0,
           weapon: w,
@@ -616,9 +677,10 @@ function runOptimizerPasses(
           damage,
           meetsTargetChc,
           gearSetCount,
-          reason: reasonParts.join(" \u00b7 "),
+          reason: reasonParts.join(" × "),
           slotExplanations: [],
           warnings: [...fallbackWarnings, ...pass.warnings],
+          roleScore,
         });
         seen.add(key);
       }

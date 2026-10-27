@@ -244,6 +244,7 @@ export function OptimizerView() {
                 <th>CHD</th>
                 <th>Ø Schaden/Treffer</th>
                 <th>DPS</th>
+                <th>Rollen-Score</th>
                 <th>Begründung</th>
               </tr>
             </thead>
@@ -266,6 +267,16 @@ export function OptimizerView() {
                   <td>+{r.stats.chd.toLocaleString("de-DE")} %</td>
                   <td>{r.damage.avgBulletDmg.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</td>
                   <td><strong>{r.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</strong></td>
+                  <td style={{ fontSize: 11 }}>
+                    {r.roleScore.key ? (
+                      <>
+                        <strong>{r.roleScore.score.toLocaleString("de-DE")}</strong>
+                        <div style={{ color: "var(--text-dim, #aaa)" }}>{r.roleScore.label}</div>
+                      </>
+                    ) : (
+                      <span style={{ color: "var(--text-dim, #aaa)" }}>Waffen-DPS</span>
+                    )}
+                  </td>
                   <td style={{ fontSize: 11 }}>
                     {r.reason}
                     <details style={{ marginTop: 4 }}>
