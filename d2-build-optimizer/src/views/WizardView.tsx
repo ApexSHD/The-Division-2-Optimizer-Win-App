@@ -1,8 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext, type Language } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
-import { optimizeBuilds, type SetBonusCatalog, aggregateBuild, computeDamage, enemyProfileFromSettings } from "../data/damage";
+import { type SetBonusCatalog, aggregateBuild, computeDamage, enemyProfileFromSettings } from "../data/damage";
+import { runOptimizerAsync } from "../data/optimizerClient";
 import type { OptimizerResult } from "../data/damage";
 import { getDb } from "../data/db";
 import type { GearSetItemPreset } from "../data/db";
@@ -113,6 +114,7 @@ export function WizardView() {
   const [anchorWeaponId, setAnchorWeaponId] = useState<string>("init-from-settings");
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
+  const runRef = useRef<{ cancel: () => void } | null>(null);
   const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
   const [setBonusCatalog, setSetBonusCatalog] = useState<SetBonusCatalog | null>(null);
   const [modSlots, setModSlots] = useState<Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]> | null>(null);
@@ -149,37 +151,49 @@ export function WizardView() {
   function startOptimization() {
     setRunning(true);
     store.setStatus(t.status.calculating);
-    store.setProgress(10);
-    setTimeout(() => {
-      try {
-        const res = optimizeBuilds(
-          store.weapons,
-          store.gear,
-          store.agent.shdLevel,
-          o,
-          {
-            gearSetNames: gearSets.map((gs) => gs.name),
-            maxResults: 10,
-            spec: store.agent.spec,
-            modsBySlot: modSlots ?? undefined,
-            setBonusCatalog,
-          },
-        );
+    store.setProgress(15);
+    const run = runOptimizerAsync(
+      store.weapons,
+      store.gear,
+      store.agent.shdLevel,
+      o,
+      {
+        gearSetNames: gearSets.map((gs) => gs.name),
+        maxResults: 10,
+        spec: store.agent.spec,
+        modsBySlot: modSlots ?? undefined,
+        setBonusCatalog,
+      },
+      { onProgress: (pct) => store.setProgress(pct) },
+    );
+    runRef.current = run;
+    run.promise
+      .then((res) => {
         setResults(res);
         setAdjusted(null);
         store.setStatus(
           res.length > 0
             ? `${res.length} beste Build(s) berechnet`
-            : "Keine passende Kombination gefunden — Inventar oder Bedingungen prüfen",
+            : "Keine passende Kombination gefunden \u2014 Inventar oder Bedingungen pr\u00fcfen",
         );
-      } catch (e) {
+      })
+      .catch((e) => {
         setResults([]);
-        store.setStatus(`Optimierung fehlgeschlagen: ${e}`);
-      } finally {
+        store.setStatus(`Optimierung: ${e instanceof Error ? e.message : String(e)}`);
+      })
+      .finally(() => {
         store.setProgress(null);
         setRunning(false);
-      }
-    }, 50);
+        runRef.current = null;
+      });
+  }
+
+  function cancelOptimization() {
+    runRef.current?.cancel();
+    runRef.current = null;
+    setRunning(false);
+    store.setProgress(null);
+    store.setStatus("Optimierung abgebrochen");
   }
 
   function goNext() {
@@ -487,9 +501,14 @@ export function WizardView() {
           </button>
         )}
         {step < 3 && (
-          <button className="btn btn-accent" onClick={goNext} disabled={step === 2 && running}>
-            {step === 2 ? (running ? "Berechne…" : t.wizard.calculate) : `${t.wizard.next} →`}
-          </button>
+          <>
+            <button className="btn btn-accent" onClick={goNext} disabled={step === 2 && running}>
+              {step === 2 ? (running ? "Berechne…" : t.wizard.calculate) : `${t.wizard.next} →`}
+            </button>
+            {step === 2 && running && (
+              <button className="btn btn-danger" onClick={cancelOptimization}>Abbrechen</button>
+            )}
+          </>
         )}
         {step === 4 && (
           <button
