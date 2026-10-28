@@ -1,27 +1,5 @@
 import type { OptimizationSettings } from "../store";
 
-function CheckRow({
-  checked,
-  onChange,
-  title,
-  hint,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  title: string;
-  hint?: string;
-}) {
-  return (
-    <label className="check-row" style={{ marginTop: 10 }}>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span className="check-text">
-        <span style={{ fontWeight: 600 }}>{title}</span>
-        {hint && <p className="settings-hint">{hint}</p>}
-      </span>
-    </label>
-  );
-}
-
 function EnemyProfileSlider({
   label,
   value,
@@ -101,24 +79,11 @@ export function OptimizationSettingsPanel({
 
       <section className="settings-section">
         <h4 className="settings-section-title">Talente</h4>
-        <CheckRow
-          checked={optimization.considerWeaponTalents}
-          onChange={(v) => set({ considerWeaponTalents: v })}
-          title="Waffen-Talente berücksichtigen"
-          hint="Beeinflusst nur Talente mit Voraussetzung. An (Standard): Bedingungen pauschal als erfüllt angenommen. Aus: bedingte Talente zählen nur, wenn der Build die Bedingung selbst liefern kann (z. B. Sadist-Blutung über Trauma-Weste oder Ongoing Directive) — Synergien werden im Ergebnis ausgewiesen. Das Ergebnis zeigt getrennt, ob und mit welchem Bonus das Talent eingerechnet wurde. Magazin-abhängige Talente (Optimist, Strapaziert, Raserei) werden als Ø über ein volles Magazin berechnet (RPM, Magazingröße & Nachladezeit aus der Waffen-DB)."
-        />
-        <CheckRow
-          checked={optimization.considerGearTalents}
-          onChange={(v) => set({ considerGearTalents: v })}
-          title="Ausrüstungs-Talente (Weste / Rucksack) berücksichtigen"
-          hint="Beeinflusst nur Westen-/Rucksack-Talente mit Voraussetzung. An (Standard): Bedingungen pauschal als erfüllt angenommen. Aus: bedingte Ausrüstungs-Talente zählen nicht in die Berechnung. Unbedingte Talente (z. B. Glaskanone) gelten unabhängig davon als aktiv. Getrennt vom Schalter für bedingte Waffen-Talente."
-        />
-        <CheckRow
-          checked={optimization.considerExoticPerks}
-          onChange={(v) => set({ considerExoticPerks: v })}
-          title="Exotische Gear-Perks einrechnen"
-          hint="Z. B. Catharsis, Memento, Coyote's Mask."
-        />
+        <div className="hint" style={{ padding: "8px 10px" }}>
+          Talente, Exotic-Perks und Stack-Effekte werden aktuell <strong>nicht</strong> in die
+          Berechnung eingerechnet (siehe Annahmen-Panel je Ergebnis und docs/FORMELN.md Abschnitt 8).
+          Die Einbindung ist als Feature geplant.
+        </div>
       </section>
 
       <section className="settings-section">

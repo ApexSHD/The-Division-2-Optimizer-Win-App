@@ -34,7 +34,9 @@ export function runOptimizerAsync(
   let worker: Worker | null = null;
   let cancelled = false;
 
+  let rejectFn: ((reason: Error) => void) | null = null;
   const promise = new Promise<OptimizerResult[]>((resolve, reject) => {
+    rejectFn = reject;
     try {
       worker = new Worker(new URL("./optimizer.worker.ts", import.meta.url), { type: "module" });
     } catch {
@@ -72,6 +74,8 @@ export function runOptimizerAsync(
     cancel: () => {
       cancelled = true;
       worker?.terminate();
+      // FIX #82-6: Promise beim Abbruch sauber rejected statt fuer immer offen
+      rejectFn?.(new Error("Abgebrochen"));
     },
   };
 }

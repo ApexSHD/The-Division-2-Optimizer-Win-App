@@ -296,13 +296,15 @@ export function computeDamage(
 
   const nonCritBody = rawHit * dtahAvgAll * dttoocAvg * ampMult;
 
-  // FIX #78-3: CHD und HSD im Spiel ADDITIV (gemeinsamer Topf), nicht multiplikativ
+  // FIX #82-2: CHD und HSD WIRKLICH additiv (gemeinsamer Bonus-Topf wie im Spiel).
+  // nonCritHit bleibt der Kopfschuss-Sicht (mit HSD-Anteil); der Krit-Treffer addiert
+  // CHD auf den HSD-Bonus statt auf den bereits erhoehten Treffer (kein HSD*CHD-Produkt).
   const hsdShare = profile.headshot;
-  // Basis-Kopfschuss-Multiplikator der Waffe (falls in DB vorhanden als HSD-Stat der Waffe)
   const nonCritHit = nonCritBody * (1 + (totalHsd / 100) * hsdShare);
 
   const finalChc = Math.min(totalChc, CHC_CAP);
-  const critHit = nonCritHit * (1 + finalChdBase / 100);
+  // gemeinsamer Topf: Treffer-Grundlage (nonCritBody) * (1 + HSD-Anteil + CHD)
+  const critHit = nonCritBody * (1 + (totalHsd / 100) * hsdShare + finalChdBase / 100);
 
   const avgBulletDmg =
     nonCritHit * (1 - finalChc / 100) + critHit * (finalChc / 100);
@@ -737,11 +739,13 @@ export function optimizeBuilds(
   const brandBonus = (r: OptimizerResult) =>
     brandScoreBonusForCombo(r.gear, settings.preferredBrand);
   const roleDriven = Boolean(settings.role) && settings.role !== "weaponDps";
-  // FIX #78-1: Schaden primaer. Verschwendete CHC nur als kleiner Abzug (1 Prozentpunkt Waste = 1 % Score-Malus),
-  // damit 0,1 % Waste niemals einen 30-%-DPS-Vorteil schlaegt.
+  // FIX #82: Schaden primaer. Verschwendete CHC nur als FEINAbzug (0,2 Prozentpunkte Waste
+  // = 0,2 % Score-Malus) - ein paar Prozentpunkte Waste duerfen niemals einen echten
+  // DPS-Vorteil schlagen (Review-Beispiel: 5,5 % DPS vs. 5 PP Waste).
   const effectiveScore = (r: OptimizerResult) => {
-    if (roleDriven) return r.roleScore.score * (1 - Math.min(0.5, r.assumptions.wastedChc / 100));
-    return r.damage.effectiveDps * (1 - Math.min(0.5, r.assumptions.wastedChc / 100));
+    const wasteMalus = Math.min(0.2, r.assumptions.wastedChc * 0.002);
+    if (roleDriven) return r.roleScore.score * (1 - wasteMalus);
+    return r.damage.effectiveDps * (1 - wasteMalus);
   };
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
@@ -751,21 +755,34 @@ export function optimizeBuilds(
   });
 
   const top: OptimizerResult[] = [];
-  const isDiverse = (x: OptimizerResult) =>
-    top.every(
-      (t) => t.gear.filter((g, i) => x.gear[i]?.id !== g.id).length >= 2 || t.weapon.id !== x.weapon.id,
-    );
+  // FIX #82-4: pro SLOT vergleichen (nicht Position), Waffenwechsel allein zaehlt nicht als divers
+  const gearDiffCount = (a: OptimizerResult, b: OptimizerResult) => {
+    const bySlotA = new Map(a.gear.map((g) => [g.slot, g.id]));
+    let diff = 0;
+    for (const g of b.gear) {
+      if (bySlotA.get(g.slot) !== g.id) diff++;
+    }
+    return diff;
+  };
+  const isDiverse = (x: OptimizerResult) => top.every((t) => gearDiffCount(t, x) >= 2);
   for (const r of results) {
     if (top.length >= maxResults) break;
-    if (results.length <= maxResults || isDiverse(r)) {
+    if (top.length === 0 || isDiverse(r)) {
       if (!top.includes(r)) top.push(r);
     }
   }
   // Fallback: wenn die Liste noch nicht voll ist, keine diversen Kandidaten mehr uebrig — dann auffuellen
   if (top.length < maxResults) {
+    // FIX #82-4: beim Auffuellen zulaessig sind (a) neue Gear-Kombinationen oder
+    // (b) dieselbe Gear-Kombination mit einer ANDEREN Waffe (Waffenvergleich statt
+    // leerer Liste) - aber nie beides identisch.
+    const seen = new Set(top.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id));
     for (const r of results) {
       if (top.length >= maxResults) break;
-      if (!top.includes(r)) top.push(r);
+      const key = r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      top.push(r);
     }
   }
   top.forEach((r, i) => {
@@ -817,7 +834,7 @@ function runOptimizerPasses(
     // pro Waffe erschöpft (Bug) und pro-Waffe-Neuerzeugung ist 30x zu teuer.
     const allCombos: GearPiece[][] = [...makeCombos()];
     const baseStatsCache = new Map<string, BuildStats>();
-    const setBonusCache = new Map<string, BuildStats>();
+    const setBonusCache = new Map<string, BuildStats>();  // speichert nur Set-Boni-Deltas
     for (const combo of allCombos) {
       for (const w of weapons) {
         if (combo.length === 0) continue;
@@ -872,14 +889,27 @@ function runOptimizerPasses(
           modsUsed = bestModsForWeapon(w, modsBySlot);
           stats = applyModContributions(stats, modsUsed);
         }
-        // FIX #80-Performance: Set-Boni haengen nur von (Kombo, Waffentyp) ab - cachen
+        // FIX #82-1: Cache speichert nur die Set-Boni-DELTAS (nicht komplette Stats mit
+        // Mods/Spec der ersten Waffe desselben Typs). Deltas werden auf die eigenen Werte addiert.
         const setKey = comboKey + "::" + w.type;
-        let setApplied = setBonusCache.get(setKey);
-        if (!setApplied) {
-          setApplied = applySetBonuses(stats, combo, w, setBonusCatalog);
-          setBonusCache.set(setKey, setApplied);
+        let setDelta: BuildStats | undefined = setBonusCache.get(setKey);
+        if (!setDelta) {
+          const applied = applySetBonuses({ ...stats, wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} }, combo, w, setBonusCatalog);
+          setDelta = { ...stats, wd: applied.wd, chc: applied.chc, chd: applied.chd, hsd: applied.hsd, dta: applied.dta, dth: applied.dth, dttooc: applied.dttooc, totalWd: 0, amp: applied.amp, sources: applied.sources };
+          setBonusCache.set(setKey, setDelta);
         }
-        stats = setApplied;
+        stats = {
+          ...stats,
+          wd: stats.wd + setDelta.wd,
+          chc: stats.chc + setDelta.chc,
+          chd: stats.chd + setDelta.chd,
+          hsd: stats.hsd + setDelta.hsd,
+          dta: stats.dta + setDelta.dta,
+          dth: stats.dth + setDelta.dth,
+          dttooc: stats.dttooc + setDelta.dttooc,
+          amp: [...stats.amp, ...setDelta.amp],
+          sources: { ...stats.sources, ...setDelta.sources },
+        };
         const damage = computeDamage(w, stats, profile, { weaponTypeWd: 0 });
         const meetsTargetChc = damage.cappedChc >= settings.targetChc;
 
@@ -897,7 +927,9 @@ function runOptimizerPasses(
           ? roleScoreFor(combo, settings.role)
           : { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" };
 
-        const wastedChc = Math.max(0, stats.chc - CHC_CAP);
+        // FIX #82-3: Waffen-CHC (core2) zaehlt im Cap mit - Verschwendung korrekt berechnen
+        const totalChcForWaste = stats.chc + (w.attributes.core2Type === "chc" ? w.attributes.core2Val : 0);
+        const wastedChc = Math.max(0, totalChcForWaste - CHC_CAP);
         const overTargetChc = Math.max(0, Math.min(stats.chc, CHC_CAP) - settings.targetChc);
         const assumptions: OptimizerAssumptions = {
           items: [

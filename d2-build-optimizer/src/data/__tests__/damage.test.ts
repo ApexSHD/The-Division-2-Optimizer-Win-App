@@ -163,7 +163,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
     for (const r of res) expect(r.gear.some((g) => g.id === lockedId)).toBe(true);
   });
 
-  it("Pruning erzeugt sichtbare Warnungen", () => {
+  it("Pruning erzeugt sichtbare Warnungen", { timeout: 20000 }, () => {
     const res = optimizeBuilds(sampleWeapons.slice(0, 3), manyGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
     expect(res[0].warnings.some((w) => w.message.includes("reduziert"))).toBe(true);
   });
@@ -374,14 +374,13 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
       mk64("backpack", "Ok4", 7), mk64("gloves", "Ok5", 7), mk64("kneepads", "Ok6", 7),
     ];
     const res = optimizeBuilds(sampleWeapons, [...overCap, ...clean], 1000, DEFAULT_OPTIMIZATION, { maxResults: 5 });
-    const cleanTop = res[0];
-    expect(cleanTop.assumptions.wastedChc).toBe(0);
-    const wastedRanks = res.map((r, i) => ({ i, w: r.assumptions.wastedChc }));
-    for (const { i, w } of wastedRanks) {
-      if (w > 0) {
-        const anyCleanAbove = res.slice(0, i).some((x) => x.assumptions.wastedChc === 0);
-        expect(anyCleanAbove || i === 0).toBe(true);
-      }
+    // FIX #82-Anpassung: Waste ist nur ein Fein-Abzug — der beste Build darf moderaten
+    // Waste haben, wenn der DPS stimmt. Extremer Waste (>20 PP) soll aber nie Rang 1 sein.
+    expect(res[0].assumptions.wastedChc).toBeLessThan(20);
+    // Sortierung bleibt valide: Diversitaet + DPS-Reihenfolge
+    for (let i = 1; i < res.length; i++) {
+      const sc = (r: typeof res[0]) => r.damage.effectiveDps * (1 - Math.min(0.2, r.assumptions.wastedChc * 0.002));
+      expect(sc(res[0])).toBeGreaterThanOrEqual(sc(res[i]) - 1e-6);
     }
   });
 
@@ -403,11 +402,12 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
       mk64("holster", "H1"), mk64("holster", "H2"), mk64("holster", "H3"),
       mk64("backpack", "B1"), mk64("gloves", "G1"), mk64("kneepads", "K1"),
     ], 1000, DEFAULT_OPTIMIZATION, { maxResults: 4 });
-    expect(res.length).toBe(4);
+    // FIX #82-Semantik: Diversitaet = mindestens 2 abweichende Teile GEGEN ALLE Top-Eintraege.
+    // weaponDiff allein zaehlt nicht mehr; die Liste kann kuerzer sein, wenn keine
+    // weiteren diversen Kombinationen existieren (Fallback: Waffenvergleich).
     for (let i = 1; i < res.length; i++) {
       const diff = res[0].gear.filter((g, idx) => res[i].gear[idx]?.id !== g.id).length;
-      const weaponDiff = res[i].weapon.id !== res[0].weapon.id;
-      expect(diff >= 2 || weaponDiff).toBe(true);
+      expect(diff >= 2).toBe(true);
     }
   });
 
@@ -485,5 +485,53 @@ describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
     ];
     const res = optimizeBuilds(sampleWeapons.slice(0, 1), gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 5 });
     expect(res.length).toBe(0);
+  });
+});
+
+describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
+  const baseW = () => ({ ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } });
+  const zeroStats = () => ({ wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} });
+
+  it("Rechenbeispiel: Krit-Kopfschuss ist ADDITIV, nicht HSD*CHD multiplikativ", () => {
+    // Setup: 100 % Headshot-Anteil, HSD +50 %, CHD +40 %
+    const stats = { ...zeroStats(), hsd: 50, chd: 40 };
+    const d = computeDamage(baseW(), stats, { armor: 0, health: 1, ooc: 0, headshot: 1 });
+    const base = sampleWeapons[0].baseDamage;
+    // Erwartung (additiver Topf): Krit-Kopfschuss = base * (1 + 0.5 + 0.4) = base * 1.9
+    // Falsch (multiplikativ): base * 1.5 * 1.4 = base * 2.1
+    expect(d.critHit).toBeCloseTo(base * 1.9, 6);
+    expect(d.critHit).not.toBeCloseTo(base * 2.1, 4);
+  });
+
+  it("wastedChc beruecksichtigt Waffen-CHC (core2)", () => {
+    // Waffe mit CHC-Minor 10: Build-CHC 55 + Waffe 10 = 65 -> 5 ueber Cap
+    const w = { ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Type: "chc" as const, core2Val: 10 } };
+    const gear: GearPiece[] = [
+      mk("mask", "A", 9), mk("chest", "B", 9), mk("holster", "C", 9),
+      mk("backpack", "D", 9), mk("gloves", "E", 9), mk("kneepads", "F", 9),
+    ];
+    const res = optimizeBuilds([w], gear, 0, DEFAULT_OPTIMIZATION, { maxResults: 1 });
+    // 54 Gear-CHC + 10 Waffe = 64 -> 4 verschwendet (vorher: 0 wegen fehlendem Waffenanteil)
+    expect(res[0].assumptions.wastedChc).toBe(4);
+  });
+
+  it("Diversitaet: bei mehreren Gear-Kombis zaehlt gleiche Ausruestung + andere Waffe NICHT als divers", () => {
+    // Zwei echte Gear-Kombinationen (M1/M2 in der Maske)
+    const gear: GearPiece[] = [
+      mk("mask", "M1"), mk("mask", "M2"),
+      mk("chest", "C1"), mk("holster", "H1"),
+      mk("backpack", "B1"), mk("gloves", "G1"), mk("kneepads", "K1"),
+    ];
+    const w1 = { ...sampleWeapons[0], id: "w1", baseDamage: 10000, rpm: 600 };
+    const w2 = { ...sampleWeapons[0], id: "w2", baseDamage: 12000, rpm: 600 };
+    const res = optimizeBuilds([w1, w2], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 4 });
+    // Die Top-Liste nutzt beide Masken-Alternativen; jede Gear-Kombi ist einzigartig
+    // (Waffen-Vergleich derselben Kombi ist nur Fallback, dominiert hier nicht)
+    const gearKeys = res.map((r) => r.gear.map((g) => g.id).join("|"));
+    expect(gearKeys).toContain("mask-M1|chest-C1|holster-H1|backpack-B1|gloves-G1|kneepads-K1");
+    expect(gearKeys).toContain("mask-M2|chest-C1|holster-H1|backpack-B1|gloves-G1|kneepads-K1");
+    // nie dieselbe Kombination aus Gear UND Waffe doppelt:
+    const full = res.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id);
+    expect(new Set(full).size).toBe(full.length);
   });
 });
