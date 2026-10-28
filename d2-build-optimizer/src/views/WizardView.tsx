@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext, type Language } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
-import { type SetBonusCatalog, aggregateBuild, computeDamage, enemyProfileFromSettings } from "../data/damage";
+import { type SetBonusCatalog, evaluateBuild, enemyProfileFromSettings } from "../data/damage";
 import { runOptimizerAsync } from "../data/optimizerClient";
 import { analyzeGaps } from "../data/damage";
 import type { GapSuggestion } from "../data/damage";
@@ -71,9 +71,13 @@ function QuickSwapPanel({
     .map((id) => gear.find((g) => g.id === id))
     .filter((g): g is import("../data/sampleData").GearPiece => Boolean(g));
 
-  const stats = aggregateBuild(items, shdLevel);
   const profile = enemyProfileFromSettings(settings);
-  const damage = computeDamage(base.weapon, stats, profile);
+  // FIX #80-3: evaluateBuild — Feintuning rechnet wie der Optimierer (Mods + Set-Boni + Spec)
+  const { stats, damage } = evaluateBuild(base.weapon, items, {
+    shdLevel,
+    profile,
+    spec: (settings as unknown as { spec?: string }).spec,
+  });
 
   const cores = { wd: 0, armour: 0, skill: 0 };
   for (const g of items) cores[g.core] += 1;
@@ -104,12 +108,13 @@ function QuickSwapPanel({
           const alternatives = gear
             .filter((c) => c.slot === g.slot && c.id !== g.id)
             .map((c) => {
-              const altStats = aggregateBuild(
-                items.map((x) => (x.slot === g.slot ? c : x)),
+              // FIX #80-3: Alternativen-Bewertung konsistent via evaluateBuild
+              const alt = evaluateBuild(base.weapon, items.map((x) => (x.slot === g.slot ? c : x)), {
                 shdLevel,
-              );
-              const altDmg = computeDamage(base.weapon, altStats, profile);
-              return { item: c, dps: altDmg.effectiveDps };
+                profile,
+                spec: (settings as unknown as { spec?: string }).spec,
+              });
+              return { item: c, dps: alt.damage.effectiveDps };
             })
             .sort((a, b) => b.dps - a.dps);
           return (
