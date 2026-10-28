@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useStore, DEFAULT_OPTIMIZATION } from "../store";
+import { useStore } from "../store";
 import { I18nContext, type Language } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 import { type SetBonusCatalog, aggregateBuild, computeDamage, enemyProfileFromSettings } from "../data/damage";
@@ -182,7 +182,9 @@ export function WizardView() {
   function chooseRole(id: RoleId) {
     const preset = rolePreset(id);
     setRole(id);
-    store.setOptimization({ ...DEFAULT_OPTIMIZATION, ...preset.patch, role: id });
+    // FIX #78: Rollenwechsel ohne Datenverlust — nur Rollen-spezifische Werte,
+    // Locks, Ankerwaffe und Gegnerprofil des Nutzers bleiben erhalten
+    store.setOptimization({ ...store.optimization, ...preset.patch, role: id });
     store.setStatus(`${lang === "de" ? "Rolle gewählt" : "Role selected"}: ${lang === "de" ? preset.labelDe : preset.labelEn}`);
   }
 

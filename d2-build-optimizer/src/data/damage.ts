@@ -263,27 +263,46 @@ export function computeDamage(
   const weaponTypeWd = opts.weaponTypeWd ?? 0;
   const talentTotalWd = opts.talentTotalWd ?? 0;
 
+  // WD-Kategorie: Waffen-Kern + Build + Spec (additiv)
   const wdCat = weapon.attributes.core1 + build.wd + weaponTypeWd;
   const wdMult = 1 + wdCat / 100;
   const twdMult = 1 + talentTotalWd / 100;
 
   const rawHit = weapon.baseDamage * knowHowMult * wdMult * twdMult;
 
-  const dtaMult = 1 + (build.dta / 100) * profile.armor;
-  const dthMult = 1 + (build.dth / 100) * profile.health;
-  const dttoocMult = 1 + (build.dttooc / 100) * profile.ooc;
+  // FIX #78-2: Waffen-Minor-Attribut (core2, z.B. CHD bei Gewehren) einbeziehen
+  const wa = weapon.attributes;
+  const weaponChd = wa.core2Type === "chd" ? wa.core2Val : 0;
+  const weaponHsd = wa.core2Type === "hsd" ? wa.core2Val : 0;
+  const weaponChc = wa.core2Type === "chc" ? wa.core2Val : 0;
+  const weaponDttooc = wa.core2Type === "dttooc" ? wa.core2Val : 0;
+  const weaponDth = wa.core2Type === "dth" ? wa.core2Val : 0;
+  const weaponDta = wa.core2Type === "dta" ? wa.core2Val : 0;
+
+  // Minor-Attribute zaehlen in ihre Kategorie (additiv)
+  const totalChc = build.chc + weaponChc;
+  const finalChdBase = build.chd + weaponChd;
+  const totalHsd = build.hsd + weaponHsd;
+  const dttoocTotal = build.dttooc + weaponDttooc;
+  const dthTotal = build.dth + weaponDth;
+  const dtaTotal = build.dta + weaponDta;
+
+  const dtahAvgAll =
+    profile.armor * (1 + dtaTotal / 100) + profile.health * (1 + dthTotal / 100);
+  const dttoocAvg = 1 + (dttoocTotal / 100) * profile.ooc;
 
   const amps = [...build.amp, ...(opts.talentAmps ?? [])];
-  const ampMult = amps.reduce((m, a) => m * (1 + a / 100), 1);
+  const ampMult = amps.reduce((m2, a) => m2 * (1 + a / 100), 1);
 
-  const nonCritBody = rawHit * dtaMult * dthMult * dttoocMult * ampMult;
+  const nonCritBody = rawHit * dtahAvgAll * dttoocAvg * ampMult;
 
+  // FIX #78-3: CHD und HSD im Spiel ADDITIV (gemeinsamer Topf), nicht multiplikativ
   const hsdShare = profile.headshot;
-  const nonCritHit = nonCritBody * (1 + (build.hsd / 100) * hsdShare);
+  // Basis-Kopfschuss-Multiplikator der Waffe (falls in DB vorhanden als HSD-Stat der Waffe)
+  const nonCritHit = nonCritBody * (1 + (totalHsd / 100) * hsdShare);
 
-  const finalChc = Math.min(build.chc, CHC_CAP);
-  const finalChd = build.chd;
-  const critHit = nonCritHit * (1 + finalChd / 100);
+  const finalChc = Math.min(totalChc, CHC_CAP);
+  const critHit = nonCritHit * (1 + finalChdBase / 100);
 
   const avgBulletDmg =
     nonCritHit * (1 - finalChc / 100) + critHit * (finalChc / 100);
@@ -300,7 +319,7 @@ export function computeDamage(
     effectiveDps,
     finalChc,
     cappedChc: finalChc,
-    finalChd,
+    finalChd: finalChdBase,
   };
 }
 
@@ -650,14 +669,20 @@ export function optimizeBuilds(
     });
   }
 
+  // FIX #78: Warnungs-Sammler separat — die Suchraum-Reduzierung laeuft im ersten
+  // makeCombos()-Aufruf; Warnungen werden danach an die Ergebnisse gemergt.
   const searchWarnings: OptimizerWarning[] = [];
-  const gearCombos = cartesianBySlot(bySlot, lockedGear, (msg) => {
+  const collectWarnings = (msg: string) => {
     searchWarnings.push({ level: "yellow", message: msg });
-  });
+  };
+  const makeCombos = () => cartesianBySlot(bySlot, lockedGear, collectWarnings);
+  // Warmup: ersten Kandidaten ziehen, damit Pruning-Warnungen schon gesammelt sind
+  const warmup = makeCombos();
+  warmup.next();
 
   const results = runOptimizerPasses(
     candidateWeapons,
-    gearCombos,
+    makeCombos,
     shdLevel,
     settings,
     profile,
@@ -676,31 +701,35 @@ export function optimizeBuilds(
   const brandBonus = (r: OptimizerResult) =>
     brandScoreBonusForCombo(r.gear, settings.preferredBrand);
   const roleDriven = Boolean(settings.role) && settings.role !== "weaponDps";
+  // FIX #78-1: Schaden primaer. Verschwendete CHC nur als kleiner Abzug (1 Prozentpunkt Waste = 1 % Score-Malus),
+  // damit 0,1 % Waste niemals einen 30-%-DPS-Vorteil schlaegt.
+  const effectiveScore = (r: OptimizerResult) => {
+    if (roleDriven) return r.roleScore.score * (1 - Math.min(0.5, r.assumptions.wastedChc / 100));
+    return r.damage.effectiveDps * (1 - Math.min(0.5, r.assumptions.wastedChc / 100));
+  };
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
-    if (roleDriven) {
-      const roleDiff = b.roleScore.score - a.roleScore.score;
-      if (Math.abs(roleDiff) > 1e-9) return roleDiff;
-    }
-    const wasteDiff = a.assumptions.wastedChc - b.assumptions.wastedChc;
-    if (Math.abs(wasteDiff) > 1e-9) return wasteDiff;
-    const dpsDiff = b.damage.effectiveDps - a.damage.effectiveDps;
-    if (Math.abs(dpsDiff) > 1e-9) return dpsDiff;
+    const scoreDiff = effectiveScore(b) - effectiveScore(a);
+    if (Math.abs(scoreDiff) > 1e-9) return scoreDiff;
     return brandBonus(b) - brandBonus(a);
   });
 
   const top: OptimizerResult[] = [];
+  const isDiverse = (x: OptimizerResult) =>
+    top.every(
+      (t) => t.gear.filter((g, i) => x.gear[i]?.id !== g.id).length >= 2 || t.weapon.id !== x.weapon.id,
+    );
   for (const r of results) {
     if (top.length >= maxResults) break;
-    const diverseEnough = top.every(
-      (t) => t.gear.filter((g, i) => r.gear[i]?.id !== g.id).length >= 2 || t.weapon.id !== r.weapon.id,
-    );
-    if (top.length === 0 || diverseEnough || results.length <= maxResults) top.push(r);
-    else {
-      const next = results.find(
-        (x) => !top.includes(x) && top.every((t) => t.gear.filter((g, i) => x.gear[i]?.id !== g.id).length >= 2 || t.weapon.id !== x.weapon.id),
-      );
-      if (next) top.push(next);
+    if (results.length <= maxResults || isDiverse(r)) {
+      if (!top.includes(r)) top.push(r);
+    }
+  }
+  // Fallback: wenn die Liste noch nicht voll ist, keine diversen Kandidaten mehr uebrig — dann auffuellen
+  if (top.length < maxResults) {
+    for (const r of results) {
+      if (top.length >= maxResults) break;
+      if (!top.includes(r)) top.push(r);
     }
   }
   top.forEach((r, i) => {
@@ -719,7 +748,7 @@ export function optimizeBuilds(
 
 function runOptimizerPasses(
   weapons: Weapon[],
-  gearCombos: GearPiece[][],
+  makeCombos: () => Generator<GearPiece[]>,
   shdLevel: number,
   settings: OptimizationSettings,
   profile: EnemyProfile,
@@ -735,15 +764,22 @@ function runOptimizerPasses(
   modsBySlot: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]> | undefined,
 ): OptimizerResult[] {
   const seen = new Set<string>();
+  // FIX #78-6: begrenzte Bestenliste statt unbegrenztem results-Array (Speicherschutz)
+  const KEEP_RESULTS = 200;
 
   for (const pass of passes) {
     const results: OptimizerResult[] = [];
+    let passMinIdx = -1;
+    let passMinScore = -Infinity;
+    const gearCombos = makeCombos();
     for (const w of weapons) {
       for (const combo of gearCombos) {
         if (combo.length === 0) continue;
         if (lockedGear.some((lg) => !combo.some((g) => g.id === lg.id))) continue;
         const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
+        // FIX #78-4: nur EIN Exotic insgesamt (Waffe + Gear) wie im Spiel
         if (exoticGear > 1) continue;
+        if (exoticGear >= 1 && w.rarity === "exotic") continue;
         if (requireChest && !combo.some((g) => g.slot === "chest")) continue;
         if (requireBackpack && !combo.some((g) => g.slot === "backpack")) continue;
 
@@ -802,7 +838,7 @@ function runOptimizerPasses(
           overTargetChc: Number(overTargetChc.toFixed(1)),
         };
 
-        results.push({
+        const candidate: OptimizerResult = {
           rank: 0,
           weapon: w,
           gear: combo,
@@ -816,8 +852,28 @@ function runOptimizerPasses(
           warnings: [...fallbackWarnings, ...pass.warnings],
           roleScore,
           assumptions,
-        });
+        };
         seen.add(key);
+        // FIX #78-6: begrenzte Bestenliste, schlechtestes per Score-Track effizient verwerfen
+        const candScore = candidate.roleScore.key ? candidate.roleScore.score : candidate.damage.effectiveDps;
+        if (passMinIdx === -1 || candScore > passMinScore) {
+          results.push(candidate);
+          if (results.length > KEEP_RESULTS) {
+            // schlechtestes einmalig suchen (nur beim Ueberlauf)
+            let worstIdx = 0;
+            for (let i = 1; i < results.length; i++) {
+              const wi = results[i].roleScore.key ? results[i].roleScore.score : results[i].damage.effectiveDps;
+              const w0 = results[worstIdx].roleScore.key ? results[worstIdx].roleScore.score : results[worstIdx].damage.effectiveDps;
+              if (wi < w0) worstIdx = i;
+            }
+            results.splice(worstIdx, 1);
+            passMinIdx = worstIdx;
+            passMinScore = results.reduce((min, r, i) => {
+              const sc = r.roleScore.key ? r.roleScore.score : r.damage.effectiveDps;
+              return sc < min.sc ? { sc, i } : min;
+            }, { sc: Infinity, i: 0 }).sc;
+          }
+        }
       }
     }
     if (results.length > 0) return results;
@@ -886,7 +942,9 @@ function piecesOfSet(setPieces: GearPiece[], targetSet: string, knownSets: Set<s
   }).length;
 }
 
-const MAX_CANDIDATES_PER_SLOT = 12;
+// FIX #78-6: Suchraum hart begrenzen — 8 Kandidaten/Slot => deterministisch schnell;
+// Specials (Talent/Named/Exotic/Set) werden davon unabhaengig immer gehalten
+const MAX_CANDIDATES_PER_SLOT = 8;
 
 function attrVector(g: GearPiece): Record<string, number> {
   const v: Record<string, number> = { core: g.core === "wd" ? g.coreValue : 0 };
@@ -914,28 +972,59 @@ function pruneSlotCandidates(items: GearPiece[], locked: GearPiece[]): GearPiece
   const lockedIds = new Set(locked.map((g) => g.id));
   const kept: GearPiece[] = items.filter((g) => lockedIds.has(g.id));
   let pool = items.filter((g) => !lockedIds.has(g.id));
-  const nonDominated: GearPiece[] = [];
+
+  // FIX #78-5: Spezielle Teile nie wegwerfen — Ziel-Set, Named, Exotic, Talent
+  const special: GearPiece[] = [];
+  const regular: GearPiece[] = [];
   for (const g of pool) {
-    if (pool.some((o) => o !== g && dominates(o, g))) continue;
+    if (g.brandType === "gearset" || g.brandType === "named" || g.brandType === "exotic" || g.talent) {
+      special.push(g);
+    } else {
+      regular.push(g);
+    }
+  }
+
+  // Dominanz nur innerhalb gleicher Marke + Kern + Talent vergleichen
+  const nonDominated: GearPiece[] = [];
+  for (const g of regular) {
+    const dominatedBy = regular.some(
+      (o) =>
+        o !== g &&
+        o.brand === g.brand &&
+        o.core === g.core &&
+        (o.talent ?? "") === (g.talent ?? "") &&
+        dominates(o, g),
+    );
+    if (dominatedBy) continue;
     nonDominated.push(g);
   }
-  if (nonDominated.length > MAX_CANDIDATES_PER_SLOT) {
-    pool = nonDominated
-      .map((g) => ({ g, sum: Object.values(attrVector(g)).reduce((a, b) => a + b, 0) }))
+
+  let candidatePool = nonDominated;
+  if (special.length + nonDominated.length > MAX_CANDIDATES_PER_SLOT) {
+    const budget = Math.max(0, MAX_CANDIDATES_PER_SLOT - special.length);
+    // Top-K mit normalisierten Beitraegen statt roher Summe (Einheiten-mix vermeiden)
+    candidatePool = nonDominated
+      .map((g) => {
+        const v = attrVector(g);
+        const sum = Object.entries(v).reduce((acc, [k, val]) => {
+          const max = GEAR_ATTR_TYPES[k as GearAttrKey]?.max ?? 0;
+          return acc + (max > 0 ? (val / max) * 10 : 0);
+        }, 0);
+        return { g, sum };
+      })
       .sort((a, b) => b.sum - a.sum)
-      .slice(0, MAX_CANDIDATES_PER_SLOT)
+      .slice(0, budget)
       .map((x) => x.g);
-  } else {
-    pool = nonDominated;
   }
+  pool = [...special, ...candidatePool];
   return [...kept, ...pool];
 }
 
-function cartesianBySlot(
+function* cartesianBySlot(
   bySlot: Map<GearSlot, GearPiece[]>,
   lockedGear: GearPiece[] = [],
   warn?: (msg: string) => void,
-): GearPiece[][] {
+): Generator<GearPiece[]> {
   const slotLists: GearPiece[][] = [];
   for (const slot of SLOTS) {
     const items = bySlot.get(slot) ?? [];
@@ -961,14 +1050,18 @@ function cartesianBySlot(
     });
     if (warn) warn(`Suchraum zu groß (${total.toLocaleString("de-DE")} Kombinationen) — Kandidaten pro Slot begrenzt.`);
   }
-  let combos: GearPiece[][] = [[]];
-  for (const items of slotLists) {
-    if (items.length === 0) continue;
-    const next: GearPiece[][] = [];
-    for (const c of combos) {
-      for (const item of items) next.push([...c, item]);
+  const n = slotLists.length;
+  const indices = new Array(n).fill(0);
+  if (slotLists.some((l) => l.length === 0)) return;
+  while (true) {
+    yield slotLists.map((l, i) => l[indices[i]]);
+    let k = n - 1;
+    while (k >= 0) {
+      indices[k]++;
+      if (indices[k] < slotLists[k].length) break;
+      indices[k] = 0;
+      k--;
     }
-    combos = next;
+    if (k < 0) return;
   }
-  return combos;
 }

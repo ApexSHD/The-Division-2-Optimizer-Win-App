@@ -49,10 +49,19 @@ export function runOptimizerAsync(
     worker.onmessage = (e: MessageEvent) => {
       const msg = e.data;
       if (msg.type === "progress") cb.onProgress?.(msg.value);
-      else if (msg.type === "done") resolve(msg.results as OptimizerResult[]);
-      else if (msg.type === "error") reject(new Error(msg.message));
+      else if (msg.type === "done") {
+        resolve(msg.results as OptimizerResult[]);
+        // FIX #78: Worker nach erfolgreichem Lauf sauber beenden
+        worker?.terminate();
+      } else if (msg.type === "error") {
+        reject(new Error(msg.message));
+        worker?.terminate();
+      }
     };
-    worker.onerror = (err) => reject(new Error(String(err)));
+    worker.onerror = (err) => {
+      reject(new Error(String(err)));
+      worker?.terminate();
+    };
 
     const req: OptimizerWorkerRequest = { weapons, gear, shdLevel, settings, opts };
     worker.postMessage(req);
