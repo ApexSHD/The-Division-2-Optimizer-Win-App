@@ -45,7 +45,7 @@ const fullGear = (): GearPiece[] => [
 describe("computeDamage — Formel (Issue #67)", () => {
   it("wendet HSD linear an, nicht quadratisch", () => {
     const stats = { wd: 0, chc: 0, chd: 0, hsd: 50, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} };
-    const w = { ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0 } };
+    const w = { ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } };
     const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0.5 });
     const expected = sampleWeapons[0].baseDamage * (1 + (50 / 100) * 0.5);
     expect(d.nonCritHit).toBeCloseTo(expected, 6);
@@ -387,12 +387,14 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
   });
 
   it("Top-N-Diversitaet: Builds unterscheiden sich in mindestens 2 Teilen (oder Waffe)", () => {
+    // 3 Alternativen in 3 Slots => genug Kombos fuer echte Diversitaet
     const res = optimizeBuilds(sampleWeapons, [
-      mk64("mask", "M1"), mk64("mask", "M2"),
-      mk64("chest", "C1"), mk64("chest", "C2"),
-      mk64("holster", "H1"), mk64("backpack", "B1"),
-      mk64("gloves", "G1"), mk64("kneepads", "K1"),
+      mk64("mask", "M1"), mk64("mask", "M2"), mk64("mask", "M3"),
+      mk64("chest", "C1"), mk64("chest", "C2"), mk64("chest", "C3"),
+      mk64("holster", "H1"), mk64("holster", "H2"), mk64("holster", "H3"),
+      mk64("backpack", "B1"), mk64("gloves", "G1"), mk64("kneepads", "K1"),
     ], 1000, DEFAULT_OPTIMIZATION, { maxResults: 4 });
+    expect(res.length).toBe(4);
     for (let i = 1; i < res.length; i++) {
       const diff = res[0].gear.filter((g, idx) => res[i].gear[idx]?.id !== g.id).length;
       const weaponDiff = res[i].weapon.id !== res[0].weapon.id;
