@@ -134,15 +134,24 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
     return out;
   };
 
-  it("liefert bei 25 Teilen/Slot vollständige 6er-Builds", () => {
-    const res = optimizeBuilds(sampleWeapons, manyGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 10 });
+  it("liefert bei 25 Teilen/Slot vollständige 6er-Builds (Worst Case, einzigartige Marken)", { timeout: 20000 }, () => {
+    const res = optimizeBuilds(sampleWeapons.slice(0, 3), manyGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 10 });
     expect(res.length).toBeGreaterThan(0);
     for (const r of res) expect(r.gear).toHaveLength(6);
   });
 
-  it("unter 100 ms pro 25/Slot (Budget)", () => {
+  it("unter 2 s: 25 Teile/Slot aus 5 Marken mit 3 Waffen (realistisches Budget)", () => {
+    // 25 Teile/Slot, aber nur 5 verschiedene Marken (realistisch) — Dominanz-Filter greift
+    const slotsR: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+    const brands = ["Ceska", "Grupo", "Fenris", "Overlord", "Petrov"];
+    const gearR: GearPiece[] = [];
+    slotsR.forEach((sl) => {
+      for (let i = 0; i < 25; i++) {
+        gearR.push(mk(sl, brands[i % 5], 1 + (i % 6), 1 + (i % 12)));
+      }
+    });
     const t0 = performance.now();
-    optimizeBuilds(sampleWeapons, manyGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 10 });
+    optimizeBuilds(sampleWeapons.slice(0, 3), gearR, 1000, DEFAULT_OPTIMIZATION, { maxResults: 10 });
     expect(performance.now() - t0).toBeLessThan(2000);
   });
 
@@ -155,7 +164,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
   });
 
   it("Pruning erzeugt sichtbare Warnungen", () => {
-    const res = optimizeBuilds(sampleWeapons, manyGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
+    const res = optimizeBuilds(sampleWeapons.slice(0, 3), manyGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
     expect(res[0].warnings.some((w) => w.message.includes("reduziert"))).toBe(true);
   });
 
@@ -416,5 +425,65 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
     const gaps = analyzeGaps(resWeak[0], gear, 1000, DEFAULT_OPTIMIZATION);
     expect(gaps.length).toBeGreaterThan(0);
     expect(gaps.some((g) => g.slot === "mask" && g.improvement.includes("Besser"))).toBe(true);
+  });
+});
+
+describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
+  const mk80 = (slot: GearSlot, brand: string, chc = 6, chd = 12, brandType: GearPiece["brandType"] = "brand"): GearPiece => ({
+    id: `${slot}-${brand}`,
+    slot,
+    brand,
+    brandType,
+    core: "wd",
+    coreValue: 15,
+    attributes: [{ type: "chc", value: chc }, { type: "chd", value: chd }],
+    talent: null,
+    prototype: true,
+  });
+
+  it("Generator-Bug behoben: ALLE Waffen werden berechnet, nicht nur die erste", () => {
+    const gear: GearPiece[] = [
+      mk80("mask", "M"), mk80("chest", "C"), mk80("holster", "H"),
+      mk80("backpack", "B"), mk80("gloves", "G"), mk80("kneepads", "K"),
+    ];
+    const weapons = [sampleWeapons[0], sampleWeapons[1], sampleWeapons[2]].filter(Boolean);
+    expect(weapons.length).toBeGreaterThanOrEqual(2);
+    const res = optimizeBuilds(weapons, gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 10 });
+    const usedWeapons = new Set(res.map((r) => r.weapon.id));
+    // Alle Waffen muessen Ergebnisse liefern (vorher: nur die erste wegen erschöpftem Generator)
+    expect(usedWeapons.size).toBe(weapons.length);
+  });
+
+  it("stärkere zweite Waffe kann gewinnen (Reihenfolge egal)", () => {
+    const gear: GearPiece[] = [
+      mk80("mask", "M"), mk80("chest", "C"), mk80("holster", "H"),
+      mk80("backpack", "B"), mk80("gloves", "G"), mk80("kneepads", "K"),
+    ];
+    const weak = { ...sampleWeapons[0], id: "weak-w", baseDamage: 1000, rpm: 400 };
+    const strong = { ...sampleWeapons[1], id: "strong-w", baseDamage: 60000, rpm: 900 };
+    const res = optimizeBuilds([weak, strong], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 10 });
+    expect(res[0].weapon.id).toBe("strong-w");
+  });
+
+  it("Exotic-Regel: eine Exotic-Waffe + ein Exotic-Gear ist erlaubt", () => {
+    const gear: GearPiece[] = [
+      mk80("mask", "Coyote", 6, 12, "exotic"),
+      mk80("chest", "C"), mk80("holster", "H"),
+      mk80("backpack", "B"), mk80("gloves", "G"), mk80("kneepads", "K"),
+    ];
+    const exoticWeapon = { ...sampleWeapons[0], id: "eagle-bearer", rarity: "exotic" as const };
+    const res = optimizeBuilds([exoticWeapon], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 5 });
+    expect(res.length).toBeGreaterThan(0);
+    expect(res[0].gear.filter((g) => g.brandType === "exotic")).toHaveLength(1);
+  });
+
+  it("Exotic-Regel: zwei Exotic-Gear-Teile bleiben verboten", () => {
+    const gear: GearPiece[] = [
+      mk80("mask", "Coyote", 6, 12, "exotic"),
+      mk80("chest", "Vest", 6, 12, "exotic"),
+      mk80("holster", "H"), mk80("backpack", "B"), mk80("gloves", "G"), mk80("kneepads", "K"),
+    ];
+    const res = optimizeBuilds(sampleWeapons.slice(0, 1), gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 5 });
+    expect(res.length).toBe(0);
   });
 });

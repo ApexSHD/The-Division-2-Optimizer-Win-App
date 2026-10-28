@@ -414,27 +414,63 @@ function calibrationHintFor(g: GearPiece): CalibrationHint | null {
   };
 }
 
+export interface EvaluateContext {
+  shdLevel: number;
+  profile: EnemyProfile;
+  spec?: string;
+  modsBySlot?: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>;
+  setBonusCatalog?: SetBonusCatalog | null;
+}
+
+/**
+ * FIX #80-3: EINE Berechnungsfunktion fuer Optimierer, Feintuning, Lueckenanalyse und
+ * Slot-Erklaerungen — mit Mods, Set-Boni und Spezialisierung konsistent.
+ */
+export function evaluateBuild(
+  weapon: Weapon,
+  gear: GearPiece[],
+  ctx: EvaluateContext,
+): { stats: BuildStats; damage: DamageBreakdown; modsUsed: ModContribution[] } {
+  let stats = aggregateBuild(gear, ctx.shdLevel);
+  const spec = specBonusFor(weapon, ctx.spec ?? "");
+  if (spec.weaponTypeWd > 0) {
+    stats.wd += spec.weaponTypeWd;
+    addStatSource(stats, "wd", "Spezialisierung", spec.weaponTypeWd, "spec");
+  }
+  if (spec.hsd > 0) {
+    stats.hsd += spec.hsd;
+    addStatSource(stats, "hsd", "Spezialisierung", spec.hsd, "spec");
+  }
+  let modsUsed: ModContribution[] = [];
+  if (ctx.modsBySlot) {
+    modsUsed = bestModsForWeapon(weapon, ctx.modsBySlot);
+    stats = applyModContributions(stats, modsUsed);
+  }
+  stats = applySetBonuses(stats, gear, weapon, ctx.setBonusCatalog ?? null);
+  const damage = computeDamage(weapon, stats, ctx.profile, { weaponTypeWd: 0 });
+  return { stats, damage, modsUsed };
+}
+
 function slotExplanationsFor(
   combo: GearPiece[],
   weapon: Weapon,
-  shdLevel: number,
-  profile: EnemyProfile,
   bySlot: Map<GearSlot, GearPiece[]>,
+  evalCtx: EvaluateContext,
   settings: OptimizationSettings,
 ): SlotExplanation[] {
   const chosenIds = new Set(combo.map((g) => g.id));
+  const baseEval = evaluateBuild(weapon, combo, evalCtx);
   return combo.map((chosen) => {
     const others = (bySlot.get(chosen.slot) ?? []).filter((g) => !chosenIds.has(g.id));
-    const baseStats = aggregateBuild(combo, shdLevel);
-    const baseDamage = computeDamage(weapon, baseStats, profile);
+    const baseDamage = baseEval.damage;
 
     let runnerUp: SlotExplanation["runnerUp"] = null;
     for (const other of others) {
-      const stats = aggregateBuild(
+      const { damage } = evaluateBuild(
+        weapon,
         combo.map((g) => (g.slot === chosen.slot ? other : g)),
-        shdLevel,
+        evalCtx,
       );
-      const damage = computeDamage(weapon, stats, profile);
       const delta = baseDamage.effectiveDps - damage.effectiveDps;
       if (!Number.isFinite(delta)) continue;
       if (!runnerUp || delta < runnerUp.dpsDelta) {
@@ -737,9 +773,14 @@ export function optimizeBuilds(
     r.slotExplanations = slotExplanationsFor(
       r.gear,
       r.weapon,
-      shdLevel,
-      profile,
       bySlot,
+      {
+        shdLevel,
+        profile,
+        spec: (opts as { spec?: string }).spec,
+        modsBySlot: opts.modsBySlot,
+        setBonusCatalog: opts.setBonusCatalog ?? null,
+      },
       settings,
     );
   });
@@ -771,15 +812,20 @@ function runOptimizerPasses(
     const results: OptimizerResult[] = [];
     let passMinIdx = -1;
     let passMinScore = -Infinity;
-    const gearCombos = makeCombos();
-    for (const w of weapons) {
-      for (const combo of gearCombos) {
+    // FIX #80-1 + Performance: Kombis EINMAL pro Pass materialisieren (begrenzt durch
+    // Slot-Pruning) und Waffen-Schleife innen laufen lassen — der Generator waere
+    // pro Waffe erschöpft (Bug) und pro-Waffe-Neuerzeugung ist 30x zu teuer.
+    const allCombos: GearPiece[][] = [...makeCombos()];
+    const baseStatsCache = new Map<string, BuildStats>();
+    const setBonusCache = new Map<string, BuildStats>();
+    for (const combo of allCombos) {
+      for (const w of weapons) {
         if (combo.length === 0) continue;
         if (lockedGear.some((lg) => !combo.some((g) => g.id === lg.id))) continue;
         const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
-        // FIX #78-4: nur EIN Exotic insgesamt (Waffe + Gear) wie im Spiel
+        // FIX #80-2: Spiel-Regel ist EINE Exotic-Waffe UND EIN Exotic-Gear (getrennt,
+        // z.B. Coyote's Mask + Eagle Bearer) — nicht nur ein Exotic insgesamt
         if (exoticGear > 1) continue;
-        if (exoticGear >= 1 && w.rarity === "exotic") continue;
         if (requireChest && !combo.some((g) => g.slot === "chest")) continue;
         if (requireBackpack && !combo.some((g) => g.slot === "backpack")) continue;
 
@@ -791,8 +837,28 @@ function runOptimizerPasses(
           gearSetCount = matching;
         }
 
-        let stats = aggregateBuild(combo, shdLevel);
-        const spec = specBonusFor(w, spec0);
+        const comboKey = combo.map((g) => g.id).join("|");
+        let baseStats = baseStatsCache.get(comboKey);
+        if (!baseStats) {
+          baseStats = aggregateBuild(combo, shdLevel);
+          baseStatsCache.set(comboKey, baseStats);
+        }
+        // Achtung Aliasing: applySetBonuses/applyModContributions erzeugen eigene Kopien;
+        // die Basis-Sources werden hier geteilt, aber nur gelesen (Anzeige im Ergebnis via addStatSource
+        // in die Kopie). Spec-Quellen werden in applySetBonuses-Kopie angelegt — falls kein Mod/Set
+        // kopiert, ist stats === baseStats-Referenz auf OK lesende Weise; addStatSource("spec") schreibt
+        // in das geteilte Array — deshalb hier eine flache Kopie mit Array-Klonen NUR wenn spec aktiv:
+        const specB = specBonusFor(w, spec0);
+        let stats: BuildStats =
+          specB.weaponTypeWd > 0 || specB.hsd > 0
+            ? {
+                ...baseStats,
+                sources: Object.fromEntries(
+                  Object.entries(baseStats.sources).map(([k, v]) => [k, [...v]]),
+                ),
+              }
+            : { ...baseStats, sources: baseStats.sources };
+        const spec = specB;
         if (spec.weaponTypeWd > 0) {
           stats.wd += spec.weaponTypeWd;
           addStatSource(stats, "wd", "Spezialisierung", spec.weaponTypeWd, "spec");
@@ -806,7 +872,14 @@ function runOptimizerPasses(
           modsUsed = bestModsForWeapon(w, modsBySlot);
           stats = applyModContributions(stats, modsUsed);
         }
-        stats = applySetBonuses(stats, combo, w, setBonusCatalog);
+        // FIX #80-Performance: Set-Boni haengen nur von (Kombo, Waffentyp) ab - cachen
+        const setKey = comboKey + "::" + w.type;
+        let setApplied = setBonusCache.get(setKey);
+        if (!setApplied) {
+          setApplied = applySetBonuses(stats, combo, w, setBonusCatalog);
+          setBonusCache.set(setKey, setApplied);
+        }
+        stats = setApplied;
         const damage = computeDamage(w, stats, profile, { weaponTypeWd: 0 });
         const meetsTargetChc = damage.cappedChc >= settings.targetChc;
 
@@ -905,11 +978,14 @@ export function analyzeGaps(
     const candidates = gear.filter((g) => g.slot === slot && g.id !== current.id);
     for (const cand of candidates) {
       const combo = best.gear.map((g) => (g.slot === slot ? cand : g));
-      const stats = aggregateBuild(combo, shdLevel);
-      const spec = specBonusFor(best.weapon, opts.spec ?? "");
-      stats.wd += spec.weaponTypeWd;
-      stats.hsd += spec.hsd;
-      const dmg = computeDamage(best.weapon, stats, profile, { weaponTypeWd: 0 });
+      // FIX #80-3: evaluateBuild — konsistent mit Optimierer (Mods + Set-Boni + Spec)
+      const { damage: dmg } = evaluateBuild(best.weapon, combo, {
+        shdLevel,
+        profile,
+        spec: opts.spec,
+        modsBySlot: opts.modsBySlot,
+        setBonusCatalog: opts.setBonusCatalog ?? null,
+      });
       const gain = ((dmg.effectiveDps - baseDps) / (baseDps || 1)) * 100;
       const prev = perSlotBest.get(slot);
       if (gain > 0 && (!prev || dmg.effectiveDps > prev.dps)) {
