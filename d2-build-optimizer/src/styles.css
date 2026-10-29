@@ -1214,6 +1214,9 @@ kbd {
 }
 
 .optimizer-results {
-  max-height: 60vh;
+  /* FIX: deutlich mehr Platz fuer die Ergebnistabelle — der 60vh-Deckel
+  schnitt die Liste ab; jetzt fast die volle Fenstershoehe mit Scroll */
+  max-height: calc(100vh - 220px);
+  min-height: 320px;
   overflow: auto;
 }
