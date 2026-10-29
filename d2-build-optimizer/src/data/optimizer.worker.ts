@@ -1,20 +1,5 @@
-import type { OptimizationSettings } from "../store";
-import type { Weapon, GearPiece } from "./sampleData";
-import type { SetBonusCatalog, OptimizerResult } from "./damage";
-
-export interface OptimizerWorkerRequest {
-  weapons: Weapon[];
-  gear: GearPiece[];
-  shdLevel: number;
-  settings: OptimizationSettings;
-  opts: {
-    gearSetNames: string[];
-    maxResults: number;
-    spec: string;
-    modsBySlot: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]> | undefined;
-    setBonusCatalog: SetBonusCatalog | null;
-  };
-}
+import type { OptimizerResult } from "./damage";
+import type { OptimizerWorkerRequest } from "./optimizerClient";
 
 self.onmessage = (e: MessageEvent<OptimizerWorkerRequest>) => {
   const { weapons, gear, shdLevel, settings, opts } = e.data;

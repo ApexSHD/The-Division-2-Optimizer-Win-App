@@ -1,8 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import { I18nContext } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
-import { optimizeBuilds, type SetBonusCatalog } from "../data/damage";
+import { OptimizerResultsTable, OptimizerWarnings } from "../components/OptimizerResults";
+import { optimizerRunOptions, useOptimizerCatalog } from "../data/optimizerCatalog";
+import { runOptimizerAsync } from "../data/optimizerClient";
 import type { OptimizerResult, SlotExplanation, StatSource } from "../data/damage";
 import { GEAR_CORE_LABELS } from "../data/sampleData";
 import type { GearCoreType } from "../data/sampleData";
@@ -84,64 +86,44 @@ function SlotExplanationBox({ exp }: { exp: SlotExplanation }) {
     </div>
   );
 }
-import { getDb } from "../data/db";
-import type { GearSetItemPreset } from "../data/db";
 
 export function OptimizerView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
-  const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
-  const [setBonusCatalog, setSetBonusCatalog] = useState<SetBonusCatalog | null>(null);
-  const [modSlots, setModSlots] = useState<Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]> | null>(null);
+  const catalog = useOptimizerCatalog();
   const o = store.optimization;
-
-  useEffect(() => {
-    getDb().then((db) => {
-      setGearSets(db.gearSetItems);
-      setModSlots(db.modSlots);
-      const brands: Record<string, Record<string, Record<string, unknown>>> = {};
-      for (const b of db.brandSets) brands[b.key] = b.numericBonusesPve ?? {};
-      const greens: Record<string, Record<string, { attr: string; val: number }[]>> = {};
-      for (const g of db.gearSets) greens[g.key] = g.numericBonuses ?? {};
-      setSetBonusCatalog({ brands, greens });
-    }).catch(() => setGearSets([]));
-  }, []);
 
   function startOptimization() {
     setRunning(true);
     store.setStatus(t.status.calculating);
-    store.setProgress(10);
-    setTimeout(() => {
-      try {
-        const res = optimizeBuilds(
-          store.weapons,
-          store.gear,
-          store.agent.shdLevel,
-          o,
-          {
-            gearSetNames: gearSets.map((gs) => gs.name),
-            maxResults: 10,
-            spec: store.agent.spec,
-            modsBySlot: modSlots ?? undefined,
-            setBonusCatalog,
-          },
-        );
+    store.setProgress(15);
+    const run = runOptimizerAsync(
+      store.weapons,
+      store.gear,
+      store.agent.shdLevel,
+      o,
+      optimizerRunOptions(catalog, store.agent.spec),
+      { onProgress: (pct) => store.setProgress(pct) },
+    );
+    run.promise
+      .then((res) => {
         setResults(res);
         store.setStatus(
           res.length > 0
             ? `${res.length} beste Build(s) berechnet`
             : "Keine passende Kombination gefunden — Inventar oder Bedingungen prüfen",
         );
-      } catch (e) {
+      })
+      .catch((e) => {
         setResults([]);
-        store.setStatus(`Optimierung fehlgeschlagen: ${e}`);
-      } finally {
+        store.setStatus(`Optimierung fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`);
+      })
+      .finally(() => {
         store.setProgress(null);
         setRunning(false);
-      }
-    }, 50);
+      });
   }
 
   const set = (patch: Partial<typeof o>) => store.setOptimization({ ...o, ...patch });
@@ -167,7 +149,7 @@ export function OptimizerView() {
           <label>Gear-Set als optionales Zusatzziel (mindestens 2 Teile)</label>
           <select value={o.targetGearSet} onChange={(e) => set({ targetGearSet: e.target.value })}>
             <option value="">– kein bestimmtes Set –</option>
-            {gearSets.map((gs) => (
+            {catalog.gearSets.map((gs) => (
               <option key={gs.key} value={gs.name}>{gs.name}</option>
             ))}
           </select>
@@ -228,100 +210,43 @@ export function OptimizerView() {
           (z. B. Gear-Set-Ziel oder Pflicht-Weste/Rucksack deaktivieren).
         </div>
       )}
-      {results !== null && results.length > 0 && results.some((r) => r.warnings.length > 0) && (
-        <div className="optimizer-warnings">
-          {Array.from(new Set(results.flatMap((r) => r.warnings.map((wn) => wn.message))))
-            .filter((msg, idx, arr) => arr.indexOf(msg) === idx)
-            .slice(0, 3)
-            .map((msg) => (
-              <div key={msg} className="warn-banner warn-yellow">⚠ {msg}</div>
-            ))}
-        </div>
-      )}
       {results !== null && results.length > 0 && (
-        <div className="table-wrap optimizer-results">
-          <table>
-            <thead>
-              <tr>
-                <th>Rang</th>
-                <th>Waffe</th>
-                <th>Gear (Slots)</th>
-                <th>WD</th>
-                <th>CHC</th>
-                <th>CHD</th>
-                <th>Ø Schaden/Treffer</th>
-                <th>DPS</th>
-                <th>Rollen-Score</th>
-                <th>Begründung</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r) => (
-                <tr key={r.rank}>
-                  <td><strong>{r.rank}</strong></td>
-                  <td>
-                    {r.weapon.name}
-                    {r.weapon.isPrototype && <span className="badge gearset" style={{ marginLeft: 4 }}>P</span>}
-                  </td>
-                  <td style={{ fontSize: 11 }}>
-                    {r.gear.map((g) => g.brand).join(" · ")}
-                    <div style={{ color: "var(--text-dim, #aaa)" }}>
-                      {r.gear.length} Teil(e)
-                    </div>
-                  </td>
-                  <td>+{r.stats.wd.toLocaleString("de-DE")} %</td>
-                  <td>{r.damage.cappedChc} %</td>
-                  <td>+{r.stats.chd.toLocaleString("de-DE")} %</td>
-                  <td>{r.damage.avgBulletDmg.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</td>
-                  <td><strong>{r.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</strong></td>
-                  <td style={{ fontSize: 11 }}>
-                    {r.roleScore.key ? (
-                      <>
-                        <strong>{r.roleScore.score.toLocaleString("de-DE")}</strong>
-                        <div style={{ color: "var(--text-dim, #aaa)" }}>{r.roleScore.label}</div>
-                      </>
-                    ) : (
-                      <span style={{ color: "var(--text-dim, #aaa)" }}>Waffen-DPS</span>
-                    )}
-                  </td>
-                  <td style={{ fontSize: 11 }}>
-                    {r.reasonParts.map((part) => (
-                      <div key={part} className="reason-line">{part}</div>
-                    ))}
-                    <details style={{ marginTop: 4 }}>
-                      <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Annahmen</summary>
-                      <div className="calc-path">
-                        {r.assumptions.wastedChc > 0 && (
-                          <div className="warn-banner warn-yellow" style={{ marginBottom: 6 }}>
-                            {"\u26a0"} {r.assumptions.wastedChc} Prozentpunkte CHC ueber dem Cap (60 %) — verschwendeter Stat
-                          </div>
-                        )}
-                        <ul className="source-list">
-                          {r.assumptions.items.map((a) => (
-                            <li key={a.label}>
-                              <span>{a.label}</span>
-                              <span style={{ color: "var(--text-dim, #aaa)" }}>{a.detail}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </details>
-                    <details style={{ marginTop: 4 }}>
-                      <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Rechenweg</summary>
-                      <CalcPathBox r={r} />
-                    </details>
-                    <details style={{ marginTop: 4 }}>
-                      <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Warum diese Teile?</summary>
-                      {r.slotExplanations.map((exp) => (
-                        <SlotExplanationBox key={exp.chosen.id} exp={exp} />
-                      ))}
-                    </details>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <OptimizerWarnings results={results} />
+          <OptimizerResultsTable results={results} showReasons />
+          {results.map((r) => (
+            <details key={r.rank} style={{ marginTop: 8 }}>
+              <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>
+                Details zu Build #{r.rank}: {r.weapon.name}
+              </summary>
+              <div className="calc-path">
+                {r.assumptions.wastedChc > 0 && (
+                  <div className="warn-banner warn-yellow" style={{ marginBottom: 6 }}>
+                    ⚠ {r.assumptions.wastedChc} Prozentpunkte CHC über dem Cap (60 %) — verschwendeter Stat
+                  </div>
+                )}
+                <ul className="source-list">
+                  {r.assumptions.items.map((a) => (
+                    <li key={a.label}>
+                      <span>{a.label}</span>
+                      <span style={{ color: "var(--text-dim, #aaa)" }}>{a.detail}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <details style={{ marginTop: 4 }}>
+                <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Rechenweg</summary>
+                <CalcPathBox r={r} />
+              </details>
+              <details style={{ marginTop: 4 }}>
+                <summary style={{ cursor: "pointer", color: "var(--accent, #4da3ff)" }}>Warum diese Teile?</summary>
+                {r.slotExplanations.map((exp) => (
+                  <SlotExplanationBox key={exp.chosen.id} exp={exp} />
+                ))}
+              </details>
+            </details>
+          ))}
+        </>
       )}
     </div>
   );
