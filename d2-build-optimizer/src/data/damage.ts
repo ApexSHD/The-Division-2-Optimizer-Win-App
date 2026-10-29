@@ -96,7 +96,7 @@ export function bestModsForWeapon(
   return result;
 }
 
-export function applyModContributions(stats: BuildStats, mods: ModContribution[]): BuildStats {
+function applyModContributions(stats: BuildStats, mods: ModContribution[]): BuildStats {
   const next: BuildStats = {
     ...stats,
     sources: Object.fromEntries(
@@ -538,7 +538,7 @@ const SET_BONUS_ATTR_MAP: Record<string, "chc" | "chd" | "hsd" | "wd" | "dta" | 
   wd: "wd",
 };
 
-export function applySetBonuses(
+function applySetBonuses(
   stats: BuildStats,
   combo: GearPiece[],
   weapon: import("./sampleData").Weapon,

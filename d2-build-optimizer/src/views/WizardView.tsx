@@ -2,13 +2,13 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext, type Language } from "../i18n";
 import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
-import { type SetBonusCatalog, evaluateBuild, enemyProfileFromSettings } from "../data/damage";
+import { evaluateBuild, enemyProfileFromSettings } from "../data/damage";
 import { runOptimizerAsync } from "../data/optimizerClient";
 import { analyzeGaps } from "../data/damage";
 import type { GapSuggestion } from "../data/damage";
 import type { OptimizerResult } from "../data/damage";
-import { getDb } from "../data/db";
-import type { GearSetItemPreset } from "../data/db";
+import { OptimizerResultsTable, OptimizerWarnings } from "../components/OptimizerResults";
+import { optimizerRunOptions, useOptimizerCatalog } from "../data/optimizerCatalog";
 import { ROLE_PRESETS, rolePreset, type RoleId } from "../data/roles";
 import { GEAR_CORE_LABELS, GEAR_ATTR_TYPES } from "../data/sampleData";
 import type { GearCoreType } from "../data/sampleData";
@@ -158,27 +158,13 @@ export function WizardView() {
   const [results, setResults] = useState<OptimizerResult[] | null>(null);
   const [running, setRunning] = useState(false);
   const runRef = useRef<{ cancel: () => void } | null>(null);
-  const [gearSets, setGearSets] = useState<GearSetItemPreset[]>([]);
-  const [setBonusCatalog, setSetBonusCatalog] = useState<SetBonusCatalog | null>(null);
-  const [modSlots, setModSlots] = useState<Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]> | null>(null);
   const [adjusted, setAdjusted] = useState<string[] | null>(null);
+  const catalog = useOptimizerCatalog();
   const o = store.optimization;
 
   useEffect(() => {
     setAnchorWeaponId(store.optimization.anchorWeaponId);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    getDb().then((db) => {
-      setGearSets(db.gearSetItems);
-      setModSlots(db.modSlots);
-      const brands: Record<string, Record<string, Record<string, unknown>>> = {};
-      for (const b of db.brandSets) brands[b.key] = b.numericBonusesPve ?? {};
-      const greens: Record<string, Record<string, { attr: string; val: number }[]>> = {};
-      for (const g of db.gearSets) greens[g.key] = g.numericBonuses ?? {};
-      setSetBonusCatalog({ brands, greens });
-    }).catch(() => setGearSets([]));
-  }, []);
 
   useEffect(() => {
     if (o.role) setRole(o.role);
@@ -202,13 +188,7 @@ export function WizardView() {
       store.gear,
       store.agent.shdLevel,
       o,
-      {
-        gearSetNames: gearSets.map((gs) => gs.name),
-        maxResults: 10,
-        spec: store.agent.spec,
-        modsBySlot: modSlots ?? undefined,
-        setBonusCatalog,
-      },
+      optimizerRunOptions(catalog, store.agent.spec),
       { onProgress: (pct) => store.setProgress(pct) },
     );
     runRef.current = run;
@@ -367,7 +347,7 @@ export function WizardView() {
             <div className="field" style={{ marginTop: 6 }}>
               <select value={o.targetGearSet} onChange={(e) => store.setOptimization({ ...o, targetGearSet: e.target.value })}>
                 <option value="">– kein bestimmtes Set –</option>
-                {gearSets.map((gs) => (
+                {catalog.gearSets.map((gs) => (
                   <option key={gs.key} value={gs.name}>{gs.name}</option>
                 ))}
               </select>
@@ -466,58 +446,11 @@ export function WizardView() {
               Keine passende Kombination gefunden — Inventar erfassen oder Bedingungen lockern.
             </div>
           )}
-          {results !== null && results.length > 0 && results.some((r) => r.warnings.length > 0) && (
-            <div className="optimizer-warnings" style={{ marginBottom: 10 }}>
-              {Array.from(new Set(results.flatMap((r) => r.warnings.map((wn) => wn.message))))
-                .filter((msg, idx, arr) => arr.indexOf(msg) === idx)
-                .slice(0, 3)
-                .map((msg) => (
-                  <div key={msg} className="warn-banner warn-yellow">⚠ {msg}</div>
-                ))}
-            </div>
-          )}
           {results !== null && results.length > 0 && (
-            <div className="table-wrap optimizer-results">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Rang</th>
-                    <th>Waffe</th>
-                    <th>Gear (Slots)</th>
-                    <th>WD</th>
-                    <th>CHC</th>
-                    <th>CHD</th>
-                    <th>Ø Schaden/Treffer</th>
-                    <th>DPS</th>
-                    <th>Rollen-Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((r) => (
-                    <tr key={r.rank}>
-                      <td><strong>{r.rank}</strong></td>
-                      <td>{r.weapon.name}</td>
-                      <td style={{ fontSize: 11 }}>{r.gear.map((g) => g.brand).join(" · ")}</td>
-                      <td>+{r.stats.wd.toLocaleString("de-DE")} %</td>
-                      <td>{r.damage.cappedChc} %</td>
-                      <td>+{r.stats.chd.toLocaleString("de-DE")} %</td>
-                      <td>{r.damage.avgBulletDmg.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</td>
-                      <td><strong>{r.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })}</strong></td>
-                      <td style={{ fontSize: 11 }}>
-                        {r.roleScore.key ? (
-                          <>
-                            <strong>{r.roleScore.score.toLocaleString("de-DE")}</strong>
-                            <div style={{ color: "var(--text-dim, #aaa)" }}>{r.roleScore.label}</div>
-                          </>
-                        ) : (
-                          <span style={{ color: "var(--text-dim, #aaa)" }}>Waffen-DPS</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <OptimizerWarnings results={results} />
+              <OptimizerResultsTable results={results} />
+            </>
           )}
         </section>
       )}
