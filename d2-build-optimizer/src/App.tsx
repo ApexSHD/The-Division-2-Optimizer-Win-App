@@ -6,8 +6,6 @@ import type { Translation } from "./i18n/de";
 import { GlobalView } from "./views/GlobalView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
-import { OptimizerView } from "./views/OptimizerView";
-import { WizardView } from "./views/WizardView";
 import { CompareView } from "./views/CompareView";
 import { AdminView } from "./views/AdminView";
 import { SettingsView } from "./views/SettingsView";
@@ -134,8 +132,6 @@ function Nav() {
     { id: "global", label: t.nav.global, icon: "🌍" },
     { id: "weapons", label: t.nav.weapons, icon: "🔫" },
     { id: "gear", label: t.nav.gear, icon: "🧦" },
-    { id: "optimizer", label: t.nav.optimizer, icon: "⚡" },
-    { id: "wizard", label: t.nav.wizard, icon: "🧭" },
     { id: "compare", label: t.nav.compare, icon: "⚖" },
     { id: "admin", label: t.nav.admin, icon: "🗄" },
     { id: "settings", label: t.nav.settings, icon: "⚙" },
@@ -262,8 +258,6 @@ function WorkArea() {
     global: { title: t.global.title, sub: t.global.subtitle },
     weapons: { title: t.weapons.title, sub: t.weapons.subtitle },
     gear: { title: t.gear.title, sub: t.gear.subtitle },
-    optimizer: { title: t.optimizer.title, sub: t.optimizer.subtitle },
-    wizard: { title: t.wizard.title, sub: t.wizard.subtitle },
     compare: { title: t.compare.title, sub: t.compare.subtitle },
     admin: { title: t.admin.title, sub: t.admin.subtitle },
     settings: { title: t.settings.title, sub: t.settings.subtitle },
@@ -281,8 +275,6 @@ function WorkArea() {
         {store.view === "global" && <GlobalView />}
         {store.view === "weapons" && <WeaponsView />}
         {store.view === "gear" && <GearView />}
-        {store.view === "optimizer" && <OptimizerView />}
-        {store.view === "wizard" && <WizardView />}
         {store.view === "compare" && <CompareView />}
         {store.view === "admin" && <AdminView />}
         {store.view === "settings" && <SettingsView />}
@@ -300,7 +292,7 @@ function Shell() {
     function onKey(e: KeyboardEvent) {
       if (e.key === "F5") {
         e.preventDefault();
-        store.setView("optimizer");
+        store.setView("global");
       } else if (e.key === "F9") {
         e.preventDefault();
         store.toggleSidebar();
