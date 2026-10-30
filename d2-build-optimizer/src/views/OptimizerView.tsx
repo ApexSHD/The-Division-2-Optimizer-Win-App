@@ -52,14 +52,58 @@ const SLOT_LABELS: Record<string, string> = {
   kneepads: "Kniekehlen",
 };
 
-function partsLabel(gear: Array<{ brand: string; slot: string }>, weaponName?: string): string {
+const GEAR_ATTR_SHORT: Record<string, string> = {
+  chc: "CHC",
+  chd: "CHD",
+  hsd: "HSD",
+  wd: "WD",
+  dta: "DTA",
+  dth: "DTH",
+  dttooc: "DTtoOC",
+  wh: "Handling",
+  armorregen: "Rüst.Reg.",
+  explres: "Expl.Res.",
+  hazard: "Gefahrensch.",
+  health: "HP",
+  skilldmg: "Skill-Sch.",
+  skillhaste: "Skill-Eile",
+  repair: "Reparatur",
+  status: "Status",
+  aok: "AoK",
+  rof: "Feuerrate",
+  incomrepair: "Eingeh. Rep.",
+};
+
+function partsLabel(
+  gear: Array<{
+    brand: string;
+    slot: string;
+    core?: string;
+    coreValue?: number;
+    attributes?: Array<{ type: string; value: number }>;
+  }>,
+  weaponName?: string,
+): string {
   const bySlotOrder = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
   const sorted = [...gear].sort(
     (a, b) => bySlotOrder.indexOf(a.slot) - bySlotOrder.indexOf(b.slot),
   );
-  const parts = sorted.map((g) => `${g.brand} (${SLOT_LABELS[g.slot] ?? g.slot})`);
+  const parts = sorted.map((g) => {
+    const attrs = (g.attributes ?? [])
+      .map((a) => `${GEAR_ATTR_SHORT[a.type] ?? a.type} ${a.value.toLocaleString("de-DE")}`)
+      .join(", ");
+    const core =
+      g.core === "wd"
+        ? `WD ${g.coreValue?.toLocaleString("de-DE")}`
+        : g.core === "armour"
+          ? `Rüstung ${g.coreValue?.toLocaleString("de-DE")}`
+          : g.core === "skill"
+            ? `Skill-Stufe`
+            : "";
+    return `${g.brand} (${SLOT_LABELS[g.slot] ?? g.slot})${core ? ` · ${core}` : ""}${attrs ? ` · ${attrs}` : ""}`;
+  });
   if (weaponName) parts.push(`Waffe: ${weaponName}`);
-  return parts.join(", ");
+  return parts.join(" | ");
 }
 
 const AXIS_LABELS: Record<AxisKey, string> = {
@@ -478,6 +522,73 @@ export function OptimizerView() {
                   .join(" · ")}
               </div>
             )}
+            {bestBuild && (() => {
+              const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+              if (!cand) return null;
+              const stats = cand.stats;
+              const summaryRows: Array<[string, string]> = [
+                ["Waffenschaden (WD) gesamt", `${stats.totalWd.toFixed(1)} %`],
+                ["Kritische Trefferchance (CHC)", `${Math.min(60, stats.chc).toFixed(1)} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`],
+                ["Kritischer Trefferschaden (CHD)", `${stats.chd.toFixed(1)} %`],
+                ["Kopfschussschaden (HSD)", `${stats.hsd.toFixed(1)} %`],
+                ["Rüstungsschaden (DTA)", `${stats.dta.toFixed(1)} %`],
+                ["Lebenspunktschaden (DTH)", `${stats.dth.toFixed(1)} %`],
+                ["Schaden gg. ungedeckte Ziele", `${stats.dttooc.toFixed(1)} %`],
+                ["Effektiver DPS", Math.round(cand.damage.effectiveDps).toLocaleString("de-DE")],
+              ];
+              const provenance: Array<[string, string, number]> = [];
+              for (const [attrKey, list] of Object.entries(stats.sources)) {
+                for (const src of list) {
+                  provenance.push([attrKey, src.label, src.value]);
+                }
+              }
+              return (
+                <>
+                  <details style={{ marginTop: 8 }}>
+                    <summary style={{ cursor: "pointer" }}>
+                      <strong>Übersicht: relevante Werte (Best-Build)</strong>
+                    </summary>
+                    <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                      <tbody>
+                        {summaryRows.map(([label, value]) => (
+                          <tr key={label}>
+                            <td style={{ padding: "2px 8px 2px 0" }}>{label}</td>
+                            <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </details>
+                  <details style={{ marginTop: 4 }}>
+                    <summary style={{ cursor: "pointer" }}>
+                      <strong>Herkunft der Werte (wie im Spiel nachvollziehbar)</strong>
+                    </summary>
+                    <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: "left" }}>Wert</th>
+                          <th style={{ textAlign: "left" }}>Quelle</th>
+                          <th style={{ textAlign: "right" }}>Betrag</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {provenance.map(([attr, label, value], i) => (
+                          <tr key={`${attr}-${i}`}>
+                            <td style={{ padding: "1px 8px 1px 0" }}>
+                              {GEAR_ATTR_SHORT[attr] ?? attr}
+                            </td>
+                            <td>{label}</td>
+                            <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                              {value.toLocaleString("de-DE")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </details>
+                </>
+              );
+            })()}
             <details>
               <summary style={{ cursor: "pointer" }}>Top-Builds ({result.inventar.ranked.length})</summary>
               <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
