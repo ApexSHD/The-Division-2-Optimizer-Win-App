@@ -469,22 +469,22 @@
     },
     {
       "key": "galvanize",
-      "name": "Galvanize",
+      "name": "Galvanize (Rucksack-Talent)",
       "slot": [
         "Weste"
       ],
       "ziel": "team",
-      "wirkung": "Rüstung/Bonusrüstung",
-      "wert": null,
-      "unit": "%",
-      "ausloeser": "bei_naehe_zu_skill",
-      "bedingung": "Verbündete in Nähe des Trägers erhalten Schutz",
-      "uptime": 0.7,
+      "wirkung": "Bonusrüstung (Team)",
+      "wert": 40,
+      "unit": "% der Rüstung",
+      "ausloeser": "bei_skill_einsatz",
+      "bedingung": "Blenden/Festsetzen/Verwirren/Schocken eines Gegners; Team im 20-m-Radius, 10 s",
+      "uptime": 0.5,
       "stapel": null,
       "team_wirkung": true,
       "category": "team_ehp",
-      "value_status": "offen",
-      "description": "Verbündete in der Nähe des Trägers erhalten Rüstungsschutz (Team-Rüstungsquelle für Rüstungs-Supporter, Issue #91)."
+      "value_status": "Annahme",
+      "description": "Standard Galvanize: Das Verursachen eines Statuseffekts (Blenden, Festsetzen, Verwirren, Schock) gewährt 40% der eigenen Rüstung als Bonusrüstung für dich und alle Verbündeten im 20-m-Radius für 10 s. Perfect Galvanize (Lavoisier / Named Electrique Rucksack): 50%, 30-m-Radius."
     },
     {
       "key": "overwatch",
@@ -550,17 +550,17 @@
         "Weste (Gearset)"
       ],
       "ziel": "team_ohne_mich",
-      "wirkung": "Reparatur",
-      "wert": null,
-      "unit": "%",
-      "ausloeser": "dauerhaft",
-      "bedingung": null,
-      "uptime": 1.0,
+      "wirkung": "Reparatur + Team-Schaden (Ground Control)",
+      "wert": 15,
+      "unit": "% Waffen- und Skill-Schaden",
+      "ausloeser": "bei_volle_ruestung",
+      "bedingung": "bei voller Rüstung; Reparatur von Verbündeten heilt Umstehende für 60%",
+      "uptime": 0.6,
       "stapel": null,
       "team_wirkung": true,
       "category": "team_ehp",
-      "value_status": "offen",
-      "description": "Verbesserte Gruppen-Reparatur (Kandidat 9.2, Skill-Heiler-Variante)."
+      "value_status": "Annahme",
+      "description": "Future Initiative 4p (Ground Control): +15% gesamter Waffen- und Skill-Schaden für dich und Verbündete bei voller Rüstung; beim Reparieren eines Verbündeten werden nahe Verbündete für 60% des Werts mitrepariert."
     },
     {
       "key": "coyote_mask",
@@ -637,6 +637,25 @@
       "category": "wd",
       "value_status": "bestätigt",
       "description": "Waffentreffer erhöhen den Gesamtwaffenschaden pro Stack; Rucksack (Risk Management) und Weste (Press the Advantage) verstärken (MVP-Kandidat DPS Krit, Issue #94; bestätigt gegen gear.json green_set_info)."
+    },
+    {
+      "key": "perfect_galvanize",
+      "name": "Perfect Galvanize (Lavoisier / Electrique)",
+      "slot": [
+        "Rucksack (Named)"
+      ],
+      "ziel": "team",
+      "wirkung": "Bonusrüstung (Team)",
+      "wert": 50,
+      "unit": "% der Rüstung",
+      "ausloeser": "bei_skill_einsatz",
+      "bedingung": "Statuseffekt; Team im 30-m-Radius, 10 s",
+      "uptime": 0.5,
+      "stapel": null,
+      "team_wirkung": true,
+      "category": "team_ehp",
+      "value_status": "Annahme",
+      "description": "Perfect Galvanize: 50% der Rüstung als Bonusrüstung, 30-m-Radius."
     }
   ]
 }

@@ -9,6 +9,7 @@ import {
   bestGearModsForRole,
   type ModeContext,
 } from "../operatingModes";
+import { GEAR_TALENTS } from "../v4Data";
 import modsJson from "../../db/mod.json";
 import gearJson from "../../db/gear.json";
 import type { SkillChoice } from "../axes";
@@ -268,4 +269,87 @@ describe("Gearset-4p-Boni (Striker, Zünglein, Zorn des Jägers)", () => {
     const bestDpsThree = Math.max(...resultThree.ranked.map((r) => r.vector.dps));
     expect(bestDpsFour).toBeGreaterThan(bestDpsThree);
   }, 30000);
+});
+
+describe("Spieler-Optionen: Gearset-Regel, Waffengattung, BUF-Werte (Klärung 29.11.)", () => {
+  const strikerSet = (slots: GearSlot[], prefix: string): GearPiece[] =>
+    slots.map((s, i) => ({
+      ...gear(s, "wd", [{ type: "chc", value: 9 }], `${prefix}-${i}`, "Striker's Battlegear"),
+      brandType: "gearset" as const,
+    }));
+  const fill = (): GearPiece[] =>
+    (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chc", value: 9 }], `fill-${i}`),
+    );
+
+  it("Gearset-Regel erzwingt: 4 Set-Teile, davon Set-Weste und Set-Rucksack (Standard: beide an)", () => {
+    const pool = [...strikerSet(["mask", "chest", "holster", "backpack"], "st"), ...fill()];
+    const result = optimizeV4(
+      [weapon],
+      pool,
+      modeCtx({
+        roleKey: "dps_krit",
+        gearSetOptions: { targetSet: "Striker's Battlegear", requireSetChest: true, requireSetBackpack: true },
+      } as never),
+    );
+    expect(result.best).not.toBeNull();
+    const bestGear = result.candidates.find((c) => c.id === result.best!.id)?.gear ?? [];
+    const setPieces = bestGear.filter((g) => g.brand === "Striker's Battlegear");
+    expect(setPieces.length).toBeGreaterThanOrEqual(4);
+    expect(setPieces.some((g) => g.slot === "chest")).toBe(true);
+    expect(setPieces.some((g) => g.slot === "backpack")).toBe(true);
+  }, 30000);
+
+  it("Gearset-Regel ohne Set im Inventar: kein zulässiges Build mit Hinweis (Kriterium 13)", () => {
+    const result = optimizeV4(
+      [weapon],
+      fill(),
+      modeCtx({
+        roleKey: "dps_krit",
+        gearSetOptions: { targetSet: "Striker's Battlegear" },
+      } as never),
+    );
+    expect(result.noAdmissibleHint).toContain("Gearset-Regel");
+  }, 30000);
+
+  it("Erzwingen abschaltbar: ohne Weste-Erzwingung reicht 4er mit Set-Rucksack, aber ohne Set-Weste", () => {
+    const pool = [...strikerSet(["mask", "holster", "gloves", "backpack"], "st"), ...fill()];
+    const result = optimizeV4(
+      [weapon],
+      pool,
+      modeCtx({
+        roleKey: "dps_krit",
+        gearSetOptions: { targetSet: "Striker's Battlegear", requireSetChest: false, requireSetBackpack: true },
+      } as never),
+    );
+    expect(result.best).not.toBeNull();
+  }, 30000);
+
+  it("Waffengattungs-Filter wirkt bei Schadens-Rollen (AR-Only im Settings)", () => {
+    const arWeapon = { ...sampleWeapons[0], type: "ar" as const };
+    const lmgWeapon = { ...sampleWeapons[0], id: "w-lmg", name: "Test-LMG", type: "lmg" as const };
+    const result = optimizeV4(
+      [arWeapon, lmgWeapon],
+      fill(),
+      modeCtx({
+        roleKey: "dps_krit",
+        settings: { ...DEFAULT_OPTIMIZATION, enemyHeadshotShare: 20, weaponTypeFilter: "lmg" },
+      }),
+    );
+    expect(result.ranked.length).toBeGreaterThan(0);
+    for (const c of result.candidates) {
+      expect(c.weapon.type).toBe("lmg");
+    }
+  }, 30000);
+
+  it("Galvanize und Future Initiative (Ground Control) haben BUF-Werte aus der Klärung", () => {
+    const galvanize = GEAR_TALENTS.find((t) => t.key === "galvanize")!;
+    expect(galvanize.wert).toBe(40);
+    expect(galvanize.team_wirkung).toBe(true);
+    const perfect = GEAR_TALENTS.find((t) => t.key === "perfect_galvanize")!;
+    expect(perfect.wert).toBe(50);
+    const fi = GEAR_TALENTS.find((t) => t.key === "future_initiative_chest")!;
+    expect(fi.wert).toBe(15);
+    expect(fi.team_wirkung).toBe(true);
+  });
 });
