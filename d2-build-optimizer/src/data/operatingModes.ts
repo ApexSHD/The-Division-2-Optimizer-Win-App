@@ -21,7 +21,7 @@ import {
   type ScoredBuild,
   type AdmissibilityCheckInput,
 } from "./roleProfiles";
-import { SKILLS, type AxisKey } from "./v4Data";
+import { SKILLS, CHC_TARGET, type AxisKey } from "./v4Data";
 
 export type OperatingMode = "inventar" | "ziel";
 
@@ -68,6 +68,7 @@ export interface V4BuildResult {
 
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
 
+const CHC_TARGET_DEFAULT = CHC_TARGET.default;
 const AGGRO_SKILL_KEYS = new Set(["shield", "decoy"]);
 
 function isSetPiece(g: GearPiece, setNameLower: string): boolean {
@@ -148,15 +149,25 @@ function gearModCatalog(): GearModDef[] {
   return out;
 }
 
-export function bestGearModsForRole(roleKey: string): GearModPick[] {
+export function bestGearModsForRole(
+  roleKey: string,
+  opts: { chcTarget?: number; chcCurrent?: number } = {},
+): GearModPick[] {
   const priority = GEAR_MODS_BY_ROLE_PRIORITY[roleKey] ?? ["chc", "chd", "hsd"];
+  let list = priority;
+  if (opts.chcTarget !== undefined && opts.chcCurrent !== undefined) {
+    const capped = Math.min(60, opts.chcCurrent);
+    if (capped >= opts.chcTarget) {
+      list = priority.map((a) => (a === "chc" ? "chd" : a));
+    }
+  }
   const catalog = gearModCatalog();
   const picks: GearModPick[] = [];
   for (const slot of GEAR_MOD_SLOTS) {
     let best: GearModDef | null = null;
     let bestRank = Infinity;
     for (const mod of catalog) {
-      const rank = priority.indexOf(mod.attr);
+      const rank = list.indexOf(mod.attr);
       if (rank === -1) continue;
       if (rank < bestRank) {
         bestRank = rank;
@@ -180,7 +191,12 @@ export function axisContextFor(
   ctx: ModeContext,
   role: RoleProfile,
 ): AxisContext {
-  const gearMods = bestGearModsForRole(role.key);
+  const chcBase = aggregateBuild(gear, ctx.shdLevel).chc;
+  const chcTarget = role.chcTarget ?? CHC_TARGET_DEFAULT;
+  const gearMods = bestGearModsForRole(role.key, {
+    chcTarget,
+    chcCurrent: chcBase,
+  });
   const gearWithMods: GearPiece[] = gear.map((g) => {
     const pick = gearMods.find((p) => p.slot === g.slot);
     if (!pick) return g;
@@ -210,7 +226,11 @@ function admissibilityInput(
   role: RoleProfile,
   ctx: ModeContext,
 ): AdmissibilityCheckInput {
-  const gearMods = bestGearModsForRole(role.key);
+  const chcBase = aggregateBuild(gear, ctx.shdLevel).chc;
+  const gearMods = bestGearModsForRole(role.key, {
+    chcTarget: role.chcTarget ?? CHC_TARGET_DEFAULT,
+    chcCurrent: chcBase,
+  });
   const gearWithMods: GearPiece[] = gear.map((g) => {
     const pick = gearMods.find((p) => p.slot === g.slot);
     if (!pick) return g;
@@ -219,8 +239,7 @@ function admissibilityInput(
       attributes: [...g.attributes, { type: pick.attr as never, value: pick.val }],
     };
   });
-  const chcWithMods =
-    aggregateBuild(gear, ctx.shdLevel).chc + modAttrTotal(gearMods, "chc");
+  const chcWithMods = chcBase + modAttrTotal(gearMods, "chc");
   return {
     gear: gearWithMods,
     vector,
