@@ -25,7 +25,35 @@ export interface SkillVariant {
   cooldown: number | null;
   charges: number | null;
   description: string;
+  scaling_type?: "damage" | "repair" | "cc_duration" | "shield_hp";
 }
+
+export interface SkillScalingRules {
+  damage_per_rank: number;
+  repair_per_rank: number;
+  cc_duration_per_rank: number;
+  shield_hp_per_rank: number;
+  overcharge: { duration: number; note: string };
+}
+
+export const SKILL_SCALING: SkillScalingRules = (skillsJson as unknown as {
+  scaling_rules: SkillScalingRules;
+}).scaling_rules;
+
+export interface ImmunityThresholds {
+  shock: number;
+  poison: number;
+  blind_deaf: number;
+  bleed: number;
+  burn: number;
+  disorient: number;
+  disrupt: number;
+  ensnare: number;
+}
+
+export const IMMUNITY_THRESHOLDS: ImmunityThresholds = (attributeRulesJson as unknown as {
+  immunity_thresholds: ImmunityThresholds;
+}).immunity_thresholds;
 
 export interface SkillEntry {
   key: string;

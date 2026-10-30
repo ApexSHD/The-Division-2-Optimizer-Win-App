@@ -21,6 +21,26 @@ import {
   type AxisWeights,
 } from "../data/questionnaire";
 import { SKILLS, AXES } from "../data/v4Data";
+import gearJson from "../db/gear.json";
+import type { WeaponType } from "../data/sampleData";
+
+const GEARSET_NAMES: string[] = Object.values(
+  (gearJson as unknown as { green_set_info: Record<string, { name?: string }> }).green_set_info,
+)
+  .map((info) => info.name)
+  .filter((n): n is string => Boolean(n))
+  .sort((a, b) => a.localeCompare(b));
+
+const WEAPON_TYPES: Array<{ value: WeaponType | ""; label: string }> = [
+  { value: "", label: "Alle" },
+  { value: "ar", label: "Sturmgewehr (AR)" },
+  { value: "smg", label: "Maschinenpistole (SMG)" },
+  { value: "lmg", label: "LMG" },
+  { value: "rifle", label: "Gewehr" },
+  { value: "mmr", label: "Präzisionsgewehr (MMR)" },
+  { value: "shotgun", label: "Schrotflinte" },
+  { value: "pistol", label: "Pistole" },
+];
 import type { SkillChoice, EffectVector } from "../data/axes";
 import type { AxisKey } from "../data/v4Data";
 const AXIS_LABELS: Record<AxisKey, string> = {
@@ -91,6 +111,10 @@ export function OptimizerView() {
   const [teamSize, setTeamSize] = useState(4);
   const [skillKeys, setSkillKeys] = useState<string[]>(["hive/restorer"]);
   const [mode, setMode] = useState<"inventar" | "ziel">("inventar");
+  const [targetSet, setTargetSet] = useState("");
+  const [weaponType, setWeaponType] = useState<WeaponType | "">("");
+  const [requireSetChest, setRequireSetChest] = useState(true);
+  const [requireSetBackpack, setRequireSetBackpack] = useState(true);
   const [result, setResult] = useState<{
     inventar: V4BuildResult;
     ziel: V4BuildResult;
@@ -101,6 +125,7 @@ export function OptimizerView() {
   const [running, setRunning] = useState(false);
 
   const goal = GOALS.find((g) => g.key === goalKey) ?? GOALS[0];
+  const damageRole = goalKey === "dps" || goalKey === "hybrid";
   const questions = useMemo(() => questionsForRole(roleKey), [roleKey]);
   const effectiveWeights = expertMode && expertWeights ? expertWeights : weightsFromAnswers(roleKey, answers);
 
@@ -130,7 +155,17 @@ export function OptimizerView() {
         skills: selectedSkills,
         teamSize,
         shdLevel: store.agent.shdLevel,
-        settings: { ...DEFAULT_OPTIMIZATION, ...store.optimization },
+        settings: {
+          ...DEFAULT_OPTIMIZATION,
+          ...store.optimization,
+          weaponTypeFilter: damageRole ? weaponType : "",
+          targetGearSet: targetSet,
+        },
+        gearSetOptions: {
+          targetSet: targetSet || undefined,
+          requireSetChest,
+          requireSetBackpack,
+        },
         threatStatusShare: 0.3,
         spec: specSuggestion.best.key,
       };
@@ -303,6 +338,58 @@ export function OptimizerView() {
           Hinweis: Eine Spezialisierung braucht eigene Stufen in der eigenen Fertigkeitenleiste. Der Vorschlag kann
           übernommen oder durch eine feste Wahl ersetzt werden.
         </small>
+      </section>
+
+      <section className="field" style={{ display: "grid", gap: 10 }}>
+        <strong>Einschränkungen (optional)</strong>
+        {damageRole && (
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            Waffengattung
+            <select value={weaponType} onChange={(e) => setWeaponType(e.target.value as WeaponType | "")}>
+              {WEAPON_TYPES.map((wt) => (
+                <option key={wt.value} value={wt.value}>
+                  {wt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {!damageRole && (
+          <small style={{ color: "var(--text-dim, #aaa)" }}>
+            Waffengattung nur bei Schadens-Zielen (DPS/Hybrid) — bei Skill-Builds ist das Waffentalent relevanter.
+          </small>
+        )}
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          Gearset (optional)
+          <select value={targetSet} onChange={(e) => setTargetSet(e.target.value)}>
+            <option value="">Keins / automatisch</option>
+            {GEARSET_NAMES.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        {targetSet && (
+          <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={requireSetChest}
+                onChange={(e) => setRequireSetChest(e.target.checked)}
+              />
+              Set-Weste erzwingen
+            </label>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={requireSetBackpack}
+                onChange={(e) => setRequireSetBackpack(e.target.checked)}
+              />
+              Set-Rucksack erzwingen
+            </label>
+          </div>
+        )}
       </section>
 
       <section className="field" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>

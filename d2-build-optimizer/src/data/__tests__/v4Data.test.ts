@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  IMMUNITY_THRESHOLDS,
   SKILLS,
   SPECIALIZATIONS,
   GEAR_TALENTS,
@@ -141,5 +142,24 @@ describe("V4-Datenbasis (Issue #89)", () => {
     const items = SOURCES.map((s) => s.item);
     expect(items.some((i) => i.includes("Striker"))).toBe(true);
     expect(items.some((i) => i.includes("St. Elmo"))).toBe(true);
+  });
+});
+
+describe("Immunitätsschwellen & bestätigte Caps (Nutzervorgabe 29.11.)", () => {
+  it("Statusresistenz-Immunität ab den Schwellwerten (Schock 86 %, Brand 94 %, Festsetzen 98 % …)", () => {
+    expect(IMMUNITY_THRESHOLDS.shock).toBe(86.0);
+    expect(IMMUNITY_THRESHOLDS.poison).toBe(89.2);
+    expect(IMMUNITY_THRESHOLDS.blind_deaf).toBe(91.0);
+    expect(IMMUNITY_THRESHOLDS.bleed).toBe(93.8);
+    expect(IMMUNITY_THRESHOLDS.burn).toBe(94.0);
+    expect(IMMUNITY_THRESHOLDS.disorient).toBe(98.0);
+    expect(IMMUNITY_THRESHOLDS.disrupt).toBe(98.0);
+    expect(IMMUNITY_THRESHOLDS.ensnare).toBe(98.0);
+  });
+
+  it("Schutz-vor-Eliten-Cap 80 % ist bestätigt (Nutzervorgabe), nicht mehr Annahme", () => {
+    const pfe = HARD_CAPS.find((c) => c.attr === "pfe");
+    expect(pfe?.cap).toBe(80);
+    expect(pfe?.value_status).toBe("bestätigt");
   });
 });

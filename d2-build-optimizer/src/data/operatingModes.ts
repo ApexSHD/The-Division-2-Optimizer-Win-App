@@ -35,6 +35,11 @@ export interface ModeContext {
   threatStatusShare: number;
   spec: string;
   userAssumptions?: Record<string, number>;
+  gearSetOptions?: {
+    targetSet?: string;
+    requireSetChest?: boolean;
+    requireSetBackpack?: boolean;
+  };
 }
 
 export interface V4Candidate {
@@ -62,6 +67,24 @@ export interface V4BuildResult {
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
 
 const AGGRO_SKILL_KEYS = new Set(["shield", "decoy"]);
+
+function isSetPiece(g: GearPiece, setNameLower: string): boolean {
+  if (g.brandType !== "gearset") return false;
+  return g.brand.toLowerCase().includes(setNameLower);
+}
+
+function enforceGearSetRule(
+  gear: GearPiece[],
+  opts: { targetSet?: string; requireSetChest?: boolean; requireSetBackpack?: boolean },
+): boolean {
+  if (!opts.targetSet) return true;
+  const setLower = opts.targetSet.toLowerCase();
+  const setPieces = gear.filter((g) => isSetPiece(g, setLower));
+  if (setPieces.length < 4) return false;
+  if (opts.requireSetChest !== false && !setPieces.some((g) => g.slot === "chest")) return false;
+  if (opts.requireSetBackpack !== false && !setPieces.some((g) => g.slot === "backpack")) return false;
+  return true;
+}
 
 export function hasAggroTool(skills: SkillChoice[]): boolean {
   return skills.some((s) => AGGRO_SKILL_KEYS.has(s.skill.key));
@@ -221,9 +244,12 @@ export function buildCandidatesFromOptimizer(
     const vector = computeEffectVector(
       axisContextFor(r.gear, r.damage.effectiveDps, ctx, role),
     );
-    const adm = exoticAdmissible(r.gear)
-      ? checkAdmissibility(admissibilityInput(r.gear, vector, role, ctx))
-      : { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Exotic-Limit: höchstens ein exotisches Ausrüstungsteil", actual: null, required: null }] };
+    const setRuleOk = enforceGearSetRule(r.gear, ctx.gearSetOptions ?? {});
+    const adm = !setRuleOk
+      ? { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Gearset-Regel: 4 Set-Teile bzw. Set-Weste/-Rucksack fehlen", actual: null, required: null }] }
+      : exoticAdmissible(r.gear)
+        ? checkAdmissibility(admissibilityInput(r.gear, vector, role, ctx))
+        : { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Exotic-Limit: höchstens ein exotisches Ausrüstungsteil", actual: null, required: null }] };
     out.push({
       id: [...r.gear.map((g) => g.id)].sort().join("|") + "::" + r.weapon.id,
       gear: r.gear,

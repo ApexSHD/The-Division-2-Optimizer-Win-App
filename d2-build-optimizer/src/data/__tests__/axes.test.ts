@@ -9,7 +9,7 @@ import {
   type SkillChoice,
 } from "../axes";
 import gearJson from "../../db/gear.json";
-import { SKILLS } from "../v4Data";
+import { SKILLS, SKILL_SCALING } from "../v4Data";
 import type { GearPiece, GearSlot } from "../sampleData";
 
 function gearPiece(
@@ -276,5 +276,52 @@ describe("Gearset-Boni in den Achsen (alle Sets modelliert)", () => {
     const fourP = bonuses.filter((b) => b.pieces === 4);
     expect(fourP.length).toBeGreaterThan(0);
     expect(fourP.some((b) => b.attr === "chd")).toBe(true);
+  });
+});
+
+describe("Skill-Skalierung (Nutzervorgabe: +35 % Schaden, +20 % Reparatur/CC-Dauer, +40 % Schild-LP je Rang)", () => {
+  it("SKL skaliert mit +35 %/Rang: 6 Kerne mehr als 3 Kerne, Faktor ~ (1+2.1)/(1+1.05)", () => {
+    const damageSkill: SkillChoice = {
+      skill: SKILLS.find((s) => s.key === "turret")!,
+      variant: SKILLS.find((s) => s.key === "turret")!.variants.find((v) => v.key === "assault")!,
+    };
+    const three = computeEffectVector(
+      ctx({ gear: fullSkillGear("skill").slice(0, 3), skills: [damageSkill], sklKind: "damage" }),
+    );
+    const six = computeEffectVector(ctx({ skills: [damageSkill], sklKind: "damage" }));
+    expect(six.skl).toBeGreaterThan(three.skl);
+    expect(six.skl / three.skl).toBeCloseTo((1 + 2.1) / (1 + 1.05), 1);
+  });
+
+  it("Reparatur-Skills skalieren mit +20 %/Rang (Heilbrut, Rang 6 = +120 %)", () => {
+    const three = computeEffectVector(
+      ctx({ gear: fullSkillGear("skill").slice(0, 3), sklKind: "heal" }),
+    );
+    const six = computeEffectVector(ctx({ sklKind: "heal" }));
+    expect(six.skl / three.skl).toBeCloseTo((1 + 1.2) / (1 + 0.6), 1);
+  });
+
+  it("CC-Dauer skaliert mit Rang: Aufruhrschaum auf Rang 6 länger als Rang 3", () => {
+    const three = computeEffectVector(
+      ctx({ gear: fullSkillGear("skill").slice(0, 3), skills: [riotFoam] }),
+    );
+    const six = computeEffectVector(ctx({ skills: [riotFoam] }));
+    expect(six.cc).toBeGreaterThan(three.cc);
+  });
+
+  it("Alle Skill-Varianten haben eine Skalierungs-Kategorie", () => {
+    for (const skill of SKILLS) {
+      for (const variant of skill.variants) {
+        expect(variant.scaling_type, `${skill.key}/${variant.key}`).toBeDefined();
+      }
+    }
+  });
+
+  it("SKILL_SCALING-Regeln entsprechen der Nutzervorgabe", () => {
+    expect(SKILL_SCALING.damage_per_rank).toBe(35);
+    expect(SKILL_SCALING.repair_per_rank).toBe(20);
+    expect(SKILL_SCALING.cc_duration_per_rank).toBe(20);
+    expect(SKILL_SCALING.shield_hp_per_rank).toBe(40);
+    expect(SKILL_SCALING.overcharge.duration).toBe(15);
   });
 });

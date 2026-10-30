@@ -5,6 +5,7 @@ import {
   teamSizeFactor,
   GEAR_TALENTS,
   SPECIALIZATIONS,
+  SKILL_SCALING,
   type AxisKey,
   type SkillEntry,
   type SkillVariant,
@@ -181,22 +182,38 @@ export function skillTierFor(
   return capValue("skill_tier", countCores(gear, "skill") + bonus);
 }
 
+function rankMultiplier(variant: SkillVariant, tier: number): number {
+  switch (variant.scaling_type) {
+    case "damage":
+      return 1 + (SKILL_SCALING.damage_per_rank * tier) / 100;
+    case "repair":
+      return 1 + (SKILL_SCALING.repair_per_rank * tier) / 100;
+    case "cc_duration":
+      return 1 + (SKILL_SCALING.cc_duration_per_rank * tier) / 100;
+    case "shield_hp":
+      return 1 + (SKILL_SCALING.shield_hp_per_rank * tier) / 100;
+    default:
+      return 1 + (SKILL_SCALING.damage_per_rank * tier) / 100;
+  }
+}
+
 function baseValueFor(
   variant: SkillVariant,
   tier: number,
   ctx: AxisContext,
   assumptions: Assumption[],
 ): number {
-  if (variant.base_value_per_tier !== null) return variant.base_value_per_tier * tier;
-  const basePerTier = registerAssumption(
+  const multiplier = rankMultiplier(variant, tier);
+  if (variant.base_value_per_tier !== null) return variant.base_value_per_tier * multiplier;
+  const base = registerAssumption(
     assumptions,
     ctx,
     `skill.${variant.key}.base`,
-    `Skill-Grundwert „${variant.name}“ (Annahme, Spiel offenbart Wert nicht)`,
+    `Skill-Grundwert „${variant.name}“ (Annahme, Spiel offenbart Wert nicht; Rang-Multiplikator ${(multiplier * 100 - 100).toFixed(0)} %)`,
     ASSUMED_BASE_VALUE_PER_TIER,
     "skills.json: value_status = offen",
   );
-  return basePerTier * tier;
+  return base * multiplier;
 }
 
 function cycleSeconds(
@@ -304,8 +321,9 @@ function computeCc(
     const variant = choice.variant;
     if (variant.effect_type !== "cc" || !variant.status_effect) continue;
     const cycle = cycleSeconds(variant, skillHaste, ctx, assumptions);
+    const rankFactor = rankMultiplier(variant, skillTierFor(ctx.gear, ctx.specializationKey));
     const rawUptime =
-      ((variant.duration ?? 0) * (1 + statusAttr / 100)) / cycle;
+      ((variant.duration ?? 0) * rankFactor * (1 + statusAttr / 100)) / cycle;
     const uptime = Math.min(1, Math.max(0, rawUptime));
     const weight = CC_EFFECT_WEIGHTS[variant.status_effect] ?? 0.5;
     cc += uptime * weight;
