@@ -2,6 +2,7 @@ import type { Weapon, GearPiece, GearSlot } from "./sampleData";
 import type { OptimizationSettings } from "../store";
 import { optimizeBuilds, aggregateBuild, type SetBonusCatalog } from "./damage";
 import gearJson from "../db/gear.json";
+import modsJson from "../db/mod.json";
 import {
   computeEffectVector,
   type AxisContext,
@@ -82,15 +83,93 @@ function statusAttrOf(gear: GearPiece[]): number {
   );
 }
 
+export interface GearModPick {
+  slot: GearSlot;
+  attr: string;
+  val: number;
+}
+
+const GEAR_MOD_SLOTS: GearSlot[] = ["mask", "chest", "backpack"];
+
+interface GearModDef {
+  attr: string;
+  name: string;
+  val: number;
+  unit: string;
+}
+
+const GEAR_MODS_BY_ROLE_PRIORITY: Record<string, string[]> = {
+  dps_krit: ["chc", "chd", "hsd"],
+  dps_kopf: ["hsd", "chd", "chc"],
+  skill_heiler: ["repair", "skillhaste", "skillduration"],
+  skill_schaden: ["skillhaste", "skillduration", "repair"],
+  kontrolle: ["skillhaste", "skillduration", "repair"],
+  ruestungs_supporter: ["repair", "hazard", "skillhaste"],
+  tank: ["hazard", "pfe", "aok"],
+  buffer: ["skillhaste", "repair", "chc"],
+  hybrid_schaden_skill: ["chc", "skillhaste", "chd"],
+  hybrid_schaden_tank: ["chc", "hazard", "chd"],
+  hybrid_skill_tank: ["skillhaste", "hazard", "repair"],
+};
+
+function gearModCatalog(): GearModDef[] {
+  const db = modsJson as unknown as {
+    gear_mods?: Record<string, Array<{ attr: string; name: string; val: number; unit: string }>>;
+  };
+  const out: GearModDef[] = [];
+  for (const list of Object.values(db.gear_mods ?? {})) {
+    for (const m of list) out.push({ attr: m.attr, name: m.name, val: m.val, unit: m.unit });
+  }
+  return out;
+}
+
+export function bestGearModsForRole(roleKey: string): GearModPick[] {
+  const priority = GEAR_MODS_BY_ROLE_PRIORITY[roleKey] ?? ["chc", "chd", "hsd"];
+  const catalog = gearModCatalog();
+  const picks: GearModPick[] = [];
+  for (const slot of GEAR_MOD_SLOTS) {
+    let best: GearModDef | null = null;
+    let bestRank = Infinity;
+    for (const mod of catalog) {
+      const rank = priority.indexOf(mod.attr);
+      if (rank === -1) continue;
+      if (rank < bestRank) {
+        bestRank = rank;
+        best = mod;
+      }
+    }
+    if (best) {
+      picks.push({ slot, attr: best.attr, val: best.val });
+    }
+  }
+  return picks;
+}
+
+function modAttrTotal(picks: GearModPick[], attr: string): number {
+  return picks.filter((p) => p.attr === attr).reduce((s, p) => s + p.val, 0);
+}
+
 export function axisContextFor(
   gear: GearPiece[],
   weaponDps: number,
   ctx: ModeContext,
   role: RoleProfile,
 ): AxisContext {
+  const gearMods = bestGearModsForRole(role.key);
+  const gearWithMods: GearPiece[] = gear.map((g) => {
+    const pick = gearMods.find((p) => p.slot === g.slot);
+    if (!pick) return g;
+    return {
+      ...g,
+      attributes: [
+        ...g.attributes,
+        { type: pick.attr as never, value: pick.val },
+      ],
+    };
+  });
   return {
     weaponDps,
-    gear,
+    gear: gearWithMods,
     skills: ctx.skills,
     sklKind: role.sklKind,
     teamSize: ctx.teamSize,
@@ -106,11 +185,22 @@ function admissibilityInput(
   role: RoleProfile,
   ctx: ModeContext,
 ): AdmissibilityCheckInput {
+  const gearMods = bestGearModsForRole(role.key);
+  const gearWithMods: GearPiece[] = gear.map((g) => {
+    const pick = gearMods.find((p) => p.slot === g.slot);
+    if (!pick) return g;
+    return {
+      ...g,
+      attributes: [...g.attributes, { type: pick.attr as never, value: pick.val }],
+    };
+  });
+  const chcWithMods =
+    aggregateBuild(gear, ctx.shdLevel).chc + modAttrTotal(gearMods, "chc");
   return {
-    gear,
+    gear: gearWithMods,
     vector,
     role,
-    chc: aggregateBuild(gear, ctx.shdLevel).chc,
+    chc: chcWithMods,
     headshotShare: Math.max(0, Math.min(100, ctx.settings.enemyHeadshotShare)) / 100,
     statusAttr: statusAttrOf(gear),
     hasHealSkill: hasHealSkill(ctx.skills),

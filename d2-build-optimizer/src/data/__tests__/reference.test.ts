@@ -12,6 +12,7 @@ interface FixtureGear {
   core: "wd" | "armour" | "skill";
   attributes: Array<{ type: string; value: number }>;
   hint?: string;
+  brandType?: "brand" | "gearset" | "named" | "exotic";
 }
 
 interface ReferenceFixture {
@@ -30,7 +31,7 @@ function toGearPiece(f: FixtureGear, prefix: string): GearPiece {
     id: `${prefix}-${f.slot}-${f.brand.replace(/[^a-zA-Z]/g, "")}-${f.attributes.map((a) => a.type + a.value).join("_")}`,
     slot: f.slot,
     brand: f.brand,
-    brandType: "brand",
+    brandType: f.brandType ?? "brand",
     core: f.core,
     coreValue: f.core === "armour" ? 170000 : f.core === "skill" ? 1 : 15,
     attributes: f.attributes.map((a) => ({ type: a.type as never, value: a.value })),

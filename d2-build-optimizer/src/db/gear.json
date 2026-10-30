@@ -1458,7 +1458,7 @@
       "n2": "+15% Waffenhandhabung",
       "n3": "+15% Feuerrate",
       "n4": "Striker's Gamble: Waffentreffer erhöhen den Gesamtwaffenschaden um 0,65% pro Stack (max. 100); 1 Stack/s Verlust bei 0-50, 2 Stacks/s bei 51-100. Rucksack 'Risk Management': 0,65% -> 1,05% pro Stack; Weste 'Press the Advantage': max. 100 -> 200 Stacks (3 Stacks/s Verlust bei 101-200). Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (Feuerrate)",
+      "modeled": "3p numerisch (Feuerrate), 4p Striker's Gamble als gemittelter WD-Bonus (Annahme: ~100 Stacks Durchschnitt, 0,65%/Stack); Rucksack/Weste-Verstärkung (1,05%/Stack bzw. 200 Stacks) bei Umsetzung von #94 als separate Stufen modellieren",
       "bonuses": {
         "2": [
           {
@@ -1470,6 +1470,13 @@
           {
             "attr": "rof",
             "val": 15
+          }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 65,
+            "value_status": "Annahme"
           }
         ]
       }

@@ -6,8 +6,10 @@ import {
   hasHealSkill,
   hasCcSkill,
   reduceSearchSpace,
+  bestGearModsForRole,
   type ModeContext,
 } from "../operatingModes";
+import modsJson from "../../db/mod.json";
 import type { SkillChoice } from "../axes";
 import { roleProfile } from "../roleProfiles";
 import { SKILLS } from "../v4Data";
@@ -177,4 +179,47 @@ describe("Betriebsarten & Suchraum V4 (Issue #92, Lastenheft Abschnitte 1.1 und 
     );
     expect(result.noAdmissibleHint).toContain("Kein zulässiges Build");
   }, 30000);
+});
+
+describe("Gear-Mods (Maske, Weste, Rucksack) in der V4-Bewertung", () => {
+  it("bestGearModsForRole: DPS Krit bekommt 3 CHC-Mods (6 % je Platz), Heiler Reparatur-Mods", () => {
+    const krit = bestGearModsForRole("dps_krit");
+    expect(krit).toHaveLength(3);
+    expect(krit.every((m) => m.attr === "chc" && m.val === 6)).toBe(true);
+    expect(krit.map((m) => m.slot).sort()).toEqual(["backpack", "chest", "mask"]);
+    const heiler = bestGearModsForRole("skill_heiler");
+    expect(heiler.every((m) => m.attr === "repair")).toBe(true);
+    const tank = bestGearModsForRole("tank");
+    expect(tank.every((m) => m.attr === "hazard")).toBe(true);
+  });
+
+  it("Krit-Build erreicht den CHC-Zielwert erst durch Gear-Mods (Issue: Mod-Plätze)", () => {
+    const modSlots: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+    const gearNoModEnough = modSlots.map((slot) =>
+      gear(slot, "wd", [{ type: "chc", value: 6 }], `${slot}-modtest`),
+    );
+    const result = optimizeV4(
+      [weapon],
+      gearNoModEnough,
+      modeCtx({ roleKey: "dps_krit" }),
+    );
+    expect(result.best).not.toBeNull();
+    expect(result.best!.admissible).toBe(true);
+  }, 30000);
+
+  it("Mod-Maxwerte sind als Annahme in mod.json hinterlegt (mods_v2)", () => {
+    const mods = modsJson as unknown as {
+      version: string;
+      gear_mods: Record<string, Array<{ attr: string; val: number }>>;
+    };
+    expect(mods.version).toBe("mods_v2");
+    const chc = mods.gear_mods.offensive.find((m) => m.attr === "chc");
+    expect(chc?.val).toBe(6.0);
+    const chd = mods.gear_mods.offensive.find((m) => m.attr === "chd");
+    expect(chd?.val).toBe(12.0);
+    const repair = mods.gear_mods.utility.find((m) => m.attr === "repair");
+    expect(repair?.val).toBe(20.0);
+    const pfe = mods.gear_mods.defensive.find((m) => m.attr === "pfe");
+    expect(pfe?.val).toBe(13.0);
+  });
 });
