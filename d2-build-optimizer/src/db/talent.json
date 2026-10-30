@@ -493,8 +493,8 @@
         "Rucksack"
       ],
       "ziel": "team_ohne_mich",
-      "wirkung": "Skill-Eile/Schaden",
-      "wert": null,
+      "wirkung": "Skill-Schaden/Skill-Eile",
+      "wert": 30,
       "unit": "%",
       "ausloeser": "dauerhaft",
       "bedingung": null,
@@ -502,8 +502,8 @@
       "stapel": null,
       "team_wirkung": true,
       "category": "team_skill",
-      "value_status": "offen",
-      "description": "Erhöht Skill-Eile und Skill-Schaden der Verbündeten, solange der Träger nicht schießt."
+      "value_status": "Annahme",
+      "description": "Erhöht Skill-Eile und Skill-Schaden der Verbündeten, solange der Träger nicht schießt. Wert als Annahme (offen), bei Umsetzung gegen Spiel verifizieren."
     },
     {
       "key": "perfect_vigilance",
