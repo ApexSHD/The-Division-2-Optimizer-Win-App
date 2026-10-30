@@ -43,6 +43,25 @@ const WEAPON_TYPES: Array<{ value: WeaponType | ""; label: string }> = [
 ];
 import type { SkillChoice, EffectVector } from "../data/axes";
 import type { AxisKey } from "../data/v4Data";
+const SLOT_LABELS: Record<string, string> = {
+  mask: "Maske",
+  chest: "Weste",
+  holster: "Holster",
+  backpack: "Rucksack",
+  gloves: "Handschuhe",
+  kneepads: "Kniekehlen",
+};
+
+function partsLabel(gear: Array<{ brand: string; slot: string }>, weaponName?: string): string {
+  const bySlotOrder = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+  const sorted = [...gear].sort(
+    (a, b) => bySlotOrder.indexOf(a.slot) - bySlotOrder.indexOf(b.slot),
+  );
+  const parts = sorted.map((g) => `${g.brand} (${SLOT_LABELS[g.slot] ?? g.slot})`);
+  if (weaponName) parts.push(`Waffe: ${weaponName}`);
+  return parts.join(", ");
+}
+
 const AXIS_LABELS: Record<AxisKey, string> = {
   dps: "Eigener Schaden",
   skl: "Skill-Wirkung",
@@ -442,6 +461,14 @@ export function OptimizerView() {
             )}
             {bestBuild && (
               <div style={{ fontSize: 13 }}>
+                {(() => {
+                  const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+                  return cand ? (
+                    <div style={{ marginBottom: 6 }}>
+                      <strong>Teile:</strong> {partsLabel(cand.gear, cand.weapon.name)}
+                    </div>
+                  ) : null;
+                })()}
                 <strong>Begründung:</strong>{" "}
                 {AXES.filter((a) => bestBuild.normalized[a] > 0)
                   .map(
@@ -463,16 +490,19 @@ export function OptimizerView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {result.inventar.ranked.slice(0, 10).map((b, i) => (
-                    <tr key={b.id}>
-                      <td>{i + 1}</td>
-                      <td>{b.score.toFixed(1)}</td>
-                      <td>{b.admissible ? "✓" : `✗ (${b.violationCount})`}</td>
-                      <td style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
-                        {b.id.split("|").join(", ")}
-                      </td>
-                    </tr>
-                  ))}
+                  {result.inventar.ranked.slice(0, 10).map((b, i) => {
+                    const cand = result.inventar.candidates.find((c) => c.id === b.id);
+                    return (
+                      <tr key={b.id}>
+                        <td>{i + 1}</td>
+                        <td>{b.score.toFixed(1)}</td>
+                        <td>{b.admissible ? "✓" : `✗ (${b.violationCount})`}</td>
+                        <td style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+                          {cand ? partsLabel(cand.gear, cand.weapon.name) : b.id}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </details>
