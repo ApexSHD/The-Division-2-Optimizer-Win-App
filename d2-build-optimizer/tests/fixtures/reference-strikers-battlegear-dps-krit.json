@@ -1,0 +1,166 @@
+{
+  "version": "reference_v1",
+  "game_version": "TU22.x (offen)",
+  "data_stand": "2026-11-29",
+  "source": "Community-Konsens „Evergreen Striker“ (Reddit r/Division2 Build-Guide; divcalc.xyz St. Elmo's × Strikers DD, TU22.1) — Werte als Annahme/Prototyp-Fixtures für die Gewichts-Abstimmung; vor Produktivverwendung gegen Spiel verifizieren",
+  "role": "dps_krit",
+  "candidate": "Striker's Battlegear (AR)",
+  "description": "Referenz-Build für den MVP-Kandidaten DPS Krit mit Gear Set Striker's Battlegear. Rucksack und Weste sind für den vollen 4er-Bonus erzwingend (Risk Management / Press the Advantage, vgl. gear.json green_set_info). CHC-Ziel ~50-55 %, CHD 140 %+ laut Community-Guide.",
+  "weapon": {
+    "name": "St. Elmo's Engine",
+    "type": "ar",
+    "is_exotic": true,
+    "source_key": "exotic_st_elmos"
+  },
+  "gear": [
+    {
+      "slot": "mask",
+      "brand": "Striker's Battlegear",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "chc",
+          "value": 9
+        }
+      ],
+      "hint": "Gearset-Teil"
+    },
+    {
+      "slot": "chest",
+      "brand": "Striker's Battlegear",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "chc",
+          "value": 9
+        }
+      ],
+      "hint": "Press the Advantage (Weste erzwingend)"
+    },
+    {
+      "slot": "holster",
+      "brand": "Striker's Battlegear",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "chc",
+          "value": 9
+        }
+      ]
+    },
+    {
+      "slot": "backpack",
+      "brand": "Striker's Battlegear",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "chc",
+          "value": 9
+        }
+      ],
+      "hint": "Risk Management (Rucksack erzwingend)"
+    },
+    {
+      "slot": "gloves",
+      "brand": "Striker's Battlegear",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "chd",
+          "value": 12
+        }
+      ]
+    },
+    {
+      "slot": "kneepads",
+      "brand": "Striker's Battlegear",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "chc",
+          "value": 9
+        }
+      ]
+    }
+  ],
+  "distractors": [
+    {
+      "slot": "mask",
+      "brand": "Ceska Vyroba",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "hazard",
+          "value": 10
+        }
+      ],
+      "hint": "Ablenkung: defensives Attribut statt CHC"
+    },
+    {
+      "slot": "chest",
+      "brand": "Fenris Group AB",
+      "core": "armour",
+      "attributes": [
+        {
+          "type": "hazard",
+          "value": 10
+        }
+      ],
+      "hint": "Ablenkung: blauer Kern"
+    },
+    {
+      "slot": "holster",
+      "brand": "Overlord Armaments",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "hazard",
+          "value": 10
+        }
+      ],
+      "hint": "Ablenkung: Hazard statt CHD"
+    },
+    {
+      "slot": "backpack",
+      "brand": "Walker, Harris",
+      "core": "skill",
+      "attributes": [
+        {
+          "type": "skillhaste",
+          "value": 10
+        }
+      ],
+      "hint": "Ablenkung: Skill-Kern"
+    },
+    {
+      "slot": "gloves",
+      "brand": "Petrov Defense Group",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "dta",
+          "value": 10
+        }
+      ],
+      "hint": "Ablenkung: DTA statt CHD"
+    },
+    {
+      "slot": "kneepads",
+      "brand": "Douglas & Harding",
+      "core": "wd",
+      "attributes": [
+        {
+          "type": "dta",
+          "value": 10
+        }
+      ],
+      "hint": "Ablenkung: DTA statt CHD"
+    }
+  ],
+  "notes": [
+    "CHC-Annahme: 5 Slots CHC 9 % (Prototyp-Roll) + SHD-Uhr 10 % = 55 % ≥ Zielwert 50 %; gegen Spiel verifizieren.",
+    "Testinventar = Referenz-Build + Ablenkungen (ähnliche Teile mit anderen Attributen), Lastenheft 9.1.",
+    "Abnahme: Engine muss den Referenz-Build aus dem Testinventar auf Platz 1-3 bringen (Kriterium 1).",
+    "Zweitprüfung Ziel-Build: ohne Inventarbeschränkung muss die Engine den Referenz-Build als Optimum oder nahe daran finden."
+  ]
+}
