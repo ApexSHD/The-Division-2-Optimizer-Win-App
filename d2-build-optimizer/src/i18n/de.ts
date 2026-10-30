@@ -5,6 +5,7 @@ export const de = {
     weapons: "Waffen",
     gear: "Gear",
     compare: "Vergleich",
+    optimizer: "Optimierer",
     setCompare: "Set-Vergleich",
     admin: "Admin",
     settings: "Einstellungen",
