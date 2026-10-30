@@ -7,6 +7,7 @@ import { GlobalView } from "./views/GlobalView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
 import { CompareView } from "./views/CompareView";
+import { OptimizerView } from "./views/OptimizerView";
 import { AdminView } from "./views/AdminView";
 import { SettingsView } from "./views/SettingsView";
 import { DB_VERSION } from "./data/sampleData";
@@ -132,6 +133,7 @@ function Nav() {
     { id: "global", label: t.nav.global, icon: "🌍" },
     { id: "weapons", label: t.nav.weapons, icon: "🔫" },
     { id: "gear", label: t.nav.gear, icon: "🧦" },
+    { id: "optimizer", label: t.nav.optimizer, icon: "🎯" },
     { id: "compare", label: t.nav.compare, icon: "⚖" },
     { id: "admin", label: t.nav.admin, icon: "🗄" },
     { id: "settings", label: t.nav.settings, icon: "⚙" },
@@ -258,6 +260,7 @@ function WorkArea() {
     global: { title: t.global.title, sub: t.global.subtitle },
     weapons: { title: t.weapons.title, sub: t.weapons.subtitle },
     gear: { title: t.gear.title, sub: t.gear.subtitle },
+    optimizer: { title: "Build-Optimierung V4", sub: "Ziele, Fragebogen, Wirkungsvektor" },
     compare: { title: t.compare.title, sub: t.compare.subtitle },
     admin: { title: t.admin.title, sub: t.admin.subtitle },
     settings: { title: t.settings.title, sub: t.settings.subtitle },
@@ -275,6 +278,7 @@ function WorkArea() {
         {store.view === "global" && <GlobalView />}
         {store.view === "weapons" && <WeaponsView />}
         {store.view === "gear" && <GearView />}
+        {store.view === "optimizer" && <OptimizerView />}
         {store.view === "compare" && <CompareView />}
         {store.view === "admin" && <AdminView />}
         {store.view === "settings" && <SettingsView />}

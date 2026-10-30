@@ -7,6 +7,7 @@ export const en: Translation = {
     weapons: "Weapons",
     gear: "Gear",
     compare: "Compare",
+    optimizer: "Optimizer",
     setCompare: "Set Compare",
     admin: "Admin",
     settings: "Settings",
