@@ -1,0 +1,494 @@
+{
+  "version": "skills_v1",
+  "game_version": "TU22.x (offen)",
+  "data_stand": "2026-11-29",
+  "source": "Lastenheft V4 Abschnitt 7 (Issue #89); Spielkatalog, Grundwerte teils nicht offengelegt",
+  "note": "Grundwerte je Stufe, Wirkdauer und Abklingzeit sind Annahmen, solange value_status = 'Annahme'. Sie werden im Annahmen-Panel (Issue #64) angezeigt und vom Nutzer anpassbar. Null-Werte sind bei Umsetzung gegen Spiel/Community-Quellen zu erfassen. Skills und Varianten wählt der Spieler selbst (Lastenheft 3.1); die Engine optimiert nur die Ausrüstung.",
+  "value_status_legend": {
+    "bestätigt": "Wert aus offizieller Quelle / Spiel",
+    "Annahme": "Wert geschätzt, im Annahmen-Panel sichtbar und anpassbar",
+    "offen": "Wert noch nicht erfasst, bei Umsetzung nachtragen"
+  },
+  "skills": [
+    {
+      "key": "chem_launcher",
+      "name": "Chemwerfer",
+      "variants": [
+        {
+          "key": "oxidizer",
+          "name": "Oxidator",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": "Säure",
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": 4,
+          "description": "Säurewolke verursacht Skill-Schaden über Zeit."
+        },
+        {
+          "key": "reinforcer",
+          "name": "Verstärker",
+          "effect_type": "heal",
+          "damage_kind": "repair",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Reparatur/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": 4,
+          "description": "Chemiewolke repariert Rüstung im Wirkungsbereich."
+        },
+        {
+          "key": "riot_foam",
+          "name": "Aufruhrschaum",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Festgesetzt",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": 4,
+          "description": "Schaum setzt Gegner fest (Statuseffekt, CC-Achse)."
+        },
+        {
+          "key": "firestarter",
+          "name": "Brandstifter",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": "Brennen",
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": 4,
+          "description": "Brandfläche verursacht Brand-Schaden über Zeit."
+        }
+      ]
+    },
+    {
+      "key": "drone",
+      "name": "Drohne",
+      "variants": [
+        {
+          "key": "striker",
+          "name": "Angriffsdrohne",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Begleitdrohne greift Ziele automatisch an."
+        },
+        {
+          "key": "fixer",
+          "name": "Reparaturdrohne",
+          "effect_type": "heal",
+          "damage_kind": "repair",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Reparatur/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Repariert den Träger bzw. Verbündete."
+        },
+        {
+          "key": "defender",
+          "name": "Schutzdrohne",
+          "effect_type": "buff",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schadensreduktion",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Reduziert eingehenden Schaden (EHP-relevant)."
+        },
+        {
+          "key": "bombardier",
+          "name": "Bomberdrohne",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Bombardiert einen markierten Bereich."
+        }
+      ]
+    },
+    {
+      "key": "hive",
+      "name": "Brut",
+      "variants": [
+        {
+          "key": "restorer",
+          "name": "Heilbrut",
+          "effect_type": "heal",
+          "damage_kind": "repair",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Reparatur/Ladung",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Heilt automatisch Verbündete in der Nähe (Kernwerkzeug für Skill-Heiler)."
+        },
+        {
+          "key": "reviver",
+          "name": "Wiederbelebung",
+          "effect_type": "heal",
+          "damage_kind": "revive",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Reparatur/Ladung",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Belebt besiegte Verbündete wieder; Pflicht-Frage im Fragebogen der Heil-/Support-Rollen."
+        },
+        {
+          "key": "booster",
+          "name": "Verstärker",
+          "effect_type": "buff",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Skill-Eile",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Erhöht Skill-Eile des Trägers (UPT-Achse)."
+        },
+        {
+          "key": "stinger",
+          "name": "Stachelbrut",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": "Interferenz",
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Greift Gegner in der Nähe an und stört sie."
+        }
+      ]
+    },
+    {
+      "key": "seeker_mine",
+      "name": "Suchmine",
+      "variants": [
+        {
+          "key": "cluster",
+          "name": "Cluster",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/Ladung",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Zerlegt sich in Minen, die Ziele verfolgen."
+        },
+        {
+          "key": "mender",
+          "name": "Heilmine",
+          "effect_type": "heal",
+          "damage_kind": "repair",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Reparatur/Ladung",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Verfolgt Verbündete und repariert sie (Kernwerkzeug für Skill-Heiler)."
+        },
+        {
+          "key": "airburst",
+          "name": "Luftstoß",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": "Brennen",
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/Ladung",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Explosive Flächenschädigung mit Brand."
+        }
+      ]
+    },
+    {
+      "key": "shield",
+      "name": "Schild",
+      "variants": [
+        {
+          "key": "bulwark",
+          "name": "Bollwerk",
+          "effect_type": "defense",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schild-HP",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Ballistischer Vollkörperschild; blockiert Waffengebrauch. Aggro-Werkzeug für Tank (Mindestwert-Regel #91)."
+        },
+        {
+          "key": "deflector",
+          "name": "Deflektor",
+          "effect_type": "defense",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schild-HP",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Reflektiert Projektile, solange der Schild steht."
+        },
+        {
+          "key": "crusader",
+          "name": "Kreuzfahrer",
+          "effect_type": "defense",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schild-HP",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Erlaubt Waffengebrauch mit Einhandwaffe."
+        },
+        {
+          "key": "guardian",
+          "name": "Beschützer",
+          "effect_type": "buff",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Team-Schaden",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Erhöht den Schaden von Verbündeten im Schutz des Schildes (BUF-relevant)."
+        }
+      ]
+    },
+    {
+      "key": "decoy",
+      "name": "Köder",
+      "variants": [
+        {
+          "key": "standard",
+          "name": "Hologramm",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Aggro",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Zieht Aggro auf sich; Aggro-Werkzeug für Tank (Mindestwert-Regel #91)."
+        }
+      ]
+    },
+    {
+      "key": "firefly",
+      "name": "Feuerfliege",
+      "variants": [
+        {
+          "key": "blinder",
+          "name": "Blender",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Geblendet",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Blendet Gegner im Sichtfeld (CC-Achse, geringere Effektgewichtung nach Lastenheft 4.4)."
+        },
+        {
+          "key": "demolisher",
+          "name": "Demolierer",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Festgesetzt",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Fixiert Gegner an schwachen Punkten (höhere Effektgewichtung nach Lastenheft 4.4)."
+        },
+        {
+          "key": "burster",
+          "name": "Zerleger",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Schock",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Ketten-Schock zwischen markierten Gegnern (höhere Effektgewichtung nach Lastenheft 4.4)."
+        }
+      ]
+    },
+    {
+      "key": "turret",
+      "name": "Geschützturm",
+      "variants": [
+        {
+          "key": "assault",
+          "name": "Sturm",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Automatischer Turm gegen Ziele in Reichweite."
+        },
+        {
+          "key": "sniper",
+          "name": "Scharfschütze",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/Schuss",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Langsame Präzisionsschüsse."
+        },
+        {
+          "key": "incinerator",
+          "name": "Brandwerfer",
+          "effect_type": "damage",
+          "damage_kind": "skill_damage",
+          "status_effect": "Brennen",
+          "base_value_per_tier": null,
+          "value_unit": "Schaden/s",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Kegelförmiger Brandstrahl."
+        }
+      ]
+    },
+    {
+      "key": "pulse",
+      "name": "Aufklärungsradar",
+      "variants": [
+        {
+          "key": "standard",
+          "name": "Standard",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Markiert",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Markiert Gegner durch Wände."
+        },
+        {
+          "key": "jammer",
+          "name": "Störsender",
+          "effect_type": "cc",
+          "damage_kind": null,
+          "status_effect": "Interferenz",
+          "base_value_per_tier": null,
+          "value_unit": null,
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Stört und deaktiviert Gegner-Skills."
+        },
+        {
+          "key": "agent",
+          "name": "Agentenradar",
+          "effect_type": "buff",
+          "damage_kind": null,
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Team-Buff",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Erhöht Schaden des Teams gegen markierte Gegner (BUF-Achse)."
+        }
+      ]
+    },
+    {
+      "key": "healing_launcher",
+      "name": "Heilwerfer",
+      "variants": [
+        {
+          "key": "standard",
+          "name": "Heilwerfer",
+          "effect_type": "heal",
+          "damage_kind": "repair",
+          "status_effect": null,
+          "base_value_per_tier": null,
+          "value_unit": "Reparatur/Projektil",
+          "value_status": "offen",
+          "duration": null,
+          "cooldown": null,
+          "charges": null,
+          "description": "Direkter Heil-Projektilwerfer (Zielheilung, Burst-Heil-Fenster)."
+        }
+      ]
+    }
+  ]
+}

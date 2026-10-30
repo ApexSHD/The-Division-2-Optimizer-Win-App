@@ -1,0 +1,65 @@
+{
+  "version": "attribute_rules_v1",
+  "game_version": "TU22.x (offen)",
+  "data_stand": "2026-11-29",
+  "source": "Lastenheft V4 Abschnitt 4.1/7 (Issue #89, Kommentar Caps & CHC-Zielwert); Cap-Quellen: Community (r/Division2 Stat caps), vor Produktivverwendung gegen Spiel verifizieren",
+  "note": "Regeln, welche Attribute auf welchem Slot und bei welchem Kern möglich sind, mit Min-/Max-Wert und Caps. Der CHC-Zielwert (Standard 50 %) wird vom Spieler erfasst, wenn Krit für die Rolle relevant ist; bei Kopfschuss- und CC-Builds wird kein CHC-Zielwert abgefragt (Issue #91). Werte über einem Cap erhöhen das Ergebnis nicht (Abnahmekriterium 11). value_status: 'bestätigt' = aus offizieller Quelle, 'Annahme' = anpassbar, 'offen' = bei Umsetzung erfassen.",
+  "hard_caps": [
+    { "attr": "chc", "name": "Kritische Trefferchance", "cap": 60, "unit": "%", "value_status": "bestätigt", "source": "Community-Konsens, mehrfach bestätigt" },
+    { "attr": "pfe", "name": "Schutz vor Eliten", "cap": 80, "unit": "%", "value_status": "Annahme", "source": "Community (r/Division2 Stat caps)" },
+    { "attr": "explres", "name": "Explosive Resistenz", "cap": 90, "unit": "%", "value_status": "Annahme", "source": "Community (r/Division2 Stat caps)" },
+    { "attr": "hazard", "name": "Gefahrenschutz", "cap": 100, "unit": "%", "value_status": "Annahme", "source": "Community (r/Division2 Stat caps)" },
+    { "attr": "cc_uptime", "name": "CC-Uptime je Effekt", "cap": 100, "unit": "%", "value_status": "bestätigt", "source": "Lastenheft V4 Abschnitt 4.4" },
+    { "attr": "skill_tier", "name": "Skill-Stufe", "cap": 6, "unit": "Stufe", "value_status": "bestätigt", "source": "Lastenheft V4 Abschnitt 4.2 (darüber Overcharge-Effekte)" }
+  ],
+  "no_hard_cap": [
+    { "attr": "skillhaste", "name": "Skill-Eile", "note": "Kein harter Cap, abnehmender Grenznutzen (diminishing returns)", "value_status": "Annahme" },
+    { "attr": "skilldmg", "name": "Skill-Schaden", "note": "Kein harter Cap bekannt", "value_status": "Annahme" },
+    { "attr": "skillrepair", "name": "Reparatur-Skills", "note": "Kein harter Cap bekannt", "value_status": "Annahme" },
+    { "attr": "chd", "name": "Krit-Trefferschaden", "note": "Kein harter Cap bekannt", "value_status": "Annahme" },
+    { "attr": "status", "name": "Statuseffekte", "note": "Kein harter Cap bekannt; CC-Uptime je Effekt separat gedeckelt", "value_status": "Annahme" }
+  ],
+  "chc_target": {
+    "default": 50,
+    "max": 60,
+    "player_input": true,
+    "roles_relevant": ["DPS Krit", "Hybrid Schaden/Skill", "Hybrid Schaden/Tank"],
+    "roles_irrelevant": ["DPS Kopfschuss", "Kontrolle (CC)"],
+    "note": "Zielwert wird vom Spieler erfasst (Lastenheft 3, Mindestwert DPS Krit), Engine optimiert darauf; CHC über Cap wird gedeckelt."
+  },
+  "slot_rules": [
+    { "slot": "Maske", "cores": ["wd", "armor", "skill"], "attributes": ["chc", "chd", "hsd", "hazard", "status", "skilldmg", "skillhaste", "skillduration", "explres", "dta", "dth", "health"], "mods": 1 },
+    { "slot": "Weste", "cores": ["wd", "armor", "skill"], "attributes": ["chc", "chd", "hsd", "hazard", "status", "skilldmg", "skillhaste", "skillduration", "explres", "dta", "dth", "health", "aok", "armorregen"], "mods": 1, "hint": "Bei Gearsets trägt die Weste das besondere vierte Set-Talent (Rucksack-Weste-Regel, Issue #94)" },
+    { "slot": "Holster", "cores": ["wd", "armor", "skill"], "attributes": ["chc", "chd", "hsd", "hazard", "status", "skillhaste", "skillduration", "explres", "health", "reloadspeed", "weaponhandling"], "mods": 0 },
+    { "slot": "Rucksack", "cores": ["wd", "armor", "skill"], "attributes": ["chc", "chd", "hsd", "hazard", "status", "skilldmg", "skillhaste", "skillduration", "explres", "dta", "dth", "health", "skillrepair"], "mods": 1, "hint": "Bei Gearsets trägt der Rucksack die verstärkte Set-Variante (Rucksack-Weste-Regel, Issue #94)" },
+    { "slot": "Handschuhe", "cores": ["wd", "armor", "skill"], "attributes": ["chc", "chd", "hsd", "dta", "dth", "aok", "hok", "skillrepair", "reloadspeed", "weaponhandling"], "mods": 0 },
+    { "slot": "Kniekehlen", "cores": ["wd", "armor", "skill"], "attributes": ["chc", "chd", "hsd", "hazard", "status", "skilldmg", "skillhaste", "explres", "health", "aok", "armorregen"], "mods": 0 }
+  ],
+  "value_ranges": {
+    "_note": "Min-/Max-Roll-Werte je Attribut (Level 40 / SHD-Endgame). offene Werte bei Umsetzung gegen Spiel/Quellen erfassen (z. B. yourgamestracker Max-Roll-Tabellen).",
+    "chc": { "min": 0.5, "max": 6.0, "unit": "%" },
+    "chd": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "hsd": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "hazard": { "min": 5.0, "max": 12.5, "unit": "%" },
+    "status": { "min": 5.0, "max": 12.5, "unit": "%" },
+    "skilldmg": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "skillhaste": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "skillrepair": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "skillduration": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "dta": { "min": 5.0, "max": 12.0, "unit": "%" },
+    "dth": { "min": 5.0, "max": 10.0, "unit": "%" },
+    "explres": { "min": 5.0, "max": 10.0, "unit": "%" },
+    "health": { "min": 2000, "max": 85000, "unit": "HP" },
+    "armorregen": { "min": 0.5, "max": 1.5, "unit": "%" },
+    "aok": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "hok": { "min": 1000, "max": 17500, "unit": "HP" },
+    "reloadspeed": { "min": 5.0, "max": 15.0, "unit": "%" },
+    "weaponhandling": { "min": 5.0, "max": 15.0, "unit": "%" }
+  },
+  "mutability": {
+    "_note": "Feld „Veränderbarkeit“ je Attribut/Teil für spätere Stufe C (Rekalibrieren/Optimieren, Issue #97). Wird im Prototyp nicht ausgewertet (Lastenheft 6.3).",
+    "default": "veränderbar",
+    "fest": ["Kern-Attribut", "Set-Fixperk (Gearset 2er/3er)", "Named-Fixattribut"],
+    "veränderbar": ["Freies Nebenattribut", "Mod-Slot-Belegung"]
+  }
+}
