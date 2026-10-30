@@ -9,6 +9,7 @@ import {
 import {
   optimizeV4,
   reachability,
+  bestGearModsForRole,
   type ModeContext,
   type V4BuildResult,
 } from "../data/operatingModes";
@@ -22,6 +23,7 @@ import {
 } from "../data/questionnaire";
 import { SKILLS, AXES } from "../data/v4Data";
 import gearJson from "../db/gear.json";
+import modsJson from "../db/mod.json";
 import type { WeaponType } from "../data/sampleData";
 
 const GEARSET_NAMES: string[] = Object.values(
@@ -176,6 +178,7 @@ export function OptimizerView() {
   const [mode, setMode] = useState<"inventar" | "ziel">("inventar");
   const [targetSet, setTargetSet] = useState("");
   const [weaponType, setWeaponType] = useState<WeaponType | "">("");
+  const [forcedWeaponId, setForcedWeaponId] = useState("");
   const [requireSetChest, setRequireSetChest] = useState(true);
   const [requireSetBackpack, setRequireSetBackpack] = useState(true);
   const [result, setResult] = useState<{
@@ -188,6 +191,7 @@ export function OptimizerView() {
   const [running, setRunning] = useState(false);
 
   const goal = GOALS.find((g) => g.key === goalKey) ?? GOALS[0];
+  const role = roleProfile(roleKey);
   const damageRole = goalKey === "dps" || goalKey === "hybrid";
   const questions = useMemo(() => questionsForRole(roleKey), [roleKey]);
   const answeredCount = useMemo(
@@ -227,6 +231,7 @@ export function OptimizerView() {
           ...store.optimization,
           weaponTypeFilter: damageRole ? weaponType : "",
           targetGearSet: targetSet,
+          anchorWeaponId: forcedWeaponId,
         },
         gearSetOptions: {
           targetSet: targetSet || undefined,
@@ -236,8 +241,12 @@ export function OptimizerView() {
         threatStatusShare: 0.3,
         spec: specSuggestion.best.key,
       };
-      const inventar = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "inventar" });
-      const ziel = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "ziel" });
+      const modsBySlot = (modsJson as unknown as {
+        slots: Record<string, Array<{ name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;
+      }).slots;
+      const opts = { modsBySlot };
+      const inventar = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "inventar" }, opts);
+      const ziel = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "ziel" }, opts);
       const reach = reachability(inventar, ziel);
       const gaps = analyzeGaps({
         weapons: store.weapons,
@@ -454,6 +463,19 @@ export function OptimizerView() {
 
       <section className="field" style={{ display: "grid", gap: 10 }}>
         <strong>Einschränkungen (optional)</strong>
+        {store.weapons.length > 0 && (
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            Waffe erzwingen
+            <select value={forcedWeaponId} onChange={(e) => setForcedWeaponId(e.target.value)}>
+              <option value="">Automatisch (beste Waffe)</option>
+              {store.weapons.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} ({w.type.toUpperCase()})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {damageRole && (
           <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
             Waffengattung
@@ -575,7 +597,16 @@ export function OptimizerView() {
               const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
               if (!cand) return null;
               const stats = cand.stats;
+              const gearMods = bestGearModsForRole(roleKey, {
+                chcTarget: role.chcTarget ?? undefined,
+                chcCurrent: cand.stats.chc,
+              });
+              const gearModText = gearMods
+                .map((m) => `${SLOT_LABELS[m.slot] ?? m.slot}: ${GEAR_ATTR_SHORT[m.attr] ?? m.attr} +${m.val}`)
+                .join(", ");
               const summaryRows: Array<[string, string]> = [
+                ["Waffe", `${cand.weapon.name} (${cand.weapon.type.toUpperCase()})${cand.weapon.talent ? ` · Talent: ${cand.weapon.talent}` : ""}`],
+                ["Gear-Mods (Maske/Weste/Rucksack)", gearModText || "—"],
                 ["Waffenschaden (WD) gesamt", `${stats.totalWd.toFixed(1)} %`],
                 ["Kritische Trefferchance (CHC)", `${Math.min(60, stats.chc).toFixed(1)} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`],
                 ["Kritischer Trefferschaden (CHD)", `${stats.chd.toFixed(1)} %`],

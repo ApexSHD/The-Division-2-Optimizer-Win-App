@@ -354,3 +354,55 @@ describe("Spieler-Optionen: Gearset-Regel, Waffengattung, BUF-Werte (Klärung 29
     expect(fi.team_wirkung).toBe(true);
   });
 });
+
+describe("Adaptive Gear-Mods & erzwungene Waffe", () => {
+  const fill = (): GearPiece[] =>
+    (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chc", value: 9 }], `fill-${i}`),
+    );
+
+  it("Adaptive Mods: CHC-Mods, solange Zielwert nicht erreicht — CHD-Mods, wenn CHC schon am Ziel", () => {
+    const below = bestGearModsForRole("dps_krit", { chcTarget: 50, chcCurrent: 30 });
+    expect(below.every((m) => m.attr === "chc")).toBe(true);
+    const atTarget = bestGearModsForRole("dps_krit", { chcTarget: 50, chcCurrent: 55 });
+    expect(atTarget.every((m) => m.attr === "chd")).toBe(true);
+  });
+
+  it("Erzwungene Waffe: nur diese Waffe in den Ergebnissen (anchorWeaponId)", () => {
+    const w1 = { ...sampleWeapons[0], id: "w-forced", name: "Erzwungen" };
+    const w2 = { ...sampleWeapons[0], id: "w-other", name: "Andere" };
+    const result = optimizeV4(
+      [w1, w2],
+      fill(),
+      modeCtx({
+        roleKey: "dps_krit",
+        settings: { ...DEFAULT_OPTIMIZATION, enemyHeadshotShare: 20, anchorWeaponId: "w-forced" },
+      }),
+    );
+    expect(result.ranked.length).toBeGreaterThan(0);
+    for (const c of result.candidates) {
+      expect(c.weapon.id).toBe("w-forced");
+    }
+  }, 30000);
+
+  it("Waffen-Mods: modsBySlot geht an die Engine (CHC-Mod erhöht den effektiven DPS-Pfad)", () => {
+    const modsBySlot = {
+      optic: [
+        { name: "Test-CHC-Sicht", slotTypes: ["Iron Sights Slot"], bonus: { type: "chc", val: 10 }, penalty: null },
+      ],
+      muzzle: [],
+      magazine: [],
+      underbarrel: [],
+    };
+    const result = optimizeV4(
+      [sampleWeapons[0]],
+      fill(),
+      modeCtx({ roleKey: "dps_krit" }),
+      { modsBySlot: modsBySlot as never },
+    );
+    expect(result.ranked.length).toBeGreaterThan(0);
+    const best = result.candidates.find((c) => c.id === result.best!.id);
+    expect(best).toBeDefined();
+    expect(best!.stats.chc).toBeGreaterThanOrEqual(10);
+  }, 30000);
+});
