@@ -190,6 +190,10 @@ export function OptimizerView() {
   const goal = GOALS.find((g) => g.key === goalKey) ?? GOALS[0];
   const damageRole = goalKey === "dps" || goalKey === "hybrid";
   const questions = useMemo(() => questionsForRole(roleKey), [roleKey]);
+  const answeredCount = useMemo(
+    () => questions.filter((q) => answers.some((a) => a.questionKey === q.key)).length,
+    [questions, answers],
+  );
   const effectiveWeights = expertMode && expertWeights ? expertWeights : weightsFromAnswers(roleKey, answers);
 
   const allSkills = useMemo(
@@ -301,13 +305,58 @@ export function OptimizerView() {
         </div>
       </section>
 
+      <section className="field" style={{ display: "grid", gap: 6 }}>
+        <strong>Auswahl</strong>
+        <div style={{ fontSize: 13, lineHeight: 1.7 }}>
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            🎯 Ziel: {goal.name}
+          </span>{" "}
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            👤 Rolle: {roleProfile(roleKey).name}
+          </span>{" "}
+          {expertMode && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              🛠 Expertenmodus
+            </span>
+          )}{" "}
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            🤝 Team: {teamSize}
+          </span>
+          {targetSet && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              🧩 Gearset: {targetSet}
+              {requireSetChest ? " · Weste ✓" : ""}
+              {requireSetBackpack ? " · Rucksack ✓" : ""}
+            </span>
+          )}
+          {damageRole && weaponType && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              🔫 {WEAPON_TYPES.find((w) => w.value === weaponType)?.label}
+            </span>
+          )}
+          {selectedSkills.length > 0 && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              ⚡ {selectedSkills.map((c) => `${c.skill.name} (${c.variant.name})`).join(", ")}
+            </span>
+          )}
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            🎖 Spec-Vorschlag: {specSuggestion.best.name}
+          </span>
+        </div>
+      </section>
+
       <section className="field" style={{ display: "grid", gap: 10 }}>
-        <strong>Fragebogen ({questions.length} Fragen)</strong>
+        <strong>
+          Fragebogen ({answeredCount}/{questions.length} beantwortet)
+        </strong>
         {questions.map((q) => {
           const answer = answers.find((a) => a.questionKey === q.key);
           return (
             <div key={q.key} style={{ display: "grid", gap: 4 }}>
-              <label>{q.labelDe}</label>
+              <label style={{ fontWeight: answer ? 600 : 400 }}>
+                {q.labelDe}
+                {answer && <span style={{ color: "var(--ok, #67c23a)", marginLeft: 6 }}>✓</span>}
+              </label>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {q.options.map((o) => (
                   <button

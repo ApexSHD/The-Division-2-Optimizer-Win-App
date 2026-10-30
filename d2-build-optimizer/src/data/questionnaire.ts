@@ -57,7 +57,7 @@ const COMMON_QUESTIONS: Question[] = [
     key: "skillPriority",
     labelDe: "Welcher Skill ist dein Haupt-Skill?",
     labelEn: "Which skill is your primary skill?",
-    roles: ROLE_PROFILES.map((r) => r.key),
+    roles: ROLE_PROFILES.filter((r) => r.ziel !== "dps").map((r) => r.key),
     options: [
       { key: "main", labelDe: "Haupt-Skill (zyklisch)", labelEn: "Primary skill (cyclic)", weightShift: { upt: 0.1 } },
       { key: "burst", labelDe: "Burst (einmalig, stark)", labelEn: "Burst (once, strong)", weightShift: { skl: 0.1, upt: -0.1 } },
@@ -90,6 +90,17 @@ const COMMON_QUESTIONS: Question[] = [
 const ROLE_SPECIFIC: Record<string, Question[]> = {
   dps_krit: [
     {
+      key: "playStyle",
+      labelDe: "Wie spielst du dich bevorzugt?",
+      labelEn: "How do you prefer to play?",
+      roles: ["dps_krit", "dps_kopf"],
+      options: [
+        { key: "aggressive", labelDe: "Aggressiv, viel in Bewegung", labelEn: "Aggressive, mobile", weightShift: { ehp: 0.1 } },
+        { key: "cover", labelDe: "Aus der Deckung, gezielt", labelEn: "From cover, precise", weightShift: { dps: 0.1 } },
+        { key: "mixed", labelDe: "Gemischt", labelEn: "Mixed", weightShift: {} },
+      ],
+    },
+    {
       key: "hsShare",
       labelDe: "Wie hoch ist dein Kopfschuss-Anteil?",
       labelEn: "What is your headshot ratio?",
@@ -102,6 +113,17 @@ const ROLE_SPECIFIC: Record<string, Question[]> = {
     },
   ],
   dps_kopf: [
+    {
+      key: "playStyle",
+      labelDe: "Wie spielst du dich bevorzugt?",
+      labelEn: "How do you prefer to play?",
+      roles: ["dps_krit", "dps_kopf"],
+      options: [
+        { key: "aggressive", labelDe: "Aggressiv, viel in Bewegung", labelEn: "Aggressive, mobile", weightShift: { ehp: 0.1 } },
+        { key: "cover", labelDe: "Aus der Deckung, gezielt", labelEn: "From cover, precise", weightShift: { dps: 0.1 } },
+        { key: "mixed", labelDe: "Gemischt", labelEn: "Mixed", weightShift: {} },
+      ],
+    },
     {
       key: "hsShareKopf",
       labelDe: "Kopfschuss-Anteil (verbindlich für die Rolle)",
