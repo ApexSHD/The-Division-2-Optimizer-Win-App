@@ -1458,7 +1458,7 @@
       "n2": "+15% Waffenhandhabung",
       "n3": "+15% Feuerrate",
       "n4": "Striker's Gamble: Waffentreffer erhöhen den Gesamtwaffenschaden um 0,65% pro Stack (max. 100); 1 Stack/s Verlust bei 0-50, 2 Stacks/s bei 51-100. Rucksack 'Risk Management': 0,65% -> 1,05% pro Stack; Weste 'Press the Advantage': max. 100 -> 200 Stacks (3 Stacks/s Verlust bei 101-200). Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (Feuerrate)",
+      "modeled": "3p numerisch (Feuerrate), 4p Striker's Gamble als gemittelter WD-Bonus (Annahme: ~100 Stacks Durchschnitt, 0,65%/Stack); Rucksack/Weste-Verstärkung (1,05%/Stack bzw. 200 Stacks) bei Umsetzung von #94 als separate Stufen modellieren",
       "bonuses": {
         "2": [
           {
@@ -1471,6 +1471,13 @@
             "attr": "rof",
             "val": 15
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 65,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1480,7 +1487,7 @@
       "n2": "+15% Sturmgewehr- & +15% LMG-Schaden",
       "n3": "+15% Waffenhandhabung",
       "n4": "Heartstopper: Kopfschüsse pulsen 5 s; Treffer auf gepulste Gegner: +1 Stack (+1% Bonus-Rüstung & +1,1% WD auf gepulste Ziele), max. 50 Stacks, Verlust 2/s. Rucksack 'Cold': Bonus-Rüstung 1% -> 2%/Stack; Weste 'Max BPM': max. 100 Stacks",
-      "modeled": "2p numerisch (nur bei AR/LMG als Zielwaffe)",
+      "modeled": "2p numerisch (nur bei AR/LMG als Zielwaffe) | 4p: Bonus-Ruestung/Waffenschaden pro Treffer auf gepulste Gegner (Stacks bis 50, Annahme ~25 Stacks) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1499,6 +1506,13 @@
             "attr": "wh",
             "val": 15
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 25,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1508,7 +1522,7 @@
       "n2": "+15% Schrotflinten- & +15% SMG-Schaden",
       "n3": "+20% Rüstung bei Kill & +50% Leben bei Kill",
       "n4": "Apex Predator: Gegner im 15m-Radius: +20% WD-Debuff; Kill eines debufften Gegners desorientiert im 5m-Radius & +5% WD für 10 s (max. 5 Stacks). Rucksack 'Overwhelming Force': Desorient-Radius 5m -> 10m; Weste 'Endless Hunger': Stack-Dauer 10 s -> 30 s",
-      "modeled": "2p numerisch (nur bei Shotgun/SMG als Zielwaffe)",
+      "modeled": "2p numerisch (nur bei Shotgun/SMG als Zielwaffe), 4p Apex Predator als WD-Bonus (Annahme: Debuff +20% amp gegen Gegner < 15 m, Uptime nach Gegnerprofil); Kill-Bonus (Blenden/Schocken bei Kill) bei Umsetzung der Gearset-Regel #94",
       "bonuses": {
         "2": [
           {
@@ -1531,6 +1545,13 @@
             "attr": "healthOnKill",
             "val": 50
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 20,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1540,7 +1561,7 @@
       "n2": "+15% CHC",
       "n3": "+20% CHD",
       "n4": "Crowd Control: Kritische Treffer markieren Gegner 20s (max. 3); kritischer Treffer auf markiertes Ziel: alle anderen markierten Gegner erhalten 60% des Schadens; stirbt ein Markierter: +10% CHD pro Stack (max. 10, bis Kampfende). Rucksack 'Critical Measures': 60% -> 112%; Weste 'Target Rich Environment': 3 -> 5 Marken. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "voll (2p/3p numerisch)",
+      "modeled": "voll (2p/3p numerisch) | 4p: Hostile Negotiations: Krit-Treffer markieren, Schaden verteilt (Annahme als CHD) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1553,6 +1574,13 @@
             "attr": "chd",
             "val": 20
           }
+        ],
+        "4": [
+          {
+            "attr": "chd",
+            "val": 20,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1562,7 +1590,7 @@
       "n2": "+15% CHC",
       "n3": "+30% Nachladegeschwindigkeit",
       "n4": "From the Shadows / Into the Light: In Deckung +10 Stacks/s (max. 50), je Stack +1,2% kritischer Trefferschaden & +0,4% Feuerrate (nicht beim Schießen aus der Deckung); außer Gefecht +10 Stacks/s (max. 50), je Stack +0,8% Rüstungs-Regeneration, Verbrauch 10 Stacks/s in Deckung. Rucksack 'Into the Light': max. 50 -> 100 Stacks, +10 -> +20/s; Weste 'From the Shadows': max. 50 -> 100 Stacks, +10 -> +20/s. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "2p numerisch (CHC)",
+      "modeled": "2p numerisch (CHC) | 4p: Wechselbuff Offensiv/Defensiv (Annahme: gemittelter Offensiv-Anteil) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1575,6 +1603,13 @@
             "attr": "reloadSpeed",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 15,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1584,7 +1619,7 @@
       "n2": "+30% Scharfschützengewehr-Schaden (MMR) & +30% Waffenhandhabung",
       "n3": "+30% Kopfschuss-Schaden & +30% Waffenhandhabung",
       "n4": "Headache: 1. Kopfschuss (MMR): nächster +80%; 2.: +10% Rüstung (bei Vollpanzer bis max. +50% als Bonus-Rüstung); 3.: Magazin-Nachfüllen; ab dem 4. alle 3 Boni pro konsekutivem Kopfschuss-Kill. Verfehlen resettet den Zyklus. Rucksack 'Lucky': 1 Fehlschuss erlaubt; Weste 'Stand Tall': Bonus-Rüstung 50% -> 100%",
-      "modeled": "2p numerisch (nur bei MMR als Zielwaffe)",
+      "modeled": "2p numerisch (nur bei MMR als Zielwaffe) | 4p: Kopfschuss-Stacks Waffenschaden (Annahme ~20 von max. 40 Stacks) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1605,6 +1640,13 @@
           {
             "attr": "wh",
             "val": 30
+          }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 20,
+            "value_status": "Annahme"
           }
         ]
       }
@@ -1615,7 +1657,7 @@
       "n2": "+30% MMR- & +30% Gewehr-Schaden",
       "n3": "+30% Kopfschuss-Schaden & +30% Waffenhandhabung",
       "n4": "Dead Man's Hand: Karte pro Treffer mit Rifle/MMR umdrehen; nach 5 Karten nächster Schuss +75% Schaden — Vierling 4 Schüsse, Full House 3, Aces & Eights 2 (Kopfschuss: Extra-Karte). Rucksack 'Ace in the Sleeve': +1 verstärkter Schuss; Weste 'No Limit': +75% -> +100%",
-      "modeled": "2p numerisch (nur bei MMR/Rifle als Zielwaffe)",
+      "modeled": "2p numerisch (nur bei MMR/Rifle als Zielwaffe) | 4p: Kopfschuss-Kill-Stacks (Annahme als WD) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1637,6 +1679,13 @@
           {
             "attr": "wh",
             "val": 30
+          }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 20,
+            "value_status": "Annahme"
           }
         ]
       }
@@ -1647,7 +1696,7 @@
       "n2": "+30% MMR- & +30% Gewehr-Schaden",
       "n3": "+30% Kopfschuss-Schaden & +30% Waffenhandhabung",
       "n4": "On Point: Treffer mit Rifle/MMR geben 1 Stack (max. Magazingröße); Nachladen: +2% Waffenhandhabung & +4% WD pro Stack für 20 s. Rucksack 'Point of Honor': +4% -> +9% WD; Weste 'Point of No Return': Timer 20 s -> 40 s",
-      "modeled": "2p numerisch (nur bei MMR/Rifle als Zielwaffe)",
+      "modeled": "2p numerisch (nur bei MMR/Rifle als Zielwaffe) | 4p: Kopfschuss-lastiger Set-Bonus (Annahme als WD) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1670,6 +1719,13 @@
             "attr": "wh",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 20,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1679,7 +1735,7 @@
       "n2": "+20% Signaturwaffen-Schaden",
       "n3": "+10% Waffenschaden (global)",
       "n4": "Aggressive Recon: Kill mit Signaturwaffe gewährt +15% Signaturwaffen-Schaden für 10s und +25% Nachladegeschwindigkeit für den nächsten Reload (nicht stapelbar); Signaturwaffen-Munition regeneriert automatisch alle 60s. Rucksack 'Signature Moves': +50% Waffenschaden für 15s nach vollständiger Munitionsleerung & doppelte Munitions-Regeneration; Weste 'Specialized Destruction': +15% -> +30% & jeder 3. Signaturwaffen-Kill erzeugt Munition. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (globaler WD-Bonus)",
+      "modeled": "3p numerisch (globaler WD-Bonus) | 4p: Signaturwaffen-Boni (Annahme als Skill-Schaden) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1692,6 +1748,13 @@
             "attr": "wd",
             "val": 10
           }
+        ],
+        "4": [
+          {
+            "attr": "skilldmg",
+            "val": 15,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1701,7 +1764,7 @@
       "n2": "+15% Waffenhandhabung & +15% Magazingröße",
       "n3": "+15% Waffenschaden (global)",
       "n4": "Symphony: Kill jenseits 25m: +40% Waffenschaden (Shotguns/SMGs/Pistolen), +20% (ARs/LMGs), +25% Bonus-Rüstung für 15s; Kill innerhalb 25m: +40% Waffenschaden (Marksman Rifles/Rifles), +20% (ARs/LMGs), +30% Kopfschussschaden für 15s; abwechselnde Kills beider Distanzen bauen Stacks auf — bei 4 Stacks gelten alle Boni verdoppelt und gleichzeitig für 15s. Rucksack 'Accelerando': 4 -> 3 Stacks; Weste 'Fortissimo': Waffenschaden-Boni verdoppelt. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (globaler WD-Bonus)",
+      "modeled": "3p numerisch (globaler WD-Bonus) | 4p: Perfekt-Kopfschuss-Boni (Annahme als HSD) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1718,6 +1781,13 @@
             "attr": "wd",
             "val": 15
           }
+        ],
+        "4": [
+          {
+            "attr": "hsd",
+            "val": 15,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1727,7 +1797,7 @@
       "n2": "+30% Magazingröße",
       "n3": "+30% LMG-Schaden",
       "n4": "Throttle Control: Schießen baut Stacks auf (max. 50); je Stack +0,5% Waffenhandhabung & +5% kritischer Trefferschaden; 6 Stacks/s Verlust beim Nicht-Schießen (kein Verlust bei unterdrückten Gegnern). Rucksack 'Snowball': +5% -> +8% CHD pro Stack; Weste 'Sustainability': max. 50 -> 75 Stacks. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (nur bei LMG als Zielwaffe)",
+      "modeled": "3p numerisch (LMG), 4p Stacks als gemittelter CHD-Bonus (Annahme: ~25 von max. 50 Stacks, +2% CHD/Stack; Weste: max. 75 Stacks, Rucksack: +4% CHD/Stack bei Umsetzung der Gearset-Regel #94)",
       "bonuses": {
         "2": [
           {
@@ -1741,6 +1811,13 @@
             "val": 30,
             "weapon": "LMG"
           }
+        ],
+        "4": [
+          {
+            "attr": "chd",
+            "val": 50,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1750,7 +1827,7 @@
       "n2": "+10% Waffenschaden (global)",
       "n3": "+30% Waffenhandhabung",
       "n4": "Camaraderie: Beschossene Gegner 10 s markiert; bei Kill 1 Stack +3% WD & +3% CHD pro beitragendem Verbündetem/Fertigkeit (max. 35, Decay alle 10 s; max. 4 Marken). Rucksack 'One for All': +3% -> +6% WD; Weste 'All for One': 4 -> 8 Marken",
-      "modeled": "2p numerisch (globaler WD-Bonus)",
+      "modeled": "2p numerisch (globaler WD-Bonus) | 4p: Schadensteilung/Schutz-Buff (Annahme als Gefahrenschutz) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1763,6 +1840,13 @@
             "attr": "wh",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "hazard",
+            "val": 10,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1772,7 +1856,7 @@
       "n2": "+10% Waffenhandhabung",
       "n3": "+5% WD / +5% Rüstung / +5% Skill-Effizienz",
       "n4": "Core Exercise: Je Kern auf den Teilen 40% der Boni der anderen beiden Kerne (Skill-Stufen zählen als 15% Skill-Effizienz); alle Teile außer Rucksack haben zufällige Kerne. Rucksack 'Outer Core': 3 Kern-Attribute; Weste 'Inner Core': 40% -> 75%",
-      "modeled": "3p numerisch (nur der WD-Anteil, +5%)",
+      "modeled": "3p numerisch (nur der WD-Anteil, +5%) | 4p: Rise Up: Ruestungs-Wiederherstellung (Annahme als Ruestungsregeneration, Hybrid-Kandidat 9.2) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1793,6 +1877,13 @@
             "attr": "skillEff",
             "val": 5
           }
+        ],
+        "4": [
+          {
+            "attr": "armorregen",
+            "val": 1,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1802,7 +1893,7 @@
       "n2": "+30% Fertigkeiten-Reparatur",
       "n3": "+15% Fertigkeiten-Tempo & +30% Fertigkeiten-Dauer",
       "n4": "Ground Control",
-      "modeled": "nur Teile-Zähler (Skill/Support-Set)",
+      "modeled": "nur Teile-Zähler (Skill/Support-Set) | 4p: Gruppen-Reparatur bei Heilung (Annahme als Reparatur) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1819,6 +1910,13 @@
             "attr": "skillDuration",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "repair",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1828,7 +1926,7 @@
       "n2": "+15% Statuseffekte",
       "n3": "+15% Fertigkeiten-Tempo & +30% Gefahrenschutz",
       "n4": "Indirect Transmission: Statuseffekte verbreiten sich bei Kill auf alle Gegner im 10m-Radius und erneuern 50% der Dauer. Rucksack 'Symptom Aggravator': +30% Schaden an statusbeeinflussten Zielen; Weste 'Proliferation': 10m -> 15m, 50% -> 75%",
-      "modeled": "nur Teile-Zähler (Status-Set)",
+      "modeled": "nur Teile-Zähler (Status-Set) | 4p: Status-Effekte springen auf weitere Gegner ueber (Annahme als Statuseffekte) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1845,6 +1943,13 @@
             "attr": "hazard",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "status",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1854,7 +1959,7 @@
       "n2": "+10% Gesamtrüstung",
       "n3": "+1% Rüstungsregen & +50% Schild-HP",
       "n4": "Makeshift Repairs: 25% des erlittenen Schadens (an dir oder deinem Schild) werden über 15 s an beide repariert. Rucksack 'Improved Materials': 25% -> 35%; Weste 'Process Refinery': 15 s -> 10 s",
-      "modeled": "nur Teile-Zähler (Tank-Set)",
+      "modeled": "nur Teile-Zähler (Tank-Set) | 4p: Schild-Ruestungsregeneration (Annahme) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1871,6 +1976,13 @@
             "attr": "shieldHp",
             "val": 50
           }
+        ],
+        "4": [
+          {
+            "attr": "armorregen",
+            "val": 1,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1880,7 +1992,7 @@
       "n2": "+15% Fertigkeiten-Tempo",
       "n3": "+15% Fertigkeiten-Dauer",
       "n4": "Tend and Befriend: Interaktion mit platzierten Fertigkeiten (Einsetzen/Ziel ändern/Heilen) gewährt der Fertigkeit +25% Fertigkeitsschaden für 10s (nicht erneuerbar). Rucksack 'Complete Uptime': Abbrechen setzt den Cooldown zurück; Weste 'Best Buds': +25% -> +50%. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
-      "modeled": "nur Teile-Zähler (Skill-Set)",
+      "modeled": "nur Teile-Zähler (Skill-Set) | 4p: Skill-Schaden bei Platzierung (Annahme) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1893,6 +2005,13 @@
             "attr": "skillDuration",
             "val": 15
           }
+        ],
+        "4": [
+          {
+            "attr": "skilldmg",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1902,7 +2021,7 @@
       "n2": "+15% Fertigkeiten-Tempo",
       "n3": "+15% Fertigkeitsschaden & +30% Fertigkeiten-Reparatur",
       "n4": "Feedback Loop: Bei Nutzen/Abbrechen einer Fertigkeit wird der Cooldown der anderen um 30 s reduziert, +10% Fertigkeitsschaden & -reparatur für 20 s (alle 10 s auslösbar). Rucksack 'Short Circuit': Cooldown 10 s -> 5 s; Weste 'Positive Reinforcement': +10% -> +25%",
-      "modeled": "nur Teile-Zähler (Skill-Set)",
+      "modeled": "nur Teile-Zähler (Skill-Set) | 4p: Cooldown-Reset-Proc (Annahme als Skill-Eile) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1919,6 +2038,13 @@
             "attr": "repairSkills",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "skillhaste",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1928,7 +2054,7 @@
       "n2": "+15% Statuseffekte",
       "n3": "+30% Nachladegeschwindigkeit",
       "n4": "Rules of Engagement: Schüsse auf statusbeeinflusste Gegner markieren sie (10s); Kill eines Markierten: volles Magazin Hohlspitz-Munition (Team: halbes Magazin). Hohlspitz: +40% Waffenschaden & Bluten bei Treffer. Rucksack 'Trauma Specialist': +50% Blutdauer & +100% Blutschaden; Weste 'Parabellum Rounds': +40% -> +60% (nur selbst). Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "4p numerisch (Kill-getriggerte WD-Verstärkung)",
+      "modeled": "4p numerisch (Kill-getriggerte WD-Verstärkung) | 4p: Kill-getriggerte Spezialmunition/WD-Verstaerkung (Annahme als WD) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1941,6 +2067,13 @@
             "attr": "reloadSpeed",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 25,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1950,7 +2083,7 @@
       "n2": "+15% Waffenhandhabung",
       "n3": "+30% Magazingröße",
       "n4": "Red, White and Blue: Beschossene Gegner erhalten rotierende Debuffs (Wechsel alle 2s): Rot = +15% erlittener Schaden, Weiß = Beschuss repariert 2% Rüstung/s des Angreifers, Blau = -10% verursachter Schaden des Gegners; stirbt ein Gegner unter allen drei Debuffs: 5m-Explosion mit Schaden entsprechend seinem Gesamt-HP+Rüstung (bei Named reduziert). Rucksack 'Patriotic Boost': Rot 15% -> 30%, Weiß 2% -> 5%, Blau 10% -> 20%; Weste 'Waving the Flag': Rotationswechsel 2s -> 1s. Alle Teile haben standardmäßig Rüstung als Kern",
-      "modeled": "nur Teile-Zähler (Support-Set)",
+      "modeled": "nur Teile-Zähler (Support-Set) | 4p: Flaggen-Debuffs (Annahme als WD) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1963,6 +2096,13 @@
             "attr": "magSize",
             "val": 30
           }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 15,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1972,7 +2112,7 @@
       "n2": "+15% Rüstung bei Kill",
       "n3": "+40% Disrupt- & +40% Pulse-Resistenz",
       "n4": "Hackstep Protocol: Ersetzt Rüstungskits durch eine sofortige, unbegrenzte Fähigkeit (CD 20s): repariert 20% Rüstung, gewährt 50% Bonus-Rüstung und versteckt dein Namensschild 5s; +1% Waffenschaden je 5% Bonus-Rüstung (max. 20%). Rucksack 'Multithreaded Execution': 50% -> 100% Bonus-Rüstung; Weste 'Compiler Optimization': CD 20s -> 15s. Teile haben je Slot Rüstung oder Waffenschaden als Kern",
-      "modeled": "nur Teile-Zähler (Tank/Utility-Set)",
+      "modeled": "nur Teile-Zähler (Tank/Utility-Set) | 4p: Ruestung bei Kill/Protokoll-Boni (Annahme als AoK) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -1989,6 +2129,13 @@
             "attr": "pulseRes",
             "val": 40
           }
+        ],
+        "4": [
+          {
+            "attr": "aok",
+            "val": 15,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -1998,7 +2145,7 @@
       "n2": "+30% Gefahrenschutz",
       "n3": "+40% Fertigkeiten-Reparatur",
       "n4": "Charging/Charged: pro Sekunde außerhalb der Deckung im Kampf +5% reduzierter eingehender Fertigkeits-Schaden (max. 50%); voll aufgeladen: Immunität gegen Bewegungs-Debuffs + Teilen mit Verbündeten für 10 s. Rucksack 'Safe Charging': 10%/s; Weste 'Overcharging': max. 70%",
-      "modeled": "nur Teile-Zähler (Tank-Set)",
+      "modeled": "nur Teile-Zähler (Tank-Set) | 4p: Schutz-Boni (Annahme als Gefahrenschutz) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2011,6 +2158,13 @@
             "attr": "repairSkills",
             "val": 40
           }
+        ],
+        "4": [
+          {
+            "attr": "hazard",
+            "val": 10,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -2020,7 +2174,7 @@
       "n2": "+20% Brenndauer & +15% Fertigkeits-Leben",
       "n3": "+40% Brandschaden",
       "n4": "Ortiz Incinerator Turret Prototype: Waffenturm dreht 360°, eigene Feuer-Immunität, Explosion bei Deaktivierung. Rucksack 'Heatstroke': +40% verstärkter Schaden an brennenden Zielen & +25% Reichweite; Weste 'Chain Combustion': Brand springt im 10m-Radius über. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
-      "modeled": "nur Teile-Zähler (Brand-Status-Set)",
+      "modeled": "nur Teile-Zähler (Brand-Status-Set) | 4p: Brand-Dauer/-Schaden (Annahme als Statuseffekte) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2037,6 +2191,13 @@
             "attr": "burnDmg",
             "val": 40
           }
+        ],
+        "4": [
+          {
+            "attr": "status",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -2046,7 +2207,7 @@
       "n2": "+70% Leben",
       "n3": "+15% Gesamtrüstung",
       "n4": "Stoic: +4% Schadensresistenz pro Gegner, der dich ins Ziel nimmt (max. 8 Stacks; Bonus x1,X je Gruppenmitglied). Rucksack 'Polyethylene Plating': +4% -> +5%; Weste 'Deceit': Gegner auf deine Köder zählen mit",
-      "modeled": "nur Teile-Zähler (Tank-Set)",
+      "modeled": "nur Teile-Zähler (Tank-Set) | 4p: Team-Ruestungs-Boni (Annahme als Ruestungsregeneration) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2059,6 +2220,13 @@
             "attr": "totalArmor",
             "val": 15
           }
+        ],
+        "4": [
+          {
+            "attr": "armorregen",
+            "val": 1,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -2068,7 +2236,7 @@
       "n2": "+15% Statuseffekte",
       "n3": "+25% Fertigkeitsschaden",
       "n4": "Return to Sender: Erhaltene Reparatur = 10% des Schadens deiner Fertigkeiten; Verbündete erhalten 20%. Weste 'Increased Interest': 10% -> 25% (selbst) & 20% -> 35% (Verbündete); Rucksack 'Over-engineered': Bei voller Rüstung wird Reparatur in Bonus-Rüstung umgewandelt (bis 80% der Gesamt-Rüstung, nur selbst). Teile haben je Slot Rüstung oder Fertigkeitsstufe als Kern",
-      "modeled": "nur Teile-Zähler (Skill/Status-Set)",
+      "modeled": "nur Teile-Zähler (Skill/Status-Set) | 4p: Skill-Schaden-Status-Set (Annahme) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2081,6 +2249,13 @@
             "attr": "skillDmg",
             "val": 25
           }
+        ],
+        "4": [
+          {
+            "attr": "skilldmg",
+            "val": 25,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -2090,7 +2265,7 @@
       "n2": "+15% Fertigkeiten-Tempo",
       "n3": "+60% Fertigkeiten-Reparatur & +40% Explosionsresistenz",
       "n4": "Huddle: +1 Fertigkeitsstufe je Verbündetem im Radius von Hive/Smart Cover; bei Stufe 6 + 4s Verbündetem: Overcharge 15s (CD 40s). Mortars/Gegner-Skills im Radius werden zerstört (CD 10s, je Verbündetem 20% schneller). Rucksack 'Smart Cooperation': Zerstörungs-CD 10s -> 1s; Weste 'Hivemind': Overcharge-CD 40s -> 25s. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
-      "modeled": "nur Teile-Zähler (Skill-Set)",
+      "modeled": "nur Teile-Zähler (Skill-Set) | 4p: Reparatur-Boni (Annahme, Kandidat 9.2 Skill-Heiler) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2107,6 +2282,13 @@
             "attr": "explRes",
             "val": 40
           }
+        ],
+        "4": [
+          {
+            "attr": "repair",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -2116,7 +2298,7 @@
       "n2": "+8% Fertigkeitseffizienz",
       "n3": "+60% Fertigkeiten-Reparatur",
       "n4": "Ortiz Rapid Application Nanite Prototype: Heil-Fertigkeiten -90% Dauer & Reichweite, dafür +150% Heil-Effizienz; Heilen eines Verbündeten: +30% Gefahrenschutz für 10s (CD 10s/Verbündetem). Rucksack 'Improved Dampeners': -90% -> -25%; Weste 'Overcharged Nanites': +150% -> +200%. Alle Teile haben standardmäßig Fertigkeitsstufe als Kern",
-      "modeled": "nur Teile-Zähler (Heal-Set)",
+      "modeled": "nur Teile-Zähler (Heal-Set) | 4p: Reparatur-Set (Annahme) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2129,6 +2311,13 @@
             "attr": "repairSkills",
             "val": 60
           }
+        ],
+        "4": [
+          {
+            "attr": "repair",
+            "val": 30,
+            "value_status": "Annahme"
+          }
         ]
       }
     },
@@ -2138,7 +2327,7 @@
       "n2": "+8% Fertigkeitseffizienz",
       "n3": "+30% Statuseffekte",
       "n4": "Spontaneous Combustion: Jeder applizierte Statuseffekt hat 40% Chance, zusätzlich Brand zu verursachen; war es bereits Brand: +25% Brandschaden für die Dauer. Rucksack 'White Hot': Brandschaden-Debuff +50%; Weste 'Flashpoint': +20% Brand-Chance",
-      "modeled": "nur Teile-Zähler (Status/Brand-Set)",
+      "modeled": "nur Teile-Zähler (Status/Brand-Set) | 4p: Brand-Status-Set (Annahme) — als Annahme, in-game verifizieren (Annahmen-Panel #96)",
       "bonuses": {
         "2": [
           {
@@ -2150,6 +2339,13 @@
           {
             "attr": "statusEffects",
             "val": 30
+          }
+        ],
+        "4": [
+          {
+            "attr": "status",
+            "val": 30,
+            "value_status": "Annahme"
           }
         ]
       }

@@ -10,6 +10,58 @@ import {
   type SkillVariant,
   type GearTalent,
 } from "./v4Data";
+import gearJson from "../db/gear.json";
+
+interface GreenSetBonus {
+  attr: string;
+  val: number;
+}
+
+const greenSetInfo = (gearJson as unknown as {
+  green_set_info: Record<string, { bonuses?: Record<string, GreenSetBonus[]> }>;
+}).green_set_info;
+
+const AXIS_ATTR_KEYS = new Set([
+  "chc", "chd", "hsd", "wh", "armorregen", "explres", "hazard", "health",
+  "skilldmg", "skillhaste", "repair", "status", "wd", "dta", "dth", "dttooc",
+  "rof", "aok", "incomrepair",
+]);
+
+export function setBonusesForGear(gear: GearPiece[]): Array<{ attr: string; val: number; set: string; pieces: number }> {
+  const counts = new Map<string, number>();
+  for (const g of gear) {
+    if (g.brandType !== "gearset") continue;
+    const raw = g.brand.toLowerCase();
+    const key =
+      greenSetInfo[raw] !== undefined
+        ? raw
+        : Object.keys(greenSetInfo).find((k) => raw.startsWith(k) || k.startsWith(raw.split(" ")[0])) ?? raw;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const out: Array<{ attr: string; val: number; set: string; pieces: number }> = [];
+  for (const [key, count] of counts) {
+    const tiers = greenSetInfo[key]?.bonuses ?? {};
+    for (const [pieces, bonuses] of Object.entries(tiers)) {
+      if (count < Number(pieces)) continue;
+      for (const b of bonuses) {
+        if (!AXIS_ATTR_KEYS.has(b.attr)) continue;
+        out.push({ attr: b.attr, val: b.val, set: key, pieces: Number(pieces) });
+      }
+    }
+  }
+  return out;
+}
+
+function attrTotal(gear: GearPiece[], type: string): number {
+  let sum = gear.reduce(
+    (s, g) => s + g.attributes.filter((a) => a.type === type).reduce((x, a) => x + a.value, 0),
+    0,
+  );
+  for (const b of setBonusesForGear(gear)) {
+    if (b.attr === type) sum += b.val;
+  }
+  return sum;
+}
 
 export interface Assumption {
   key: string;
@@ -107,13 +159,7 @@ function registerAssumption(
   return value;
 }
 
-function sumAttr(gear: GearPiece[], type: string): number {
-  return gear.reduce(
-    (sum, g) =>
-      sum + g.attributes.filter((a) => a.type === type).reduce((s, a) => s + a.value, 0),
-    0,
-  );
-}
+
 
 function countCores(gear: GearPiece[], core: string): number {
   return gear.filter((g) => g.core === core).length;
@@ -180,14 +226,14 @@ function computeSkl(
   assumptions: Assumption[],
 ): AxisComputation {
   const tier = skillTierFor(ctx.gear, ctx.specializationKey);
-  const skillAttr = sumAttr(ctx.gear, "skilldmg");
-  const repairAttr = sumAttr(ctx.gear, "repair");
+  const skillAttr = attrTotal(ctx.gear, "skilldmg");
+  const repairAttr = attrTotal(ctx.gear, "repair");
   let sklDamage = 0;
   let sklHeal = 0;
   for (const choice of ctx.skills) {
     const variant = choice.variant;
     const base = baseValueFor(variant, tier, ctx, assumptions);
-    const cycle = cycleSeconds(variant, sumAttr(ctx.gear, "skillhaste"), ctx, assumptions);
+    const cycle = cycleSeconds(variant, attrTotal(ctx.gear, "skillhaste"), ctx, assumptions);
     if (variant.effect_type === "damage") {
       sklDamage += (base * (1 + skillAttr / 100)) / cycle;
     } else if (variant.effect_type === "heal") {
@@ -214,12 +260,12 @@ function computeEhp(
 ): AxisComputation {
   const window = ctx.combatWindowSeconds ?? COMBAT_WINDOW_DEFAULT;
   const armor = sumCoreValues(ctx.gear, "armour");
-  const health = sumAttr(ctx.gear, "health");
-  const hazard = capValue("hazard", sumAttr(ctx.gear, "hazard"));
-  const explres = capValue("explres", sumAttr(ctx.gear, "explres"));
+  const health = attrTotal(ctx.gear, "health");
+  const hazard = capValue("hazard", attrTotal(ctx.gear, "hazard"));
+  const explres = capValue("explres", attrTotal(ctx.gear, "explres"));
   const threat = Math.max(0, Math.min(1, ctx.threat.statusShare));
   const damageReduction = (threat * hazard + (1 - threat) * explres) / 100;
-  const regenAttr = sumAttr(ctx.gear, "armorregen");
+  const regenAttr = attrTotal(ctx.gear, "armorregen");
   const regen = (regenAttr / 100) * armor * window;
   const ehp = (armor + health) / (1 - Math.min(0.9, damageReduction)) + regen;
   const usedAssumptions = [...assumptions];
@@ -251,8 +297,8 @@ function computeCc(
   ctx: AxisContext,
   assumptions: Assumption[],
 ): AxisComputation {
-  const statusAttr = sumAttr(ctx.gear, "status");
-  const skillHaste = sumAttr(ctx.gear, "skillhaste");
+  const statusAttr = attrTotal(ctx.gear, "status");
+  const skillHaste = attrTotal(ctx.gear, "skillhaste");
   let cc = 0;
   for (const choice of ctx.skills) {
     const variant = choice.variant;
@@ -360,7 +406,7 @@ function computeUpt(
   ctx: AxisContext,
   assumptions: Assumption[],
 ): AxisComputation {
-  const skillHaste = sumAttr(ctx.gear, "skillhaste");
+  const skillHaste = attrTotal(ctx.gear, "skillhaste");
   const window = ctx.combatWindowSeconds ?? COMBAT_WINDOW_DEFAULT;
   if (ctx.skills.length === 0) {
     return { key: "upt", value: 0, detail: { skills: 0 }, assumptions };

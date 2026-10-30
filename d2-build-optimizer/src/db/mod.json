@@ -1,1718 +1,1847 @@
 {
-    "version": "mods_v1",
-    "source": "Davids Mod-Tabelle (Optics Rail / Magazine / Underbarrel / Muzzle inkl. Exotic-Fixed-Mods)",
-    "note": "Struktur kompatibel zu MOD_CATALOG im Striker-Build-Optimierer. slotTypes = Slot-Typen laut Waffen-Tabelle (Iron / Micro / Short / Long / Neutral bei Optik; Kaliber bei Magazin/Mündung; Side / Long / Short / Gadget bei Unterlauf). Exotic-Mods sind zusätzlich unter exotic_mods pro Waffe hinterlegt. | Y8S3.2: Exotic-Mods aktualisiert (Ruthless/Merciless/Ravenous/Diamondback/Nemesis/Mantis/Dread Edict).",
-    "attr_legend": {
-        "reloadSpeed": "Nachladetempo %",
-        "stability": "Stabilität %",
-        "accuracy": "Genauigkeit %",
-        "range": "Optimale Reichweite %",
-        "chc": "Kritische Trefferchance %",
-        "chd": "Kritischer Trefferschaden %",
-        "hsd": "Kopfschussschaden %",
-        "rof": "Feuerrate %",
-        "handling": "Waffenhandling %",
-        "wd": "Waffen-Schaden %",
-        "capacity": "Extra-Runden",
-        "swapSpeed": "Waffenwechsel-Tempo %",
-        "melee": "Nahkampfschaden %"
-    },
-    "slots": {
-        "optic": [
-            {
-                "name": "Streamlined Iron Sights",
-                "slotTypes": [
-                    "Iron Sights Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Weighted Iron Sights",
-                "slotTypes": [
-                    "Iron Sights Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Open Iron Sights",
-                "slotTypes": [
-                    "Iron Sights Slot"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "552 Holo Sight",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "ACOG Scope (4x)",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "C79 Scope (3.4x)",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "CQBSS Scope (8x)",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 30
-                },
-                "penalty": null
-            },
-            {
-                "name": "Digital Scope",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 45
-                },
-                "penalty": {
-                    "type": "chd",
-                    "val": -5
-                }
-            },
-            {
-                "name": "MK5 Scope (15x)",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 40
-                },
-                "penalty": {
-                    "type": "reloadSpeed",
-                    "val": -20
-                }
-            },
-            {
-                "name": "VX-1 Scope (12x)",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 35
-                },
-                "penalty": {
-                    "type": "reloadSpeed",
-                    "val": -10
-                }
-            },
-            {
-                "name": "Low Reflex Sight",
-                "slotTypes": [
-                    "Short/Micro Optics Rail"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 5
-                },
-                "penalty": {
-                    "type": "range",
-                    "val": -20
-                }
-            },
-            {
-                "name": "EXPS3 Holo Sight",
-                "slotTypes": [
-                    "Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 3
-                },
-                "penalty": null
-            },
-            {
-                "name": "PRO Red Dot Sight",
-                "slotTypes": [
-                    "Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Reflex Sight",
-                "slotTypes": [
-                    "Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "handling",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Russian Red Dot Sight",
-                "slotTypes": [
-                    "Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Small RDS Scope",
-                "slotTypes": [
-                    "Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 15
-                },
-                "penalty": {
-                    "type": "accuracy",
-                    "val": -5
-                }
-            },
-            {
-                "name": "T2 Micro Red Dot Sight",
-                "slotTypes": [
-                    "Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Rugged Mini Reflex Sight",
-                "slotTypes": [
-                    "Neutral Optics Rail",
-                    "Long/Short Optics Rail",
-                    "Micro Optics Rail"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "GR9 Built-in Scope (8x)",
-                "slotTypes": [
-                    "Long/Short Optics Rail"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            }
+  "version": "mods_v2",
+  "source": "Davids Mod-Tabelle (Optics Rail / Magazine / Underbarrel / Muzzle inkl. Exotic-Fixed-Mods)",
+  "note": "Struktur kompatibel zu MOD_CATALOG im Striker-Build-Optimierer. slotTypes = Slot-Typen laut Waffen-Tabelle (Iron / Micro / Short / Long / Neutral bei Optik; Kaliber bei Magazin/Mündung; Side / Long / Short / Gadget bei Unterlauf). Exotic-Mods sind zusätzlich unter exotic_mods pro Waffe hinterlegt. | Y8S3.2: Exotic-Mods aktualisiert (Ruthless/Merciless/Ravenous/Diamondback/Nemesis/Mantis/Dread Edict).",
+  "attr_legend": {
+    "reloadSpeed": "Nachladetempo %",
+    "stability": "Stabilität %",
+    "accuracy": "Genauigkeit %",
+    "range": "Optimale Reichweite %",
+    "chc": "Kritische Trefferchance %",
+    "chd": "Kritischer Trefferschaden %",
+    "hsd": "Kopfschussschaden %",
+    "rof": "Feuerrate %",
+    "handling": "Waffenhandling %",
+    "wd": "Waffen-Schaden %",
+    "capacity": "Extra-Runden",
+    "swapSpeed": "Waffenwechsel-Tempo %",
+    "melee": "Nahkampfschaden %"
+  },
+  "slots": {
+    "optic": [
+      {
+        "name": "Streamlined Iron Sights",
+        "slotTypes": [
+          "Iron Sights Slot"
         ],
-        "magazine": [
-            {
-                "name": "Oversized 9mm Mag",
-                "slotTypes": [
-                    "9mm Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Extended 9mm Mag",
-                "slotTypes": [
-                    "9mm Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 20
-                },
-                "penalty": {
-                    "type": "reloadSpeed",
-                    "val": -10
-                }
-            },
-            {
-                "name": "Segmented 9mm Mag",
-                "slotTypes": [
-                    "9mm Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Heavy Spring 9mm Mag",
-                "slotTypes": [
-                    "9mm Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Extended .45 ACP Mag",
-                "slotTypes": [
-                    ".45 ACP Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Oversized .45 ACP Mag",
-                "slotTypes": [
-                    ".45 ACP Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 20
-                },
-                "penalty": {
-                    "type": "reloadSpeed",
-                    "val": -10
-                }
-            },
-            {
-                "name": "Short Spring .45 ACP Mag",
-                "slotTypes": [
-                    ".45 ACP Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Force Feed .45 ACP Mag",
-                "slotTypes": [
-                    ".45 ACP Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "rof",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Precision Feeding .45 Mag",
-                "slotTypes": [
-                    ".45 ACP Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Light Extended 5.56 Mag",
-                "slotTypes": [
-                    "5.56 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Sturdy Extended 5.56 Mag",
-                "slotTypes": [
-                    "5.56 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 20
-                },
-                "penalty": {
-                    "type": "reloadSpeed",
-                    "val": -10
-                }
-            },
-            {
-                "name": "Tactical 5.56 Mag",
-                "slotTypes": [
-                    "5.56 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Infantry 5.56 Mag",
-                "slotTypes": [
-                    "5.56 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 30
-                },
-                "penalty": null
-            },
-            {
-                "name": "Balanced Spring 5.56 Mag",
-                "slotTypes": [
-                    "5.56 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Light Extended 7.62 Mag",
-                "slotTypes": [
-                    "7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Sturdy Extended 7.62 Mag",
-                "slotTypes": [
-                    "7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 20
-                },
-                "penalty": {
-                    "type": "reloadSpeed",
-                    "val": -10
-                }
-            },
-            {
-                "name": "Weighted 7.62 Mag",
-                "slotTypes": [
-                    "7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Precision 7.62 Mag",
-                "slotTypes": [
-                    "7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 7
-                },
-                "penalty": null
-            },
-            {
-                "name": "Thin 7.62 Mag",
-                "slotTypes": [
-                    "7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Large Pouch",
-                "slotTypes": [
-                    "Ammunition Belt Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 35
-                },
-                "penalty": null
-            },
-            {
-                "name": "Large Pouch (Gunner)",
-                "slotTypes": [
-                    "Ammunition Belt Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 50
-                },
-                "penalty": null
-            },
-            {
-                "name": "Tactical Small Pouch",
-                "slotTypes": [
-                    "Ammunition Belt Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Nimble Link Belt",
-                "slotTypes": [
-                    "Ammunition Belt Slot"
-                ],
-                "bonus": {
-                    "type": "rof",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Non-disruptive Link",
-                "slotTypes": [
-                    "Ammunition Belt Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Calibrated Link",
-                "slotTypes": [
-                    "Ammunition Belt Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 15
-                },
-                "penalty": null
-            },
-            {
-                "name": "Compensated Integrated Spring",
-                "slotTypes": [
-                    "Integrated Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Overbalanced Integrated Spring",
-                "slotTypes": [
-                    "Integrated Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Stiff Integrated Spring",
-                "slotTypes": [
-                    "Integrated Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "wd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Underbalanced Integrated Spring",
-                "slotTypes": [
-                    "Integrated Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "rof",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Tightly Packed Marksman Mag",
-                "slotTypes": [
-                    "Marksman 7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Lightweight Marksman Mag",
-                "slotTypes": [
-                    "Marksman 7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Sturdy Marksman Mag",
-                "slotTypes": [
-                    "Marksman 7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Mended Marksman Mag",
-                "slotTypes": [
-                    "Marksman 7.62 Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Extended Pistol Mag",
-                "slotTypes": [
-                    "Pistol Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "capacity",
-                    "val": 11
-                },
-                "penalty": null
-            },
-            {
-                "name": "Field Pistol Mag",
-                "slotTypes": [
-                    "Pistol Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 30
-                },
-                "penalty": null
-            },
-            {
-                "name": "Police Pistol Mag",
-                "slotTypes": [
-                    "Pistol Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Speed Loading Revolver Drum",
-                "slotTypes": [
-                    "Revolver Drum Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            },
-            {
-                "name": "Hard Tubular Spring",
-                "slotTypes": [
-                    "Tubular Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "rof",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Counter-Clockwise Tubular Spring",
-                "slotTypes": [
-                    "Tubular Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Flexible Tubular Spring",
-                "slotTypes": [
-                    "Tubular Magazine Slot"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                },
-                "penalty": null
-            }
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Weighted Iron Sights",
+        "slotTypes": [
+          "Iron Sights Slot"
         ],
-        "underbarrel": [
-            {
-                "name": "Compact Coupled Laser Pointer",
-                "slotTypes": [
-                    "Gadget Slot"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Compact Coupled Small Laser Pointer",
-                "slotTypes": [
-                    "Gadget Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Pistol Flashlight",
-                "slotTypes": [
-                    "Gadget Slot"
-                ],
-                "bonus": null,
-                "penalty": null,
-                "note": "Erleuchtet dunkle Bereiche"
-            },
-            {
-                "name": "Hand Stop",
-                "slotTypes": [
-                    "Long Underbarrel Rail"
-                ],
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Short Grip",
-                "slotTypes": [
-                    "Long Underbarrel Rail"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Tactical Short Grip",
-                "slotTypes": [
-                    "Long Underbarrel Rail"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Angled Grip",
-                "slotTypes": [
-                    "Long/Short Underbarrel Rail"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Vertical Grip",
-                "slotTypes": [
-                    "Long/Short Underbarrel Rail"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Laser Pointer",
-                "slotTypes": [
-                    "Side Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Small Laser Pointer",
-                "slotTypes": [
-                    "Side Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 7
-                },
-                "penalty": null
-            },
-            {
-                "name": "Linked Laser Pointer",
-                "slotTypes": [
-                    "Long Underbarrel Rail"
-                ],
-                "bonus": null,
-                "penalty": null,
-                "note": "Pulst anvisierte Ziele"
-            }
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Open Iron Sights",
+        "slotTypes": [
+          "Iron Sights Slot"
         ],
-        "muzzle": [
-            {
-                "name": "Compensator 9mm",
-                "slotTypes": [
-                    "9mm Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Flash Hider 9mm",
-                "slotTypes": [
-                    "9mm Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Loud Vent Brake 9mm",
-                "slotTypes": [
-                    "9mm Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Muzzle Brake 9mm",
-                "slotTypes": [
-                    "9mm Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 3
-                },
-                "penalty": null
-            },
-            {
-                "name": "Osprey 9 Suppressor",
-                "slotTypes": [
-                    "9mm Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Small Suppressor 9mm",
-                "slotTypes": [
-                    "9mm Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Compensator .45",
-                "slotTypes": [
-                    ".45 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Flash Hider .45",
-                "slotTypes": [
-                    ".45 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Loud Vent Brake .45",
-                "slotTypes": [
-                    ".45 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Muzzle Brake .45",
-                "slotTypes": [
-                    ".45 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "hsd",
-                    "val": 3
-                },
-                "penalty": null
-            },
-            {
-                "name": "Osprey .45 Suppressor",
-                "slotTypes": [
-                    ".45 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Small Suppressor .45",
-                "slotTypes": [
-                    ".45 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Compensator 5.56",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Flash Hider 5.56",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Large Suppressor 5.56",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Loud Vent Brake 5.56",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Muzzle Brake 5.56",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Omega 5.56 Rifle Suppressor",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": {
-                    "type": "range",
-                    "val": -10
-                }
-            },
-            {
-                "name": "Compensator 7.62",
-                "slotTypes": [
-                    "7.62 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Flash Hider 7.62",
-                "slotTypes": [
-                    "7.62 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Large Suppressor 7.62",
-                "slotTypes": [
-                    "7.62 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Loud Vent Brake 7.62",
-                "slotTypes": [
-                    "7.62 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "range",
-                    "val": 10
-                },
-                "penalty": null
-            },
-            {
-                "name": "Muzzle Brake 7.62",
-                "slotTypes": [
-                    "7.62 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                },
-                "penalty": null
-            },
-            {
-                "name": "Omega 7.62 Rifle Suppressor",
-                "slotTypes": [
-                    "7.62 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": {
-                    "type": "range",
-                    "val": -10
-                }
-            },
-            {
-                "name": "QDC Sound Suppressor (Stoner LAMG)",
-                "slotTypes": [
-                    "5.56 Muzzle Slot"
-                ],
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                },
-                "penalty": null
-            }
-        ]
-    },
-    "exotic_mods": {
-        "Eagle Bearer": {
-            "optic": {
-                "name": "Eagle Eye Sight",
-                "bonus": {
-                    "type": "chc",
-                    "val": 10
-                }
-            },
-            "magazine": {
-                "name": "Bullet Eyrie",
-                "bonus": {
-                    "type": "capacity",
-                    "val": 30
-                }
-            },
-            "underbarrel": {
-                "name": "Talon Grip",
-                "bonus": {
-                    "type": "handling",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Jagged Beak",
-                "bonus": {
-                    "type": "chd",
-                    "val": 15
-                }
-            }
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
         },
-        "Chameleon": {
-            "optic": {
-                "name": "Chameleon Optics",
-                "bonus": {
-                    "type": "chc",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Chameleon ActivCamo Processor",
-                "bonus": {
-                    "type": "capacity",
-                    "val": 20
-                }
-            },
-            "underbarrel": {
-                "name": "Chameleon Grip",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Chameleon Dampener",
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 20
-                }
-            }
+        "penalty": null
+      },
+      {
+        "name": "552 Holo Sight",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
         },
-        "The Bighorn": {
-            "optic": {
-                "name": "Fire Select Scope",
-                "bonus": {
-                    "type": "hsd",
-                    "val": 30
-                }
-            },
-            "magazine": {
-                "name": "Tension Spring Magazine",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Bighorn Horn Grip",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Carbon Steel Muzzle",
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                }
-            }
+        "penalty": null
+      },
+      {
+        "name": "ACOG Scope (4x)",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 20
         },
-        "Capacitor": {
-            "optic": {
-                "name": "Conductive Focal",
-                "bonus": {
-                    "type": "chc",
-                    "val": 10
-                }
-            },
-            "magazine": {
-                "name": "Voltage Generator",
-                "bonus": {
-                    "type": "capacity",
-                    "val": 11
-                }
-            },
-            "underbarrel": {
-                "name": "Dielectric Safety Grip",
-                "bonus": {
-                    "type": "handling",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Discharge Electrode",
-                "bonus": {
-                    "type": "chd",
-                    "val": 30
-                }
-            }
+        "penalty": null
+      },
+      {
+        "name": "C79 Scope (3.4x)",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
         },
-        "Pestilence": {
-            "magazine": {
-                "name": "Plagued Magazine",
-                "bonus": {
-                    "type": "rof",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Caution Tape",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Plagued Muzzle",
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 10
-                }
-            }
+        "penalty": null
+      },
+      {
+        "name": "CQBSS Scope (8x)",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 30
         },
-        "Bullet King": {
-            "magazine": {
-                "name": "Mag of Holding",
-                "bonus": null
-            },
-            "underbarrel": {
-                "name": "Solid Gold Bipod",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Gold Plated Muzzle",
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                }
-            }
+        "penalty": null
+      },
+      {
+        "name": "Digital Scope",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 45
         },
-        "Bluescreen": {
-            "optic": {
-                "name": "Lightning Sight",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            },
-            "magazine": {
-                "name": "Deauthentication Frame",
-                "bonus": {
-                    "type": "handling",
-                    "val": 15
-                }
-            },
-            "underbarrel": {
-                "name": "Dropkick Grip",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Overclock Muzzle",
-                "bonus": {
-                    "type": "rof",
-                    "val": 10
-                }
-            }
-        },
-        "Sweet Dreams": {
-            "optic": {
-                "name": "Outcast Optics",
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Modified Feed System",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 15
-                }
-            },
-            "underbarrel": {
-                "name": "Stunner",
-                "bonus": {
-                    "type": "range",
-                    "val": 25
-                }
-            }
-        },
-        "Lullaby": {
-            "optic": {
-                "name": "Outcast Optics",
-                "bonus": {
-                    "type": "accuracy",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Modified Feed System",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 15
-                }
-            },
-            "underbarrel": {
-                "name": "Stunner",
-                "bonus": {
-                    "type": "range",
-                    "val": 25
-                }
-            }
-        },
-        "Scorpio": {
-            "optic": {
-                "name": "Starlight Receptors",
-                "bonus": {
-                    "type": "chc",
-                    "val": 10
-                }
-            },
-            "magazine": {
-                "name": "Venom Glands",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Chaelae Grip",
-                "bonus": {
-                    "type": "handling",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Aculeus",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            }
-        },
-        "The Chatterbox": {
-            "optic": {
-                "name": "Modified Optics",
-                "bonus": {
-                    "type": "chc",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Chatterbox Magazine",
-                "bonus": {
-                    "type": "capacity",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Chatterbox Cannister",
-                "bonus": {
-                    "type": "handling",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Chatterbox Muzzle",
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                }
-            }
-        },
-        "Lady Death": {
-            "optic": {
-                "name": "Gaze of Death",
-                "bonus": {
-                    "type": "chc",
-                    "val": 10
-                }
-            },
-            "magazine": {
-                "name": "Death's Hand",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Kiss of Death",
-                "bonus": {
-                    "type": "melee",
-                    "val": 500
-                }
-            },
-            "muzzle": {
-                "name": "Death's Maw",
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                }
-            }
-        },
-        "Backfire": {
-            "optic": {
-                "name": "Quick Sight",
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                }
-            },
-            "magazine": {
-                "name": "Barbed Grip Magazine",
-                "bonus": {
-                    "type": "capacity",
-                    "val": 20
-                }
-            },
-            "underbarrel": {
-                "name": "Barbed Frame",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Jagged Muzzle",
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                }
-            }
-        },
-        "Merciless": {
-            "optic": {
-                "name": "Merciless Optics",
-                "bonus": {
-                    "type": "chc",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Merciless Magazine",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 15
-                }
-            },
-            "underbarrel": {
-                "name": "Merciless Grip",
-                "bonus": {
-                    "type": "handling",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Merciless Muzzle",
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                }
-            }
-        },
-        "Ruthless": {
-            "optic": {
-                "name": "Merciless Optics",
-                "bonus": {
-                    "type": "chc",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Merciless Magazine",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 15
-                }
-            },
-            "underbarrel": {
-                "name": "Merciless Grip",
-                "bonus": {
-                    "type": "handling",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Merciless Muzzle",
-                "bonus": {
-                    "type": "stability",
-                    "val": 20
-                }
-            }
-        },
-        "Diamondback": {
-            "optic": {
-                "name": "Diamondback Dot Sight",
-                "bonus": {
-                    "type": "chd",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Diamondback Lever",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Diamondback Grip",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            },
-            "muzzle": {
-                "name": "Rattlesnake Ornamentation",
-                "bonus": {
-                    "type": "chd",
-                    "val": 15
-                }
-            }
-        },
-        "The Ravenous": {
-            "optic": {
-                "name": "Predatory Optics",
-                "bonus": {
-                    "type": "chc",
-                    "val": 15
-                }
-            },
-            "magazine": {
-                "name": "Gluttonous Magazines",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            },
-            "underbarrel": {
-                "name": "Wolf's Claw",
-                "bonus": {
-                    "type": "chd",
-                    "val": 5
-                }
-            },
-            "muzzle": {
-                "name": "Devouring Maw",
-                "bonus": {
-                    "type": "stability",
-                    "val": 10
-                }
-            }
-        },
-        "Nemesis": {
-            "optic": {
-                "name": "Nemesis Digital Scope",
-                "bonus": {
-                    "type": "hsd",
-                    "val": 45
-                }
-            },
-            "magazine": {
-                "name": "Nemesis Bolt",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                }
-            },
-            "underbarrel": {
-                "name": "Nemesis Bipod",
-                "bonus": {
-                    "type": "handling",
-                    "val": 5
-                }
-            },
-            "muzzle": {
-                "name": "Nemesis Barrel",
-                "bonus": {
-                    "type": "handling",
-                    "val": 5
-                }
-            }
-        },
-        "Mantis": {
-            "optic": {
-                "name": "Anti-Glint Coated Sight",
-                "bonus": {
-                    "type": "hsd",
-                    "val": 45
-                }
-            },
-            "magazine": {
-                "name": "Well-Oiled Machine",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 20
-                }
-            },
-            "underbarrel": {
-                "name": "Ghillie Frame",
-                "bonus": {
-                    "type": "handling",
-                    "val": 5
-                }
-            },
-            "muzzle": {
-                "name": "Wrapped Suppressor",
-                "bonus": {
-                    "type": "handling",
-                    "val": 5
-                }
-            }
-        },
-        "Liberty": {
-            "optic": {
-                "name": "Liberty Sight",
-                "bonus": {
-                    "type": "hsd",
-                    "val": 5
-                }
-            },
-            "magazine": {
-                "name": "Trigger Mechanism",
-                "bonus": {
-                    "type": "handling",
-                    "val": 15
-                }
-            },
-            "underbarrel": {
-                "name": "Trigger Mechanism (UB)",
-                "bonus": {
-                    "type": "rof",
-                    "val": 15
-                }
-            }
-        },
-        "Regulus": {
-            "magazine": {
-                "name": "Engraved Drum",
-                "bonus": {
-                    "type": "reloadSpeed",
-                    "val": 10
-                }
-            }
-        },
-        "Dread Edict": {
-            "optic": {
-                "name": "Judgement's Glare",
-                "bonus": {
-                    "type": "hsd",
-                    "val": 45
-                }
-            },
-            "magazine": {
-                "name": "Tuned-tension Spring",
-                "bonus": {
-                    "type": "capacity",
-                    "val": 5
-                }
-            },
-            "underbarrel": {
-                "name": "Fearless Frame",
-                "bonus": {
-                    "type": "handling",
-                    "val": 15
-                }
-            },
-            "muzzle": {
-                "name": "Punctuating Barrel",
-                "bonus": {
-                    "type": "chc",
-                    "val": 15
-                }
-            }
-        },
-        "HK GR9": {
-            "optic": {
-                "name": "Built-in Scope (8x)",
-                "bonus": {
-                    "type": "chc",
-                    "val": 5
-                }
-            }
+        "penalty": {
+          "type": "chd",
+          "val": -5
         }
+      },
+      {
+        "name": "MK5 Scope (15x)",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 40
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -20
+        }
+      },
+      {
+        "name": "VX-1 Scope (12x)",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 35
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -10
+        }
+      },
+      {
+        "name": "Low Reflex Sight",
+        "slotTypes": [
+          "Short/Micro Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 5
+        },
+        "penalty": {
+          "type": "range",
+          "val": -20
+        }
+      },
+      {
+        "name": "EXPS3 Holo Sight",
+        "slotTypes": [
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 3
+        },
+        "penalty": null
+      },
+      {
+        "name": "PRO Red Dot Sight",
+        "slotTypes": [
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Reflex Sight",
+        "slotTypes": [
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "handling",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Russian Red Dot Sight",
+        "slotTypes": [
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Small RDS Scope",
+        "slotTypes": [
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 15
+        },
+        "penalty": {
+          "type": "accuracy",
+          "val": -5
+        }
+      },
+      {
+        "name": "T2 Micro Red Dot Sight",
+        "slotTypes": [
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Rugged Mini Reflex Sight",
+        "slotTypes": [
+          "Neutral Optics Rail",
+          "Long/Short Optics Rail",
+          "Micro Optics Rail"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "GR9 Built-in Scope (8x)",
+        "slotTypes": [
+          "Long/Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      }
+    ],
+    "magazine": [
+      {
+        "name": "Oversized 9mm Mag",
+        "slotTypes": [
+          "9mm Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Extended 9mm Mag",
+        "slotTypes": [
+          "9mm Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 20
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -10
+        }
+      },
+      {
+        "name": "Segmented 9mm Mag",
+        "slotTypes": [
+          "9mm Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Heavy Spring 9mm Mag",
+        "slotTypes": [
+          "9mm Magazine Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Extended .45 ACP Mag",
+        "slotTypes": [
+          ".45 ACP Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Oversized .45 ACP Mag",
+        "slotTypes": [
+          ".45 ACP Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 20
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -10
+        }
+      },
+      {
+        "name": "Short Spring .45 ACP Mag",
+        "slotTypes": [
+          ".45 ACP Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Force Feed .45 ACP Mag",
+        "slotTypes": [
+          ".45 ACP Magazine Slot"
+        ],
+        "bonus": {
+          "type": "rof",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Precision Feeding .45 Mag",
+        "slotTypes": [
+          ".45 ACP Magazine Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Light Extended 5.56 Mag",
+        "slotTypes": [
+          "5.56 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Sturdy Extended 5.56 Mag",
+        "slotTypes": [
+          "5.56 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 20
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -10
+        }
+      },
+      {
+        "name": "Tactical 5.56 Mag",
+        "slotTypes": [
+          "5.56 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Infantry 5.56 Mag",
+        "slotTypes": [
+          "5.56 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 30
+        },
+        "penalty": null
+      },
+      {
+        "name": "Balanced Spring 5.56 Mag",
+        "slotTypes": [
+          "5.56 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Light Extended 7.62 Mag",
+        "slotTypes": [
+          "7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Sturdy Extended 7.62 Mag",
+        "slotTypes": [
+          "7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 20
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -10
+        }
+      },
+      {
+        "name": "Weighted 7.62 Mag",
+        "slotTypes": [
+          "7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Precision 7.62 Mag",
+        "slotTypes": [
+          "7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 7
+        },
+        "penalty": null
+      },
+      {
+        "name": "Thin 7.62 Mag",
+        "slotTypes": [
+          "7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Large Pouch",
+        "slotTypes": [
+          "Ammunition Belt Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 35
+        },
+        "penalty": null
+      },
+      {
+        "name": "Large Pouch (Gunner)",
+        "slotTypes": [
+          "Ammunition Belt Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 50
+        },
+        "penalty": null
+      },
+      {
+        "name": "Tactical Small Pouch",
+        "slotTypes": [
+          "Ammunition Belt Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Nimble Link Belt",
+        "slotTypes": [
+          "Ammunition Belt Slot"
+        ],
+        "bonus": {
+          "type": "rof",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Non-disruptive Link",
+        "slotTypes": [
+          "Ammunition Belt Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Calibrated Link",
+        "slotTypes": [
+          "Ammunition Belt Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 15
+        },
+        "penalty": null
+      },
+      {
+        "name": "Compensated Integrated Spring",
+        "slotTypes": [
+          "Integrated Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Overbalanced Integrated Spring",
+        "slotTypes": [
+          "Integrated Magazine Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Stiff Integrated Spring",
+        "slotTypes": [
+          "Integrated Magazine Slot"
+        ],
+        "bonus": {
+          "type": "wd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Underbalanced Integrated Spring",
+        "slotTypes": [
+          "Integrated Magazine Slot"
+        ],
+        "bonus": {
+          "type": "rof",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Tightly Packed Marksman Mag",
+        "slotTypes": [
+          "Marksman 7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Lightweight Marksman Mag",
+        "slotTypes": [
+          "Marksman 7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Sturdy Marksman Mag",
+        "slotTypes": [
+          "Marksman 7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Mended Marksman Mag",
+        "slotTypes": [
+          "Marksman 7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Extended Pistol Mag",
+        "slotTypes": [
+          "Pistol Magazine Slot"
+        ],
+        "bonus": {
+          "type": "capacity",
+          "val": 11
+        },
+        "penalty": null
+      },
+      {
+        "name": "Field Pistol Mag",
+        "slotTypes": [
+          "Pistol Magazine Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 30
+        },
+        "penalty": null
+      },
+      {
+        "name": "Police Pistol Mag",
+        "slotTypes": [
+          "Pistol Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Speed Loading Revolver Drum",
+        "slotTypes": [
+          "Revolver Drum Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Hard Tubular Spring",
+        "slotTypes": [
+          "Tubular Magazine Slot"
+        ],
+        "bonus": {
+          "type": "rof",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Counter-Clockwise Tubular Spring",
+        "slotTypes": [
+          "Tubular Magazine Slot"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Flexible Tubular Spring",
+        "slotTypes": [
+          "Tubular Magazine Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      }
+    ],
+    "underbarrel": [
+      {
+        "name": "Compact Coupled Laser Pointer",
+        "slotTypes": [
+          "Gadget Slot"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Compact Coupled Small Laser Pointer",
+        "slotTypes": [
+          "Gadget Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Pistol Flashlight",
+        "slotTypes": [
+          "Gadget Slot"
+        ],
+        "bonus": null,
+        "penalty": null,
+        "note": "Erleuchtet dunkle Bereiche"
+      },
+      {
+        "name": "Hand Stop",
+        "slotTypes": [
+          "Long Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Short Grip",
+        "slotTypes": [
+          "Long Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Tactical Short Grip",
+        "slotTypes": [
+          "Long Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Angled Grip",
+        "slotTypes": [
+          "Long/Short Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Vertical Grip",
+        "slotTypes": [
+          "Long/Short Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Laser Pointer",
+        "slotTypes": [
+          "Side Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Small Laser Pointer",
+        "slotTypes": [
+          "Side Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 7
+        },
+        "penalty": null
+      },
+      {
+        "name": "Linked Laser Pointer",
+        "slotTypes": [
+          "Long Underbarrel Rail"
+        ],
+        "bonus": null,
+        "penalty": null,
+        "note": "Pulst anvisierte Ziele"
+      }
+    ],
+    "muzzle": [
+      {
+        "name": "Compensator 9mm",
+        "slotTypes": [
+          "9mm Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Flash Hider 9mm",
+        "slotTypes": [
+          "9mm Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Loud Vent Brake 9mm",
+        "slotTypes": [
+          "9mm Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Muzzle Brake 9mm",
+        "slotTypes": [
+          "9mm Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 3
+        },
+        "penalty": null
+      },
+      {
+        "name": "Osprey 9 Suppressor",
+        "slotTypes": [
+          "9mm Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Small Suppressor 9mm",
+        "slotTypes": [
+          "9mm Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Compensator .45",
+        "slotTypes": [
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Flash Hider .45",
+        "slotTypes": [
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Loud Vent Brake .45",
+        "slotTypes": [
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Muzzle Brake .45",
+        "slotTypes": [
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 3
+        },
+        "penalty": null
+      },
+      {
+        "name": "Osprey .45 Suppressor",
+        "slotTypes": [
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Small Suppressor .45",
+        "slotTypes": [
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Compensator 5.56",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Flash Hider 5.56",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Large Suppressor 5.56",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Loud Vent Brake 5.56",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Muzzle Brake 5.56",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Omega 5.56 Rifle Suppressor",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": {
+          "type": "range",
+          "val": -10
+        }
+      },
+      {
+        "name": "Compensator 7.62",
+        "slotTypes": [
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Flash Hider 7.62",
+        "slotTypes": [
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Large Suppressor 7.62",
+        "slotTypes": [
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Loud Vent Brake 7.62",
+        "slotTypes": [
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "range",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Muzzle Brake 7.62",
+        "slotTypes": [
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Omega 7.62 Rifle Suppressor",
+        "slotTypes": [
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": {
+          "type": "range",
+          "val": -10
+        }
+      },
+      {
+        "name": "QDC Sound Suppressor (Stoner LAMG)",
+        "slotTypes": [
+          "5.56 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        },
+        "penalty": null
+      }
+    ]
+  },
+  "exotic_mods": {
+    "Eagle Bearer": {
+      "optic": {
+        "name": "Eagle Eye Sight",
+        "bonus": {
+          "type": "chc",
+          "val": 10
+        }
+      },
+      "magazine": {
+        "name": "Bullet Eyrie",
+        "bonus": {
+          "type": "capacity",
+          "val": 30
+        }
+      },
+      "underbarrel": {
+        "name": "Talon Grip",
+        "bonus": {
+          "type": "handling",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Jagged Beak",
+        "bonus": {
+          "type": "chd",
+          "val": 15
+        }
+      }
+    },
+    "Chameleon": {
+      "optic": {
+        "name": "Chameleon Optics",
+        "bonus": {
+          "type": "chc",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Chameleon ActivCamo Processor",
+        "bonus": {
+          "type": "capacity",
+          "val": 20
+        }
+      },
+      "underbarrel": {
+        "name": "Chameleon Grip",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Chameleon Dampener",
+        "bonus": {
+          "type": "accuracy",
+          "val": 20
+        }
+      }
+    },
+    "The Bighorn": {
+      "optic": {
+        "name": "Fire Select Scope",
+        "bonus": {
+          "type": "hsd",
+          "val": 30
+        }
+      },
+      "magazine": {
+        "name": "Tension Spring Magazine",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Bighorn Horn Grip",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Carbon Steel Muzzle",
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        }
+      }
+    },
+    "Capacitor": {
+      "optic": {
+        "name": "Conductive Focal",
+        "bonus": {
+          "type": "chc",
+          "val": 10
+        }
+      },
+      "magazine": {
+        "name": "Voltage Generator",
+        "bonus": {
+          "type": "capacity",
+          "val": 11
+        }
+      },
+      "underbarrel": {
+        "name": "Dielectric Safety Grip",
+        "bonus": {
+          "type": "handling",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Discharge Electrode",
+        "bonus": {
+          "type": "chd",
+          "val": 30
+        }
+      }
+    },
+    "Pestilence": {
+      "magazine": {
+        "name": "Plagued Magazine",
+        "bonus": {
+          "type": "rof",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Caution Tape",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Plagued Muzzle",
+        "bonus": {
+          "type": "accuracy",
+          "val": 10
+        }
+      }
+    },
+    "Bullet King": {
+      "magazine": {
+        "name": "Mag of Holding",
+        "bonus": null
+      },
+      "underbarrel": {
+        "name": "Solid Gold Bipod",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Gold Plated Muzzle",
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        }
+      }
+    },
+    "Bluescreen": {
+      "optic": {
+        "name": "Lightning Sight",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      },
+      "magazine": {
+        "name": "Deauthentication Frame",
+        "bonus": {
+          "type": "handling",
+          "val": 15
+        }
+      },
+      "underbarrel": {
+        "name": "Dropkick Grip",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Overclock Muzzle",
+        "bonus": {
+          "type": "rof",
+          "val": 10
+        }
+      }
+    },
+    "Sweet Dreams": {
+      "optic": {
+        "name": "Outcast Optics",
+        "bonus": {
+          "type": "accuracy",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Modified Feed System",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 15
+        }
+      },
+      "underbarrel": {
+        "name": "Stunner",
+        "bonus": {
+          "type": "range",
+          "val": 25
+        }
+      }
+    },
+    "Lullaby": {
+      "optic": {
+        "name": "Outcast Optics",
+        "bonus": {
+          "type": "accuracy",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Modified Feed System",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 15
+        }
+      },
+      "underbarrel": {
+        "name": "Stunner",
+        "bonus": {
+          "type": "range",
+          "val": 25
+        }
+      }
+    },
+    "Scorpio": {
+      "optic": {
+        "name": "Starlight Receptors",
+        "bonus": {
+          "type": "chc",
+          "val": 10
+        }
+      },
+      "magazine": {
+        "name": "Venom Glands",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Chaelae Grip",
+        "bonus": {
+          "type": "handling",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Aculeus",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      }
+    },
+    "The Chatterbox": {
+      "optic": {
+        "name": "Modified Optics",
+        "bonus": {
+          "type": "chc",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Chatterbox Magazine",
+        "bonus": {
+          "type": "capacity",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Chatterbox Cannister",
+        "bonus": {
+          "type": "handling",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Chatterbox Muzzle",
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        }
+      }
+    },
+    "Lady Death": {
+      "optic": {
+        "name": "Gaze of Death",
+        "bonus": {
+          "type": "chc",
+          "val": 10
+        }
+      },
+      "magazine": {
+        "name": "Death's Hand",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Kiss of Death",
+        "bonus": {
+          "type": "melee",
+          "val": 500
+        }
+      },
+      "muzzle": {
+        "name": "Death's Maw",
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        }
+      }
+    },
+    "Backfire": {
+      "optic": {
+        "name": "Quick Sight",
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        }
+      },
+      "magazine": {
+        "name": "Barbed Grip Magazine",
+        "bonus": {
+          "type": "capacity",
+          "val": 20
+        }
+      },
+      "underbarrel": {
+        "name": "Barbed Frame",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Jagged Muzzle",
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        }
+      }
+    },
+    "Merciless": {
+      "optic": {
+        "name": "Merciless Optics",
+        "bonus": {
+          "type": "chc",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Merciless Magazine",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 15
+        }
+      },
+      "underbarrel": {
+        "name": "Merciless Grip",
+        "bonus": {
+          "type": "handling",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Merciless Muzzle",
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        }
+      }
+    },
+    "Ruthless": {
+      "optic": {
+        "name": "Merciless Optics",
+        "bonus": {
+          "type": "chc",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Merciless Magazine",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 15
+        }
+      },
+      "underbarrel": {
+        "name": "Merciless Grip",
+        "bonus": {
+          "type": "handling",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Merciless Muzzle",
+        "bonus": {
+          "type": "stability",
+          "val": 20
+        }
+      }
+    },
+    "Diamondback": {
+      "optic": {
+        "name": "Diamondback Dot Sight",
+        "bonus": {
+          "type": "chd",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Diamondback Lever",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Diamondback Grip",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      },
+      "muzzle": {
+        "name": "Rattlesnake Ornamentation",
+        "bonus": {
+          "type": "chd",
+          "val": 15
+        }
+      }
+    },
+    "The Ravenous": {
+      "optic": {
+        "name": "Predatory Optics",
+        "bonus": {
+          "type": "chc",
+          "val": 15
+        }
+      },
+      "magazine": {
+        "name": "Gluttonous Magazines",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      },
+      "underbarrel": {
+        "name": "Wolf's Claw",
+        "bonus": {
+          "type": "chd",
+          "val": 5
+        }
+      },
+      "muzzle": {
+        "name": "Devouring Maw",
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        }
+      }
+    },
+    "Nemesis": {
+      "optic": {
+        "name": "Nemesis Digital Scope",
+        "bonus": {
+          "type": "hsd",
+          "val": 45
+        }
+      },
+      "magazine": {
+        "name": "Nemesis Bolt",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        }
+      },
+      "underbarrel": {
+        "name": "Nemesis Bipod",
+        "bonus": {
+          "type": "handling",
+          "val": 5
+        }
+      },
+      "muzzle": {
+        "name": "Nemesis Barrel",
+        "bonus": {
+          "type": "handling",
+          "val": 5
+        }
+      }
+    },
+    "Mantis": {
+      "optic": {
+        "name": "Anti-Glint Coated Sight",
+        "bonus": {
+          "type": "hsd",
+          "val": 45
+        }
+      },
+      "magazine": {
+        "name": "Well-Oiled Machine",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        }
+      },
+      "underbarrel": {
+        "name": "Ghillie Frame",
+        "bonus": {
+          "type": "handling",
+          "val": 5
+        }
+      },
+      "muzzle": {
+        "name": "Wrapped Suppressor",
+        "bonus": {
+          "type": "handling",
+          "val": 5
+        }
+      }
+    },
+    "Liberty": {
+      "optic": {
+        "name": "Liberty Sight",
+        "bonus": {
+          "type": "hsd",
+          "val": 5
+        }
+      },
+      "magazine": {
+        "name": "Trigger Mechanism",
+        "bonus": {
+          "type": "handling",
+          "val": 15
+        }
+      },
+      "underbarrel": {
+        "name": "Trigger Mechanism (UB)",
+        "bonus": {
+          "type": "rof",
+          "val": 15
+        }
+      }
+    },
+    "Regulus": {
+      "magazine": {
+        "name": "Engraved Drum",
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 10
+        }
+      }
+    },
+    "Dread Edict": {
+      "optic": {
+        "name": "Judgement's Glare",
+        "bonus": {
+          "type": "hsd",
+          "val": 45
+        }
+      },
+      "magazine": {
+        "name": "Tuned-tension Spring",
+        "bonus": {
+          "type": "capacity",
+          "val": 5
+        }
+      },
+      "underbarrel": {
+        "name": "Fearless Frame",
+        "bonus": {
+          "type": "handling",
+          "val": 15
+        }
+      },
+      "muzzle": {
+        "name": "Punctuating Barrel",
+        "bonus": {
+          "type": "chc",
+          "val": 15
+        }
+      }
+    },
+    "HK GR9": {
+      "optic": {
+        "name": "Built-in Scope (8x)",
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        }
+      }
     }
+  },
+  "gear_mods_note": "Ausruestungs-Mods (System-Mod-Platz: Maske, Weste, Rucksack - je 1 Platz, siehe attribute-rules.json slot_rules.mods). Max-Werte aus Nutzervorgabe 29.11. (gegen Spielstand zu verifizieren, value_status=Annahme).",
+  "gear_mods": {
+    "offensive": [
+      {
+        "attr": "chc",
+        "name": "Kritische Trefferchance",
+        "val": 6.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "chd",
+        "name": "Kritischer Trefferschaden",
+        "val": 12.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "hsd",
+        "name": "Kopfschussschaden",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      }
+    ],
+    "defensive": [
+      {
+        "attr": "pfe",
+        "name": "Schutz vor Eliten",
+        "val": 13.0,
+        "unit": "%",
+        "value_status": "Annahme",
+        "note": "Extrem selten; 12,0% ist der häufigste hohe Drop"
+      },
+      {
+        "attr": "aok",
+        "name": "Ruestung bei Toetung",
+        "val": 18935,
+        "unit": "Ruestung",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "hazard",
+        "name": "Gefahrenschutz",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "pulse_res",
+        "name": "Impulsaktivator-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "bleed_res",
+        "name": "Bluten-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "blind_res",
+        "name": "Blenden-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "burn_res",
+        "name": "Brennen-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "confuse_res",
+        "name": "Verwirren-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "shock_res",
+        "name": "Schocken-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "poison_res",
+        "name": "Vergiftung-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "foam_res",
+        "name": "Schaum-Widerstand",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      }
+    ],
+    "utility": [
+      {
+        "attr": "skillhaste",
+        "name": "Fertigkeitstempo",
+        "val": 12.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "repair",
+        "name": "Reparatur-Fertigkeiten",
+        "val": 20.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      },
+      {
+        "attr": "skillduration",
+        "name": "Fertigkeitsdauer",
+        "val": 10.0,
+        "unit": "%",
+        "value_status": "Annahme"
+      }
+    ]
+  }
 }

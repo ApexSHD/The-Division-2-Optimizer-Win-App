@@ -3,10 +3,12 @@ import {
   computeEffectVector,
   skillTierFor,
   buffsFor,
+  setBonusesForGear,
   COMBAT_WINDOW_DEFAULT,
   type AxisContext,
   type SkillChoice,
 } from "../axes";
+import gearJson from "../../db/gear.json";
 import { SKILLS } from "../v4Data";
 import type { GearPiece, GearSlot } from "../sampleData";
 
@@ -216,5 +218,63 @@ describe("Achsen-Berechnung V4 (Issue #90, Lastenheft Abschnitt 4)", () => {
       expect(v[key]).toBeDefined();
       expect(Number.isFinite(v[key])).toBe(true);
     }
+  });
+});
+
+describe("Gearset-Boni in den Achsen (alle Sets modelliert)", () => {
+  it("alle Gearsets in green_set_info haben ein 4p-Tier", () => {
+    const green = (gearJson as unknown as {
+      green_set_info: Record<string, { bonuses: Record<string, Array<{ attr: string; val: number; value_status?: string }>> }>;
+    }).green_set_info;
+    const keys = Object.keys(green);
+    expect(keys.length).toBeGreaterThanOrEqual(28);
+    for (const k of keys) {
+      expect(green[k].bonuses["4"], `Set ${k} ohne 4p-Tier`).toBeDefined();
+      expect(green[k].bonuses["4"].length).toBeGreaterThan(0);
+    }
+  });
+
+  it("4er-Eclipse erhöht den CC-Wert über die Statuseffekt-Achse (Set-Bonus fließt in Achsen)", () => {
+    const mkGear = (brand: string, type: GearPiece["brandType"]): GearPiece[] =>
+      (["mask", "chest", "holster", "backpack"] as GearSlot[]).map(
+        (slot, i) => ({
+          id: `eclipse-${slot}-${i}`,
+          slot,
+          brand,
+          brandType: type,
+          core: "skill" as const,
+          coreValue: 1,
+          attributes: [],
+          talent: null,
+          prototype: true,
+        }),
+      );
+    const withSet = computeEffectVector(
+      ctx({ gear: [...mkGear("Eclipse Protocol", "gearset"), ...fullSkillGear("skill").slice(0, 2)], skills: [riotFoam] }),
+    );
+    const withoutSet = computeEffectVector(
+      ctx({ gear: fullSkillGear("skill"), skills: [riotFoam] }),
+    );
+    expect(withSet.cc).toBeGreaterThan(withoutSet.cc);
+  });
+
+  it("setBonusesForGear liefert die 4p-Annahme mit Set-Name und Teilezahl", () => {
+    const four = (["mask", "chest", "holster", "backpack"] as GearSlot[]).map(
+      (slot, i) => ({
+        id: `ts-${i}`,
+        slot,
+        brand: "Tipping Scales",
+        brandType: "gearset" as const,
+        core: "wd" as const,
+        coreValue: 15,
+        attributes: [],
+        talent: null,
+        prototype: true,
+      }),
+    );
+    const bonuses = setBonusesForGear(four);
+    const fourP = bonuses.filter((b) => b.pieces === 4);
+    expect(fourP.length).toBeGreaterThan(0);
+    expect(fourP.some((b) => b.attr === "chd")).toBe(true);
   });
 });

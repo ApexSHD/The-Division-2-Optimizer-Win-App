@@ -1,6 +1,8 @@
 import type { Weapon, GearPiece, GearSlot } from "./sampleData";
 import type { OptimizationSettings } from "../store";
-import { optimizeBuilds } from "./damage";
+import { optimizeBuilds, aggregateBuild, type SetBonusCatalog } from "./damage";
+import gearJson from "../db/gear.json";
+import modsJson from "../db/mod.json";
 import {
   computeEffectVector,
   type AxisContext,
@@ -32,7 +34,6 @@ export interface ModeContext {
   settings: OptimizationSettings;
   threatStatusShare: number;
   spec: string;
-  talentKeys?: string[];
   userAssumptions?: Record<string, number>;
 }
 
@@ -82,12 +83,70 @@ function statusAttrOf(gear: GearPiece[]): number {
   );
 }
 
-function chcAttrOf(gear: GearPiece[]): number {
-  return gear.reduce(
-    (sum, g) =>
-      sum + g.attributes.filter((a) => a.type === "chc").reduce((s, a) => s + a.value, 0),
-    0,
-  );
+export interface GearModPick {
+  slot: GearSlot;
+  attr: string;
+  val: number;
+}
+
+const GEAR_MOD_SLOTS: GearSlot[] = ["mask", "chest", "backpack"];
+
+interface GearModDef {
+  attr: string;
+  name: string;
+  val: number;
+  unit: string;
+}
+
+const GEAR_MODS_BY_ROLE_PRIORITY: Record<string, string[]> = {
+  dps_krit: ["chc", "chd", "hsd"],
+  dps_kopf: ["hsd", "chd", "chc"],
+  skill_heiler: ["repair", "skillhaste", "skillduration"],
+  skill_schaden: ["skillhaste", "skillduration", "repair"],
+  kontrolle: ["skillhaste", "skillduration", "repair"],
+  ruestungs_supporter: ["repair", "hazard", "skillhaste"],
+  tank: ["hazard", "pfe", "aok"],
+  buffer: ["skillhaste", "repair", "chc"],
+  hybrid_schaden_skill: ["chc", "skillhaste", "chd"],
+  hybrid_schaden_tank: ["chc", "hazard", "chd"],
+  hybrid_skill_tank: ["skillhaste", "hazard", "repair"],
+};
+
+function gearModCatalog(): GearModDef[] {
+  const db = modsJson as unknown as {
+    gear_mods?: Record<string, Array<{ attr: string; name: string; val: number; unit: string }>>;
+  };
+  const out: GearModDef[] = [];
+  for (const list of Object.values(db.gear_mods ?? {})) {
+    for (const m of list) out.push({ attr: m.attr, name: m.name, val: m.val, unit: m.unit });
+  }
+  return out;
+}
+
+export function bestGearModsForRole(roleKey: string): GearModPick[] {
+  const priority = GEAR_MODS_BY_ROLE_PRIORITY[roleKey] ?? ["chc", "chd", "hsd"];
+  const catalog = gearModCatalog();
+  const picks: GearModPick[] = [];
+  for (const slot of GEAR_MOD_SLOTS) {
+    let best: GearModDef | null = null;
+    let bestRank = Infinity;
+    for (const mod of catalog) {
+      const rank = priority.indexOf(mod.attr);
+      if (rank === -1) continue;
+      if (rank < bestRank) {
+        bestRank = rank;
+        best = mod;
+      }
+    }
+    if (best) {
+      picks.push({ slot, attr: best.attr, val: best.val });
+    }
+  }
+  return picks;
+}
+
+function modAttrTotal(picks: GearModPick[], attr: string): number {
+  return picks.filter((p) => p.attr === attr).reduce((s, p) => s + p.val, 0);
 }
 
 export function axisContextFor(
@@ -96,9 +155,21 @@ export function axisContextFor(
   ctx: ModeContext,
   role: RoleProfile,
 ): AxisContext {
+  const gearMods = bestGearModsForRole(role.key);
+  const gearWithMods: GearPiece[] = gear.map((g) => {
+    const pick = gearMods.find((p) => p.slot === g.slot);
+    if (!pick) return g;
+    return {
+      ...g,
+      attributes: [
+        ...g.attributes,
+        { type: pick.attr as never, value: pick.val },
+      ],
+    };
+  });
   return {
     weaponDps,
-    gear,
+    gear: gearWithMods,
     skills: ctx.skills,
     sklKind: role.sklKind,
     teamSize: ctx.teamSize,
@@ -114,11 +185,22 @@ function admissibilityInput(
   role: RoleProfile,
   ctx: ModeContext,
 ): AdmissibilityCheckInput {
+  const gearMods = bestGearModsForRole(role.key);
+  const gearWithMods: GearPiece[] = gear.map((g) => {
+    const pick = gearMods.find((p) => p.slot === g.slot);
+    if (!pick) return g;
+    return {
+      ...g,
+      attributes: [...g.attributes, { type: pick.attr as never, value: pick.val }],
+    };
+  });
+  const chcWithMods =
+    aggregateBuild(gear, ctx.shdLevel).chc + modAttrTotal(gearMods, "chc");
   return {
-    gear,
+    gear: gearWithMods,
     vector,
     role,
-    chc: chcAttrOf(gear),
+    chc: chcWithMods,
     headshotShare: Math.max(0, Math.min(100, ctx.settings.enemyHeadshotShare)) / 100,
     statusAttr: statusAttrOf(gear),
     hasHealSkill: hasHealSkill(ctx.skills),
@@ -156,12 +238,9 @@ export function buildCandidatesFromOptimizer(
 }
 
 export function goalForRole(roleKey: string): string {
-  const role = ROLE_KEY_SET.has(roleKey) ? roleProfile(roleKey) : null;
-  if (!role) return GOALS[0].name;
+  const role = roleProfile(roleKey);
   return GOALS.find((g) => g.key === role.ziel)?.name ?? GOALS[0].name;
 }
-
-const ROLE_KEY_SET = new Set<string>([]);
 
 export function reduceSearchSpace(
   gear: GearPiece[],
@@ -193,7 +272,6 @@ export function reduceSearchSpace(
       for (const axis of ["dps", "skl", "ehp", "cc", "buf", "upt"] as AxisKey[]) {
         fit += role.weights[axis] * (v as unknown as Record<AxisKey, number>)[axis];
       }
-      if (exoticAdmissible([g])) fit += 0;
       return { g, fit };
     });
     scored.sort((a, b) => b.fit - a.fit || (a.g.id < b.g.id ? -1 : 1));
@@ -240,7 +318,7 @@ export function optimizeV4(
       spec: ctx.spec,
       considerMods: true,
       modsBySlot: opts.modsBySlot as never,
-      setBonusCatalog: opts.setBonusCatalog as never,
+      setBonusCatalog: (opts.setBonusCatalog as never) ?? defaultSetBonusCatalog(),
     },
   );
 
@@ -277,12 +355,20 @@ export function optimizeV4(
   };
 }
 
-export interface ReachabilityResult {
-  mode: OperatingMode;
-  inventarScore: number | null;
-  zielScore: number | null;
-  reachabilityPercent: number | null;
-  targetIsUpperBound: boolean;
+function defaultSetBonusCatalog(): SetBonusCatalog {
+  const gearDb = gearJson as unknown as {
+    brand_set_info: Record<string, Record<string, unknown>>;
+    green_set_info: Record<string, Record<string, unknown>>;
+  };
+  const brands: SetBonusCatalog["brands"] = {};
+  for (const [key, info] of Object.entries(gearDb.brand_set_info ?? {})) {
+    brands[key.toLowerCase()] = (info as { bonuses_pve?: Record<string, Record<string, unknown>> }).bonuses_pve ?? {};
+  }
+  const greens: SetBonusCatalog["greens"] = {};
+  for (const [key, info] of Object.entries(gearDb.green_set_info ?? {})) {
+    greens[key.toLowerCase()] = (info as { bonuses?: Record<string, { attr: string; val: number }[]> }).bonuses ?? {};
+  }
+  return { brands, greens };
 }
 
 export function reachability(
@@ -304,6 +390,14 @@ export function reachability(
       ? true
       : zielScore >= inventarScore,
   };
+}
+
+export interface ReachabilityResult {
+  mode: OperatingMode;
+  inventarScore: number | null;
+  zielScore: number | null;
+  reachabilityPercent: number | null;
+  targetIsUpperBound: boolean;
 }
 
 export const V4_ALL_SLOTS = SLOTS;

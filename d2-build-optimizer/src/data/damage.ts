@@ -587,7 +587,11 @@ function applySetBonuses(
   const greenCounts = new Map<string, number>();
   for (const g of combo) {
     if (g.brandType === "gearset") {
-      const key = g.brand.toLowerCase();
+      const raw = g.brand.toLowerCase();
+      const key =
+        catalog.greens[raw] !== undefined
+          ? raw
+          : Object.keys(catalog.greens).find((k) => raw.startsWith(k) || k.startsWith(raw.split(" ")[0])) ?? raw;
       greenCounts.set(key, (greenCounts.get(key) ?? 0) + 1);
     }
   }
