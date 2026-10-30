@@ -26,7 +26,9 @@
           "duration": null,
           "cooldown": null,
           "charges": 4,
-          "description": "Säurewolke verursacht Skill-Schaden über Zeit."
+          "description": "Säurewolke verursacht Skill-Schaden über Zeit.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "reinforcer",
@@ -40,7 +42,9 @@
           "duration": null,
           "cooldown": null,
           "charges": 4,
-          "description": "Chemiewolke repariert Rüstung im Wirkungsbereich."
+          "description": "Chemiewolke repariert Rüstung im Wirkungsbereich.",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "riot_foam",
@@ -54,7 +58,9 @@
           "duration": 6,
           "cooldown": 10,
           "charges": 4,
-          "description": "Schaum setzt Gegner fest (Statuseffekt, CC-Achse)."
+          "description": "Schaum setzt Gegner fest (Statuseffekt, CC-Achse).",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "firestarter",
@@ -68,7 +74,9 @@
           "duration": null,
           "cooldown": null,
           "charges": 4,
-          "description": "Brandfläche verursacht Brand-Schaden über Zeit."
+          "description": "Brandfläche verursacht Brand-Schaden über Zeit.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -88,7 +96,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Begleitdrohne greift Ziele automatisch an."
+          "description": "Begleitdrohne greift Ziele automatisch an.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "fixer",
@@ -102,7 +112,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Repariert den Träger bzw. Verbündete."
+          "description": "Repariert den Träger bzw. Verbündete.",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "defender",
@@ -116,7 +128,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Reduziert eingehenden Schaden (EHP-relevant)."
+          "description": "Reduziert eingehenden Schaden (EHP-relevant).",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "bombardier",
@@ -130,7 +144,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Bombardiert einen markierten Bereich."
+          "description": "Bombardiert einen markierten Bereich.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -150,7 +166,9 @@
           "duration": 15,
           "cooldown": 60,
           "charges": null,
-          "description": "Heilt automatisch Verbündete in der Nähe (Kernwerkzeug für Skill-Heiler)."
+          "description": "Heilt automatisch Verbündete in der Nähe (Kernwerkzeug für Skill-Heiler).",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "reviver",
@@ -164,7 +182,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Belebt besiegte Verbündete wieder; Pflicht-Frage im Fragebogen der Heil-/Support-Rollen."
+          "description": "Belebt besiegte Verbündete wieder; Pflicht-Frage im Fragebogen der Heil-/Support-Rollen.",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "booster",
@@ -178,7 +198,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Erhöht Skill-Eile des Trägers (UPT-Achse)."
+          "description": "Erhöht Skill-Eile des Trägers (UPT-Achse).",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "stinger",
@@ -192,7 +214,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Greift Gegner in der Nähe an und stört sie."
+          "description": "Greift Gegner in der Nähe an und stört sie.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -212,7 +236,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Zerlegt sich in Minen, die Ziele verfolgen."
+          "description": "Zerlegt sich in Minen, die Ziele verfolgen.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "mender",
@@ -226,7 +252,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Verfolgt Verbündete und repariert sie (Kernwerkzeug für Skill-Heiler)."
+          "description": "Verfolgt Verbündete und repariert sie (Kernwerkzeug für Skill-Heiler).",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "airburst",
@@ -240,7 +268,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Explosive Flächenschädigung mit Brand."
+          "description": "Explosive Flächenschädigung mit Brand.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -260,7 +290,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Ballistischer Vollkörperschild; blockiert Waffengebrauch. Aggro-Werkzeug für Tank (Mindestwert-Regel #91)."
+          "description": "Ballistischer Vollkörperschild; blockiert Waffengebrauch. Aggro-Werkzeug für Tank (Mindestwert-Regel #91).",
+          "scaling_type": "shield_hp",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "deflector",
@@ -274,7 +306,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Reflektiert Projektile, solange der Schild steht."
+          "description": "Reflektiert Projektile, solange der Schild steht.",
+          "scaling_type": "shield_hp",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "crusader",
@@ -288,7 +322,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Erlaubt Waffengebrauch mit Einhandwaffe."
+          "description": "Erlaubt Waffengebrauch mit Einhandwaffe.",
+          "scaling_type": "shield_hp",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "guardian",
@@ -302,7 +338,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Erhöht den Schaden von Verbündeten im Schutz des Schildes (BUF-relevant)."
+          "description": "Erhöht den Schaden von Verbündeten im Schutz des Schildes (BUF-relevant).",
+          "scaling_type": "shield_hp",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -322,7 +360,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Zieht Aggro auf sich; Aggro-Werkzeug für Tank (Mindestwert-Regel #91)."
+          "description": "Zieht Aggro auf sich; Aggro-Werkzeug für Tank (Mindestwert-Regel #91).",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -342,7 +382,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Blendet Gegner im Sichtfeld (CC-Achse, geringere Effektgewichtung nach Lastenheft 4.4)."
+          "description": "Blendet Gegner im Sichtfeld (CC-Achse, geringere Effektgewichtung nach Lastenheft 4.4).",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "demolisher",
@@ -356,7 +398,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Fixiert Gegner an schwachen Punkten (höhere Effektgewichtung nach Lastenheft 4.4)."
+          "description": "Fixiert Gegner an schwachen Punkten (höhere Effektgewichtung nach Lastenheft 4.4).",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "burster",
@@ -370,7 +414,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Ketten-Schock zwischen markierten Gegnern (höhere Effektgewichtung nach Lastenheft 4.4)."
+          "description": "Ketten-Schock zwischen markierten Gegnern (höhere Effektgewichtung nach Lastenheft 4.4).",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -390,7 +436,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Automatischer Turm gegen Ziele in Reichweite."
+          "description": "Automatischer Turm gegen Ziele in Reichweite.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "sniper",
@@ -404,7 +452,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Langsame Präzisionsschüsse."
+          "description": "Langsame Präzisionsschüsse.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "incinerator",
@@ -418,7 +468,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Kegelförmiger Brandstrahl."
+          "description": "Kegelförmiger Brandstrahl.",
+          "scaling_type": "damage",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -438,7 +490,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Markiert Gegner durch Wände."
+          "description": "Markiert Gegner durch Wände.",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "jammer",
@@ -452,7 +506,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Stört und deaktiviert Gegner-Skills."
+          "description": "Stört und deaktiviert Gegner-Skills.",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         },
         {
           "key": "agent",
@@ -466,7 +522,9 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Erhöht Schaden des Teams gegen markierte Gegner (BUF-Achse)."
+          "description": "Erhöht Schaden des Teams gegen markierte Gegner (BUF-Achse).",
+          "scaling_type": "cc_duration",
+          "scaling_value_status": "Annahme"
         }
       ]
     },
@@ -486,9 +544,22 @@
           "duration": null,
           "cooldown": null,
           "charges": null,
-          "description": "Direkter Heil-Projektilwerfer (Zielheilung, Burst-Heil-Fenster)."
+          "description": "Direkter Heil-Projektilwerfer (Zielheilung, Burst-Heil-Fenster).",
+          "scaling_type": "repair",
+          "scaling_value_status": "Annahme"
         }
       ]
     }
-  ]
+  ],
+  "scaling_rules": {
+    "_note": "Skalierungslogik je Skill-Kategorie (Nutzervorgabe 29.11.): Schaden +35%/Rang (Rang 6 = +210% Basisschaden), Reparatur +20%/Rang (+120% auf Rang 6), CC +20% Effektdauer pro Rang oder zusaetzliche Ziele, Ballistischer Schild Hybrid +40% LP/Rang (gelbe UND blaue Kerne), Overcharge bricht Rang-6-Limit kurzzeitig (15 s, z.B. Talent Zukunftssicher / Acostas Umhaengetasche).",
+    "damage_per_rank": 35,
+    "repair_per_rank": 20,
+    "cc_duration_per_rank": 20,
+    "shield_hp_per_rank": 40,
+    "overcharge": {
+      "duration": 15,
+      "note": "Effizienzen verdoppelt, Radien vergroessert, Abklingzeiten entfallen"
+    }
+  }
 }
