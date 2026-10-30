@@ -2,7 +2,7 @@
   "version": "specializations_v1",
   "game_version": "TU22.x (offen)",
   "data_stand": "2026-11-29",
-  "source": "Lastenheft V4 Abschnitt 3.4/7 (Issue #89, Kommentar Spezialisierungen); Werte gegen aktuellen Spielstand zu verifizieren (Boni ändern sich mit TUs)",
+  "source": "Nutzervorgabe 30.10. (final): vollständige Spec-Übersicht inkl. Taktischer Link, Passive Boni, Spezial-Ausrüstung, Rüstungskit-Effekte; Waffe-Baum: bis zu 3 individuelle Waffenklassen je Spec +15 % WD (Annahme: passt zur Build-Waffe)",
   "note": "Die Spezialisierung ist ein Ergebnis, kein Eingabefeld (Lastenheft 3.4): Das Tool prüft alle Spezialisierungen als Ergänzung zum Rollenprofil und schlägt die beste vor (Begründung), übernehmbar oder durch feste Wahl ersetzbar. Hinweis: Eine Spezialisierung braucht eigene Stufen in der eigenen Fertigkeitenleiste. Gruppen-Buffs sind strukturiert nach dem BUF-Schema aus Lastenheft 4.5 (Ziel, Wirkung, Wert, Auslöser, Uptime, Stapel).",
   "team_buff_schema_legend": {
     "target": "selbst | team | team_ohne_mich",
@@ -14,130 +14,314 @@
       "key": "sharpshooter",
       "name": "Präzisionsschütze",
       "signature_weapon": "TAC-50 C",
-      "focus": ["Fernkampf", "Präzision"],
+      "focus": [
+        "Fernkampf",
+        "Präzision"
+      ],
       "passive_boni": [
-        { "wirkung": "Waffenstabilität/-präzision", "wert": null, "value_status": "offen" },
-        { "wirkung": "Nachladegeschwindigkeit", "wert": null, "value_status": "offen" },
-        { "wirkung": "Kopfschussschaden", "wert": null, "value_status": "offen" }
+        {
+          "wirkung": "Kopfschussschaden",
+          "wert": 25,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Waffenstabilität",
+          "wert": 30,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Nachladegeschwindigkeit",
+          "wert": 30,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Kritischer Trefferschutz (Konflikt-Modus)",
+          "wert": 20,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Rüstung in Deckung",
+          "wert": null,
+          "value_status": "offen"
+        },
+        {
+          "wirkung": "Gewehrmunition in Deckung (5 Schuss/20 s)",
+          "wert": null,
+          "value_status": "bestätigt"
+        }
       ],
       "signature_grenade": "Blendgranate",
       "skill_boni": [],
       "team_buffs": [
         {
-          "name": "Kopfschuss-Team-Buff",
+          "name": "Taktischer Link (Kopfschuss)",
           "target": "team_ohne_mich",
           "wirkung": "Kopfschussschaden",
           "wert": 10,
           "unit": "%",
           "ausloeser": "bedingt",
-          "bedingung": "nur für Teammitglieder, die näher am Gegner stehen als der Träger",
+          "bedingung": "nur wenn näher am Ziel als der Träger",
           "uptime": 1.0,
           "stapel": null,
-          "value_status": "offen"
+          "value_status": "bestätigt"
         }
       ],
       "team_side_effects": [
-        { "wirkung": "Signaturmunition", "beschreibung": "Kills mit der TAC-50 lassen Signaturmunition für die Gruppe fallen" }
+        {
+          "wirkung": "Signaturmunition",
+          "beschreibung": "Kills mit der TAC-50 lassen Signaturmunition für die Gruppe fallen"
+        }
       ],
-      "axis_relevance": { "dps": 1, "skl": 0, "ehp": 0, "cc": 0, "buf": 1, "upt": 0 }
+      "axis_relevance": {
+        "dps": 1,
+        "skl": 0,
+        "ehp": 0,
+        "cc": 0,
+        "buf": 1,
+        "upt": 0
+      }
     },
     {
       "key": "demolitionist",
       "name": "Zerstörungsexperte",
       "signature_weapon": "M32A1",
-      "focus": ["Explosionen", "Crowd Control"],
+      "focus": [
+        "Explosionen",
+        "Crowd Control"
+      ],
       "passive_boni": [
-        { "wirkung": "Explosivschaden", "wert": 20, "unit": "%", "value_status": "offen" }
+        {
+          "wirkung": "Explosionsschaden",
+          "wert": 25,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Brandwiderstand",
+          "wert": 20,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Krisenreaktion (Magazin voll bei Rüstungsbruch, 60 s CD)",
+          "wert": null,
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Einschlagsschutz (1 Explosion/60 s ignorieren)",
+          "wert": null,
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Kritischer Trefferschutz (Konflikt)",
+          "wert": 20,
+          "unit": "%",
+          "value_status": "bestätigt"
+        }
       ],
       "signature_grenade": "Splittergranate (Bluten)",
       "skill_boni": [],
       "team_buffs": [
         {
-          "name": "Deckungs-Schadens-Buff",
+          "name": "Taktischer Link (aus Deckung)",
           "target": "team",
-          "wirkung": "Schaden aus Deckung",
+          "wirkung": "Schaden gegen Ziele außerhalb der Deckung",
           "wert": 5,
           "unit": "%",
           "ausloeser": "dauerhaft",
           "bedingung": null,
           "uptime": 1.0,
           "stapel": null,
-          "value_status": "offen"
+          "value_status": "bestätigt"
         }
       ],
       "team_side_effects": [
-        { "wirkung": "Kinetik-Schutz", "beschreibung": "Verringert den kinetischen Schaden für Verbündete", "wert": null, "value_status": "offen" }
+        {
+          "wirkung": "Kinetik-Schutz",
+          "beschreibung": "Verringert den kinetischen Schaden für Verbündete",
+          "wert": null,
+          "value_status": "offen"
+        }
       ],
-      "axis_relevance": { "dps": 1, "skl": 1, "ehp": 0, "cc": 1, "buf": 1, "upt": 0 }
+      "axis_relevance": {
+        "dps": 1,
+        "skl": 1,
+        "ehp": 0,
+        "cc": 1,
+        "buf": 1,
+        "upt": 0
+      }
     },
     {
       "key": "survivalist",
       "name": "Überlebensspezialist",
       "signature_weapon": "Präzisions-Armbrust",
-      "focus": ["Heilung", "Support", "Statuseffekte"],
+      "focus": [
+        "Heilung",
+        "Support",
+        "Statuseffekte"
+      ],
       "passive_boni": [
-        { "wirkung": "Schaden gegen Ziele mit Statuseffekten", "wert": null, "unit": "%", "value_status": "offen" },
-        { "wirkung": "Ausgehende Heilung", "wert": null, "unit": "%", "value_status": "offen" }
+        {
+          "wirkung": "Erhöhte Heilung",
+          "wert": 15,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Schutz vor Eliten",
+          "wert": 10,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Fertigkeitstempo in Deckung",
+          "wert": 10,
+          "unit": "%",
+          "value_status": "bestätigt"
+        }
       ],
       "signature_grenade": "Brandgranate",
       "skill_boni": [],
       "team_buffs": [
         {
-          "name": "Status-Präzisions-Buff",
+          "name": "Taktischer Link (Status)",
           "target": "team",
-          "wirkung": "Schaden gegen Ziele mit eigenen Statuseffekten",
+          "wirkung": "Schaden gegen Ziele mit Statuseffekt",
           "wert": 10,
           "unit": "%",
           "ausloeser": "dauerhaft",
-          "bedingung": "nur gegen Ziele, die von den Statuseffekten des Trägers betroffen sind",
+          "bedingung": "Ziel unter Statuseffekt",
           "uptime": 1.0,
           "stapel": null,
-          "value_status": "offen"
+          "value_status": "bestätigt"
         }
       ],
       "team_side_effects": [
-        { "wirkung": "Gruppenheilung", "beschreibung": "Gruppenheilung beim Einsatz von Rüstungskits", "wert": null, "value_status": "offen" }
+        {
+          "wirkung": "Gruppenheilung",
+          "beschreibung": "Gruppenheilung beim Einsatz von Rüstungskits",
+          "wert": null,
+          "value_status": "offen"
+        }
       ],
-      "axis_relevance": { "dps": 0, "skl": 1, "ehp": 0, "cc": 1, "buf": 1, "upt": 0 }
+      "axis_relevance": {
+        "dps": 0,
+        "skl": 1,
+        "ehp": 0,
+        "cc": 1,
+        "buf": 1,
+        "upt": 0
+      }
     },
     {
       "key": "gunner",
       "name": "Richtschütze",
       "signature_weapon": "Minigun",
-      "focus": ["Dauerfeuer", "Offensive"],
+      "focus": [
+        "Dauerfeuer",
+        "Offensive"
+      ],
       "passive_boni": [
-        { "wirkung": "Rüstung bei Kills", "wert": null, "value_status": "offen" },
-        { "wirkung": "Passive Munition", "beschreibung": "Generiert alle 60 Sek. passiv Munition", "wert": null },
-        { "wirkung": "Feuerrate nach Kill", "wert": null, "unit": "%", "value_status": "offen" }
+        {
+          "wirkung": "Rüstung bei Kill",
+          "wert": 10,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Munitionskapazität",
+          "wert": 50,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Munitionsregeneration (10 %/60 s, 5 % für Gruppe)",
+          "wert": null,
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Waffenhandhabung stillstehend",
+          "wert": 20,
+          "unit": "%",
+          "value_status": "bestätigt"
+        }
       ],
       "signature_grenade": "Schaumgranate (setzt Gegner fest)",
       "skill_boni": [],
       "team_buffs": [
         {
-          "name": "Nachlade-Buff",
+          "name": "Taktischer Link (Feuerrate)",
           "target": "team",
-          "wirkung": "Nachladegeschwindigkeit",
-          "wert": null,
+          "wirkung": "Feuerrate bei Tötung",
+          "wert": 5,
           "unit": "%",
           "ausloeser": "bei_kill",
-          "bedingung": "alle 3 Kills",
+          "bedingung": null,
           "uptime": 0.5,
           "stapel": null,
-          "value_status": "offen"
+          "value_status": "bestätigt"
         }
       ],
       "team_side_effects": [
-        { "wirkung": "Zusatzrüstung", "beschreibung": "Gewährt Verbündeten temporäre Zusatzrüstung (EHP-relevant)", "wert": null, "value_status": "offen" }
+        {
+          "wirkung": "Zusatzrüstung",
+          "beschreibung": "Gewährt Verbündeten temporäre Zusatzrüstung (EHP-relevant)",
+          "wert": null,
+          "value_status": "offen"
+        }
       ],
-      "axis_relevance": { "dps": 1, "skl": 0, "ehp": 1, "cc": 1, "buf": 1, "upt": 0 }
+      "axis_relevance": {
+        "dps": 1,
+        "skl": 0,
+        "ehp": 1,
+        "cc": 1,
+        "buf": 1,
+        "upt": 0
+      }
     },
     {
       "key": "technician",
       "name": "Techniker",
       "signature_weapon": "P-017",
-      "focus": ["Skill-Builds", "Elektronik"],
+      "focus": [
+        "Skill-Builds",
+        "Elektronik"
+      ],
       "passive_boni": [
-        { "wirkung": "Schaden gegen Drohnen/Hunde/Elektronik", "wert": null, "unit": "%", "value_status": "offen" }
+        {
+          "wirkung": "Fertigkeiten-Rang (+1 Skill Tier, hybrid gelb/blau)",
+          "wert": 1,
+          "unit": "Stufe",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Fertigkeitenschaden",
+          "wert": 10,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Schaden gegen Drohnen/Mechanik",
+          "wert": 15,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Übertakten (Schock/EMP-Immunität im 5-m-Radius)",
+          "wert": null,
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Reparaturfertigkeit",
+          "wert": 10,
+          "unit": "%",
+          "value_status": "bestätigt"
+        }
       ],
       "signature_grenade": "EMP-Granate",
       "skill_boni": [
@@ -149,68 +333,99 @@
           "ausloeser": "dauerhaft",
           "bedingung": null,
           "uptime": 1.0,
-          "value_status": "offen",
+          "value_status": "bestätigt",
           "hint": "Harter Skill-Stufen-Bonus: muss in die SKL-Berechnung (Lastenheft 4.2, Issue #90) eingehen, nicht als Buff."
         }
       ],
       "team_buffs": [
         {
-          "name": "Schock-Immunität",
+          "name": "Taktischer Link (Fertigkeiten-Markierung)",
           "target": "team",
-          "wirkung": "Immunität gegen Schock/Störung",
-          "wert": null,
-          "unit": "bool",
-          "ausloeser": "bei_naehe_zu_skill",
-          "bedingung": "Verbündete im 5-m-Radius um platzierte Fertigkeiten",
-          "uptime": 0.7,
-          "stapel": null,
-          "value_status": "offen"
-        },
-        {
-          "name": "Skill-Schadens-Buff",
-          "target": "team",
-          "wirkung": "Skill-Schaden",
-          "wert": null,
+          "wirkung": "Schaden gegen via Fertigkeit markierte Ziele",
+          "wert": 15,
           "unit": "%",
           "ausloeser": "dauerhaft",
-          "bedingung": null,
+          "bedingung": "Ziel von eigener Fertigkeit markiert",
           "uptime": 1.0,
           "stapel": null,
-          "value_status": "offen"
+          "value_status": "bestätigt"
         }
       ],
       "team_side_effects": [],
-      "axis_relevance": { "dps": 0, "skl": 1, "ehp": 0, "cc": 0, "buf": 1, "upt": 1 }
+      "axis_relevance": {
+        "dps": 0,
+        "skl": 1,
+        "ehp": 0,
+        "cc": 0,
+        "buf": 1,
+        "upt": 1
+      }
     },
     {
       "key": "firewall",
       "name": "Feuerwand",
       "signature_weapon": "K9-JetStream",
-      "focus": ["Nahkampf", "Aggressives Tanken"],
+      "focus": [
+        "Nahkampf",
+        "Aggressives Tanken"
+      ],
       "passive_boni": [
-        { "wirkung": "Branddauer", "wert": null, "unit": "%", "value_status": "offen" },
-        { "wirkung": "Stürmer-Schild", "beschreibung": "Erhöht den Schaden basierend auf den Feinden vor dir", "wert": null, "value_status": "offen" }
+        {
+          "wirkung": "Branddauer",
+          "wert": 20,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Schockwelle bei Rüstungszerstörung (5 m Brand)",
+          "wert": null,
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Gesundheit bei Tötung",
+          "wert": 10,
+          "unit": "%",
+          "value_status": "bestätigt"
+        },
+        {
+          "wirkung": "Nahkampfschaden",
+          "wert": 30,
+          "unit": "%",
+          "value_status": "bestätigt"
+        }
       ],
       "signature_grenade": "Cluster-Brandgranate",
       "skill_boni": [],
       "team_buffs": [
         {
-          "name": "Nahkampf-Team-Buff",
-          "target": "team_ohne_mich",
-          "wirkung": "Waffenschaden",
+          "name": "Taktischer Link (Nähe)",
+          "target": "team",
+          "wirkung": "Schaden gegen Feinde im 10-m-Radius",
           "wert": 10,
           "unit": "%",
           "ausloeser": "bedingt",
-          "bedingung": "Verbündete fügen Gegnern innerhalb von 10 m vor dem Träger erhöhten Schaden zu",
+          "bedingung": "Feinde im Umkreis des Trägers",
           "uptime": 0.7,
           "stapel": null,
-          "value_status": "offen"
+          "value_status": "bestätigt"
         }
       ],
       "team_side_effects": [
-        { "wirkung": "Rüstungsbruch-Brennen", "beschreibung": "Beim Brechen der eigenen Rüstung erleiden nahe Feinde den Statuseffekt „Brennend“ (CC-relevant)", "wert": null }
+        {
+          "wirkung": "Rüstungsbruch-Brennen",
+          "beschreibung": "Beim Brechen der eigenen Rüstung erleiden nahe Feinde den Statuseffekt „Brennend“ (CC-relevant)",
+          "wert": null
+        }
       ],
-      "axis_relevance": { "dps": 1, "skl": 0, "ehp": 1, "cc": 1, "buf": 1, "upt": 0 }
+      "axis_relevance": {
+        "dps": 1,
+        "skl": 0,
+        "ehp": 1,
+        "cc": 1,
+        "buf": 1,
+        "upt": 0
+      }
     }
-  ]
+  ],
+  "weapon_tree_note": "Skillbaum: bis zu drei individuelle Waffenklassen wählbar, je +15 % Waffenschaden (SPEC_WEAPON_TREE_WD in damage.ts; Annahme: gewählte Klassen passen zur Build-Waffe, da nur 2 Gattungen spielbar)"
 }
