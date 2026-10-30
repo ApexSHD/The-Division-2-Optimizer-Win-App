@@ -1,5 +1,5 @@
 {
-  "version": "mods_v2",
+  "version": "mods_v3",
   "source": "Davids Mod-Tabelle (Optics Rail / Magazine / Underbarrel / Muzzle inkl. Exotic-Fixed-Mods)",
   "note": "Struktur kompatibel zu MOD_CATALOG im Striker-Build-Optimierer. slotTypes = Slot-Typen laut Waffen-Tabelle (Iron / Micro / Short / Long / Neutral bei Optik; Kaliber bei Magazin/Mündung; Side / Long / Short / Gadget bei Unterlauf). Exotic-Mods sind zusätzlich unter exotic_mods pro Waffe hinterlegt. | Y8S3.2: Exotic-Mods aktualisiert (Ruthless/Merciless/Ravenous/Diamondback/Nemesis/Mantis/Dread Edict).",
   "attr_legend": {
@@ -241,6 +241,52 @@
         ],
         "bonus": {
           "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "PRO Red Dot Sight (Rugged Mini Reflex)",
+        "slotTypes": [
+          "Long/Short Optics Rail",
+          "Short Optics Rail"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "EXPS3 Holo Sight (Russisches Rotpunkt)",
+        "slotTypes": [
+          "Long Optics Rail"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "VX-1 Scope 12x",
+        "slotTypes": [
+          "Long Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 10
+        },
+        "penalty": null,
+        "note": "Zwingt in First-Person"
+      },
+      {
+        "name": "Digital Scope (Praezisionsschuetze-exklusiv)",
+        "slotTypes": [
+          "Long Optics Rail"
+        ],
+        "bonus": {
+          "type": "hsd",
           "val": 5
         },
         "penalty": null
@@ -698,6 +744,101 @@
           "val": 20
         },
         "penalty": null
+      },
+      {
+        "name": "Robustes erweitertes Magazin (5.56/7.62)",
+        "slotTypes": [
+          "5.56 Magazine Slot",
+          "7.62 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "magSize",
+          "val": 20
+        },
+        "penalty": null,
+        "note": "Wichtigstes Magazin im Spiel"
+      },
+      {
+        "name": "Erweitertes 9mm/.45 Magazin (SMG)",
+        "slotTypes": [
+          "9mm Magazine Slot",
+          ".45 Magazine Slot"
+        ],
+        "bonus": {
+          "type": "magSize",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Präzisions-Magazin (MMR)",
+        "slotTypes": [
+          "MMR Magazine Slot"
+        ],
+        "bonus": {
+          "type": "hsd",
+          "val": 7
+        },
+        "penalty": null,
+        "note": "HSD +5-7% je Kaliber"
+      },
+      {
+        "name": "Erweitertes MMR-Magazin",
+        "slotTypes": [
+          "MMR Magazine Slot"
+        ],
+        "bonus": {
+          "type": "magSize",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Grosse Tasche (M249/Infantry MG5)",
+        "slotTypes": [
+          "LMG Belt Pouch"
+        ],
+        "bonus": {
+          "type": "magSize",
+          "val": 50
+        },
+        "penalty": {
+          "type": "reloadSpeed",
+          "val": -10
+        }
+      },
+      {
+        "name": "Taktische kleine Tasche (LMG)",
+        "slotTypes": [
+          "LMG Belt Pouch"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Flexible Röhrenfeder (Shotgun)",
+        "slotTypes": [
+          "Shotgun Tube Slot"
+        ],
+        "bonus": {
+          "type": "reloadSpeed",
+          "val": 30
+        },
+        "penalty": null
+      },
+      {
+        "name": "Magazin-Trommel (ACS-12)",
+        "slotTypes": [
+          "Shotgun Tube Slot"
+        ],
+        "bonus": {
+          "type": "magSize",
+          "val": 20
+        },
+        "penalty": null
       }
     ],
     "underbarrel": [
@@ -719,9 +860,10 @@
         ],
         "bonus": {
           "type": "chc",
-          "val": 10
+          "val": 5
         },
-        "penalty": null
+        "penalty": null,
+        "note": "Max. CHC Unterlauf: +5% (Nutzervorgabe; alter Eintrag +10% war falsch)"
       },
       {
         "name": "Pistol Flashlight",
@@ -817,6 +959,30 @@
         "bonus": null,
         "penalty": null,
         "note": "Pulst anvisierte Ziele"
+      },
+      {
+        "name": "Kompakter Laserpointer",
+        "slotTypes": [
+          "Gadget Slot",
+          "Short Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Winkel-/Vertikaler Vordergriff",
+        "slotTypes": [
+          "Long Underbarrel Rail"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
+        },
+        "penalty": null,
+        "note": "Stabilitaet/Praezision +10%"
       }
     ],
     "muzzle": [
@@ -1098,6 +1264,56 @@
         "bonus": {
           "type": "stability",
           "val": 20
+        },
+        "penalty": null
+      },
+      {
+        "name": "Omega 5.56/7.62 Suppressor",
+        "slotTypes": [
+          "5.56 Muzzle Slot",
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Praezisions-Muendungsbremse",
+        "slotTypes": [
+          "5.56 Muzzle Slot",
+          "7.62 Muzzle Slot",
+          "9mm Muzzle Slot",
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chc",
+          "val": 5
+        },
+        "penalty": null
+      },
+      {
+        "name": "Osprey 9mm/.45 Suppressor",
+        "slotTypes": [
+          "9mm Muzzle Slot",
+          ".45 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "chd",
+          "val": 10
+        },
+        "penalty": null
+      },
+      {
+        "name": "Grosse Muendungsbremse / Muendungskappe",
+        "slotTypes": [
+          "5.56 Muzzle Slot",
+          "7.62 Muzzle Slot"
+        ],
+        "bonus": {
+          "type": "stability",
+          "val": 10
         },
         "penalty": null
       }
@@ -1843,5 +2059,22 @@
         "value_status": "Annahme"
       }
     ]
-  }
+  },
+  "max_values_note": "Max-Werte je Waffenklasse/Mod-Platz aus Nutzervorgabe 30.10. (bestaetigt): AR/Rifle/LMG: Optik CHC 5/CHD 10/HSD 10; Muendung CHD 10/CHC 5/Stabilitaet 10; Unterlauf Stabilitaet-Praezision 10/CHC 5; Magazin +20 Pat. (robust) - SMG analog (Pistolen-Kaliber). MMR: Optik HSD 10 (VX-1) bzw. 5 (Digital, Praezisionsschuetze), Magazin HSD 5-7 +5 Pat. Shotgun: stark limitiert (viele Modelle gar keine Mods), Rohrenmagazin +30% Nachladegeschwindigkeit, Trommel +20. Spezial-Exklusiv: Techniker Linked Laser Pointer (markiert Ziele), Stuermer-Schild-Mods (Feuerwand).",
+  "special_exclusive": [
+    {
+      "name": "Linked Laser Pointer (Techniker-exklusiv)",
+      "slot": "underbarrel",
+      "bonus": null,
+      "note": "Kein numerischer Wert - markiert (pulst) Ziele automatisch bei Visierung; essenziell fuer Perfekt Unaufhaltsam (Spotter) und Herzbrecher-Set",
+      "spec": "technician"
+    },
+    {
+      "name": "Stuermer-Schild-Modifikationen",
+      "slot": "shield",
+      "bonus": null,
+      "note": "Nur aktiv mit Feuerwand-Spec und ausgeruestetem Schild; erhoeht Schaden pro Feind vor dir",
+      "spec": "firewall"
+    }
+  ]
 }
