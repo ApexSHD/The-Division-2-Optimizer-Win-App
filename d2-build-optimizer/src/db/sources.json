@@ -1,0 +1,28 @@
+{
+  "version": "sources_v1",
+  "game_version": "TU22.x (offen)",
+  "data_stand": "2026-11-29",
+  "source": "Lastenheft V4 Abschnitt 7 (Issue #89); Bezugsquellen für Empfehlungs-Stufe A/B (Issue #93)",
+  "note": "Wo ein Teil herkommt und ob es gezielt farmbar ist. Stufe A = gezielt farmbar, Stufe B = selten/zufallsabhängig. game_activity-Werte bei Umsetzung gegen aktuellen Spielstand verifizieren.",
+  "source_types_legend": {
+    "targeted_farm": "Gezielt farmbar (feste Quelle, z. B. Boss, Vendor, Projekt) → Stufe A",
+    "random_drop": "Zufallsabhängig (allgemeiner Loot-Pool, Exotic-Drop-Chance) → Stufe B",
+    "quest": "Aufgabe/Freischaltung mit fester Belohnung",
+    "vendor": "Händler/Dark-Zone-Vendor (Wechselndes Sortiment)"
+  },
+  "sources": [
+    { "key": "gearset_striker", "item": "Striker's Battlegear (Gearset)", "source_type": "targeted_farm", "game_activity": ["Gearset-Zielloot (z. B. Summit/Countdown Gearset-Targeted Loot)", "Gearset-Caches"], "stage": "A", "value_status": "offen" },
+    { "key": "gearset_eclipse", "item": "Eclipse Protocol (Gearset)", "source_type": "targeted_farm", "game_activity": ["Gearset-Zielloot", "Gearset-Caches"], "stage": "A", "value_status": "offen" },
+    { "key": "gearset_foundry", "item": "Foundry Bulwark (Gearset)", "source_type": "targeted_farm", "game_activity": ["Gearset-Zielloot", "Gearset-Caches"], "stage": "A", "value_status": "offen" },
+    { "key": "gearset_future_initiative", "item": "Future Initiative (Gearset)", "source_type": "targeted_farm", "game_activity": ["Gearset-Zielloot", "Gearset-Caches"], "stage": "A", "value_status": "offen" },
+    { "key": "named_coyote_mask", "item": "Coyote's Mask (Exotic)", "source_type": "random_drop", "game_activity": ["Exotic-Drop ( RAID: Dark Hours)", "Dark-Zone-Kommandant"], "stage": "B", "value_status": "offen" },
+    { "key": "exotic_st_elmos", "item": "St. Elmo's Engine (Exotic-Waffe)", "source_type": "quest", "game_activity": ["Exotic-Waffen-Projekt (komplettes Waffenprojekt bauen)"], "stage": "A", "value_status": "offen" },
+    { "key": "exotic_memento", "item": "Memento (Exotic-Rucksack)", "source_type": "random_drop", "game_activity": ["Exotic-Drop (Season/Countdown/Summit)"], "stage": "B", "value_status": "offen" },
+    { "key": "named_equalizer", "item": "Equalizer (Named-Weste)", "source_type": "targeted_farm", "game_activity": ["Named-Item-Zielloot", "Season-Track/Vendor (wechselnd)"], "stage": "B", "value_status": "offen" },
+    { "key": "named_btsu", "item": "BTSU Transference Overclock (Named-Rucksack)", "source_type": "targeted_farm", "game_activity": ["Named-Item-Zielloot", "Vendor (wechselnd)"], "stage": "B", "value_status": "offen" },
+    { "key": "brand_fenris", "item": "Fenris Group AB (Markenset)", "source_type": "targeted_farm", "game_activity": ["Marken-Zielloot (beliebige Aktivität)"], "stage": "A", "value_status": "offen" },
+    { "key": "brand_grupo", "item": "Grupo Sombra (Markenset)", "source_type": "targeted_farm", "game_activity": ["Marken-Zielloot (beliebige Aktivität)"], "stage": "A", "value_status": "offen" },
+    { "key": "brand_ceska", "item": "Ceska Vyroba (Markenset)", "source_type": "targeted_farm", "game_activity": ["Marken-Zielloot (beliebige Aktivität)"], "stage": "A", "value_status": "offen" },
+    { "key": "brand_walkiris", "item": "Walker, Harris (Markenset)", "source_type": "targeted_farm", "game_activity": ["Marken-Zielloot (beliebige Aktivität)"], "stage": "A", "value_status": "offen" }
+  ]
+}

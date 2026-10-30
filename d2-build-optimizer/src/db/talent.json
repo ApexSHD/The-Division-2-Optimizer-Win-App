@@ -1,365 +1,642 @@
 {
-    "version": "v1",
-    "source": "Davids High-End-Talenttabelle (Perfect-Talent-Liste)",
-    "note": "Normale High-End-Waffentalente. Werte in Klammern (Named/Perfect-Varianten) bewusst weggelassen – Perfect-Werte kommen aus der Named-Waffen-DB. Allgemeine Talente (ALL WEAPONS) sind bereits im Canvas modelliert und hier nicht doppelt aufgeführt.",
-    "categories_legend": {
-        "wd": "Waffen-Schaden (additiv)",
-        "amp": "Verstärker (multiplikative Gruppe)",
-        "chd": "Krit-Trefferschaden (additiv)",
-        "chcchd": "Kritische Trefferchance / -Schaden",
-        "utility": "Utility – kein direkter Schadenswert",
-        "dyn": "Dynamisch – situativ/zielabhängig"
+  "version": "v2",
+  "source": "Davids High-End-Talenttabelle (Perfect-Talent-Liste)",
+  "note": "Normale High-End-Waffentalente. Werte in Klammern (Named/Perfect-Varianten) bewusst weggelassen – Perfect-Werte kommen aus der Named-Waffen-DB. Allgemeine Talente (ALL WEAPONS) sind bereits im Canvas modelliert und hier nicht doppelt aufgeführt. Ab v2: strukturierte gear_talents nach dem BUF-Schema (Lastenheft V4 Abschnitt 4.5) für Team-Buffs; Werte mit value_status='offen' sind bei Umsetzung gegen Spiel/Quellen zu erfassen.",
+  "categories_legend": {
+    "wd": "Waffen-Schaden (additiv)",
+    "amp": "Verstärker (multiplikative Gruppe)",
+    "chd": "Krit-Trefferschaden (additiv)",
+    "chcchd": "Kritische Trefferchance / -Schaden",
+    "utility": "Utility – kein direkter Schadenswert",
+    "dyn": "Dynamisch – situativ/zielabhängig"
+  },
+  "talents": [
+    {
+      "key": "rifleman",
+      "name": "Rifleman",
+      "label": "Rifleman",
+      "weapon_types": [
+        "Rifle"
+      ],
+      "category": "wd",
+      "group": "Waffen-Schaden",
+      "value": 50,
+      "unit": "%",
+      "conditional": true,
+      "condition": "5 Kopfschuss-Stacks à +10% Waffen-Schaden (5s aktiv)",
+      "estimated": false,
+      "description": "Kopfschüsse gewähren einen Stack von +10% Waffen-Schaden für 5s. Maximal 5 Stacks. Weitere Kopfschüsse aktualisieren die Dauer."
     },
-    "talents": [
-        {
-            "key": "rifleman",
-            "name": "Rifleman",
-            "label": "Rifleman",
-            "weapon_types": [
-                "Rifle"
-            ],
-            "category": "wd",
-            "group": "Waffen-Schaden",
-            "value": 50,
-            "unit": "%",
-            "conditional": true,
-            "condition": "5 Kopfschuss-Stacks à +10% Waffen-Schaden (5s aktiv)",
-            "estimated": false,
-            "description": "Kopfschüsse gewähren einen Stack von +10% Waffen-Schaden für 5s. Maximal 5 Stacks. Weitere Kopfschüsse aktualisieren die Dauer."
-        },
-        {
-            "key": "boomerang",
-            "name": "Boomerang",
-            "label": "Bumerang",
-            "weapon_types": [
-                "Rifle"
-            ],
-            "category": "dyn",
-            "group": "Dynamisch",
-            "value": 40,
-            "unit": "%",
-            "conditional": true,
-            "condition": "50% Chance je Crit-Treffer: Kugel kehrt zurück, nächster Schuss +40% Schaden",
-            "estimated": true,
-            "description": "Kritische Treffer haben eine 50% Chance, die Kugel zurück ins Magazin zu bringen. Wenn eine Kugel zurückgebracht wird, erhält der nächste Schuss +40% erhöhten Schaden."
-        },
-        {
-            "key": "lucky_shot",
-            "name": "Lucky Shot",
-            "label": "Glücksschuss",
-            "weapon_types": [
-                "Rifle",
-                "MMR",
-                "Pistol"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren."
-        },
-        {
-            "key": "precision_strike",
-            "name": "Precision Strike",
-            "label": "Präzisionsschlag",
-            "weapon_types": [
-                "Rifle",
-                "AR",
-                "MMR",
-                "LMG"
-            ],
-            "category": "amp",
-            "group": "Verstärker",
-            "value": 20,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nach Stack-Aufbau (>20m-Kills), Treffer innerhalb 20m (5s aktiv, max. 3 Stacks)",
-            "estimated": false,
-            "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren."
-        },
-        {
-            "key": "back_and_forth",
-            "name": "Back and Forth",
-            "label": "Hin und her",
-            "weapon_types": [
-                "Rifle",
-                "AR",
-                "MMR",
-                "MP",
-                "LMG",
-                "Shotgun"
-            ],
-            "category": "dyn",
-            "group": "Schussfrequenz / Waffen-Schaden",
-            "value": 9,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nach Waffenwechsel zu dieser Waffe (+10% Feuerrate, +9% Waffen-Schaden, 10s aktiv)",
-            "estimated": false,
-            "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen."
-        },
-        {
-            "key": "near_sighted",
-            "name": "Near Sighted",
-            "label": "Kurzsichtig",
-            "weapon_types": [
-                "AR"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Erhält +80% Stabilität auf Kosten von -35% optimaler Reichweite."
-        },
-        {
-            "key": "on_empty",
-            "name": "On Empty",
-            "label": "Leer",
-            "weapon_types": [
-                "AR"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Das Nachladen aus dem leeren Magazin gewährt +60% Waffen-Handhabung für 10s."
-        },
-        {
-            "key": "measured",
-            "name": "Measured",
-            "label": "Abgemessen",
-            "weapon_types": [
-                "AR",
-                "MP",
-                "LMG"
-            ],
-            "category": "dyn",
-            "group": "Schussfrequenz / Waffen-Schaden",
-            "value": 30,
-            "unit": "%",
-            "conditional": true,
-            "condition": "untere Magazinhälfte: +30% Gesamt-Waffen-Schaden (obere Hälfte: +25% RoF, -25% WD)",
-            "estimated": false,
-            "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)"
-        },
-        {
-            "key": "overflowing",
-            "name": "Overflowing",
-            "label": "Überlaufend",
-            "weapon_types": [
-                "AR"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Jedes 3. Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%."
-        },
-        {
-            "key": "stabilize",
-            "name": "Stabilize",
-            "label": "Stabilisieren",
-            "weapon_types": [
-                "AR",
-                "MP",
-                "LMG"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück."
-        },
-        {
-            "key": "naked",
-            "name": "Naked",
-            "label": "Nackt",
-            "weapon_types": [
-                "MMR"
-            ],
-            "category": "dyn",
-            "group": "Kopfschuss-Schaden",
-            "value": 50,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nur gegen Gegner ohne Rüstung (5s aktiv)",
-            "estimated": false,
-            "description": "Das Treffen eines Gegners ohne Rüstung gewährt +50% Kopfschuss-Schaden für 5s."
-        },
-        {
-            "key": "outsider",
-            "name": "Outsider",
-            "label": "Außenseiter",
-            "weapon_types": [
-                "MP"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Nach dem Töten eines Gegners erhältst du +100% optimale Reichweite und +100% Genauigkeit für 10s."
-        },
-        {
-            "key": "unwavering",
-            "name": "Unwavering",
-            "label": "Unbeirrbar",
-            "weapon_types": [
-                "MP"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Das Wechseln zu dieser Waffe gewährt +300% Waffen-Handhabung für 5s. Tötungen aktualisieren den Buff. Das Wechseln weg deaktiviert dies für alle Waffen für 5s."
-        },
-        {
-            "key": "unhinged",
-            "name": "Unhinged",
-            "label": "Aus den Angeln",
-            "weapon_types": [
-                "LMG"
-            ],
-            "category": "wd",
-            "group": "Waffen-Schaden",
-            "value": 18,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Gewährt +18% Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit."
-        },
-        {
-            "key": "frenzy",
-            "name": "Frenzy",
-            "label": "Raserei",
-            "weapon_types": [
-                "LMG"
-            ],
-            "category": "dyn",
-            "group": "Schussfrequenz / Waffen-Schaden",
-            "value": 15,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nach Nachladen aus leer, je 10 Kugeln im Magazin +3% RoF & +3% WD (9s aktiv)",
-            "estimated": true,
-            "description": "Für jede 10 Kugeln in der Magazinkapazität erhältst du +3% Feuerrate und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst. (Wert: 50-Schuss-Magazin.)"
-        },
-        {
-            "key": "overwhelm",
-            "name": "Overwhelm",
-            "label": "Überwältigen",
-            "weapon_types": [
-                "LMG"
-            ],
-            "category": "wd",
-            "group": "Waffen-Schaden",
-            "value": 40,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nach Unterdrücken eines nicht-unterdrückten Ziels (12s aktiv, max. 4 Stacks)",
-            "estimated": false,
-            "description": "Das Unterdrücken eines Gegners, der nicht bereits unterdrückt ist, gewährt +10% Waffen-Schaden für 12 Sekunden. Maximal 4 Stacks."
-        },
-        {
-            "key": "pummel",
-            "name": "Pummel",
-            "label": "Draufhauen",
-            "weapon_types": [
-                "Shotgun"
-            ],
-            "category": "wd",
-            "group": "Waffen-Schaden",
-            "value": 40,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nach 3 aufeinanderfolgenden Tötungen (10s aktiv)",
-            "estimated": false,
-            "description": "3 aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s."
-        },
-        {
-            "key": "pumped_up",
-            "name": "Pumped Up",
-            "label": "Aufgepumpt",
-            "weapon_types": [
-                "Shotgun"
-            ],
-            "category": "wd",
-            "group": "Waffen-Schaden",
-            "value": 30,
-            "unit": "%",
-            "conditional": true,
-            "condition": "je Nachladen +1,2% Waffen-Schaden (10s aktiv, max. 25 Stacks)",
-            "estimated": false,
-            "description": "Das Nachladen gewährt +1,2% Waffen-Schaden für 10s. Stackt bis zu 25 Mal."
-        },
-        {
-            "key": "brazen",
-            "name": "Brazen",
-            "label": "Dreist",
-            "weapon_types": [
-                "Shotgun"
-            ],
-            "category": "amp",
-            "group": "Verstärker (additiv)",
-            "value": 21,
-            "unit": "%",
-            "conditional": true,
-            "condition": "je Pellet-Treffer +3,5% Verstärker auf den nächsten Schuss, wenn mindestens 6 Pellets treffen",
-            "estimated": true,
-            "description": "Erhalte +3,5% verstärkten Schaden auf den nächsten Schuss für jeden Pellet, der das Ziel trifft, wenn mindestens 6 Pellets treffen. (Wert: 6 Pellets; bis 8 Pellets möglich.)"
-        },
-        {
-            "key": "salvage",
-            "name": "Salvage",
-            "label": "Bergung",
-            "weapon_types": [
-                "Pistol"
-            ],
-            "category": "utility",
-            "group": "Nutzen",
-            "value": null,
-            "unit": "%",
-            "conditional": false,
-            "condition": null,
-            "estimated": false,
-            "description": "Das Töten eines Ziels hat eine 70% Chance, das Magazin nachzufüllen."
-        },
-        {
-            "key": "finisher",
-            "name": "Finisher",
-            "label": "Finisher",
-            "weapon_types": [
-                "Pistol"
-            ],
-            "category": "chcchd",
-            "group": "Kritische Trefferchance / Schaden",
-            "value": 30,
-            "unit": "%",
-            "conditional": true,
-            "condition": "nach Waffenwechsel innerhalb 10s nach einem Kill (15s aktiv)",
-            "estimated": false,
-            "description": "Das Wechseln von dieser Waffe innerhalb von 10s nach dem Töten eines Gegners gewährt +30% kritische Trefferchance und +30% kritischen Trefferschaden für 15s."
-        }
-    ]
+    {
+      "key": "boomerang",
+      "name": "Boomerang",
+      "label": "Bumerang",
+      "weapon_types": [
+        "Rifle"
+      ],
+      "category": "dyn",
+      "group": "Dynamisch",
+      "value": 40,
+      "unit": "%",
+      "conditional": true,
+      "condition": "50% Chance je Crit-Treffer: Kugel kehrt zurück, nächster Schuss +40% Schaden",
+      "estimated": true,
+      "description": "Kritische Treffer haben eine 50% Chance, die Kugel zurück ins Magazin zu bringen. Wenn eine Kugel zurückgebracht wird, erhält der nächste Schuss +40% erhöhten Schaden."
+    },
+    {
+      "key": "lucky_shot",
+      "name": "Lucky Shot",
+      "label": "Glücksschuss",
+      "weapon_types": [
+        "Rifle",
+        "MMR",
+        "Pistol"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren."
+    },
+    {
+      "key": "precision_strike",
+      "name": "Precision Strike",
+      "label": "Präzisionsschlag",
+      "weapon_types": [
+        "Rifle",
+        "AR",
+        "MMR",
+        "LMG"
+      ],
+      "category": "amp",
+      "group": "Verstärker",
+      "value": 20,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nach Stack-Aufbau (>20m-Kills), Treffer innerhalb 20m (5s aktiv, max. 3 Stacks)",
+      "estimated": false,
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren."
+    },
+    {
+      "key": "back_and_forth",
+      "name": "Back and Forth",
+      "label": "Hin und her",
+      "weapon_types": [
+        "Rifle",
+        "AR",
+        "MMR",
+        "MP",
+        "LMG",
+        "Shotgun"
+      ],
+      "category": "dyn",
+      "group": "Schussfrequenz / Waffen-Schaden",
+      "value": 9,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nach Waffenwechsel zu dieser Waffe (+10% Feuerrate, +9% Waffen-Schaden, 10s aktiv)",
+      "estimated": false,
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen."
+    },
+    {
+      "key": "near_sighted",
+      "name": "Near Sighted",
+      "label": "Kurzsichtig",
+      "weapon_types": [
+        "AR"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Erhält +80% Stabilität auf Kosten von -35% optimaler Reichweite."
+    },
+    {
+      "key": "on_empty",
+      "name": "On Empty",
+      "label": "Leer",
+      "weapon_types": [
+        "AR"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Das Nachladen aus dem leeren Magazin gewährt +60% Waffen-Handhabung für 10s."
+    },
+    {
+      "key": "measured",
+      "name": "Measured",
+      "label": "Abgemessen",
+      "weapon_types": [
+        "AR",
+        "MP",
+        "LMG"
+      ],
+      "category": "dyn",
+      "group": "Schussfrequenz / Waffen-Schaden",
+      "value": 30,
+      "unit": "%",
+      "conditional": true,
+      "condition": "untere Magazinhälfte: +30% Gesamt-Waffen-Schaden (obere Hälfte: +25% RoF, -25% WD)",
+      "estimated": false,
+      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)"
+    },
+    {
+      "key": "overflowing",
+      "name": "Overflowing",
+      "label": "Überlaufend",
+      "weapon_types": [
+        "AR"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Jedes 3. Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%."
+    },
+    {
+      "key": "stabilize",
+      "name": "Stabilize",
+      "label": "Stabilisieren",
+      "weapon_types": [
+        "AR",
+        "MP",
+        "LMG"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück."
+    },
+    {
+      "key": "naked",
+      "name": "Naked",
+      "label": "Nackt",
+      "weapon_types": [
+        "MMR"
+      ],
+      "category": "dyn",
+      "group": "Kopfschuss-Schaden",
+      "value": 50,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nur gegen Gegner ohne Rüstung (5s aktiv)",
+      "estimated": false,
+      "description": "Das Treffen eines Gegners ohne Rüstung gewährt +50% Kopfschuss-Schaden für 5s."
+    },
+    {
+      "key": "outsider",
+      "name": "Outsider",
+      "label": "Außenseiter",
+      "weapon_types": [
+        "MP"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Nach dem Töten eines Gegners erhältst du +100% optimale Reichweite und +100% Genauigkeit für 10s."
+    },
+    {
+      "key": "unwavering",
+      "name": "Unwavering",
+      "label": "Unbeirrbar",
+      "weapon_types": [
+        "MP"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Das Wechseln zu dieser Waffe gewährt +300% Waffen-Handhabung für 5s. Tötungen aktualisieren den Buff. Das Wechseln weg deaktiviert dies für alle Waffen für 5s."
+    },
+    {
+      "key": "unhinged",
+      "name": "Unhinged",
+      "label": "Aus den Angeln",
+      "weapon_types": [
+        "LMG"
+      ],
+      "category": "wd",
+      "group": "Waffen-Schaden",
+      "value": 18,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Gewährt +18% Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit."
+    },
+    {
+      "key": "frenzy",
+      "name": "Frenzy",
+      "label": "Raserei",
+      "weapon_types": [
+        "LMG"
+      ],
+      "category": "dyn",
+      "group": "Schussfrequenz / Waffen-Schaden",
+      "value": 15,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nach Nachladen aus leer, je 10 Kugeln im Magazin +3% RoF & +3% WD (9s aktiv)",
+      "estimated": true,
+      "description": "Für jede 10 Kugeln in der Magazinkapazität erhältst du +3% Feuerrate und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst. (Wert: 50-Schuss-Magazin.)"
+    },
+    {
+      "key": "overwhelm",
+      "name": "Overwhelm",
+      "label": "Überwältigen",
+      "weapon_types": [
+        "LMG"
+      ],
+      "category": "wd",
+      "group": "Waffen-Schaden",
+      "value": 40,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nach Unterdrücken eines nicht-unterdrückten Ziels (12s aktiv, max. 4 Stacks)",
+      "estimated": false,
+      "description": "Das Unterdrücken eines Gegners, der nicht bereits unterdrückt ist, gewährt +10% Waffen-Schaden für 12 Sekunden. Maximal 4 Stacks."
+    },
+    {
+      "key": "pummel",
+      "name": "Pummel",
+      "label": "Draufhauen",
+      "weapon_types": [
+        "Shotgun"
+      ],
+      "category": "wd",
+      "group": "Waffen-Schaden",
+      "value": 40,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nach 3 aufeinanderfolgenden Tötungen (10s aktiv)",
+      "estimated": false,
+      "description": "3 aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s."
+    },
+    {
+      "key": "pumped_up",
+      "name": "Pumped Up",
+      "label": "Aufgepumpt",
+      "weapon_types": [
+        "Shotgun"
+      ],
+      "category": "wd",
+      "group": "Waffen-Schaden",
+      "value": 30,
+      "unit": "%",
+      "conditional": true,
+      "condition": "je Nachladen +1,2% Waffen-Schaden (10s aktiv, max. 25 Stacks)",
+      "estimated": false,
+      "description": "Das Nachladen gewährt +1,2% Waffen-Schaden für 10s. Stackt bis zu 25 Mal."
+    },
+    {
+      "key": "brazen",
+      "name": "Brazen",
+      "label": "Dreist",
+      "weapon_types": [
+        "Shotgun"
+      ],
+      "category": "amp",
+      "group": "Verstärker (additiv)",
+      "value": 21,
+      "unit": "%",
+      "conditional": true,
+      "condition": "je Pellet-Treffer +3,5% Verstärker auf den nächsten Schuss, wenn mindestens 6 Pellets treffen",
+      "estimated": true,
+      "description": "Erhalte +3,5% verstärkten Schaden auf den nächsten Schuss für jeden Pellet, der das Ziel trifft, wenn mindestens 6 Pellets treffen. (Wert: 6 Pellets; bis 8 Pellets möglich.)"
+    },
+    {
+      "key": "salvage",
+      "name": "Salvage",
+      "label": "Bergung",
+      "weapon_types": [
+        "Pistol"
+      ],
+      "category": "utility",
+      "group": "Nutzen",
+      "value": null,
+      "unit": "%",
+      "conditional": false,
+      "condition": null,
+      "estimated": false,
+      "description": "Das Töten eines Ziels hat eine 70% Chance, das Magazin nachzufüllen."
+    },
+    {
+      "key": "finisher",
+      "name": "Finisher",
+      "label": "Finisher",
+      "weapon_types": [
+        "Pistol"
+      ],
+      "category": "chcchd",
+      "group": "Kritische Trefferchance / Schaden",
+      "value": 30,
+      "unit": "%",
+      "conditional": true,
+      "condition": "nach Waffenwechsel innerhalb 10s nach einem Kill (15s aktiv)",
+      "estimated": false,
+      "description": "Das Wechseln von dieser Waffe innerhalb von 10s nach dem Töten eines Gegners gewährt +30% kritische Trefferchance und +30% kritischen Trefferschaden für 15s."
+    }
+  ],
+  "gear_talents_schema": {
+    "ziel": "self | team | team_ohne_mich",
+    "wirkung": "Wirkungsart (Waffenschaden, CHC, CHD, Rüstung, Bonusrüstung, Skill-Eile, Nachladegeschwindigkeit, Skill-Schaden, Reparatur, ...)",
+    "wert": "numerischer Wert",
+    "ausloeser": "dauerhaft | bei_treffer | bei_kill | bei_skill_einsatz | bei_naehe_zu_skill | bei_volle_ruestung | bedingt",
+    "uptime": "geschätzter Aktivanteil (Annahme, anpassbar)",
+    "stapel": "max. Stapel und Abbau",
+    "team_wirkung": "true, wenn das Talent auf Verbündete wirkt (Lastenheft 4.5)"
+  },
+  "gear_talents": [
+    {
+      "key": "vigilance",
+      "name": "Wachsamkeit (Vigilance)",
+      "slot": [
+        "Rucksack"
+      ],
+      "ziel": "self",
+      "wirkung": "Waffenschaden",
+      "wert": 25,
+      "unit": "%",
+      "ausloeser": "bedingt",
+      "bedingung": "solange seit 5s kein Schaden erlitten",
+      "uptime": 0.8,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "amp",
+      "value_status": "offen",
+      "description": "Erhält erhöhten Waffenschaden, solange in den letzten 5 Sekunden kein Schaden erlitten wurde."
+    },
+    {
+      "key": "spark",
+      "name": "Funke (Spark)",
+      "slot": [
+        "Weste"
+      ],
+      "ziel": "self",
+      "wirkung": "Skill-Schaden",
+      "wert": 15,
+      "unit": "%",
+      "ausloeser": "bei_treffer",
+      "bedingung": "nach Treffer an Gegner, der kürzlich von Verbündeten getroffen wurde",
+      "uptime": 0.9,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "skill",
+      "value_status": "offen",
+      "description": "Skill-Schaden-Bonus, wenn ein Verbündeter kürzlich dasselbe Ziel getroffen hat (Team-Synergie)."
+    },
+    {
+      "key": "composure",
+      "name": "Gelassenheit (Composure)",
+      "slot": [
+        "Rucksack"
+      ],
+      "ziel": "self",
+      "wirkung": "Waffenschaden",
+      "wert": 15,
+      "unit": "%",
+      "ausloeser": "bedingt",
+      "bedingung": "solange in Deckung",
+      "uptime": 0.8,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "amp",
+      "value_status": "offen",
+      "description": "+15% verstärkter Waffenschaden, solange sich der Träger in Deckung befindet."
+    },
+    {
+      "key": "intimidate",
+      "name": "Einschüchterung (Intimidate)",
+      "slot": [
+        "Weste"
+      ],
+      "ziel": "self",
+      "wirkung": "Verstärkter Schaden",
+      "wert": 35,
+      "unit": "%",
+      "ausloeser": "bedingt",
+      "bedingung": "gegen unterdrückte/geblendete Gegner in Nähe",
+      "uptime": 0.5,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "amp",
+      "value_status": "offen",
+      "description": "Verstärkter Schaden gegen unterdrückte oder geblendete Gegner in der Nähe."
+    },
+    {
+      "key": "clutch",
+      "name": "Kupplung (Clutch)",
+      "slot": [
+        "Weste"
+      ],
+      "ziel": "self",
+      "wirkung": "Reparatur (bei Krit)",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "bei_treffer",
+      "bedingung": "kritische Treffer reparieren Rüstung",
+      "uptime": 1.0,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "ehp",
+      "value_status": "offen",
+      "description": "Kritische Treffer reparieren Rüstung und heilen bei niedriger Gesundheit."
+    },
+    {
+      "key": "galvanize",
+      "name": "Galvanize",
+      "slot": [
+        "Weste"
+      ],
+      "ziel": "team",
+      "wirkung": "Rüstung/Bonusrüstung",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "bei_naehe_zu_skill",
+      "bedingung": "Verbündete in Nähe des Trägers erhalten Schutz",
+      "uptime": 0.7,
+      "stapel": null,
+      "team_wirkung": true,
+      "category": "team_ehp",
+      "value_status": "offen",
+      "description": "Verbündete in der Nähe des Trägers erhalten Rüstungsschutz (Team-Rüstungsquelle für Rüstungs-Supporter, Issue #91)."
+    },
+    {
+      "key": "overwatch",
+      "name": "Überwachung (Overwatch)",
+      "slot": [
+        "Rucksack"
+      ],
+      "ziel": "team_ohne_mich",
+      "wirkung": "Skill-Eile/Schaden",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "dauerhaft",
+      "bedingung": null,
+      "uptime": 1.0,
+      "stapel": null,
+      "team_wirkung": true,
+      "category": "team_skill",
+      "value_status": "offen",
+      "description": "Erhöht Skill-Eile und Skill-Schaden der Verbündeten, solange der Träger nicht schießt."
+    },
+    {
+      "key": "perfect_vigilance",
+      "name": "Perfekte Wachsamkeit",
+      "slot": [
+        "Rucksack (Named)"
+      ],
+      "ziel": "self",
+      "wirkung": "Waffenschaden",
+      "wert": 35,
+      "unit": "%",
+      "ausloeser": "bedingt",
+      "bedingung": "solange seit 5s kein Schaden erlitten",
+      "uptime": 0.8,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "amp",
+      "value_status": "offen",
+      "description": "Perfekt-Variante von Wachsamkeit (Named-Gear)."
+    },
+    {
+      "key": "future_initiative_backpack",
+      "name": "Future Initiative (Rucksack)",
+      "slot": [
+        "Rucksack (Gearset)"
+      ],
+      "ziel": "team_ohne_mich",
+      "wirkung": "Reparatur/Bonusrüstung",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "bedingt",
+      "bedingung": "bei Heilung von Verbündeten",
+      "uptime": 1.0,
+      "stapel": null,
+      "team_wirkung": true,
+      "category": "team_ehp",
+      "value_status": "offen",
+      "description": "Verbesserte Gruppen-Reparatur und Bonusrüstung (Kernwerkzeug Rüstungs-Supporter/Skill-Heiler, Kandidat 9.2)."
+    },
+    {
+      "key": "future_initiative_chest",
+      "name": "Future Initiative (Weste)",
+      "slot": [
+        "Weste (Gearset)"
+      ],
+      "ziel": "team_ohne_mich",
+      "wirkung": "Reparatur",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "dauerhaft",
+      "bedingung": null,
+      "uptime": 1.0,
+      "stapel": null,
+      "team_wirkung": true,
+      "category": "team_ehp",
+      "value_status": "offen",
+      "description": "Verbesserte Gruppen-Reparatur (Kandidat 9.2, Skill-Heiler-Variante)."
+    },
+    {
+      "key": "coyote_mask",
+      "name": "Coyote's Mask (Talent)",
+      "slot": [
+        "Maske (Exotic)"
+      ],
+      "ziel": "team",
+      "wirkung": "CHC/CHD",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "bedingt",
+      "bedingung": "Distanz-abhängige Krit-Buffs für Team und selbst",
+      "uptime": 0.8,
+      "stapel": null,
+      "team_wirkung": true,
+      "category": "chcchd",
+      "value_status": "offen",
+      "description": "Exotic-Maske mit Distanz-abhängigen Krit-Chance/-Schaden-Buffs für das Team (BUF-Quelle)."
+    },
+    {
+      "key": "momento",
+      "name": "Memento (Talent)",
+      "slot": [
+        "Rucksack (Exotic)"
+      ],
+      "ziel": "self",
+      "wirkung": "Waffenschaden/Skill-Effizienz/Rüstungsregeneration (Stapel)",
+      "wert": null,
+      "unit": "%",
+      "ausloeser": "bei_kill",
+      "bedingung": "Trophäen-Stapel, kurz-/langfristige Boni",
+      "uptime": 0.9,
+      "stapel": "langfristig max. 30 Stapel",
+      "team_wirkung": false,
+      "category": "dyn",
+      "value_status": "offen",
+      "description": "Exotic-Rucksack: Trophäen gewähren temporäre und langfristige Stapel-Boni (Referenz-Variante Striker+Memento, Issue #94)."
+    },
+    {
+      "key": "eclipse_protocol",
+      "name": "Eclipse Protocol (Set-Talent)",
+      "slot": [
+        "Gearset 4er"
+      ],
+      "ziel": "self",
+      "wirkung": "Statuseffekt-Übertragung",
+      "wert": null,
+      "unit": null,
+      "ausloeser": "bei_skill_einsatz",
+      "bedingung": "Statuseffekte springen auf weitere Gegner über",
+      "uptime": 1.0,
+      "stapel": null,
+      "team_wirkung": false,
+      "category": "cc",
+      "value_status": "offen",
+      "description": "Gearset für Kontrolle (Kandidat 9.2, CC); Status-Effekte verbreiten sich auf zusätzliche Gegner."
+    },
+    {
+      "key": "striker_gamble",
+      "name": "Striker's Gamble (Striker's Battlegear)",
+      "slot": [
+        "Gearset 4er"
+      ],
+      "ziel": "self",
+      "wirkung": "Waffenschaden (Stapel)",
+      "wert": 0.65,
+      "unit": "% pro Stack",
+      "ausloeser": "bei_treffer",
+      "bedingung": "max. 100 Stacks (Weste: 200); Rucksack: 1,05% pro Stack",
+      "uptime": 1.0,
+      "stapel": "max. 100 (Weste 200), Abbau 1-3 Stacks/s",
+      "team_wirkung": false,
+      "category": "wd",
+      "value_status": "bestätigt",
+      "description": "Waffentreffer erhöhen den Gesamtwaffenschaden pro Stack; Rucksack (Risk Management) und Weste (Press the Advantage) verstärken (MVP-Kandidat DPS Krit, Issue #94; bestätigt gegen gear.json green_set_info)."
+    }
+  ]
 }
