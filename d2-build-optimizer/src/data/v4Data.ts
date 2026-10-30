@@ -40,6 +40,21 @@ export const SKILL_SCALING: SkillScalingRules = (skillsJson as unknown as {
   scaling_rules: SkillScalingRules;
 }).scaling_rules;
 
+export interface ImmunityThresholds {
+  shock: number;
+  poison: number;
+  blind_deaf: number;
+  bleed: number;
+  burn: number;
+  disorient: number;
+  disrupt: number;
+  ensnare: number;
+}
+
+export const IMMUNITY_THRESHOLDS: ImmunityThresholds = (attributeRulesJson as unknown as {
+  immunity_thresholds: ImmunityThresholds;
+}).immunity_thresholds;
+
 export interface SkillEntry {
   key: string;
   name: string;
