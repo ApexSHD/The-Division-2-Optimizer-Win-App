@@ -239,10 +239,11 @@ describe("Gearset-4p-Boni (Striker, Zünglein, Zorn des Jägers)", () => {
       const tiers = gearDb.green_set_info[key].bonuses;
       expect(tiers["4"]).toBeDefined();
       expect(tiers["4"].length).toBeGreaterThan(0);
-      expect(tiers["4"][0].value_status).toBe("Annahme");
+      expect(tiers["4"][0].value_status).toContain("Annahme");
     }
     expect(gearDb.green_set_info.striker.bonuses["4"][0]).toMatchObject({ attr: "wd", val: 65 });
-    expect(gearDb.green_set_info.tippingscales.bonuses["4"][0]).toMatchObject({ attr: "chd", val: 50 });
+    expect(gearDb.green_set_info.striker.bonuses["4"][0].value_status).toContain("Maximalschaden");
+    expect(gearDb.green_set_info.tippingscales.bonuses["4"][0]).toMatchObject({ attr: "chd", val: 100 });
     expect(gearDb.green_set_info.huntersfury.bonuses["4"][0]).toMatchObject({ attr: "wd", val: 20 });
   });
 

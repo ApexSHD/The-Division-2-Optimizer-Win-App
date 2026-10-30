@@ -1458,7 +1458,7 @@
       "n2": "+15% Waffenhandhabung",
       "n3": "+15% Feuerrate",
       "n4": "Striker's Gamble: Waffentreffer erhöhen den Gesamtwaffenschaden um 0,65% pro Stack (max. 100); 1 Stack/s Verlust bei 0-50, 2 Stacks/s bei 51-100. Rucksack 'Risk Management': 0,65% -> 1,05% pro Stack; Weste 'Press the Advantage': max. 100 -> 200 Stacks (3 Stacks/s Verlust bei 101-200). Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (Feuerrate), 4p Striker's Gamble als gemittelter WD-Bonus (Annahme: ~100 Stacks Durchschnitt, 0,65%/Stack); Rucksack/Weste-Verstärkung (1,05%/Stack bzw. 200 Stacks) bei Umsetzung von #94 als separate Stufen modellieren",
+      "modeled": "3p numerisch (Feuerrate), 4p Striker's Gamble als Maximalschaden (100 Stacks x 0,65% = +65% WD; Rucksack 1,05%/Stack = +105%, Weste max. 200 Stacks = +130% - Erhoehungen mit Gearset-Regel #94 als eigene Stufen). Zeitverlaufsmodell (Stack-Aufbau ueber Magazin/RPM/Nachladezeit) als spaetere Erweiterung (Issue offen).",
       "bonuses": {
         "2": [
           {
@@ -1476,7 +1476,7 @@
           {
             "attr": "wd",
             "val": 65,
-            "value_status": "Annahme"
+            "value_status": "Annahme (Maximalschaden)"
           }
         ]
       }
@@ -1797,7 +1797,7 @@
       "n2": "+30% Magazingröße",
       "n3": "+30% LMG-Schaden",
       "n4": "Throttle Control: Schießen baut Stacks auf (max. 50); je Stack +0,5% Waffenhandhabung & +5% kritischer Trefferschaden; 6 Stacks/s Verlust beim Nicht-Schießen (kein Verlust bei unterdrückten Gegnern). Rucksack 'Snowball': +5% -> +8% CHD pro Stack; Weste 'Sustainability': max. 50 -> 75 Stacks. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (LMG), 4p Stacks als gemittelter CHD-Bonus (Annahme: ~25 von max. 50 Stacks, +2% CHD/Stack; Weste: max. 75 Stacks, Rucksack: +4% CHD/Stack bei Umsetzung der Gearset-Regel #94)",
+      "modeled": "3p numerisch (LMG), 4p Stacks als Maximalschaden (50 Stacks x 2% CHD = +100%; Weste max. 75 Stacks = +150%, Rucksack 4%/Stack = +200% - mit Gearset-Regel #94). Zeitverlaufsmodell als spaetere Erweiterung.",
       "bonuses": {
         "2": [
           {
@@ -1815,8 +1815,8 @@
         "4": [
           {
             "attr": "chd",
-            "val": 50,
-            "value_status": "Annahme"
+            "val": 100,
+            "value_status": "Annahme (Maximalschaden)"
           }
         ]
       }
