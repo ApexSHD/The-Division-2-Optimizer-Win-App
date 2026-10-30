@@ -43,6 +43,69 @@ const WEAPON_TYPES: Array<{ value: WeaponType | ""; label: string }> = [
 ];
 import type { SkillChoice, EffectVector } from "../data/axes";
 import type { AxisKey } from "../data/v4Data";
+const SLOT_LABELS: Record<string, string> = {
+  mask: "Maske",
+  chest: "Weste",
+  holster: "Holster",
+  backpack: "Rucksack",
+  gloves: "Handschuhe",
+  kneepads: "Kniekehlen",
+};
+
+const GEAR_ATTR_SHORT: Record<string, string> = {
+  chc: "CHC",
+  chd: "CHD",
+  hsd: "HSD",
+  wd: "WD",
+  dta: "DTA",
+  dth: "DTH",
+  dttooc: "DTtoOC",
+  wh: "Handling",
+  armorregen: "Rüst.Reg.",
+  explres: "Expl.Res.",
+  hazard: "Gefahrensch.",
+  health: "HP",
+  skilldmg: "Skill-Sch.",
+  skillhaste: "Skill-Eile",
+  repair: "Reparatur",
+  status: "Status",
+  aok: "AoK",
+  rof: "Feuerrate",
+  incomrepair: "Eingeh. Rep.",
+};
+
+function partsLabel(
+  gear: Array<{
+    brand: string;
+    slot: string;
+    core?: string;
+    coreValue?: number;
+    attributes?: Array<{ type: string; value: number }>;
+  }>,
+  weaponName?: string,
+): string {
+  const bySlotOrder = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+  const sorted = [...gear].sort(
+    (a, b) => bySlotOrder.indexOf(a.slot) - bySlotOrder.indexOf(b.slot),
+  );
+  const parts = sorted.map((g) => {
+    const attrs = (g.attributes ?? [])
+      .map((a) => `${GEAR_ATTR_SHORT[a.type] ?? a.type} ${a.value.toLocaleString("de-DE")}`)
+      .join(", ");
+    const core =
+      g.core === "wd"
+        ? `WD ${g.coreValue?.toLocaleString("de-DE")}`
+        : g.core === "armour"
+          ? `Rüstung ${g.coreValue?.toLocaleString("de-DE")}`
+          : g.core === "skill"
+            ? `Skill-Stufe`
+            : "";
+    return `${g.brand} (${SLOT_LABELS[g.slot] ?? g.slot})${core ? ` · ${core}` : ""}${attrs ? ` · ${attrs}` : ""}`;
+  });
+  if (weaponName) parts.push(`Waffe: ${weaponName}`);
+  return parts.join(" | ");
+}
+
 const AXIS_LABELS: Record<AxisKey, string> = {
   dps: "Eigener Schaden",
   skl: "Skill-Wirkung",
@@ -127,6 +190,10 @@ export function OptimizerView() {
   const goal = GOALS.find((g) => g.key === goalKey) ?? GOALS[0];
   const damageRole = goalKey === "dps" || goalKey === "hybrid";
   const questions = useMemo(() => questionsForRole(roleKey), [roleKey]);
+  const answeredCount = useMemo(
+    () => questions.filter((q) => answers.some((a) => a.questionKey === q.key)).length,
+    [questions, answers],
+  );
   const effectiveWeights = expertMode && expertWeights ? expertWeights : weightsFromAnswers(roleKey, answers);
 
   const allSkills = useMemo(
@@ -238,13 +305,58 @@ export function OptimizerView() {
         </div>
       </section>
 
+      <section className="field" style={{ display: "grid", gap: 6 }}>
+        <strong>Auswahl</strong>
+        <div style={{ fontSize: 13, lineHeight: 1.7 }}>
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            🎯 Ziel: {goal.name}
+          </span>{" "}
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            👤 Rolle: {roleProfile(roleKey).name}
+          </span>{" "}
+          {expertMode && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              🛠 Expertenmodus
+            </span>
+          )}{" "}
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            🤝 Team: {teamSize}
+          </span>
+          {targetSet && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              🧩 Gearset: {targetSet}
+              {requireSetChest ? " · Weste ✓" : ""}
+              {requireSetBackpack ? " · Rucksack ✓" : ""}
+            </span>
+          )}
+          {damageRole && weaponType && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              🔫 {WEAPON_TYPES.find((w) => w.value === weaponType)?.label}
+            </span>
+          )}
+          {selectedSkills.length > 0 && (
+            <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+              ⚡ {selectedSkills.map((c) => `${c.skill.name} (${c.variant.name})`).join(", ")}
+            </span>
+          )}
+          <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+            🎖 Spec-Vorschlag: {specSuggestion.best.name}
+          </span>
+        </div>
+      </section>
+
       <section className="field" style={{ display: "grid", gap: 10 }}>
-        <strong>Fragebogen ({questions.length} Fragen)</strong>
+        <strong>
+          Fragebogen ({answeredCount}/{questions.length} beantwortet)
+        </strong>
         {questions.map((q) => {
           const answer = answers.find((a) => a.questionKey === q.key);
           return (
             <div key={q.key} style={{ display: "grid", gap: 4 }}>
-              <label>{q.labelDe}</label>
+              <label style={{ fontWeight: answer ? 600 : 400 }}>
+                {q.labelDe}
+                {answer && <span style={{ color: "var(--ok, #67c23a)", marginLeft: 6 }}>✓</span>}
+              </label>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {q.options.map((o) => (
                   <button
@@ -442,6 +554,14 @@ export function OptimizerView() {
             )}
             {bestBuild && (
               <div style={{ fontSize: 13 }}>
+                {(() => {
+                  const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+                  return cand ? (
+                    <div style={{ marginBottom: 6 }}>
+                      <strong>Teile:</strong> {partsLabel(cand.gear, cand.weapon.name)}
+                    </div>
+                  ) : null;
+                })()}
                 <strong>Begründung:</strong>{" "}
                 {AXES.filter((a) => bestBuild.normalized[a] > 0)
                   .map(
@@ -451,6 +571,73 @@ export function OptimizerView() {
                   .join(" · ")}
               </div>
             )}
+            {bestBuild && (() => {
+              const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+              if (!cand) return null;
+              const stats = cand.stats;
+              const summaryRows: Array<[string, string]> = [
+                ["Waffenschaden (WD) gesamt", `${stats.totalWd.toFixed(1)} %`],
+                ["Kritische Trefferchance (CHC)", `${Math.min(60, stats.chc).toFixed(1)} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`],
+                ["Kritischer Trefferschaden (CHD)", `${stats.chd.toFixed(1)} %`],
+                ["Kopfschussschaden (HSD)", `${stats.hsd.toFixed(1)} %`],
+                ["Rüstungsschaden (DTA)", `${stats.dta.toFixed(1)} %`],
+                ["Lebenspunktschaden (DTH)", `${stats.dth.toFixed(1)} %`],
+                ["Schaden gg. ungedeckte Ziele", `${stats.dttooc.toFixed(1)} %`],
+                ["Effektiver DPS", Math.round(cand.damage.effectiveDps).toLocaleString("de-DE")],
+              ];
+              const provenance: Array<[string, string, number]> = [];
+              for (const [attrKey, list] of Object.entries(stats.sources)) {
+                for (const src of list) {
+                  provenance.push([attrKey, src.label, src.value]);
+                }
+              }
+              return (
+                <>
+                  <details style={{ marginTop: 8 }}>
+                    <summary style={{ cursor: "pointer" }}>
+                      <strong>Übersicht: relevante Werte (Best-Build)</strong>
+                    </summary>
+                    <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                      <tbody>
+                        {summaryRows.map(([label, value]) => (
+                          <tr key={label}>
+                            <td style={{ padding: "2px 8px 2px 0" }}>{label}</td>
+                            <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </details>
+                  <details style={{ marginTop: 4 }}>
+                    <summary style={{ cursor: "pointer" }}>
+                      <strong>Herkunft der Werte (wie im Spiel nachvollziehbar)</strong>
+                    </summary>
+                    <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: "left" }}>Wert</th>
+                          <th style={{ textAlign: "left" }}>Quelle</th>
+                          <th style={{ textAlign: "right" }}>Betrag</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {provenance.map(([attr, label, value], i) => (
+                          <tr key={`${attr}-${i}`}>
+                            <td style={{ padding: "1px 8px 1px 0" }}>
+                              {GEAR_ATTR_SHORT[attr] ?? attr}
+                            </td>
+                            <td>{label}</td>
+                            <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                              {value.toLocaleString("de-DE")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </details>
+                </>
+              );
+            })()}
             <details>
               <summary style={{ cursor: "pointer" }}>Top-Builds ({result.inventar.ranked.length})</summary>
               <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
@@ -463,16 +650,19 @@ export function OptimizerView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {result.inventar.ranked.slice(0, 10).map((b, i) => (
-                    <tr key={b.id}>
-                      <td>{i + 1}</td>
-                      <td>{b.score.toFixed(1)}</td>
-                      <td>{b.admissible ? "✓" : `✗ (${b.violationCount})`}</td>
-                      <td style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
-                        {b.id.split("|").join(", ")}
-                      </td>
-                    </tr>
-                  ))}
+                  {result.inventar.ranked.slice(0, 10).map((b, i) => {
+                    const cand = result.inventar.candidates.find((c) => c.id === b.id);
+                    return (
+                      <tr key={b.id}>
+                        <td>{i + 1}</td>
+                        <td>{b.score.toFixed(1)}</td>
+                        <td>{b.admissible ? "✓" : `✗ (${b.violationCount})`}</td>
+                        <td style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+                          {cand ? partsLabel(cand.gear, cand.weapon.name) : b.id}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </details>

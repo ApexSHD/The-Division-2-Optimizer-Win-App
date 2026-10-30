@@ -50,6 +50,8 @@ export interface V4Candidate {
   admissible: boolean;
   violations: MinimumViolation[];
   violationCount: number;
+  stats: import("./damage").BuildStats;
+  damage: import("./damage").DamageBreakdown;
 }
 
 export interface V4BuildResult {
@@ -258,6 +260,8 @@ export function buildCandidatesFromOptimizer(
       admissible: adm.admissible,
       violations: adm.violations,
       violationCount: adm.violations.length,
+      stats: r.stats,
+      damage: r.damage,
     });
   }
   return out;
