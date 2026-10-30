@@ -103,15 +103,22 @@ export function OptimizerView() {
   const goal = GOALS.find((g) => g.key === goalKey) ?? GOALS[0];
   const questions = useMemo(() => questionsForRole(roleKey), [roleKey]);
   const effectiveWeights = expertMode && expertWeights ? expertWeights : weightsFromAnswers(roleKey, answers);
+
+  const allSkills = useMemo(
+    () => SKILLS.flatMap((s) => s.variants.map((v) => ({ skill: s, variant: v }))),
+    [],
+  );
+  const selectedSkills: SkillChoice[] = useMemo(
+    () =>
+      skillKeys
+        .map((key) => allSkills.find((c) => `${c.skill.key}/${c.variant.key}` === key))
+        .filter((c): c is SkillChoice => Boolean(c)),
+    [skillKeys, allSkills],
+  );
   const specSuggestion = useMemo(
     () => suggestSpecialization(roleKey, effectiveWeights, teamSize, selectedSkills),
-    [roleKey, effectiveWeights, teamSize, skillKeys],
+    [roleKey, effectiveWeights, teamSize, selectedSkills],
   );
-
-  const allSkills = SKILLS.flatMap((s) => s.variants.map((v) => ({ skill: s, variant: v })));
-  const selectedSkills: SkillChoice[] = skillKeys
-    .map((key) => allSkills.find((c) => `${c.skill.key}/${c.variant.key}` === key))
-    .filter((c): c is SkillChoice => Boolean(c));
 
   const runOptimization = () => {
     if (store.weapons.length === 0 || store.gear.length === 0) return;
