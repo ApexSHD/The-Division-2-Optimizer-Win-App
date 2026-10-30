@@ -576,6 +576,7 @@ export function OptimizerView() {
               if (!cand) return null;
               const stats = cand.stats;
               const summaryRows: Array<[string, string]> = [
+                ["Waffe", `${cand.weapon.name} (${cand.weapon.type.toUpperCase()})${cand.weapon.talent ? ` · Talent: ${cand.weapon.talent}` : ""}`],
                 ["Waffenschaden (WD) gesamt", `${stats.totalWd.toFixed(1)} %`],
                 ["Kritische Trefferchance (CHC)", `${Math.min(60, stats.chc).toFixed(1)} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`],
                 ["Kritischer Trefferschaden (CHD)", `${stats.chd.toFixed(1)} %`],
