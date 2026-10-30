@@ -265,6 +265,7 @@ export function buildCandidatesFromOptimizer(
     const vector = computeEffectVector(
       axisContextFor(r.gear, r.damage.effectiveDps, ctx, role),
     );
+    const statsWithGearMods = applyGearModsToStats(r.stats, ctx, role);
     const setRuleOk = enforceGearSetRule(r.gear, ctx.gearSetOptions ?? {});
     const adm = !setRuleOk
       ? { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Gearset-Regel: 4 Set-Teile bzw. Set-Weste/-Rucksack fehlen", actual: null, required: null }] }
@@ -279,7 +280,7 @@ export function buildCandidatesFromOptimizer(
       admissible: adm.admissible,
       violations: adm.violations,
       violationCount: adm.violations.length,
-      stats: r.stats,
+      stats: statsWithGearMods,
       damage: r.damage,
     });
   }
@@ -403,6 +404,47 @@ export function optimizeV4(
     runtimeMs: Date.now() - start,
   };
 }
+
+function applyGearModsToStats(
+  stats: import("./damage").BuildStats,
+  _ctx: ModeContext,
+  role: RoleProfile,
+): import("./damage").BuildStats {
+  const gearMods = bestGearModsForRole(role.key, {
+    chcTarget: role.chcTarget ?? CHC_TARGET_DEFAULT,
+    chcCurrent: stats.chc,
+  });
+  if (gearMods.length === 0) return stats;
+  const next: import("./damage").BuildStats = {
+    ...stats,
+    sources: Object.fromEntries(
+      Object.entries(stats.sources).map(([k, v]) => [k, [...v]]),
+    ),
+  };
+  const attrMap: Record<string, keyof import("./damage").BuildStats> = {
+    chc: "chc",
+    chd: "chd",
+    hsd: "hsd",
+    hazard: "dta",
+  };
+  for (const pick of gearMods) {
+    const key = attrMap[pick.attr];
+    if (!key) continue;
+    (next[key] as number) += pick.val;
+    (next.sources[pick.attr] ??= []).push({
+      itemId: `gear-mod-${pick.slot}`,
+      label: `Gear-Mod (${SLOT_LABEL_GEAR_MODS[pick.slot] ?? pick.slot})`,
+      value: pick.val,
+    });
+  }
+  return next;
+}
+
+const SLOT_LABEL_GEAR_MODS: Record<string, string> = {
+  mask: "Maske",
+  chest: "Weste",
+  backpack: "Rucksack",
+};
 
 function defaultSetBonusCatalog(): SetBonusCatalog {
   const gearDb = gearJson as unknown as {

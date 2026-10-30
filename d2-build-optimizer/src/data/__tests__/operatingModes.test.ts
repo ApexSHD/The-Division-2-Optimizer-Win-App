@@ -406,3 +406,63 @@ describe("Adaptive Gear-Mods & erzwungene Waffe", () => {
     expect(best!.stats.chc).toBeGreaterThanOrEqual(10);
   }, 30000);
 });
+
+describe("Spec-Waffenschaden-Baum & Gear-Mods in den Ergebnis-Stats", () => {
+  const fill = (): GearPiece[] =>
+    (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chc", value: 9 }], `fill-${i}`),
+    );
+
+  it("Spec-Baum: +15 % WD für bis zu drei Gattungen je Spezialisierung (Annahme: aktiv)", () => {
+    const result = optimizeV4(
+      [sampleWeapons[0]],
+      fill(),
+      modeCtx({ roleKey: "dps_krit", spec: "gunner" }),
+    );
+    expect(result.ranked.length).toBeGreaterThan(0);
+    const best = result.candidates.find((c) => c.id === result.best!.id);
+    expect(best).toBeDefined();
+    const specSource = (best!.stats.sources.wd ?? []).find((s) =>
+      s.label.includes("Spezialisierung"),
+    );
+    expect(specSource).toBeDefined();
+    expect(specSource!.value).toBe(15);
+  }, 30000);
+
+  it("Gear-Mods erscheinen in den Ergebnis-Stats und der Herkunfts-Tabelle", () => {
+    const lowChcGear = (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chd", value: 12 }], `low-${i}`),
+    );
+    const result = optimizeV4(
+      [sampleWeapons[0]],
+      lowChcGear,
+      modeCtx({ roleKey: "dps_krit" }),
+    );
+    expect(result.candidates.length).toBeGreaterThan(0);
+    const first = result.candidates[0];
+    const gearModSources = (first.stats.sources.chc ?? []).filter((s) =>
+      s.label.includes("Gear-Mod"),
+    );
+    expect(gearModSources.length).toBe(3);
+    for (const src of gearModSources) {
+      expect(src.value).toBe(6);
+    }
+  }, 30000);
+
+  it("Adaptive Umschaltung in den Stats: CHC am Zielwert -> CHD-Gear-Mods in den Quellen", () => {
+    const highChcGear = (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chc", value: 9 }, { type: "chc", value: 9 }], `high-${i}`),
+    );
+    const result = optimizeV4(
+      [sampleWeapons[0]],
+      highChcGear,
+      modeCtx({ roleKey: "dps_krit" }),
+    );
+    const best = result.candidates.find((c) => c.id === result.best!.id);
+    expect(best).toBeDefined();
+    const chdGearMods = (best!.stats.sources.chd ?? []).filter((s) =>
+      s.label.includes("Gear-Mod"),
+    );
+    expect(chdGearMods.length).toBe(3);
+  }, 30000);
+});

@@ -55,13 +55,16 @@ export interface SpecBonuses {
   weaponTypeWd: Partial<Record<import("./sampleData").WeaponType, number>>;
 }
 
+// Nutzervorgabe 30.10.: Spezialisierungs-Skillbaum gewaehrt bis zu +15 % Waffenschaden
+// fuer bis zu drei waehlbare Waffengattungen je Spec. Annahme: immer aktiv, da der Spieler
+// nur mit zwei Gattungen spielt und die Baumwahl entsprechend trifft.
 export const SPEC_PASSIVE_BONUSES: Record<SpecId, SpecBonuses> = {
-  demolitionist: { weaponTypeWd: { lmg: 15, smg: 15 } },
-  gunner: { weaponTypeWd: { ar: 10, lmg: 10, shotgun: 10 } },
-  sharpshooter: { hsd: 25, weaponTypeWd: { mmr: 15, rifle: 15 } },
-  survivalist: { weaponTypeWd: { rifle: 15, shotgun: 15 } },
-  technician: { weaponTypeWd: { smg: 10, rifle: 10 } },
-  firewall: { weaponTypeWd: { shotgun: 15, smg: 10 } },
+  demolitionist: { weaponTypeWd: { lmg: 15, smg: 15, ar: 15 } },
+  gunner: { weaponTypeWd: { ar: 15, lmg: 15, shotgun: 15 } },
+  sharpshooter: { hsd: 25, weaponTypeWd: { mmr: 15, rifle: 15, ar: 15 } },
+  survivalist: { weaponTypeWd: { rifle: 15, shotgun: 15, ar: 15 } },
+  technician: { weaponTypeWd: { smg: 15, rifle: 15, mmr: 15 } },
+  firewall: { weaponTypeWd: { shotgun: 15, smg: 15, ar: 15 } },
 };
 
 export interface ModContribution {
