@@ -466,3 +466,25 @@ describe("Spec-Waffenschaden-Baum & Gear-Mods in den Ergebnis-Stats", () => {
     expect(chdGearMods.length).toBe(3);
   }, 30000);
 });
+
+describe("Waffen-Baum: +15 % WD je Spec universell (Nutzervorgabe final)", () => {
+  it("Jede Spezialisierung gibt +15 % WD über den Skillbaum (drei wählbare Klassen, Annahme: passt zur Waffe)", () => {
+    const fill = (): GearPiece[] =>
+      (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+        gear(s, "wd", [{ type: "chc", value: 9 }], `fill-${i}`),
+      );
+    for (const spec of ["sharpshooter", "demolitionist", "survivalist", "gunner", "technician", "firewall"]) {
+      const result = optimizeV4(
+        [sampleWeapons[0]],
+        fill(),
+        modeCtx({ roleKey: "dps_krit", spec }),
+      );
+      expect(result.candidates.length).toBeGreaterThan(0);
+      const specSource = (result.candidates[0].stats.sources.wd ?? []).find(
+        (s) => s.label.includes("Spezialisierung"),
+      );
+      expect(specSource, `${spec} ohne Baum-Bonus`).toBeDefined();
+      expect(specSource!.value).toBe(15);
+    }
+  });
+});

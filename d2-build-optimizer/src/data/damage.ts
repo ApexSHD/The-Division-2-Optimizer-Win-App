@@ -55,16 +55,20 @@ export interface SpecBonuses {
   weaponTypeWd: Partial<Record<import("./sampleData").WeaponType, number>>;
 }
 
-// Nutzervorgabe 30.10.: Spezialisierungs-Skillbaum gewaehrt bis zu +15 % Waffenschaden
-// fuer bis zu drei waehlbare Waffengattungen je Spec. Annahme: immer aktiv, da der Spieler
-// nur mit zwei Gattungen spielt und die Baumwahl entsprechend trifft.
+// Nutzervorgabe 30.10. (final): Jede Spezialisierung erlaubt im Skillbaum, bis zu drei
+// INDIVIDUELLE Waffenklassen zu waehlen, die je +15 % Waffenschaden erhalten. Da der Spieler
+// nur mit zwei Gattungen spielt, gilt die Annahme: die gewaehlten Klassen passen zur Build-Waffe,
+// d. h. der Bonus wirkt universell als +15 % WD auf die genutzte Waffe (SPEC_WEAPON_TREE_WD).
+// Zusaetzliche Spec-Passive (Nutzervorgabe): Sharpshooter +25 % HSD, Demolitionist +25 % Explosivschaden.
+export const SPEC_WEAPON_TREE_WD = 15;
+
 export const SPEC_PASSIVE_BONUSES: Record<SpecId, SpecBonuses> = {
-  demolitionist: { weaponTypeWd: { lmg: 15, smg: 15, ar: 15 } },
-  gunner: { weaponTypeWd: { ar: 15, lmg: 15, shotgun: 15 } },
-  sharpshooter: { hsd: 25, weaponTypeWd: { mmr: 15, rifle: 15, ar: 15 } },
-  survivalist: { weaponTypeWd: { rifle: 15, shotgun: 15, ar: 15 } },
-  technician: { weaponTypeWd: { smg: 15, rifle: 15, mmr: 15 } },
-  firewall: { weaponTypeWd: { shotgun: 15, smg: 15, ar: 15 } },
+  demolitionist: { weaponTypeWd: {} },
+  gunner: { weaponTypeWd: {} },
+  sharpshooter: { hsd: 25, weaponTypeWd: {} },
+  survivalist: { weaponTypeWd: {} },
+  technician: { weaponTypeWd: {} },
+  firewall: { weaponTypeWd: {} },
 };
 
 export interface ModContribution {
@@ -122,9 +126,11 @@ function applyModContributions(stats: BuildStats, mods: ModContribution[]): Buil
 export function specBonusFor(weapon: import("./sampleData").Weapon, spec: string): { hsd: number; weaponTypeWd: number } {
   const bonuses = SPEC_PASSIVE_BONUSES[spec as SpecId];
   if (!bonuses) return { hsd: 0, weaponTypeWd: 0 };
+  const typed = bonuses.weaponTypeWd[weapon.type] ?? 0;
+  const tree = typed > 0 ? 0 : SPEC_WEAPON_TREE_WD;
   return {
     hsd: bonuses.hsd ?? 0,
-    weaponTypeWd: bonuses.weaponTypeWd[weapon.type] ?? 0,
+    weaponTypeWd: Math.max(typed, tree),
   };
 }
 
