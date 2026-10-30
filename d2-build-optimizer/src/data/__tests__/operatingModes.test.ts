@@ -10,6 +10,7 @@ import {
   type ModeContext,
 } from "../operatingModes";
 import modsJson from "../../db/mod.json";
+import gearJson from "../../db/gear.json";
 import type { SkillChoice } from "../axes";
 import { roleProfile } from "../roleProfiles";
 import { SKILLS } from "../v4Data";
@@ -22,11 +23,12 @@ function gear(
   core: "wd" | "armour" | "skill",
   attrs: Array<{ type: string; value: number }> = [],
   id?: string,
+  brand = "Testmarke",
 ): GearPiece {
   return {
     id: id ?? `${slot}-${core}-${Math.random().toString(36).slice(2, 7)}`,
     slot,
-    brand: "Testmarke",
+    brand,
     brandType: "brand",
     core,
     coreValue: core === "armour" ? 170000 : core === "skill" ? 1 : 15,
@@ -222,4 +224,48 @@ describe("Gear-Mods (Maske, Weste, Rucksack) in der V4-Bewertung", () => {
     const pfe = mods.gear_mods.defensive.find((m) => m.attr === "pfe");
     expect(pfe?.val).toBe(13.0);
   });
+});
+
+describe("Gearset-4p-Boni (Striker, Zünglein, Zorn des Jägers)", () => {
+  it("alle drei DPS-Gearsets haben ein 4p-Tier in green_set_info (Annahme-markiert)", () => {
+    const gearDb = gearJson as unknown as {
+      green_set_info: Record<
+        string,
+        { bonuses: Record<string, Array<{ attr: string; val: number; value_status?: string }>> }
+      >;
+    };
+    for (const key of ["striker", "tippingscales", "huntersfury"]) {
+      const tiers = gearDb.green_set_info[key].bonuses;
+      expect(tiers["4"]).toBeDefined();
+      expect(tiers["4"].length).toBeGreaterThan(0);
+      expect(tiers["4"][0].value_status).toBe("Annahme");
+    }
+    expect(gearDb.green_set_info.striker.bonuses["4"][0]).toMatchObject({ attr: "wd", val: 65 });
+    expect(gearDb.green_set_info.tippingscales.bonuses["4"][0]).toMatchObject({ attr: "chd", val: 50 });
+    expect(gearDb.green_set_info.huntersfury.bonuses["4"][0]).toMatchObject({ attr: "wd", val: 20 });
+  });
+
+  it("4p-Tier wirkt in der Set-Bonus-Anwendung: 4er-Zünglein schlägt 3er-Variante", () => {
+    const ts = (slot: GearSlot, id: string): GearPiece =>
+      gear(slot, "wd", [{ type: "chc", value: 9 }], id, "Tipping Scales");
+    const mkSet = (slots: GearSlot[], prefix: string): GearPiece[] =>
+      slots.map((s, i) => ({ ...ts(s, `${prefix}-${i}`), brandType: "gearset" as const }));
+    const fourSet = mkSet(["mask", "chest", "holster", "backpack"], "ts4");
+    const threeSet = mkSet(["mask", "chest", "holster"], "ts3");
+    const fillAll = (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chc", value: 9 }], `fill-${i}`),
+    );
+    const ctxDps = modeCtx({ roleKey: "dps_krit" });
+    const resultFour = optimizeV4([weapon], [...fourSet, ...fillAll], ctxDps, {
+      maxResults: 5,
+    });
+    const resultThree = optimizeV4([weapon], [...threeSet, ...fillAll], ctxDps, {
+      maxResults: 5,
+    });
+    expect(resultFour.ranked.length).toBeGreaterThan(0);
+    expect(resultThree.ranked.length).toBeGreaterThan(0);
+    const bestDpsFour = Math.max(...resultFour.ranked.map((r) => r.vector.dps));
+    const bestDpsThree = Math.max(...resultThree.ranked.map((r) => r.vector.dps));
+    expect(bestDpsFour).toBeGreaterThan(bestDpsThree);
+  }, 30000);
 });

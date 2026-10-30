@@ -1515,7 +1515,7 @@
       "n2": "+15% Schrotflinten- & +15% SMG-Schaden",
       "n3": "+20% Rüstung bei Kill & +50% Leben bei Kill",
       "n4": "Apex Predator: Gegner im 15m-Radius: +20% WD-Debuff; Kill eines debufften Gegners desorientiert im 5m-Radius & +5% WD für 10 s (max. 5 Stacks). Rucksack 'Overwhelming Force': Desorient-Radius 5m -> 10m; Weste 'Endless Hunger': Stack-Dauer 10 s -> 30 s",
-      "modeled": "2p numerisch (nur bei Shotgun/SMG als Zielwaffe)",
+      "modeled": "2p numerisch (nur bei Shotgun/SMG als Zielwaffe), 4p Apex Predator als WD-Bonus (Annahme: Debuff +20% amp gegen Gegner < 15 m, Uptime nach Gegnerprofil); Kill-Bonus (Blenden/Schocken bei Kill) bei Umsetzung der Gearset-Regel #94",
       "bonuses": {
         "2": [
           {
@@ -1537,6 +1537,13 @@
           {
             "attr": "healthOnKill",
             "val": 50
+          }
+        ],
+        "4": [
+          {
+            "attr": "wd",
+            "val": 20,
+            "value_status": "Annahme"
           }
         ]
       }
@@ -1734,7 +1741,7 @@
       "n2": "+30% Magazingröße",
       "n3": "+30% LMG-Schaden",
       "n4": "Throttle Control: Schießen baut Stacks auf (max. 50); je Stack +0,5% Waffenhandhabung & +5% kritischer Trefferschaden; 6 Stacks/s Verlust beim Nicht-Schießen (kein Verlust bei unterdrückten Gegnern). Rucksack 'Snowball': +5% -> +8% CHD pro Stack; Weste 'Sustainability': max. 50 -> 75 Stacks. Alle Teile haben standardmäßig Waffenschaden als Kern",
-      "modeled": "3p numerisch (nur bei LMG als Zielwaffe)",
+      "modeled": "3p numerisch (LMG), 4p Stacks als gemittelter CHD-Bonus (Annahme: ~25 von max. 50 Stacks, +2% CHD/Stack; Weste: max. 75 Stacks, Rucksack: +4% CHD/Stack bei Umsetzung der Gearset-Regel #94)",
       "bonuses": {
         "2": [
           {
@@ -1747,6 +1754,13 @@
             "attr": "wd",
             "val": 30,
             "weapon": "LMG"
+          }
+        ],
+        "4": [
+          {
+            "attr": "chd",
+            "val": 50,
+            "value_status": "Annahme"
           }
         ]
       }
