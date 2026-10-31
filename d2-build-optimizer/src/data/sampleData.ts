@@ -26,6 +26,7 @@ export interface Weapon {
   knowHow: number;
   isPrototype: boolean;
   attributes: WeaponAttributes;
+  innateHsd?: number;
 }
 
 export const WEAPON_ATTR_LABELS: Record<WeaponAttrKey, string> = {

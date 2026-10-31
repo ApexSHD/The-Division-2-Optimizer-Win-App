@@ -1,0 +1,36 @@
+{
+  "version": "calibration_v1",
+  "game_version": "TU22.x",
+  "data_stand": "2026-10-31",
+  "source": "Nutzer-Inventar-Export (CSV) + Schießstand-Messungen 31.10.; Schießstand-Referenz: Lexington Non-Krit 195.012 / Krit 515.612 (CHD effektiv 164,40 %), Mk16 Non-Krit 269.178 / Krit 711.709 (CHD effektiv 164,40 %); Charakterblatt: CHC 51,9 %, CHD 164,4 %, HSD 75,0 %, SHD 48.640",
+  "note": "Kalibrierungs-Fixture für den Abgleich Engine vs. Spiel. Waffen-Mods des Nutzers: 3x CHC +5 % (real, nicht Max-Roll). Gear-Mods nicht einzeln erfasst (Annahme im Tool: Max-Rolls).",
+  "shd_level": 48640,
+  "gear": [
+    { "slot": "Maske", "brand": "Striker's Battlegear", "brandType": "gearset", "prototype": true, "core": "wd", "coreValue": 22.5, "attributes": [{ "type": "chc", "value": 8.9 }] },
+    { "slot": "Weste", "brand": "Striker's Battlegear", "brandType": "gearset", "prototype": true, "core": "wd", "coreValue": 22.5, "attributes": [{ "type": "chc", "value": 9 }] },
+    { "slot": "Holster", "brand": "Grupo Sombra S.A.", "brandType": "brand", "prototype": true, "core": "wd", "coreValue": 22.5, "attributes": [{ "type": "chc", "value": 9 }, { "type": "chd", "value": 18 }] },
+    { "slot": "Rucksack", "brand": "Striker's Battlegear", "brandType": "gearset", "prototype": true, "core": "wd", "coreValue": 22.5, "attributes": [{ "type": "chd", "value": 18 }] },
+    { "slot": "Handschuhe", "brand": "Contractor's Gloves", "brandType": "named", "prototype": true, "core": "wd", "coreValue": 20.9, "attributes": [{ "type": "dta", "value": 12 }, { "type": "chd", "value": 16.4 }] },
+    { "slot": "Knieschoner", "brand": "Striker's Battlegear", "brandType": "gearset", "prototype": true, "core": "wd", "coreValue": 22.5, "attributes": [{ "type": "chd", "value": 18 }] }
+  ],
+  "weapon": {
+    "name": "Lexington",
+    "type": "ar",
+    "rarity": "named",
+    "prototype": true,
+    "core1": 22.5,
+    "core2": { "type": "dth", "value": 31.5 },
+    "minor": { "type": "dttooc", "value": 15 },
+    "talent": "Strapaziert",
+    "knowHow": 30,
+    "innateHsd": 55,
+    "weaponMods": [{ "type": "chc", "value": 5 }, { "type": "chc", "value": 5 }, { "type": "chc", "value": 5 }]
+  },
+  "expected": {
+    "chc": 51.9,
+    "chd": 164.4,
+    "hsd": 75.0,
+    "nonCrit": 195012,
+    "crit": 515612
+  }
+}
