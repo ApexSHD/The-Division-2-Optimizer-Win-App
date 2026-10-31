@@ -93,6 +93,12 @@ export function bestModsForWeapon(
 ): ModContribution[] {
   const result: ModContribution[] = [];
   for (const category of weapon.modSlots) {
+    // Erfasster Mod schlaegt die automatische DB-Auswahl (Abstimmung: erfasst vor Max-Roll)
+    const equipped = weapon.equippedMods?.find((m) => m.slot === category);
+    if (equipped) {
+      result.push({ slot: category, modName: `Erfasst: ${category}`, attr: equipped.attr, value: equipped.value });
+      continue;
+    }
     const pool = (modsBySlot[category] ?? []).filter((m) => m.bonus && MOD_DAMAGE_ATTRS.has(m.bonus.type));
     let best: { name: string; bonus: { type: string; val: number }; score: number } | null = null;
     for (const m of pool) {
@@ -329,8 +335,18 @@ export function computeDamage(
   const effectiveDps = (avgBulletDmg * weapon.rpm * rofMult) / 60;
 
   // BER-3: Dauer-DPS inkl. Nachladen (Typ-Standard, pro Waffe ueberschreibbar)
-  const magSize = weapon.magSize > 0 ? weapon.magSize : 1;
-  const reloadSeconds = reloadSecondsFor(weapon);
+  // Erfasste Waffen-Mods gehen zuerst in effektive Magazin-/Nachladewerte ein
+  const equipped = weapon.equippedMods ?? [];
+  const capacityBonus = equipped
+    .filter((m) => m.attr === "magSize" || m.attr === "capacity")
+    .reduce((acc, m) => acc + m.value, 0);
+  const reloadSpeedChange = equipped.reduce((acc, m) => {
+    if (m.attr === "reloadSpeed") return acc - m.value;
+    if (m.reloadPenalty !== undefined) return acc + m.reloadPenalty;
+    return acc;
+  }, 0);
+  const magSize = Math.max(1, Math.round((weapon.magSize > 0 ? weapon.magSize : 1) * (1 + capacityBonus / 100)));
+  const reloadSeconds = Math.max(0.5, reloadSecondsFor(weapon) * (1 + reloadSpeedChange / 100));
   const secondsPerMagazine = magSize / ((weapon.rpm * rofMult) / 60);
   const damagePerMagazine = avgBulletDmg * magSize;
   const sustainedDps = damagePerMagazine / (secondsPerMagazine + reloadSeconds);
@@ -473,6 +489,14 @@ export function evaluateBuild(
   if (ctx.modsBySlot) {
     modsUsed = bestModsForWeapon(weapon, ctx.modsBySlot);
     stats = applyModContributions(stats, modsUsed);
+  }
+  // Erfasste Gear-Mods (g.mod) ueberschreiben die automatische Annahme fuer dieses Teil
+  for (const g of gear) {
+    if (g.mod && MOD_DAMAGE_ATTRS.has(g.mod.attr)) {
+      const key = g.mod.attr as keyof typeof MOD_DAMAGE_ATTRS extends never ? never : string;
+      stats = { ...stats, [key]: (stats[key as keyof BuildStats] as number) + g.mod.value } as BuildStats;
+      addStatSource(stats, key, `Mod: ${g.brand} (${g.slot})`, g.mod.value, "mod");
+    }
   }
   stats = applySetBonuses(stats, gear, weapon, ctx.setBonusCatalog ?? null);
   const damage = computeDamage(weapon, stats, ctx.profile, { weaponTypeWd: 0 });

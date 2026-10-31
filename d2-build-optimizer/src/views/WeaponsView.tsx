@@ -22,6 +22,46 @@ import {
 
 const ALL_MOD_SLOTS = ["optic", "muzzle", "underbarrel", "magazine"] as const;
 
+const MOD_SLOT_LABELS: Record<(typeof ALL_MOD_SLOTS)[number], string> = {
+  optic: "Optik",
+  muzzle: "Mündung",
+  underbarrel: "Unterlauf",
+  magazine: "Magazin",
+};
+
+import modsJson from "../db/mod.json";
+
+interface DbWeaponMod {
+  name: string;
+  label: string;
+  bonus: { type: string; val: number };
+  penalty?: { type: string; val: number } | null;
+}
+
+const WEAPON_MOD_DB: Record<(typeof ALL_MOD_SLOTS)[number], DbWeaponMod[]> = (() => {
+  const db = modsJson as unknown as {
+    slots?: Record<string, Array<{ name: string; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;
+  };
+  const out: Record<(typeof ALL_MOD_SLOTS)[number], DbWeaponMod[]> = {
+    optic: [],
+    muzzle: [],
+    underbarrel: [],
+    magazine: [],
+  };
+  for (const [cat, list] of Object.entries(db.slots ?? {})) {
+    if (!(cat in out)) continue;
+    out[cat as (typeof ALL_MOD_SLOTS)[number]] = (list ?? [])
+      .filter((m): m is { name: string; bonus: { type: string; val: number }; penalty?: { type: string; val: number } | null } => Boolean(m.bonus))
+      .map((m) => ({
+        name: m.name,
+        label: `${m.name} (+${m.bonus.val} % ${m.bonus.type}${m.penalty ? ` / −${m.penalty.val} % ${m.penalty.type}` : ""})`,
+        bonus: m.bonus,
+        penalty: m.penalty ?? null,
+      }));
+  }
+  return out;
+})();
+
 function newWeapon(id: string): Weapon {
   return {
     id,
@@ -587,6 +627,76 @@ export function WeaponsView() {
                   <span style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>fix 30</span>
                 )}
               </div>
+            </Field>
+            <Field label="Mods (montierte Waffen-Mods)">
+              {ALL_MOD_SLOTS.map((slot) => {
+                const slotKey = slot as "optic" | "muzzle" | "underbarrel" | "magazine";
+                const equipped = editing.equippedMods?.find((m) => m.slot === slotKey);
+                const pool = WEAPON_MOD_DB[slotKey] ?? [];
+                return (
+                  <div key={slot} style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4, flexWrap: "wrap" }}>
+                    <span style={{ width: 84, fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+                      {MOD_SLOT_LABELS[slotKey]}
+                    </span>
+                    <select
+                      value={equipped?.dbName ?? ""}
+                      onChange={(e) => {
+                        const dbName = e.target.value;
+                        const mods = [...(editing.equippedMods ?? [])].filter((m) => m.slot !== slotKey);
+                        if (!dbName) {
+                          setEditing({ ...editing, equippedMods: mods.length > 0 ? mods : undefined });
+                          return;
+                        }
+                        const dbMod = pool.find((m) => m.name === dbName);
+                        setEditing({
+                          ...editing,
+                          equippedMods: [
+                            ...mods,
+                            {
+                              slot: slotKey,
+                              attr: (dbMod?.bonus.type ?? "chc") as import("../data/sampleData").WeaponAttrKey,
+                              value: dbMod?.bonus.val ?? 0,
+                              dbName,
+                              reloadPenalty: dbMod?.penalty?.type === "reloadSpeed" ? dbMod.penalty.val : undefined,
+                            },
+                          ],
+                        });
+                      }}
+                    >
+                      <option value="">– kein Mod erfasst –</option>
+                      {pool.map((m) => (
+                        <option key={m.name} value={m.name}>{m.label}</option>
+                      ))}
+                    </select>
+                    {equipped && (
+                      <label style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 12 }}>
+                        Wert
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.5"
+                          value={equipped.value}
+                          onChange={(e) => {
+                            const val = Math.max(0, Number(e.target.value));
+                            setEditing({
+                              ...editing,
+                              equippedMods: (editing.equippedMods ?? []).map((m) =>
+                                m.slot === slotKey ? { ...m, value: val } : m,
+                              ),
+                            });
+                          }}
+                          style={{ width: 76 }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                );
+              })}
+              <p className="settings-hint">
+                Bei Mod-Auswahl wird der Datenbank-Wert automatisch eingesetzt (inkl. Mali, z. B.
+                „Extended Mag +20 % Kapazität / −10 % Nachladetempo“) und kann reduziert werden.
+                Ohne Erfassung wählt die Engine automatisch die besten Schadens-Mods (Annahme).
+              </p>
             </Field>
             <Field label={`Kern 1: +${weaponAttrMax(WEAPON_CORE1_MAX, editing.isPrototype)} % ${t.weapons.types[editing.type]}-Schaden (WD)`}>
               <input
