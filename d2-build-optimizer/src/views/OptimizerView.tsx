@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import {
   GOALS,
@@ -30,7 +30,17 @@ import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 import { DB_VERSION, reloadSecondsFor } from "../data/sampleData";
 import { weaponFingerprint, gearFingerprint } from "../data/loadoutIntegrity";
-import { DIFFICULTIES, difficultyInfo, timeToKillSeconds, type DifficultyKey } from "../data/difficultyProfiles";
+import {
+  DIFFICULTIES,
+  difficultyInfo,
+  timeToKillSeconds,
+  allowedDifficulties,
+  defaultDifficultyFor,
+  prototypeCapActive,
+  stackSetHint,
+  STACK_SET_NAMES,
+  type DifficultyKey,
+} from "../data/difficultyProfiles";
 import type { WeaponType, Loadout, LoadoutMetrics } from "../data/sampleData";
 
 interface EnemyPreset {
@@ -335,12 +345,16 @@ function LoadoutCard({
   roleChcTarget,
   roleHsdTarget,
   teamSize,
+  gameMode,
+  difficultyKey,
 }: {
   result: V4BuildResult;
   cand: V4Candidate;
   roleChcTarget: number | null;
   roleHsdTarget: number | null;
   teamSize: number;
+  gameMode: string | undefined;
+  difficultyKey: string;
 }) {
   const store = useStore();
   const active = store.builds.find((b) => b.id === store.activeBuildId) ?? null;
@@ -487,6 +501,41 @@ function LoadoutCard({
       </div>
       <div style={{ fontSize: 12, display: "grid", gap: 2 }}>
         <strong>Set- und Marken-Boni</strong>
+        {(() => {
+          const stackSets = cand.gear
+            .map((g) => g.brand)
+            .filter((b) => STACK_SET_NAMES.some((n) => b.toLowerCase().includes(n)));
+          const uniqueStackSets = [...new Set(stackSets)];
+          const hint = stackSetHint(difficultyKey, uniqueStackSets);
+          return hint ? (
+            <div
+              style={{
+                border: "1px solid var(--border, #555)",
+                borderRadius: 6,
+                padding: "4px 8px",
+                fontSize: 12,
+                background: "rgba(79,156,249,0.08)",
+              }}
+            >
+              ℹ {hint}
+            </div>
+          ) : null;
+        })()}
+        {prototypeCapActive(gameMode) && (
+          <div
+            style={{
+              border: "1px dashed var(--warn, #e6a23c)",
+              borderRadius: 6,
+              padding: "4px 8px",
+              fontSize: 12,
+              background: "rgba(230,162,60,0.06)",
+            }}
+          >
+            ⚠ <strong>Raid/Incursion — kein Prototyp:</strong> Prototyp-Werte zählen hier nur bis zum
+            High-End-Maximalwert (z. B. WD 20 % → 15 %, CHD 17 % → 12 %). Prototyp-Teile im Build:{" "}
+            {cand.gear.filter((g) => g.prototype).length + (cand.weapon.isPrototype ? 1 : 0)}
+          </div>
+        )}
         {(() => {
           const brandCounts = new Map<string, { count: number; label: string }>();
           const greenCounts = new Map<string, { count: number; label: string }>();
@@ -772,6 +821,23 @@ export function OptimizerView() {
     [questions, answers],
   );
   const effectiveWeights = expertMode && expertWeights ? expertWeights : weightsFromAnswers(roleKey, answers);
+  const gameModeAnswer = answers.find((a) => a.questionKey === "gameMode")?.optionKey;
+  const visibleDifficulties = useMemo(
+    () => DIFFICULTIES.filter((d) => allowedDifficulties(gameModeAnswer).includes(d.key)),
+    [gameModeAnswer],
+  );
+  const difficultyValid = useMemo(
+    () => visibleDifficulties.some((d) => d.key === store.optimization.difficultyKey),
+    [visibleDifficulties, store.optimization.difficultyKey],
+  );
+  useEffect(() => {
+    if (!difficultyValid) {
+      store.setOptimization({
+        ...store.optimization,
+        difficultyKey: defaultDifficultyFor(gameModeAnswer),
+      });
+    }
+  }, [difficultyValid, gameModeAnswer]);
 
   const allSkills = useMemo(
     () => SKILLS.flatMap((s) => s.variants.map((v) => ({ skill: s, variant: v }))),
@@ -1140,7 +1206,7 @@ export function OptimizerView() {
                 })
               }
             >
-              {DIFFICULTIES.map((d) => (
+              {visibleDifficulties.map((d) => (
                 <option key={d.key} value={d.key}>{d.label}</option>
               ))}
             </select>
@@ -1429,6 +1495,8 @@ export function OptimizerView() {
                   roleChcTarget={role.chcTarget}
                   roleHsdTarget={needsHeadshotShare ? store.optimization.targetHsd : null}
                   teamSize={teamSize}
+                  gameMode={gameModeAnswer}
+                  difficultyKey={store.optimization.difficultyKey}
                 />
               );
             })()}
