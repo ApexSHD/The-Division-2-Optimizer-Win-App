@@ -195,7 +195,7 @@ export function GearView() {
     if (!file) return;
     try {
       const text = await file.text();
-      const { gear, skippedRows } = gearFromCsv(text, () =>
+      const { gear, skippedRows, warnings } = gearFromCsv(text, () =>
         `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       );
       if (gear.length === 0) {
@@ -217,9 +217,12 @@ export function GearView() {
         toImport.push(g);
       }
       store.addGearBulk(toImport);
-      store.setStatus(`${toImport.length} Gear-Teil(e) importiert${duplicates ? `, ${duplicates} Duplikat(e) übersprungen` : ""}${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}`);
+      store.setStatus(`${toImport.length} Gear-Teil(e) importiert${duplicates ? `, ${duplicates} Duplikat(e) übersprungen` : ""}${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}${warnings.length ? `, ⚠ ${warnings.join(" ⚠ ")}` : ""}`);
     } catch (err) {
-      store.setStatus(`CSV-Import fehlgeschlagen: ${err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      store.setStatus(
+        `CSV-Import fehlgeschlagen: ${msg}. Lösung: Spalten „Slot“ und „Marke/Set“ sind Pflicht — Vorlage über „CSV exportieren“ erzeugen und daran orientieren.`,
+      );
     }
   }
 

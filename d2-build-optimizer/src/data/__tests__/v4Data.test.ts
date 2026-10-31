@@ -106,7 +106,7 @@ describe("V4-Datenbasis (Issue #89)", () => {
     expect(slots).toEqual([
       "Handschuhe",
       "Holster",
-      "Kniekehlen",
+      "Knieschoner",
       "Maske",
       "Rucksack",
       "Weste",

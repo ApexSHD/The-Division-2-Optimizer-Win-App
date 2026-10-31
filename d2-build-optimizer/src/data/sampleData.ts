@@ -271,7 +271,7 @@ export const sampleBrandSets: BrandSet[] = [
   { id: "b1", name: "Walker, Harris & Co.", bonuses: [{ pieces: 2, bonus: "Panzerung +15 %" }, { pieces: 3, bonus: "Waffenschaden +10 %" }] },
   { id: "b2", name: "Overlord Armaments", bonuses: [{ pieces: 2, bonus: "RPM +5 %" }, { pieces: 3, bonus: "Waffen-Bonus +30 %" }] },
   { id: "b3", name: "Petrov Defense Group", bonuses: [{ pieces: 2, bonus: "LMG-Schaden +10 %" }, { pieces: 3, bonus: "Waffenschaden +10 %" }] },
-  { id: "b4", name: "Grupo Sombra", bonuses: [{ pieces: 2, bonus: "Kritischer Trefferschaden +15 %" }, { pieces: 3, bonus: "Kritische Trefferchance +10 %" }] },
+  { id: "b4", name: "Grupo Sombra S.A.", bonuses: [{ pieces: 2, bonus: "Kritischer Trefferschaden +15 %" }, { pieces: 3, bonus: "Kritische Trefferchance +10 %" }] },
   { id: "b5", name: "Umbra Initiative", bonuses: [{ pieces: 2, bonus: "CHC +10 %" }, { pieces: 3, bonus: "CHD +15 %" }] },
   { id: "b6", name: "Ryang & Sachs", bonuses: [{ pieces: 2, bonus: "CHD +15 %" }, { pieces: 3, bonus: "CHC +10 %" }] },
 ];

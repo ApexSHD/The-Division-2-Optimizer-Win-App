@@ -3,6 +3,7 @@ import { StoreProvider, useStore } from "./store";
 import { aggregateBuild } from "./data/damage";
 import { I18nContext, I18nProvider } from "./i18n";
 import type { Translation } from "./i18n/de";
+import type { GearPiece } from "./data/sampleData";
 import { GlobalView } from "./views/GlobalView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
@@ -162,11 +163,24 @@ function ValuesSidebar() {
 
   if (!store.sidebarVisible) return null;
 
+  const activeBuild = store.builds.find((b) => b.id === store.activeBuildId) ?? null;
+  const buildGear = activeBuild
+    ? Object.values(activeBuild.gearIds)
+        .map((gid) => store.gear.find((g) => g.id === gid))
+        .filter((g): g is GearPiece => Boolean(g))
+    : [];
+  const statsSource = buildGear.length > 0 ? buildGear : store.gear;
+  const sourceLabel =
+    buildGear.length > 0
+      ? `Loadout: ${activeBuild?.name ?? ""}`
+      : "Gesamtes Inventar (noch kein Loadout ausgewählt — im Optimierer „Als Loadout speichern“ nutzen)";
+
   return (
     <aside className="sidebar" aria-label={t.sidebar.title}>
       <h3>{t.sidebar.title}</h3>
+      <div className="stat" style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{sourceLabel}</div>
       {(() => {
-        const stats = aggregateBuild(store.gear, store.agent.shdLevel);
+        const stats = aggregateBuild(statsSource, store.agent.shdLevel);
         return (
           <>
             <div className="stat">
@@ -194,7 +208,7 @@ function ValuesSidebar() {
       </div>
       <h3>Wertzusammensetzung</h3>
       {(() => {
-        const stats = aggregateBuild(store.gear, store.agent.shdLevel);
+        const stats = aggregateBuild(sourceLabel ? statsSource : store.gear, store.agent.shdLevel);
         const src = (key: string) => stats.sources[key] ?? [];
         const renderSources = (key: string) => {
           const list = src(key);
@@ -226,7 +240,7 @@ function ValuesSidebar() {
       })()}
       <h3>{t.sidebar.setBonuses}</h3>
       <div className="set-bonus" style={{ opacity: 0.6 }}>
-        Werden automatisch aus dem erfassten Inventar berechnet (mit der Berechnungs-Engine).
+        Berechnet für das oben genannte Loadout bzw. Inventar (mit der Berechnungs-Engine).
       </div>
     </aside>
   );
