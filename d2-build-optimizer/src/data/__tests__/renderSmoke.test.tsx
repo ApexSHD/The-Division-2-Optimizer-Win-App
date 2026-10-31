@@ -7,6 +7,7 @@ import { DashboardView } from "../../views/DashboardView";
 import { LoadoutsView } from "../../views/LoadoutsView";
 import { BuildsView } from "../../views/BuildsView";
 import { WeaponsView } from "../../views/WeaponsView";
+import { SettingsView } from "../../views/SettingsView";
 import App from "../../App";
 import { StoreProvider } from "../../store";
 
@@ -151,5 +152,28 @@ describe("OptimizerView Wizard (Progress Bar)", () => {
     expect(html).not.toContain("Fragebogen (optional");
     expect(html).not.toContain("Zielmetrik");
     expect(html).not.toContain("Einschr\u00e4nkungen (optional)");
+  });
+});
+
+describe("SettingsView im Windows-Stil (zweispaltig)", () => {
+  it("rendert Sidebar-Kategorien und Sprachauswahl im Darstellungs-Bereich", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(SettingsView)),
+    );
+    expect(html).toContain("settings-layout");
+    expect(html).toContain("settings-nav");
+    expect(html).toContain("Darstellung");
+    expect(html).toContain("Sprache");
+    expect(html).toContain("Deutsch");
+    expect(html).toContain("English");
+  });
+
+  it("weitere Kategorien (Daten, Updates, Über) sind in der Navigation vorhanden", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(SettingsView)),
+    );
+    expect(html).toContain("Daten &amp; Speicherung");
+    expect(html).toContain("Updates");
+    expect(html).toContain("Über");
   });
 });
