@@ -61,3 +61,25 @@ describe("Gear-CSV Roundtrip (Issue #76)", () => {
     expect(gear[0].brandType).toBe("gearset");
   });
 });
+
+describe("Import-Warnungen (Issue #114 INV-2 / TRA-2)", () => {
+  it("warnt bei doppeltem Attribut, importiert aber weiter", () => {
+    const csv = [
+      "Slot;Marke;1. Attribut;2. Attribut;3. Attribut;Talent",
+      "Maske;Grupo Sombra S.A.;Waffenschaden 15;Kritischer Trefferschaden 12,5;Kritischer Trefferschaden 8;",
+    ].join("\n");
+    const { gear, warnings } = gearFromCsv(csv, () => "imported-1");
+    expect(gear).toHaveLength(1);
+    expect(warnings.some((w) => w.includes("doppeltes Attribut"))).toBe(true);
+  });
+
+  it("warnt mit Loesungshinweis bei unbekanntem Slot", () => {
+    const csv = [
+      "Slot;Marke;1. Attribut;2. Attribut;3. Attribut;Talent",
+      "Hut;Testbrand;Waffenschaden 15;Kritische Trefferchance 5;Kritischer Trefferschaden 8;",
+    ].join("\n");
+    const { gear, warnings } = gearFromCsv(csv, () => "imported-1");
+    expect(gear).toHaveLength(0);
+    expect(warnings.some((w) => w.includes("unbekannter Slot") && w.includes("Knieschoner"))).toBe(true);
+  });
+});

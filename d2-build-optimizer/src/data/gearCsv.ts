@@ -163,12 +163,13 @@ function parseAttr(cell: string): { type: GearAttrKey; value: number } | null {
 export interface GearCsvImportResult {
   gear: GearPiece[];
   skippedRows: number;
+  warnings: string[];
 }
 
 export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportResult {
   const text = csv.replace(/^\uFEFF/, "");
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length === 0) return { gear: [], skippedRows: 0 };
+  if (lines.length === 0) return { gear: [], skippedRows: 0, warnings: [] };
   const header = splitCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
   const slotIdx = header.findIndex((h) => h.startsWith("slot"));
   const brandIdx = header.findIndex((h) => h.startsWith("marke") || h.startsWith("set"));
@@ -183,11 +184,13 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
   const talentIdx = col("talent");
 
   const gear: GearPiece[] = [];
+  const warnings: string[] = [];
   let skippedRows = 0;
   outer: for (const line of lines.slice(1)) {
     const cells = splitCsvLine(line);
     const brand = (cells[brandIdx] ?? "").trim();
     if (!brand) {
+      warnings.push(`Zeile übersprungen — Spalte „Marke/Set“ ist leer. Bitte Marke oder Set ergänzen.`);
       skippedRows++;
       continue;
     }
@@ -197,6 +200,9 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
       if (i < 0) continue;
       const cell = (cells[i] ?? "").trim();
       if (cell && !parseAttr(cell)) {
+        warnings.push(
+          `„${brand}“ übersprungen — Attribut in Spalte ${i === a2Idx ? "2" : "3"} nicht lesbar („${cell}“). Erwartet: Text plus Wert, z. B. „Kritische Trefferchance 9,5“.`,
+        );
         skippedRows++;
         continue outer;
       }
@@ -204,9 +210,18 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
     const attrs = [a2Idx, a3Idx]
       .map((i) => (i >= 0 ? parseAttr(cells[i] ?? "") : null))
       .filter((a): a is { type: GearAttrKey; value: number } => a !== null);
+    const attrTypes = attrs.map((a) => a.type);
+    if (attrTypes.length === 2 && attrTypes[0] === attrTypes[1]) {
+      warnings.push(
+        `„${brand}“ — Warnung: doppeltes Attribut „${GEAR_ATTR_TYPES[attrTypes[0]]?.label ?? attrTypes[0]}“ in Attribut 2 und 3. Vermutlich Erfassungsfehler — bitte prüfen.`,
+      );
+    }
 
     const parsedSlot = parseSlot(cells[slotIdx] ?? "");
     if (!parsedSlot) {
+      warnings.push(
+        `„${brand}“ übersprungen — unbekannter Slot „${(cells[slotIdx] ?? "").trim()}“. Erlaubt: ${["Maske", "Weste", "Holster", "Rucksack", "Handschuhe", "Knieschoner"].join("/, ")}.`,
+      );
       skippedRows++;
       continue;
     }
@@ -232,5 +247,5 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
       }),
     );
   }
-  return { gear, skippedRows };
+  return { gear, skippedRows, warnings };
 }

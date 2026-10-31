@@ -162,12 +162,13 @@ function parseRarityLabel(label: string): Rarity {
 export interface CsvImportResult {
   weapons: Weapon[];
   skippedRows: number;
+  warnings: string[];
 }
 
 export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResult {
   const text = csv.replace(/^\uFEFF/, "");
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length === 0) return { weapons: [], skippedRows: 0 };
+  if (lines.length === 0) return { weapons: [], skippedRows: 0, warnings: [] };
   const header = splitCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
   const nameIdx = header.findIndex((h) => h === "name");
   if (nameIdx === -1) throw new Error("CSV ohne 'Name'-Spalte");
@@ -186,16 +187,21 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
   const magIdx = col("magazingr");
 
   const weapons: Weapon[] = [];
+  const warnings: string[] = [];
   let skippedRows = 0;
   for (const line of lines.slice(1)) {
     const cells = splitCsvLine(line);
     const name = (cells[nameIdx] ?? "").trim();
     if (!name) {
+      warnings.push(`Zeile übersprungen — Spalte „Name“ ist leer. Bitte Namen ergänzen.`);
       skippedRows++;
       continue;
     }
     const parsedType = typeIdx >= 0 ? parseTypeLabel(cells[typeIdx] ?? "") : "ar";
     if (!parsedType) {
+      warnings.push(
+        `„${name}“ übersprungen — unbekannte Waffengattung „${(cells[typeIdx] ?? "").trim()}“. Erlaubt: ${["Sturmgewehr", "Maschinenpistole", "LMG", "Gewehr", "Präzisionsgewehr", "Schrotflinte", "Pistole"].join("/, ")}.`,
+      );
       skippedRows++;
       continue;
     }
@@ -210,11 +216,19 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
     const a2Cell = a2Idx >= 0 ? (cells[a2Idx] ?? "").trim() : "";
     const a3Cell = a3Idx >= 0 ? (cells[a3Idx] ?? "").trim() : "";
     if ((a2Cell && !parseAttrCell(a2Cell)) || (a3Cell && !parseAttrCell(a3Cell))) {
+      warnings.push(
+        `„${name}“ übersprungen — Attribut 2/3 nicht lesbar („${a2Cell || a3Cell}“). Erwartet: Text plus Prozentwert, z. B. „Kritischer Trefferschaden +12,5 %“.`,
+      );
       skippedRows++;
       continue;
     }
     const a2 = a2Cell ? parseAttrCell(a2Cell) : null;
     const a3 = a3Cell ? parseAttrCell(a3Cell) : null;
+    if (a2 && a3 && a2.type === a3.type) {
+      warnings.push(
+        `„${name}“ — Warnung: doppeltes Attribut „${WEAPON_ATTR_LABELS[a2.type]}“ in Attribut 2 und 3. Vermutlich Erfassungsfehler — bitte prüfen.`,
+      );
+    }
 
     const core1 = core1Parsed !== undefined ? core1Parsed : undefined;
     const core2Type = a2 ? a2.type : undefined;
@@ -247,5 +261,5 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
       }),
     );
   }
-  return { weapons, skippedRows };
+  return { weapons, skippedRows, warnings };
 }

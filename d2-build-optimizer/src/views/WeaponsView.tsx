@@ -181,7 +181,7 @@ export function WeaponsView() {
     if (!file) return;
     try {
       const text = await file.text();
-      const { weapons, skippedRows } = weaponsFromCsv(text, () =>
+      const { weapons, skippedRows, warnings } = weaponsFromCsv(text, () =>
         `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       );
       if (weapons.length === 0) {
@@ -206,9 +206,13 @@ export function WeaponsView() {
       const parts = [`${toImport.length} Waffe(n) importiert`];
       if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen (nur bei identischen Werten)`);
       if (skippedRows) parts.push(`${skippedRows} Zeile(n) ungültig`);
+      if (warnings.length) parts.push(`⚠ ${warnings.join(" ⚠ ")}`);
       store.setStatus(parts.join(", "));
     } catch (err) {
-      store.setStatus(`CSV-Import fehlgeschlagen: ${err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      store.setStatus(
+        `CSV-Import fehlgeschlagen: ${msg}. Lösung: Spalten „Name“, „Typ“, „Attribut 1–3“ prüfen — Vorlage über „CSV exportieren“ erzeugen und daran orientieren.`,
+      );
     }
   }
 
