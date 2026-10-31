@@ -263,6 +263,7 @@ export function GearView() {
 
   function confirmImport(mode: "replace" | "merge") {
     if (!preview) return;
+    store.noteImport(preview.warnings, preview.skippedRows, "Gear");
     const gearKey = (g: GearPiece) =>
       `${g.slot}::${g.brand}::${g.brandType}::${g.core}::${g.coreValue}::${g.attributes.map((a) => `${a.type}:${a.value}`).join(",")}::${g.talent ?? ""}::${g.prototype ? 1 : 0}::${g.mod ? `${g.mod.attr}:${g.mod.value}` : ""}`;
     if (mode === "replace") {
