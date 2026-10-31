@@ -30,6 +30,7 @@ import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 import { DB_VERSION, reloadSecondsFor } from "../data/sampleData";
 import { weaponFingerprint, gearFingerprint } from "../data/loadoutIntegrity";
+import { DIFFICULTIES, difficultyInfo, timeToKillSeconds, type DifficultyKey } from "../data/difficultyProfiles";
 import type { WeaponType, Loadout, LoadoutMetrics } from "../data/sampleData";
 
 interface EnemyPreset {
@@ -333,11 +334,13 @@ function LoadoutCard({
   cand,
   roleChcTarget,
   roleHsdTarget,
+  teamSize,
 }: {
   result: V4BuildResult;
   cand: V4Candidate;
   roleChcTarget: number | null;
   roleHsdTarget: number | null;
+  teamSize: number;
 }) {
   const store = useStore();
   const active = store.builds.find((b) => b.id === store.activeBuildId) ?? null;
@@ -395,6 +398,27 @@ function LoadoutCard({
     ["Burst-/Dauer-DPS", `${cand.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })} / ${sustained.toLocaleString("de-DE", { maximumFractionDigits: 0 })}`, sustainedDeltaActive ? `Δ Dauer zu aktiv: ${sustainedDeltaActive}` : "Burst ohne, Dauer inkl. Nachladen"],
     ["Schaden/Magazin", cand.damage.damagePerMagazine.toLocaleString("de-DE", { maximumFractionDigits: 0 }), `Magazin: ${cand.weapon.magSize} Schuss · Nachladen: ${reloadSecondsFor(cand.weapon).toLocaleString("de-DE", { maximumFractionDigits: 1 })} s`],
     ["Zeit bis leeres Magazin", `${cand.damage.secondsPerMagazine.toLocaleString("de-DE", { maximumFractionDigits: 1 })} s`, ""],
+    [
+      "Zeit zum Töten (Elite)",
+      (() => {
+        const dps =
+          store.optimization.targetMetric === "burst"
+            ? cand.damage.effectiveDps
+            : cand.damage.sustainedDps;
+        const ttk = timeToKillSeconds(
+          store.optimization.difficultyKey as DifficultyKey,
+          "elite",
+          teamSize as 1 | 2 | 3 | 4,
+          dps,
+        );
+        return ttk === null
+          ? "\u2014"
+          : `${ttk.toLocaleString("de-DE", { maximumFractionDigits: 1 })} s (Pool ${(
+              timeToKillSeconds(store.optimization.difficultyKey as DifficultyKey, "elite", teamSize as 1 | 2 | 3 | 4, 1_000_000) ?? 0
+            ).toFixed(1)} Mio.)`;
+      })(),
+      `${difficultyInfo(store.optimization.difficultyKey as DifficultyKey).label} · ${teamSize} Spieler`,
+    ],
     ["Kritische Trefferchance (CHC)", `${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`, chcState],
     ["Kritischer Trefferschaden (CHD)", `+${stats.chd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, `Cap 60 % für CHC beachtet`],
     ["Waffenschaden (WD)", `+${stats.wd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, ""],
@@ -1051,7 +1075,7 @@ export function OptimizerView() {
         )}
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            Teamgröße
+            Teamgröße (steuert auch die Gegner-Teamskalierung)
             <select value={teamSize} onChange={(e) => setTeamSize(Number(e.target.value))}>
               {[1, 2, 3, 4].map((n) => (
                 <option key={n} value={n}>
@@ -1104,6 +1128,22 @@ export function OptimizerView() {
               style={{ width: 64, textAlign: "center" }}
             />
             <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>%</span>
+          </label>
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            Schwierigkeit
+            <select
+              value={store.optimization.difficultyKey}
+              onChange={(e) =>
+                store.setOptimization({
+                  ...store.optimization,
+                  difficultyKey: e.target.value,
+                })
+              }
+            >
+              {DIFFICULTIES.map((d) => (
+                <option key={d.key} value={d.key}>{d.label}</option>
+              ))}
+            </select>
           </label>
           <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
             Zielmetrik
@@ -1388,6 +1428,7 @@ export function OptimizerView() {
                   cand={cand}
                   roleChcTarget={role.chcTarget}
                   roleHsdTarget={needsHeadshotShare ? store.optimization.targetHsd : null}
+                  teamSize={teamSize}
                 />
               );
             })()}

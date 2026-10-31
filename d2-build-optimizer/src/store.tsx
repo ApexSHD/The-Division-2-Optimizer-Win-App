@@ -20,6 +20,8 @@ export interface OptimizationSettings {
   targetChc: number;
   targetHsd: number;
   targetMetric: "burst" | "sustained";
+  difficultyKey: string;
+  enemyTeamSize: 1 | 2 | 3 | 4;
   lockedGearIds: string[];
   anchorWeaponId: string;
   weaponTypeFilter: import("./data/sampleData").WeaponType | "";
@@ -83,6 +85,8 @@ export function shdBonusFor(level: number, key: string): number {
 export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
   targetMetric: "sustained",
   targetHsd: 100,
+  difficultyKey: "heroic",
+  enemyTeamSize: 4,
   role: "",
   targetChc: 50,
   lockedGearIds: [],
