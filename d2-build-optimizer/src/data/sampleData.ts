@@ -57,7 +57,7 @@ export interface Weapon {
 }
 
 export const WEAPON_ATTR_LABELS: Record<WeaponAttrKey, string> = {
-  dth: "Lebenspunktschaden (DTH)",
+  dth: "Lebensenergieschaden (DTH)",
   chc: "Kritische Trefferchance (CHC)",
   chd: "Kritischer Trefferschaden (CHD)",
   dttooc: "Schaden gg. ungedeckte Ziele (DTToOC)",
@@ -183,7 +183,7 @@ export const GEAR_ATTR_TYPES: Record<GearAttrKey, { label: string; group: string
   wd: { label: "Waffenschaden (Minor)", group: "Offensiv (Rot)", max: 15 },
   dta: { label: "Rüstungsschaden", group: "Offensiv (Rot)", max: 8 },
   dttooc: { label: "Schaden gg. ungedeckte Ziele", group: "Offensiv (Rot)", max: 8 },
-  dth: { label: "Lebenspunktschaden", group: "Offensiv (Rot)", max: 10 },
+  dth: { label: "Lebensenergieschaden", group: "Offensiv (Rot)", max: 10 },
   rof: { label: "Feuerrate", group: "Offensiv (Rot)", max: 5 },
   aok: { label: "Rüstung bei Tötung", group: "Defensiv (Blau)", max: 10 },
   incomrepair: { label: "Erhaltene Reparatur", group: "Defensiv (Blau)", max: 20 },
