@@ -27,6 +27,7 @@ import { SKILLS, AXES } from "../data/v4Data";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 import { DB_VERSION, reloadSecondsFor } from "../data/sampleData";
+import { weaponFingerprint, gearFingerprint } from "../data/loadoutIntegrity";
 import type { WeaponType, Loadout, LoadoutMetrics } from "../data/sampleData";
 
 const ENEMY_PROFILE_PRESETS: Array<{ key: string; label: string; enemyHeadshotShare: number; hint: string }> = [
@@ -643,6 +644,10 @@ export function OptimizerView() {
         armor: bestBuild.vector.ehp,
       },
       dbVersion: DB_VERSION,
+      signatures: {
+        [cand.weapon.id]: weaponFingerprint(cand.weapon),
+        ...Object.fromEntries(cand.gear.map((g) => [g.id, gearFingerprint(g)])),
+      },
     };
     store.addBuild(build);
     store.setActiveBuildId(build.id);

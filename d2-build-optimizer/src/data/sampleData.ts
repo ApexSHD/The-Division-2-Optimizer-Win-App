@@ -276,6 +276,7 @@ export interface Loadout extends Build {
   assumptions: string[];
   metrics: LoadoutMetrics;
   dbVersion: string;
+  signatures?: Record<string, string>;
 }
 
 export const DB_VERSION = "weapons_v1 · gear_v1 · mods_v1";

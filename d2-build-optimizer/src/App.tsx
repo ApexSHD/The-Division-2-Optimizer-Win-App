@@ -13,6 +13,7 @@ import { AdminView } from "./views/AdminView";
 import { SettingsView } from "./views/SettingsView";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { DB_VERSION } from "./data/sampleData";
+import { checkLoadoutIntegrity } from "./data/loadoutIntegrity";
 
 function useThemeEffect() {
   const store = useStore();
@@ -180,6 +181,24 @@ function ValuesSidebar() {
     <aside className="sidebar" aria-label={t.sidebar.title}>
       <h3>{t.sidebar.title}</h3>
       <div className="stat" style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{sourceLabel}</div>
+      {activeBuild && (() => {
+        const integrity = checkLoadoutIntegrity(activeBuild, store.weapons, store.gear, DB_VERSION);
+        if (!integrity.outdated) return null;
+        return (
+          <div
+            style={{
+              border: "1px solid var(--warn, #e6a23c)",
+              borderRadius: 6,
+              padding: "4px 8px",
+              fontSize: 11,
+              background: "rgba(230,162,60,0.08)",
+            }}
+            title="Teile wurden gelöscht/geändert oder die Datenbank wurde aktualisiert"
+          >
+            ⚠ Loadout veraltet: {integrity.reasons.join(" · ")}
+          </div>
+        );
+      })()}
       {(() => {
         const stats = aggregateBuild(statsSource, store.agent.shdLevel);
         return (
