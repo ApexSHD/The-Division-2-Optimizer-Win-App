@@ -493,14 +493,14 @@ describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
   const zeroStats = () => ({ wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} });
 
   it("Rechenbeispiel: Krit-Kopfschuss ist ADDITIV, nicht HSD*CHD multiplikativ", () => {
-    // Setup: 100 % Headshot-Anteil, HSD +50 %, CHD +40 %
+    // Setup: 100 % Headshot-Anteil, HSD +50 %, CHD +40 % (+ CHD_BASE 25 % seit Kalibrierung 31.10.)
     const stats = { ...zeroStats(), hsd: 50, chd: 40 };
     const d = computeDamage(baseW(), stats, { armor: 0, health: 1, ooc: 0, headshot: 1 });
     const base = sampleWeapons[0].baseDamage;
-    // Erwartung (additiver Topf): Krit-Kopfschuss = base * (1 + 0.5 + 0.4) = base * 1.9
-    // Falsch (multiplikativ): base * 1.5 * 1.4 = base * 2.1
-    expect(d.critHit).toBeCloseTo(base * 1.9, 6);
-    expect(d.critHit).not.toBeCloseTo(base * 2.1, 4);
+    // Erwartung (additiver Topf inkl. Basis-CHD): Krit-Kopfschuss = base * (1 + 0.5 + 0.4 + 0.25) = base * 2.15
+    // Falsch (multiplikativ): base * 1.5 * 1.65 = base * 2.475
+    expect(d.critHit).toBeCloseTo(base * 2.15, 6);
+    expect(d.critHit).not.toBeCloseTo(base * 2.475, 4);
   });
 
   it("wastedChc beruecksichtigt Waffen-CHC (core2)", () => {

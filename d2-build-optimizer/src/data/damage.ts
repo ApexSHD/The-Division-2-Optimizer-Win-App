@@ -48,6 +48,10 @@ export interface DamageBreakdown {
 
 const CHC_CAP = 60;
 
+// Nutzervorgabe/Community-verifiziert 31.10.: Basis-Kritschaden des Agenten (nicht im Charakterblatt
+// als solcher ausgewiesen, aber wirksam - Schießstand-Verifikation 164,4 % CHD).
+export const CHD_BASE = 25;
+
 export type SpecId = "demolitionist" | "gunner" | "sharpshooter" | "survivalist" | "technician" | "firewall";
 
 export interface SpecBonuses {
@@ -290,8 +294,8 @@ export function computeDamage(
 
   // Minor-Attribute zaehlen in ihre Kategorie (additiv)
   const totalChc = build.chc + weaponChc;
-  const finalChdBase = build.chd + weaponChd;
-  const totalHsd = build.hsd + weaponHsd;
+  const finalChdBase = CHD_BASE + build.chd + weaponChd;
+  const totalHsd = (weapon.innateHsd ?? 0) + build.hsd + weaponHsd;
   const dttoocTotal = build.dttooc + weaponDttooc;
   const dthTotal = build.dth + weaponDth;
   const dtaTotal = build.dta + weaponDta;
