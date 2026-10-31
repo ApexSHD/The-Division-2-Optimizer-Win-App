@@ -6,7 +6,6 @@ import type { Translation } from "./i18n/de";
 import type { GearPiece } from "./data/sampleData";
 import { GlobalView } from "./views/GlobalView";
 import { DashboardView } from "./views/DashboardView";
-import { LoadoutsView } from "./views/LoadoutsView";
 import { BuildsView } from "./views/BuildsView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
@@ -154,7 +153,6 @@ function Nav() {
       title: "Optimierung",
       entries: [
         { id: "optimizer", label: t.nav.optimizer, icon: "\ud83c\udfaf" },
-        { id: "loadouts", label: "Loadouts", icon: "\ud83e\uddf1" },
         { id: "compare", label: t.nav.compare, icon: "\u2696" },
       ],
     },
@@ -323,7 +321,6 @@ function WorkArea() {
 
   const titles: Record<typeof store.view, { title: string; sub: string }> = {
     dashboard: { title: "Dashboard", sub: "Inventar, Lücken, Loadouts und Datenstatus auf einen Blick" },
-    loadouts: { title: "Loadouts", sub: "Alle gespeicherten Builds mit ihren Werten" },
     builds: { title: "Builds", sub: "Eigenen Build aus dem Inventar zusammenstellen" },
     global: { title: t.global.title, sub: t.global.subtitle },
     weapons: { title: t.weapons.title, sub: t.weapons.subtitle },
@@ -348,7 +345,6 @@ function WorkArea() {
         {store.view === "weapons" && <WeaponsView />}
         {store.view === "gear" && <GearView />}
         {store.view === "optimizer" && <OptimizerView />}
-        {store.view === "loadouts" && <LoadoutsView />}
         {store.view === "builds" && <BuildsView />}
         {store.view === "compare" && <CompareView />}
         {store.view === "admin" && <AdminView />}

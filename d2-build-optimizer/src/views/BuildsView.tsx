@@ -9,6 +9,7 @@ import { computeEffectVector, type AxisContext } from "../data/axes";
 import { DB_VERSION } from "../data/sampleData";
 import type { Weapon, GearPiece, GearSlot, Loadout } from "../data/sampleData";
 import { gearFingerprint, weaponFingerprint } from "../data/loadoutIntegrity";
+import { LoadoutsView } from "./LoadoutsView";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 
@@ -258,6 +259,11 @@ export function BuildsView() {
           Zurücksetzen
         </button>
       </div>
+
+      <section className="field" style={{ margin: 0 }}>
+        <h2 style={{ margin: "0 0 8px" }}>Vorhandene Loadouts</h2>
+        <LoadoutsView embedded />
+      </section>
     </div>
   );
 }
