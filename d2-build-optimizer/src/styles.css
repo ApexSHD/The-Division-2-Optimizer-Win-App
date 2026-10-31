@@ -1341,3 +1341,81 @@ kbd {
   color: var(--accent, #f57c1f);
   font-weight: 700;
 }
+
+/* ---- Einstellungen im Windows-11-Stil (zweispaltig, Sidebar links) ---- */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  min-height: 100%;
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-right: 1px solid var(--border, #555);
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim, #aaa);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.settings-nav-item:hover {
+  background: var(--bg-hover, #2a2d33);
+  color: var(--text, #eee);
+}
+
+.settings-nav-item.active {
+  background: var(--bg-hover, #2a2d33);
+  color: var(--text, #eee);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent, #f57c1f);
+}
+
+.settings-content {
+  padding: 12px 24px 24px;
+  max-width: 720px;
+}
+
+.settings-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 20px 0 8px;
+  color: var(--text-faint, #888);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border, #444);
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row label {
+  flex: 1;
+  font-size: 14px;
+}
+
+.settings-row select,
+.settings-row input[type="text"] {
+  max-width: 240px;
+}
