@@ -6,10 +6,13 @@ import { DB_VERSION } from "../data/sampleData";
 import type { Loadout } from "../data/sampleData";
 import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
+import { SidePanel } from "../components/SidePanel";
+import { gearShortLabel, weaponShortLabel } from "../data/itemLabels";
 
 export function LoadoutsView({ embedded = false }: { embedded?: boolean }) {
   const store = useStore();
   const [sortKey, setSortKey] = useState<string>("timestamp");
+  const [editing, setEditing] = useState<Loadout | null>(null);
 
   const rows = useMemo(
     () =>
@@ -32,6 +35,25 @@ export function LoadoutsView({ embedded = false }: { embedded?: boolean }) {
       () => store.setStatus(`Build-Code kopiert: ${code.slice(0, 24)}…`),
       () => store.setStatus(`Build-Code: ${code}`),
     );
+  };
+
+  const weaponOf = (b: Loadout) => store.weapons.find((w) => w.id === b.weaponIds[0]) ?? null;
+  const gearOf = (b: Loadout) =>
+    (Object.values(b.gearIds) as (string | undefined)[])
+      .map((gid) => store.gear.find((g) => g.id === gid))
+      .filter((g): g is NonNullable<typeof g> => Boolean(g));
+  const weaponModsOf = (b: Loadout) => b.weaponMods ?? [];
+  const gearModOf = (b: Loadout, gearId: string) => b.gearMods?.[gearId] ?? null;
+
+  const saveEdit = () => {
+    if (!editing) return;
+    if (!editing.name.trim()) {
+      store.setStatus("Name fehlt — bitte Namen angeben.");
+      return;
+    }
+    store.updateBuild({ ...editing, name: editing.name.trim() });
+    store.setStatus(`„${editing.name.trim()}" aktualisiert`);
+    setEditing(null);
   };
 
   const removeLoadout = (b: Loadout) => {
@@ -113,6 +135,53 @@ export function LoadoutsView({ embedded = false }: { embedded?: boolean }) {
       render: (b) => (b.timestamp ? new Date(b.timestamp).toLocaleDateString("de-DE") : "—"),
       sortValue: (b) => b.timestamp ?? "",
     },
+    {
+      key: "details",
+      label: "Teile & Mods",
+      render: (b) => {
+        const w = weaponOf(b);
+        const gear = gearOf(b);
+        const wMods = weaponModsOf(b);
+        return (
+          <details style={{ whiteSpace: "normal" }}>
+            <summary style={{ cursor: "pointer", fontSize: 12 }}>
+              {gear.length} Gear-Teil(e){w ? " · 1 Waffe" : ""}{wMods.length > 0 ? ` · ${wMods.length} Waffen-Mod(s)` : ""}
+            </summary>
+            <div style={{ fontSize: 11, display: "grid", gap: 3, marginTop: 4 }}>
+              {w ? (
+                <div>
+                  <strong>{weaponShortLabel(w)}</strong>
+                  {wMods.length > 0 && (
+                    <div style={{ color: "var(--text-dim, #aaa)", paddingLeft: 10 }}>
+                      Mods:{" "}
+                      {wMods
+                        .map((m) => `${m.dbName ?? m.slot} (+${m.value.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % ${m.attr})`)
+                        .join(" · ")}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ color: "var(--warn, #e6a23c)" }}>Waffe nicht mehr im Inventar</div>
+              )}
+              {gear.map((g) => {
+                const mod = gearModOf(b, g.id);
+                return (
+                  <div key={g.id}>
+                    {gearShortLabel(g)}
+                    {mod && (
+                      <span style={{ color: "var(--text-dim, #aaa)" }}>
+                        {" "}· Mod: {mod.attr.toUpperCase()} +{mod.value.toLocaleString("de-DE", { maximumFractionDigits: 1 })}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+        );
+      },
+      sortValue: () => "",
+    },
   ];
 
   return (
@@ -133,6 +202,7 @@ export function LoadoutsView({ embedded = false }: { embedded?: boolean }) {
           },
           { label: "⚖", title: "Im Vergleich öffnen", onAction: () => store.setView("compare") },
           { label: "📋", title: "Build-Code kopieren", onAction: (b) => copyCode(b) },
+          { label: "✎", title: "Loadout bearbeiten", onAction: (b) => setEditing({ ...b }) },
           { label: "✕", title: "Loadout löschen", className: "btn-danger", onAction: (b) => removeLoadout(b) },
         ]}
         toolbar={
@@ -153,6 +223,134 @@ export function LoadoutsView({ embedded = false }: { embedded?: boolean }) {
           </>
         }
       />
+
+      <SidePanel
+        open={editing !== null}
+        title={editing ? `Loadout bearbeiten: ${editing.name}` : "Loadout bearbeiten"}
+        onClose={() => setEditing(null)}
+        footer={
+          <>
+            <button className="btn" onClick={() => setEditing(null)}>Abbrechen</button>
+            <span className="spacer" />
+            <button className="btn btn-accent" onClick={saveEdit}>Speichern</button>
+          </>
+        }
+      >
+        {editing && (
+          <>
+            <div className="field">
+              <label>Name</label>
+              <input
+                type="text"
+                value={editing.name}
+                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                style={{ width: "100%" }}
+              />
+            </div>
+            <div className="field">
+              <label>Notiz</label>
+              <input
+                type="text"
+                value={editing.note}
+                onChange={(e) => setEditing({ ...editing, note: e.target.value })}
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            {(editing.weaponMods ?? []).length > 0 && (
+              <div className="field">
+                <label>Waffen-Mods (Werte anpassen / entfernen)</label>
+                {(editing.weaponMods ?? []).map((m, i) => (
+                  <div key={`${m.slot}-${i}`} style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4, flexWrap: "wrap", fontSize: 13 }}>
+                    <span style={{ minWidth: 80 }}>{m.slot}</span>
+                    <span style={{ color: "var(--text-dim, #aaa)", minWidth: 150 }}>
+                      {m.dbName ?? m.attr} ({m.attr})
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={m.value}
+                      onChange={(e) =>
+                        setEditing({
+                          ...editing,
+                          weaponMods: (editing.weaponMods ?? []).map((x, xi) =>
+                            xi === i ? { ...x, value: Math.max(0, Number(e.target.value)) } : x,
+                          ),
+                        })
+                      }
+                      style={{ width: 80 }}
+                    />
+                    <button
+                      className="btn btn-danger"
+                      style={{ fontSize: 11, padding: "2px 8px" }}
+                      onClick={() =>
+                        setEditing({
+                          ...editing,
+                          weaponMods: (editing.weaponMods ?? []).filter((_, xi) => xi !== i),
+                        })
+                      }
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {editing.gearMods && Object.keys(editing.gearMods).length > 0 && (
+              <div className="field">
+                <label>Gear-Mods (Werte anpassen / entfernen)</label>
+                {Object.entries(editing.gearMods ?? {}).map(([gid, modMaybe]) => {
+                  const mod = modMaybe!;
+                  const g = store.gear.find((x) => x.id === gid);
+                  return (
+                    <div key={gid} style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4, flexWrap: "wrap", fontSize: 13 }}>
+                      <span style={{ color: "var(--text-dim, #aaa)", minWidth: 200 }}>
+                        {g ? `${g.brand} (${g.slot})` : gid}
+                      </span>
+                      <span>{mod.attr.toUpperCase()}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        value={mod.value}
+                        onChange={(e) =>
+                          setEditing({
+                            ...editing,
+                            gearMods: {
+                              ...editing.gearMods,
+                              [gid]: { attr: mod.attr, value: Math.max(0, Number(e.target.value)) },
+                            },
+                          })
+                        }
+                        style={{ width: 80 }}
+                      />
+                      <button
+                        className="btn btn-danger"
+                        style={{ fontSize: 11, padding: "2px 8px" }}
+                        onClick={() => {
+                          const next = { ...editing.gearMods };
+                          delete next[gid];
+                          setEditing({ ...editing, gearMods: next });
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <p className="settings-hint">
+              Gear-Teile und Waffe werden über die Referenzen auf dein Inventar gehalten — das
+              Loadout aktualisiert sich automatisch mit, wenn Teile geändert werden (Veraltungs-Hinweis
+              zeigt Abweichungen). Werte der zugeordneten Mods lassen sich hier korrigieren.
+            </p>
+          </>
+        )}
+      </SidePanel>
     </div>
   );
 }
