@@ -306,6 +306,31 @@
       "name": "Perfekt hin und her",
       "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
       "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Rifleman",
+      "description": "Kopfschüsse gewähren einen Stack von +10% Waffen-Schaden für 5s. Maximal 5 Stacks. Weitere Kopfschüsse aktualisieren die Dauer.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Bumerang",
+      "description": "Kritische Treffer haben eine 50% Chance, die Kugel zurück ins Magazin zu bringen. Wenn eine Kugel zurückgebracht wird, erhält der nächste Schuss +40% erhöhten Schaden.",
+      "group": "Dynamisch"
+    },
+    {
+      "name": "Glücksschuss",
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
     }
   ],
   "Sturmgewehre": [
@@ -332,6 +357,41 @@
     {
       "name": "Perfekt stabilisieren",
       "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Kurzsichtig",
+      "description": "Erhält +80% Stabilität auf Kosten von -35% optimaler Reichweite.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Leer",
+      "description": "Das Nachladen aus dem leeren Magazin gewährt +60% Waffen-Handhabung für 10s.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Überlaufend",
+      "description": "Jedes 3. Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
       "group": "Nutzen"
     }
   ],
@@ -385,6 +445,26 @@
       "name": "Perfekt hin und her",
       "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
       "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Glücksschuss",
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Nackt",
+      "description": "Das Treffen eines Gegners ohne Rüstung gewährt +50% Kopfschuss-Schaden für 5s.",
+      "group": "Kopfschuss-Schaden"
     }
   ],
   "Maschinenpistolen": [
@@ -412,6 +492,31 @@
       "name": "Perfekt hin und her",
       "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
       "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Außenseiter",
+      "description": "Nach dem Töten eines Gegners erhältst du +100% optimale Reichweite und +100% Genauigkeit für 10s.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Unbeirrbar",
+      "description": "Das Wechseln zu dieser Waffe gewährt +300% Waffen-Handhabung für 5s. Tötungen aktualisieren den Buff. Das Wechseln weg deaktiviert dies für alle Waffen für 5s.",
+      "group": "Nutzen"
     }
   ],
   "Leichte Maschinengewehre": [
@@ -449,6 +554,41 @@
       "name": "Perfekt hin und her",
       "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
       "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Aus den Angeln",
+      "description": "Gewährt +18% Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Raserei",
+      "description": "Für jede 10 Kugeln in der Magazinkapazität erhältst du +3% Feuerrate und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst. (Wert: 50-Schuss-Magazin.)",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Überwältigen",
+      "description": "Das Unterdrücken eines Gegners, der nicht bereits unterdrückt ist, gewährt +10% Waffen-Schaden für 12 Sekunden. Maximal 4 Stacks.",
+      "group": "Waffen-Schaden"
     }
   ],
   "Schrotflinten": [
@@ -471,6 +611,26 @@
       "name": "Perfekt hin und her",
       "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
       "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Draufhauen",
+      "description": "3 aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Aufgepumpt",
+      "description": "Das Nachladen gewährt +1,2% Waffen-Schaden für 10s. Stackt bis zu 25 Mal.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Dreist",
+      "description": "Erhalte +3,5% verstärkten Schaden auf den nächsten Schuss für jeden Pellet, der das Ziel trifft, wenn mindestens 6 Pellets treffen. (Wert: 6 Pellets; bis 8 Pellets möglich.)",
+      "group": "Verstärker (additiv)"
     }
   ],
   "Pistolen": [
@@ -493,6 +653,21 @@
       "name": "Perfekt entschlossen",
       "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
       "group": "Nutzen"
+    },
+    {
+      "name": "Glücksschuss",
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Bergung",
+      "description": "Das Töten eines Ziels hat eine 70% Chance, das Magazin nachzufüllen.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Finisher",
+      "description": "Das Wechseln von dieser Waffe innerhalb von 10s nach dem Töten eines Gegners gewährt +30% kritische Trefferchance und +30% kritischen Trefferschaden für 15s.",
+      "group": "Kritische Trefferchance / Schaden"
     }
   ]
 }
