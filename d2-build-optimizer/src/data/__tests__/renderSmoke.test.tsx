@@ -3,6 +3,7 @@ import { renderToString } from "react-dom/server";
 import * as React from "react";
 import { OptimizerView } from "../../views/OptimizerView";
 import { OnboardingWizard } from "../../components/OnboardingWizard";
+import { DashboardView } from "../../views/DashboardView";
 import { StoreProvider } from "../../store";
 
 describe("OptimizerView Render-Smoke (Fix schwarzer Bildschirm)", () => {
@@ -39,5 +40,23 @@ describe("OnboardingWizard Render-Smoke (TRA-4, Issue #119)", () => {
     expect(html).toContain("3 · Erstes Ergebnis");
     expect(html).toContain("Überspringen");
     expect(html).toContain("Weiter");
+  });
+});
+
+describe("DashboardView Render-Smoke (Lastenheft Dashboard)", () => {
+  it("rendert KPI-Kacheln, Schnellaktionen und Datenstatus", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(DashboardView)),
+    );
+    expect(html).toContain("Dashboard");
+    expect(html).toContain("Inventar-Überblick");
+    expect(html).toContain("Gear-Teile");
+    expect(html).toContain("Safe-to-Junk");
+    expect(html).toContain("Lückenanalyse");
+    expect(html).toContain("Deine Builds &amp; Loadouts");
+    expect(html).toContain("Schnellaktionen");
+    expect(html).toContain("Zustand der Daten");
+    expect(html).toContain("Optimierer starten");
+    expect(html).toContain("Build-Tipp");
   });
 });

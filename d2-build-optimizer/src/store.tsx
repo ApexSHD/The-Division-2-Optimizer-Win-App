@@ -5,7 +5,7 @@ import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalize
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
-export type ViewId = "global" | "weapons" | "gear" | "optimizer" | "compare" | "admin" | "settings";
+export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "optimizer" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
 
 export interface AgentValues {
@@ -213,6 +213,9 @@ export interface AppState {
   setOnboardingDone: (done: boolean) => void;
   status: string;
   setStatus: (s: string) => void;
+  lastImportAt: string | null;
+  importWarnings: string[];
+  noteImport: (warnings: string[], skippedRows: number, kind: string) => void;
   progress: number | null;
   setProgress: (p: number | null) => void;
   addWeapon: (w: Weapon) => void;
@@ -253,9 +256,19 @@ function newId(prefix: string): string {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [view, setView] = useState<AppState["view"]>("global");
+  const [view, setView] = useState<AppState["view"]>("dashboard");
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [status, setStatus] = useState("Bereit");
+  const [lastImportAt, setLastImportAt] = useState<string | null>(null);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+  const noteImport = (warnings: string[], skippedRows: number, kind: string) => {
+    setLastImportAt(new Date().toISOString());
+    const all = [...warnings];
+    if (skippedRows > 0) {
+      all.unshift(`${skippedRows} Zeile(n) im ${kind}-Import nicht erkannt — Ursache siehe Import-Vorschau.`);
+    }
+    setImportWarnings(all);
+  };
   const [progress, setProgress] = useState<number | null>(null);
   const [userData, setUserData] = useState<UserData>(() => defaultUserData());
   const [storagePath, setStoragePath] = useState<string | null>(null);
@@ -397,6 +410,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setOnboardingDone: (done) => mutate((d) => ({ ...d, onboardingDone: done })),
     status,
     setStatus,
+    lastImportAt,
+    importWarnings,
+    noteImport,
     progress,
     setProgress,
     addWeapon: (w) => mutate((d) => ({ ...d, weapons: [...d.weapons, w] })),
