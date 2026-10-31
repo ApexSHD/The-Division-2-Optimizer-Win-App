@@ -141,7 +141,7 @@ function defaultUserData(): UserData {
   };
 }
 
-function sanitize(raw: unknown): UserData {
+export function sanitize(raw: unknown): UserData {
   const fallback = defaultUserData();
   if (typeof raw !== "object" || raw === null) return fallback;
   const r = raw as Partial<UserData>;
@@ -173,7 +173,45 @@ function sanitize(raw: unknown): UserData {
           normalizeGear(g as Parameters<typeof normalizeGear>[0]),
         )
       : [],
-    builds: Array.isArray(r.builds) ? r.builds : [],
+    builds: Array.isArray(r.builds)
+      ? (r.builds as unknown[])
+          .map((b): Loadout | null => {
+            if (typeof b !== "object" || b === null) return null;
+            const raw = b as Partial<Loadout> & { metrics?: Partial<Loadout["metrics"]> };
+            if (!raw.id || typeof raw.id !== "string") return null;
+            return {
+              id: raw.id,
+              name: raw.name ?? "Loadout",
+              weaponIds: Array.isArray(raw.weaponIds) ? raw.weaponIds : [],
+              gearIds:
+                raw.gearIds && typeof raw.gearIds === "object"
+                  ? (Object.fromEntries(
+                      Object.entries(raw.gearIds).filter(([, v]) => typeof v === "string"),
+                    ) as Loadout["gearIds"])
+                  : {},
+              note: raw.note ?? "",
+              timestamp: raw.timestamp ?? "",
+              roleId: raw.roleId ?? "",
+              assumptions: Array.isArray(raw.assumptions) ? raw.assumptions : [],
+              metrics: {
+                dps: raw.metrics?.dps ?? 0,
+                chc: raw.metrics?.chc ?? 0,
+                chd: raw.metrics?.chd ?? 0,
+                wd: raw.metrics?.wd ?? 0,
+                hsd: raw.metrics?.hsd ?? 0,
+                armor: raw.metrics?.armor ?? 0,
+              },
+              dbVersion: raw.dbVersion ?? "",
+              signatures:
+                raw.signatures && typeof raw.signatures === "object"
+                  ? (Object.fromEntries(
+                      Object.entries(raw.signatures).filter(([, v]) => typeof v === "string"),
+                    ) as Record<string, string>)
+                  : undefined,
+            };
+          })
+          .filter((b): b is Loadout => b !== null)
+      : [],
     activeBuildId: typeof r.activeBuildId === "string" ? r.activeBuildId : "",
     onboardingDone: Boolean(r.onboardingDone),
   };
