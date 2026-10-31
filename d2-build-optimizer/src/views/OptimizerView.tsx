@@ -318,6 +318,40 @@ function LoadoutCard({
   ];
   return (
     <div style={{ display: "grid", gap: 10 }}>
+      <div style={{ display: "grid", gap: 8 }}>
+        <strong>Wertzusammensetzung nach Quelle</strong>
+        {(["wd", "chc", "chd", "hsd"] as const).map((key) => {
+          const list = stats.sources[key] ?? [];
+          const total = list.reduce((acc, src2) => acc + src2.value, 0);
+          if (total <= 0) return null;
+          const palette = ["#4f9cf9", "#67c23a", "#e6a23c", "#b07cf9", "#f97f9c", "#7cd0e0", "#c9b458"];
+          return (
+            <div key={key}>
+              <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)", marginBottom: 2 }}>
+                {GEAR_ATTR_SHORT[key] ?? key} +{total.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %
+              </div>
+              <div style={{ display: "flex", height: 10, borderRadius: 4, overflow: "hidden", border: "1px solid var(--border, #555)" }}>
+                {list.map((src2, i) => (
+                  <div
+                    key={i}
+                    title={`${src2.label}: +${src2.value.toLocaleString("de-DE")}`}
+                    style={{ width: `${(100 * src2.value) / total}%`, background: palette[i % palette.length] }}
+                  />
+                ))}
+              </div>
+              <div style={{ fontSize: 10, color: "var(--text-dim, #aaa)", display: "flex", gap: 8, flexWrap: "wrap", marginTop: 2 }}>
+                {list.map((src2, i) => (
+                  <span key={i}>
+                    <span style={{ display: "inline-block", width: 8, height: 8, background: palette[i % palette.length], borderRadius: 2, marginRight: 3 }} />
+                    {src2.label} +{src2.value.toLocaleString("de-DE")}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <small style={{ color: "var(--text-dim, #aaa)" }}>Farbliche Segmente je Quelle; Maus über einem Segment zeigt den Betrag. Gear-Mods: Max-Roll angenommen (siehe Annahmen-Panel).</small>
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
         {metrics.map(([label, value, hint]) => (
           <div key={label} className="field" style={{ margin: 0, padding: "6px 10px", borderRadius: 6 }}>
@@ -334,6 +368,41 @@ function LoadoutCard({
         <div style={{ height: 8, borderRadius: 4, background: "var(--border, #555)", overflow: "hidden" }}>
           <div style={{ width: `${Math.max(0, Math.min(100, dpsShare))}%`, height: "100%", background: "var(--accent, #4f9cf9)" }} />
         </div>
+      </div>
+      <div style={{ fontSize: 12, display: "grid", gap: 2 }}>
+        <strong>Set- und Marken-Boni</strong>
+        {(() => {
+          const brandCounts = new Map<string, { count: number; label: string }>();
+          const greenCounts = new Map<string, { count: number; label: string }>();
+          for (const g of cand.gear) {
+            const bucket = g.brandType === "gearset" ? greenCounts : g.brandType === "brand" ? brandCounts : null;
+            if (!bucket) continue;
+            const key = g.brand.toLowerCase().split(" ")[0];
+            const e = bucket.get(key) ?? { count: 0, label: g.brand };
+            e.count += 1;
+            bucket.set(key, e);
+          }
+          const rows: React.ReactNode[] = [];
+          const tiersFor = (map: Map<string, { count: number; label: string }>, isGreen: boolean) => {
+            for (const [key, { count, label }] of map) {
+              const nextTier = isGreen ? count + 1 : Math.min(3, count + 1);
+              const activeTxt = isGreen ? `${count}/4 Teile` : `${count}/3 Marken-Teilen`;
+              const nextTxt = count < (isGreen ? 4 : 3) ? ` — ${nextTier - count} weiteres Teil für nächste Stufe` : " — maximale Stufe aktiv";
+              rows.push(
+                <div key={`${isGreen}-${key}`}>
+                  {isGreen ? "🟩" : "🏷"} {label}: {activeTxt}{nextTxt}
+                </div>,
+              );
+            }
+          };
+          tiersFor(greenCounts, true);
+          tiersFor(brandCounts, false);
+          if (rows.length === 0) rows.push(<div key="none">Keine Set- oder Marken-Boni aktiv (nur Named/Exotic-Teile).</div>);
+          return rows;
+        })()}
+        <small style={{ color: "var(--text-dim, #aaa)" }}>
+          Nicht modellierte Boni (z. B. bestimmte 4er-Set-Effekte, Exotic-Perks) sind mit „nicht berechnet“ im Annahmen-Panel gekennzeichnet — siehe docs/FORMELN.md §8.
+        </small>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
         {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => {
