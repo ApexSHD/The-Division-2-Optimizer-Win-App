@@ -6,6 +6,7 @@ import { OnboardingWizard } from "../../components/OnboardingWizard";
 import { DashboardView } from "../../views/DashboardView";
 import { LoadoutsView } from "../../views/LoadoutsView";
 import { BuildsView } from "../../views/BuildsView";
+import { WeaponsView } from "../../views/WeaponsView";
 import App from "../../App";
 import { StoreProvider } from "../../store";
 
@@ -119,5 +120,15 @@ describe("BuildsView mit Picker-Kacheln", () => {
     expect(html.replace(/<!-- -->/g, "")).toContain("＋ Waffe auswählen");
     expect(html.replace(/<!-- -->/g, "")).toContain("＋ Maske auswählen");
     expect(html.replace(/<!-- -->/g, "")).toContain("＋ Knieschoner auswählen");
+  });
+});
+
+describe("Waffen-Bearbeitung: Mod-Plätze (Mods am Build)", () => {
+  it("WeaponsView-Tabelle bleibt ohne Mod-Spalte (Inventar mod-frei)", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(WeaponsView)),
+    );
+    expect(html).toContain("Know-How");
+    expect(html).not.toContain("montierte Waffen-Mods");
   });
 });

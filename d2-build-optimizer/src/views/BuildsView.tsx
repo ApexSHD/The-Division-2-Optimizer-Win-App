@@ -12,6 +12,45 @@ import { gearFingerprint, weaponFingerprint } from "../data/loadoutIntegrity";
 import { LoadoutsView } from "./LoadoutsView";
 import { ItemPicker, type PickerTarget } from "../components/ItemPicker";
 import { gearShortLabel, weaponShortLabel } from "../data/itemLabels";
+import type { WeaponMod } from "../data/sampleData";
+
+const GEAR_MOD_MAX: Record<string, number> = (() => {
+  const db = modsJson as unknown as {
+    gear_mods?: Record<string, Array<{ attr: string; val: number }>>;
+  };
+  const out: Record<string, number> = {};
+  for (const list of Object.values(db.gear_mods ?? {})) {
+    for (const m of list) out[m.attr] = m.val;
+  }
+  return out;
+})();
+
+const WEAPON_MODS_DB: Record<string, Array<{ name: string; label: string; bonusType: string; bonusVal: number; penaltyType?: string; penaltyVal?: number }>> = (() => {
+  const db = modsJson as unknown as {
+    slots?: Record<string, Array<{ name: string; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;
+  };
+  const out: Record<string, Array<{ name: string; label: string; bonusType: string; bonusVal: number; penaltyType?: string; penaltyVal?: number }>> = {};
+  for (const [cat, list] of Object.entries(db.slots ?? {})) {
+    out[cat] = (list ?? [])
+      .filter((m) => m.bonus)
+      .map((m) => ({
+        name: m.name,
+        label: `${m.name} (+${m.bonus!.val} % ${m.bonus!.type}${m.penalty ? ` / −${m.penalty.val} % ${m.penalty.type}` : ""})`,
+        bonusType: m.bonus!.type,
+        bonusVal: m.bonus!.val,
+        penaltyType: m.penalty?.type,
+        penaltyVal: m.penalty?.val,
+      }));
+  }
+  return out;
+})();
+
+const MOD_SLOT_LABELS: Record<string, string> = {
+  optic: "Optik",
+  muzzle: "Mündung",
+  underbarrel: "Unterlauf",
+  magazine: "Magazin",
+};
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 
@@ -49,6 +88,8 @@ export function BuildsView() {
   const [weaponId, setWeaponId] = useState<string>("");
   const [slotIds, setSlotIds] = useState<Partial<Record<GearSlot, string>>>({});
   const [picker, setPicker] = useState<PickerTarget | null>(null);
+  const [buildGearMods, setBuildGearMods] = useState<Record<string, { attr: string; value: number } | undefined>>({});
+  const [buildWeaponMods, setBuildWeaponMods] = useState<WeaponMod[]>([]);
 
   const weapon: Weapon | null = store.weapons.find((w) => w.id === weaponId) ?? null;
   const gear: GearPiece[] = SLOTS.map((s) => store.gear.find((g) => g.id === slotIds[s])).filter(
@@ -67,7 +108,13 @@ export function BuildsView() {
       modsBySlot,
       setBonusCatalog: defaultSetBonusCatalog(),
     };
-    const { stats, damage } = evaluateBuild(weapon, gear, ctx);
+    const gearWithMods: GearPiece[] = gear.map((g) =>
+      buildGearMods[g.id]
+        ? ({ ...g, mod: { attr: buildGearMods[g.id]!.attr as import("../data/sampleData").GearAttrKey, value: buildGearMods[g.id]!.value } } as GearPiece)
+        : ({ ...g, mod: null } as GearPiece),
+    );
+    const weaponWithMods: Weapon = { ...weapon, equippedMods: buildWeaponMods };
+    const { stats, damage } = evaluateBuild(weaponWithMods, gearWithMods, ctx);
     const axisCtx: AxisContext = {
       weaponDps: damage.effectiveDps,
       gear,
@@ -78,7 +125,7 @@ export function BuildsView() {
     };
     const vector = computeEffectVector(axisCtx);
     return { stats, damage, ehp: vector.ehp };
-  }, [weapon, gear, store.agent.shdLevel, store.agent.spec, store.optimization]);
+  }, [weapon, gear, buildGearMods, buildWeaponMods, store.agent.shdLevel, store.agent.spec, store.optimization]);
 
   const exoticCount = gear.filter((g) => g.brandType === "exotic").length;
   const exoticWeapon = weapon?.rarity === "exotic" ? 1 : 0;
@@ -123,6 +170,10 @@ export function BuildsView() {
           }
         : { dps: 0, chc: 0, chd: 0, wd: 0, hsd: 0, armor: 0 },
       dbVersion: DB_VERSION,
+      gearMods: Object.fromEntries(
+        Object.entries(buildGearMods).filter(([, v]) => Boolean(v)),
+      ) as Loadout["gearMods"],
+      weaponMods: buildWeaponMods.length > 0 ? buildWeaponMods : undefined,
       signatures: {
         [weapon.id]: weaponFingerprint(weapon),
         ...Object.fromEntries(gear.map((g) => [g.id, gearFingerprint(g)])),
@@ -256,6 +307,137 @@ export function BuildsView() {
         </div>
       </section>
 
+      {(gear.some((g) => ["mask", "chest", "backpack"].includes(g.slot)) || (weapon && weapon.rarity !== "exotic" && weapon.modSlots.length > 0)) && (
+        <section className="field" style={{ display: "grid", gap: 10 }}>
+          <strong>Mod-Zuordnung für diesen Build</strong>
+          {gear
+            .filter((g) => ["mask", "chest", "backpack"].includes(g.slot))
+            .map((g) => {
+              const mod = buildGearMods[g.id];
+              return (
+                <div key={g.id} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", fontSize: 13 }}>
+                  <span style={{ minWidth: 220 }}>
+                    {SLOT_LABELS[g.slot]}: <strong>{g.brand}</strong>
+                  </span>
+                  <select
+                    value={mod?.attr ?? ""}
+                    onChange={(e) => {
+                      const attr = e.target.value;
+                      if (!attr) {
+                        setBuildGearMods((prev) => ({ ...prev, [g.id]: undefined }));
+                        return;
+                      }
+                      const max = GEAR_MOD_MAX[attr] ?? 0;
+                      setBuildGearMods((prev) => ({ ...prev, [g.id]: { attr, value: max } }));
+                    }}
+                  >
+                    <option value="">– kein Mod –</option>
+                    {Object.entries(GEAR_MOD_MAX).map(([attr, max]) => (
+                      <option key={attr} value={attr}>
+                        {attr.toUpperCase()} (Max {max.toLocaleString("de-DE")})
+                      </option>
+                    ))}
+                  </select>
+                  {mod && (
+                    <label style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      Wert
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.5"
+                        value={mod.value}
+                        onChange={(e) =>
+                          setBuildGearMods((prev) => ({
+                            ...prev,
+                            [g.id]: { attr: mod.attr, value: Math.max(0, Number(e.target.value)) },
+                          }))
+                        }
+                        style={{ width: 80 }}
+                      />
+                      <span style={{ color: "var(--text-dim, #aaa)", fontSize: 11 }}>
+                        / Max {GEAR_MOD_MAX[mod.attr]?.toLocaleString("de-DE") ?? "?"}
+                      </span>
+                    </label>
+                  )}
+                </div>
+              );
+            })}
+          {weapon && weapon.rarity !== "exotic" && weapon.modSlots.length > 0 && (
+            <div style={{ display: "grid", gap: 6 }}>
+              <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+                Waffe: <strong>{weapon.name}</strong> ({weapon.modSlots.length} Mod-Platz/Plätze)
+              </span>
+              {weapon.modSlots.map((slot) => {
+                const equipped = buildWeaponMods.find((m) => m.slot === slot);
+                const pool = WEAPON_MODS_DB[slot] ?? [];
+                return (
+                  <div key={slot} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", fontSize: 13 }}>
+                    <span style={{ minWidth: 84 }}>{MOD_SLOT_LABELS[slot] ?? slot}</span>
+                    <select
+                      value={equipped?.dbName ?? ""}
+                      onChange={(e) => {
+                        const dbName = e.target.value;
+                        const rest = buildWeaponMods.filter((m) => m.slot !== slot);
+                        if (!dbName) {
+                          setBuildWeaponMods(rest);
+                          return;
+                        }
+                        const dbMod = pool.find((m) => m.name === dbName);
+                        if (!dbMod) return;
+                        setBuildWeaponMods([
+                          ...rest,
+                          {
+                            slot,
+                            attr: dbMod.bonusType as WeaponMod["attr"],
+                            value: dbMod.bonusVal,
+                            dbName,
+                            reloadPenalty: dbMod.penaltyType === "reloadSpeed" ? dbMod.penaltyVal : undefined,
+                          },
+                        ]);
+                      }}
+                    >
+                      <option value="">– kein Mod –</option>
+                      {pool.map((m) => (
+                        <option key={m.name} value={m.name}>{m.label}</option>
+                      ))}
+                    </select>
+                    {equipped && (
+                      <label style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                        Wert
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.5"
+                          value={equipped.value}
+                          onChange={(e) =>
+                            setBuildWeaponMods((prev) =>
+                              prev.map((m) =>
+                                m.slot === slot ? { ...m, value: Math.max(0, Number(e.target.value)) } : m,
+                              ),
+                            )
+                          }
+                          style={{ width: 76 }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {weapon?.rarity === "exotic" && (
+            <small style={{ color: "var(--text-dim, #aaa)" }}>
+              Exotische Waffen haben feste Mods — keine Zuordnung möglich.
+            </small>
+          )}
+          <small style={{ color: "var(--text-dim, #aaa)" }}>
+            Gear-Mods werden mit dem Maximalwert aus der Mod-Datenbank vorbelegt und können
+            reduziert werden. Waffen-Mod-Plätze entsprechen der Waffenspezifikation (Ansicht
+            Waffen). Der Optimierer ordnet Mods automatisch je Rolle zu.
+          </small>
+        </section>
+      )}
+
       {preview && (
         <section className="field" style={{ display: "grid", gap: 8 }}>
           <strong>Live-Vorschau</strong>
@@ -285,6 +467,8 @@ export function BuildsView() {
             setNote("");
             setWeaponId("");
             setSlotIds({});
+            setBuildGearMods({});
+            setBuildWeaponMods([]);
           }}
         >
           Zurücksetzen
