@@ -15,17 +15,18 @@ const hive: SkillChoice = {
 };
 
 describe("Fragebogen V4 (Issue #95, Lastenheft 3.3)", () => {
-  it("jede Rolle hat 5–10 Fragen (Kriterium 15)", () => {
+  it("jede Rolle hat 2–10 Fragen (neuer Fragebogen: 4 gemeinsame + rollenspezifische)", () => {
     for (const role of ROLE_PROFILES) {
       const count = questionsForRole(role.key).length;
-      expect(count, `${role.key}: ${count} Fragen`).toBeGreaterThanOrEqual(5);
+      expect(count, `${role.key}: ${count} Fragen`).toBeGreaterThanOrEqual(2);
       expect(count, `${role.key}: ${count} Fragen`).toBeLessThanOrEqual(10);
     }
   });
 
   it("Kriterium 14: gleiche Antworten ergeben immer dieselben Gewichte", () => {
     const answers = [
-      { questionKey: "teamSize", optionKey: "full" },
+      { questionKey: "gameMode", optionKey: "raid" },
+      { questionKey: "buildPriority", optionKey: "damage" },
       { questionKey: "distance", optionKey: "close" },
       { questionKey: "enemies", optionKey: "elite" },
       { questionKey: "hsShare", optionKey: "high" },
@@ -35,19 +36,20 @@ describe("Fragebogen V4 (Issue #95, Lastenheft 3.3)", () => {
     expect(a).toEqual(b);
   });
 
-  it("Gewichtsverschiebung wirkt: Solo senkt BUF, volles Team erhöht BUF", () => {
-    const base = weightsFromAnswers("buffer", []);
-    const solo = weightsFromAnswers("buffer", [{ questionKey: "teamSize", optionKey: "solo" }]);
-    const full = weightsFromAnswers("buffer", [{ questionKey: "teamSize", optionKey: "full" }]);
-    expect(solo.buf).toBeLessThan(base.buf);
-    expect(full.buf).toBeGreaterThan(base.buf);
+  it("Gewichtsverschiebung wirkt: Build-Priorität Schaden senkt EHP, Überleben hebt es", () => {
+    const base = weightsFromAnswers("dps_krit", []);
+    const damage = weightsFromAnswers("dps_krit", [{ questionKey: "buildPriority", optionKey: "damage" }]);
+    const survival = weightsFromAnswers("dps_krit", [{ questionKey: "buildPriority", optionKey: "survival" }]);
+    expect(damage.ehp).toBeLessThan(base.ehp);
+    expect(survival.ehp).toBeGreaterThan(base.ehp);
+    expect(damage.dps).toBeGreaterThan(base.dps);
   });
 
   it("Gewichte bleiben nicht-negativ und Rollen-basiert (Expertenmodus-Basis)", () => {
     const allShifts = weightsFromAnswers("dps_krit", [
-      { questionKey: "teamSize", optionKey: "solo" },
-      { questionKey: "distance", optionKey: "far" },
-      { questionKey: "enemies", optionKey: "trash" },
+      { questionKey: "playStyle", optionKey: "aggressive" },
+      { questionKey: "buildPriority", optionKey: "damage" },
+      { questionKey: "gameMode", optionKey: "raid" },
     ]);
     for (const value of Object.values(allShifts)) {
       expect(value).toBeGreaterThanOrEqual(0);
@@ -104,5 +106,38 @@ describe("Ziele-Struktur (Lastenheft 3)", () => {
     expect(ROLE_PROFILES).toHaveLength(11);
     const allRoleKeys = GOALS.flatMap((g) => g.roles);
     expect(new Set(allRoleKeys).size).toBe(allRoleKeys.length);
+  });
+});
+
+describe("Fragebogen neu konzipiert (Issue #136)", () => {
+  it("Spielmodus deckt die Content-Typen ab: Offene Welt, Missionen, Vergeltung, Raid, Incursion, Dark Zone/PvP", () => {
+    const gameMode = questionsForRole("dps_krit").find((q) => q.key === "gameMode");
+    expect(gameMode).toBeDefined();
+    const keys = gameMode!.options.map((o) => o.key);
+    expect(keys).toEqual(["openworld", "missions", "countdown", "raid", "incursion", "pvp"]);
+  });
+
+  it("redundante alte Fragen sind entfernt (Teamgröße, Distanz, Gegnermix als Fragen)", () => {
+    const keys = questionsForRole("dps_krit").map((q) => q.key);
+    expect(keys).not.toContain("teamSize");
+    expect(keys).not.toContain("distance");
+    expect(keys).not.toContain("enemies");
+  });
+
+  it("Nachlade-Verhalten nur für DPS-Rollen, mit den zwei Optionen", () => {
+    const dpsKeys = questionsForRole("dps_krit").map((q) => q.key);
+    expect(dpsKeys).toContain("reloadBehavior");
+    const healKeys = questionsForRole("skill_heiler").map((q) => q.key);
+    expect(healKeys).not.toContain("reloadBehavior");
+    const reload = questionsForRole("dps_krit").find((q) => q.key === "reloadBehavior");
+    expect(reload!.options.map((o) => o.key)).toEqual(["reload", "swap"]);
+  });
+
+  it("Spielmodus wirkt (noch) nicht auf die Gewichte — nur Raid/Incursion leicht EHP", () => {
+    const base = weightsFromAnswers("dps_krit", []);
+    const openworld = weightsFromAnswers("dps_krit", [{ questionKey: "gameMode", optionKey: "openworld" }]);
+    const raid = weightsFromAnswers("dps_krit", [{ questionKey: "gameMode", optionKey: "raid" }]);
+    expect(openworld.ehp).toBeCloseTo(base.ehp, 6);
+    expect(raid.ehp).toBeGreaterThan(base.ehp);
   });
 });
