@@ -13,6 +13,8 @@ import {
   type V4BuildResult,
   type V4Candidate,
 } from "../data/operatingModes";
+import { bestModsForWeapon } from "../data/damage";
+import type { WeaponMod } from "../data/sampleData";
 import type { GearPiece, GearSlot } from "../data/sampleData";
 import type { MinimumViolation } from "../data/roleProfiles";
 import { analyzeGaps, GAP_STAGE_C_NOTE, type GapRecommendation } from "../data/gapAnalysis";
@@ -644,6 +646,33 @@ export function OptimizerView() {
         armor: bestBuild.vector.ehp,
       },
       dbVersion: DB_VERSION,
+      gearMods: (() => {
+        const picks = bestGearModsForRole(roleKey, {
+          chcTarget: role.chcTarget ?? undefined,
+          chcCurrent: cand.stats.chc,
+        });
+        const bySlot = new Map(picks.map((p) => [p.slot, p]));
+        const out: Record<string, { attr: string; value: number }> = {};
+        for (const g of cand.gear) {
+          const pick = bySlot.get(g.slot);
+          if (pick) out[g.id] = { attr: pick.attr, value: pick.val };
+        }
+        return Object.keys(out).length > 0 ? out : undefined;
+      })(),
+      weaponMods: (() => {
+        const modsBySlotLocal = (modsJson as unknown as {
+          slots: Record<string, Array<{ name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;
+        }).slots;
+        const auto = bestModsForWeapon(cand.weapon, modsBySlotLocal);
+        return auto.length > 0
+          ? auto.map((m) => ({
+              slot: m.slot as WeaponMod["slot"],
+              attr: m.attr as WeaponMod["attr"],
+              value: m.value,
+              dbName: m.modName,
+            }))
+          : undefined;
+      })(),
       signatures: {
         [cand.weapon.id]: weaponFingerprint(cand.weapon),
         ...Object.fromEntries(cand.gear.map((g) => [g.id, gearFingerprint(g)])),

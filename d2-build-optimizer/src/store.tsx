@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { Weapon, GearPiece, Mod, BrandSet, Loadout, GearSlot } from "./data/sampleData";
+import type { Weapon, WeaponMod, GearPiece, Mod, BrandSet, Loadout, GearSlot } from "./data/sampleData";
 import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalizeGear } from "./data/sampleData";
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
@@ -208,6 +208,28 @@ export function sanitize(raw: unknown): UserData {
                       Object.entries(raw.signatures).filter(([, v]) => typeof v === "string"),
                     ) as Record<string, string>)
                   : undefined,
+              gearMods:
+                raw.gearMods && typeof raw.gearMods === "object"
+                  ? (Object.fromEntries(
+                      Object.entries(raw.gearMods).filter(
+                        ([, v]) =>
+                          typeof v === "object" &&
+                          v !== null &&
+                          typeof (v as { attr?: unknown }).attr === "string" &&
+                          typeof (v as { value?: unknown }).value === "number",
+                      ),
+                    ) as Loadout["gearMods"])
+                  : undefined,
+              weaponMods: Array.isArray(raw.weaponMods)
+                ? (raw.weaponMods.filter(
+                    (m): m is WeaponMod =>
+                      typeof m === "object" &&
+                      m !== null &&
+                      typeof (m as WeaponMod).slot === "string" &&
+                      typeof (m as WeaponMod).attr === "string" &&
+                      typeof (m as WeaponMod).value === "number",
+                  ) as WeaponMod[])
+                : undefined,
             };
           })
           .filter((b): b is Loadout => b !== null)
