@@ -110,3 +110,14 @@ describe("BuildsView (manuelle Build-Erfassung)", () => {
     expect(html).toContain("Builds");
   });
 });
+
+describe("BuildsView mit Picker-Kacheln", () => {
+  it("rendert Kacheln mit Auswahl-Hinweis statt Dropdowns", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(BuildsView)),
+    );
+    expect(html.replace(/<!-- -->/g, "")).toContain("＋ Waffe auswählen");
+    expect(html.replace(/<!-- -->/g, "")).toContain("＋ Maske auswählen");
+    expect(html.replace(/<!-- -->/g, "")).toContain("＋ Knieschoner auswählen");
+  });
+});

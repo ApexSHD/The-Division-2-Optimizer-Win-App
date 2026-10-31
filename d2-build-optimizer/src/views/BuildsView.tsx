@@ -10,6 +10,8 @@ import { DB_VERSION } from "../data/sampleData";
 import type { Weapon, GearPiece, GearSlot, Loadout } from "../data/sampleData";
 import { gearFingerprint, weaponFingerprint } from "../data/loadoutIntegrity";
 import { LoadoutsView } from "./LoadoutsView";
+import { ItemPicker, type PickerTarget } from "../components/ItemPicker";
+import { gearShortLabel, weaponShortLabel } from "../data/itemLabels";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 
@@ -46,6 +48,7 @@ export function BuildsView() {
   const [note, setNote] = useState("");
   const [weaponId, setWeaponId] = useState<string>("");
   const [slotIds, setSlotIds] = useState<Partial<Record<GearSlot, string>>>({});
+  const [picker, setPicker] = useState<PickerTarget | null>(null);
 
   const weapon: Weapon | null = store.weapons.find((w) => w.id === weaponId) ?? null;
   const gear: GearPiece[] = SLOTS.map((s) => store.gear.find((g) => g.id === slotIds[s])).filter(
@@ -180,48 +183,76 @@ export function BuildsView() {
             />
           </label>
         </div>
-        <label style={{ display: "grid", gap: 4 }}>
-          Waffe
-          <select value={weaponId} onChange={(e) => setWeaponId(e.target.value)}>
-            <option value="">— Waffe auswählen —</option>
-            {[...store.weapons]
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.name} ({w.type.toUpperCase()}
-                  {w.rarity === "exotic" ? ", Exotic" : ""})
-                </option>
-              ))}
-          </select>
-        </label>
+        <div style={{ display: "grid", gap: 4 }}>
+          <strong>Waffe</strong>
+          <button
+            className="btn"
+            style={{
+              textAlign: "left",
+              padding: "8px 10px",
+              border: `1px solid ${weapon ? "var(--accent, #f57c1f)" : "var(--border, #555)"}`,
+              background: weapon ? "var(--accent-soft, rgba(245,124,31,0.16))" : undefined,
+              minHeight: 44,
+              display: "grid",
+              gap: 2,
+            }}
+            onClick={() => setPicker({ kind: "weapon" })}
+            title="Waffe aus dem Inventar auswählen"
+          >
+            {weapon ? (
+              <>
+                <span style={{ fontWeight: 600 }}>{weapon.name}</span>
+                <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+                  {weaponShortLabel(weapon).split(" · ").slice(1).join(" · ")} · WD +{weapon.attributes.core1.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % · {weapon.rpm} RPM
+                </span>
+              </>
+            ) : (
+              <span>＋ Waffe auswählen…</span>
+            )}
+          </button>
+        </div>
         {exoticWarning && (
           <div style={{ border: "1px solid var(--warn, #e6a23c)", borderRadius: 6, padding: "4px 8px", fontSize: 12, background: "rgba(230,162,60,0.08)" }}>
             ⚠ {exoticWarning}
           </div>
         )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 8 }}>
-          {SLOTS.map((slot) => (
-            <label key={slot} style={{ display: "grid", gap: 4, fontSize: 13 }}>
-              {SLOT_LABELS[slot]}
-              <select
-                value={slotIds[slot] ?? ""}
-                onChange={(e) =>
-                  setSlotIds((prev) => ({ ...prev, [slot]: e.target.value || undefined }))
-                }
-              >
-                <option value="">— frei lassen —</option>
-                {store.gear
-                  .filter((g) => g.slot === slot)
-                  .map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.brand}
-                      {g.talent ? ` · ${g.talent}` : ""}
-                      {g.brandType === "exotic" ? " (Exotic)" : ""}
-                    </option>
-                  ))}
-              </select>
-            </label>
-          ))}
+          {SLOTS.map((slot) => {
+            const item = store.gear.find((g) => g.id === slotIds[slot]);
+            return (
+              <div key={slot} style={{ display: "grid", gap: 4 }}>
+                <strong style={{ fontSize: 13 }}>{SLOT_LABELS[slot]}</strong>
+                <button
+                  className="btn"
+                  style={{
+                    textAlign: "left",
+                    padding: "8px 10px",
+                    border: item ? "1px solid var(--accent, #f57c1f)" : "1px dashed var(--border, #555)",
+                    background: item ? "var(--accent-soft, rgba(245,124,31,0.16))" : undefined,
+                    minHeight: 44,
+                    display: "grid",
+                    gap: 2,
+                  }}
+                  onClick={() => setPicker({ kind: "gear", slot })}
+                  title="Gear-Teil aus dem Inventar auswählen"
+                >
+                  {item ? (
+                    <>
+                      <span style={{ fontWeight: 600 }}>
+                        {item.brand}
+                        {item.prototype ? " · Prototyp" : ""}
+                      </span>
+                      <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>
+                        {gearShortLabel(item).split(" · ").slice(1).join(" · ")}
+                      </span>
+                    </>
+                  ) : (
+                    <span>＋ {SLOT_LABELS[slot]} auswählen…</span>
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -264,6 +295,20 @@ export function BuildsView() {
         <h2 style={{ margin: "0 0 8px" }}>Vorhandene Loadouts</h2>
         <LoadoutsView embedded />
       </section>
+
+      <ItemPicker
+        open={picker !== null}
+        target={picker ?? { kind: "weapon" }}
+        selectedId={
+          picker?.kind === "gear" ? (slotIds[picker.slot] ?? "") : weaponId
+        }
+        onPick={(id) => {
+          if (!picker) return;
+          if (picker.kind === "weapon") setWeaponId(id);
+          else setSlotIds((prev) => ({ ...prev, [picker.slot]: id || undefined }));
+        }}
+        onClose={() => setPicker(null)}
+      />
     </div>
   );
 }
