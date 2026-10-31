@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tCore, tGearAttr, tWeaponAttr, tItemName, tTalentName } from "../itemNames";
+import { tCore, tGearAttr, tWeaponAttr, tItemName, tTalentName, tWeaponName } from "../itemNames";
 
 describe("ItemName-i18n: Attribut- und Kern-Uebersetzungen (Auftraggeber-Liste 1)", () => {
   it("Kernattribute DE<->EN (Waffenschaden/Weapon Damage, Ruestung/Armor, Skill Tier)", () => {
@@ -65,5 +65,27 @@ describe("Talent-Namen DE<->EN (Auftraggeber-Liste 2)", () => {
     expect(tTalentName("Aus den Angeln", "en", "x")).toBe("Unhinged");
     expect(tTalentName("Raserei", "de", "x")).toBe("x"); // DE-Anzeige laeuft ueber DB-Label, Fallback
     expect(tTalentName("Unbekanntes Talent", "en", "DB-Name")).toBe("DB-Name");
+  });
+});
+
+describe("Exotische Waffen-Namen DE<->EN (Auftraggeber-Liste 3, unvollstaendig)", () => {
+  it("Sturmgewehre: Eagle Bearer/Adlertraeger, St. Elmo's Engine/St.-Elmos-Feuer", () => {
+    expect(tWeaponName("Eagle Bearer", "de", "x")).toBe("Adlertr\u00e4ger");
+    expect(tWeaponName("Eagle Bearer", "en", "x")).toBe("Eagle Bearer");
+    expect(tWeaponName("St. Elmo's Engine", "de", "x")).toBe("St.-Elmos-Feuer");
+    expect(tWeaponName("Chameleon", "de", "x")).toBe("Cham\u00e4leon");
+  });
+
+  it("Klammervarianten werden auf Basisnamen gemappt (Pestilence (M249 B) -> Pestilenz)", () => {
+    expect(tWeaponName("Pestilence (M249 B)", "de", "x")).toBe("Pestilenz");
+    expect(tWeaponName("Iron Lung (MG5)", "de", "x")).toBe("Eiserne Lunge");
+    expect(tWeaponName("Busy Little Bee (Custom PF45)", "de", "x")).toBe("Flei\u00dfiges Bienchen");
+  });
+
+  it("Unveraenderte Namen und Fallback", () => {
+    expect(tWeaponName("Nemesis", "de", "x")).toBe("Nemesis");
+    expect(tWeaponName("Regulus", "de", "x")).toBe("Regulus");
+    expect(tWeaponName("ACR", "de", "ACR")).toBe("ACR");
+    expect(tWeaponName("Unbekannte Waffe", "en", "DB-Name")).toBe("DB-Name");
   });
 });

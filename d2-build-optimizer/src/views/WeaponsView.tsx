@@ -9,7 +9,7 @@ import { ChartPlaceholder } from "../components/ChartPlaceholder";
 import { getDb } from "../data/db";
 import type { WeaponPreset, DisplayTalent } from "../data/db";
 import { TALENT_DISPLAY_TYPE_MAP, talentsAllowedForWeapon, carrierForTalent } from "../data/db";
-import { tWeaponAttr, tTalentName, type ItemLang } from "../i18n/itemNames";
+import { tWeaponAttr, tTalentName, tWeaponName, type ItemLang } from "../i18n/itemNames";
 import type { Weapon, WeaponType, WeaponAttrKey } from "../data/sampleData";
 import { weaponsToCsv, weaponsFromCsv } from "../data/weaponCsv";
 import {
@@ -288,7 +288,7 @@ export function WeaponsView() {
       label: t.weapons.columns.name,
       render: (w) => (
         <strong>
-          {w.name}
+          {tWeaponName(w.name, itemLang, w.name)}
           {w.isPrototype && <span className="badge gearset" style={{ marginLeft: 6 }}>Prototyp</span>}
         </strong>
       ),

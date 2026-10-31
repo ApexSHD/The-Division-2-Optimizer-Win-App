@@ -1,5 +1,6 @@
 import attributeNamesJson from "./attributeNames.json";
 import talentNamesJson from "./talentNames.json";
+import weaponNamesJson from "./weaponNames.json";
 
 export type ItemLang = "de" | "en";
 
@@ -65,6 +66,27 @@ export function tTalentName(deLabel: string, lang: ItemLang, fallback: string): 
   const entry = TALENT_NAMES[deLabel];
   if (!entry) return fallback;
   return entry[lang] ?? fallback;
+}
+
+const WEAPON_NAMES: Record<string, AttrEntry> = (() => {
+  const out: Record<string, AttrEntry> = {};
+  const file = weaponNamesJson as unknown as Record<string, Record<string, AttrEntry>>;
+  for (const list of Object.values(file)) {
+    if (typeof list !== "object" || list === null) continue;
+    for (const [key, entry] of Object.entries(list)) {
+      if (entry && typeof entry === "object" && "de" in entry && "en" in entry) {
+        out[key] = entry;
+      }
+    }
+  }
+  return out;
+})();
+
+export function tWeaponName(dbName: string, lang: ItemLang, fallback: string): string {
+  // Exakte Suche, dann Basisname ohne Klammerzusatz
+  const exact = WEAPON_NAMES[dbName] ?? WEAPON_NAMES[dbName.replace(/\s*\(.*\)\s*$/, "").trim()];
+  if (!exact) return fallback;
+  return exact[lang] ?? fallback;
 }
 
 const ITEM_NAMES: Record<string, AttrEntry> = {};
