@@ -1007,6 +1007,7 @@ export function OptimizerView() {
         </div>
       </section>
 
+      {wizardStep === 1 ? (
       <section className="field" style={{ display: "grid", gap: 6 }}>
         <strong>Inventar-Status</strong>
         {(() => {
@@ -1059,7 +1060,9 @@ export function OptimizerView() {
           );
         })()}
       </section>
+      ) : null}
 
+      {wizardStep === 1 ? (
       <section className="field" style={{ display: "grid", gap: 12 }}>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {GOALS.map((g) => (
@@ -1100,7 +1103,9 @@ export function OptimizerView() {
           </button>
         )}
       </section>
+      ) : null}
 
+      {wizardStep <= 2 ? (
       <section className="field" style={{ display: "grid", gap: 6 }}>
         <strong>Auswahl</strong>
         <div style={{ fontSize: 13, lineHeight: 1.7 }}>
@@ -1140,8 +1145,9 @@ export function OptimizerView() {
           </span>
         </div>
       </section>
+      ) : null}
 
-      {wizardStep >= 2 ? (
+      {wizardStep === 2 ? (
       <details className="field" style={{ display: "grid", gap: 10 }}>
         <summary style={{ cursor: "pointer" }}>
           <strong>
@@ -1238,7 +1244,7 @@ export function OptimizerView() {
       </details>
       ) : null}
 
-      {wizardStep >= 2 ? (
+      {wizardStep === 2 ? (
         <section className="field" style={{ display: "grid", gap: 10 }}>
         <strong>Rahmen: Gegnerprofil und CHC-Ziel</strong>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -1379,7 +1385,7 @@ export function OptimizerView() {
       </section>
       ) : null}
 
-      {wizardStep >= 2 ? (
+      {wizardStep === 2 ? (
       <section className="field" style={{ display: "grid", gap: 8 }}>
         <strong>Spezialisierungs-Vorschlag (Ergebnis, kein Eingabefeld)</strong>
         <div>
@@ -1395,7 +1401,7 @@ export function OptimizerView() {
       </section>
       ) : null}
 
-      {wizardStep >= 2 ? (
+      {wizardStep === 2 ? (
       <section className="field" style={{ display: "grid", gap: 10 }}>
         <strong>Einschränkungen (optional)</strong>
         {store.weapons.length > 0 && (
@@ -1462,17 +1468,26 @@ export function OptimizerView() {
       </section>
       ) : null}
 
-      <section className="field" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        {wizardStep < 3 && (
+      {wizardStep === 2 ? (
+        <section className="field" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button className="btn" onClick={() => setWizardStep(1)}>
+            ← Zurück zur Rolle
+          </button>
           <button
             className="btn btn-primary"
             onClick={() => setWizardStep(3)}
-            disabled={!step1Done}
-            title={step1Done ? "Zum Berechnen fortfahren" : "Bitte zuerst eine Rolle wählen"}
+            title="Zum Berechnen fortfahren"
           >
             Weiter zum Berechnen →
           </button>
-        )}
+        </section>
+      ) : null}
+
+      {wizardStep === 3 ? (
+      <section className="field" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <button className="btn" onClick={() => setWizardStep(2)}>
+          ← Zurück zu den Einstellungen
+        </button>
         <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0 || store.weapons.length === 0}>
           {running ? "Berechne…" : "Builds berechnen"}
         </button>
@@ -1492,6 +1507,7 @@ export function OptimizerView() {
           </span>
         )}
       </section>
+      ) : null}
 
       {result && (
         <>
