@@ -7,7 +7,7 @@ import {
   bestModsForWeapon,
   specBonusFor,
 } from "../damage";
-import { sampleWeapons } from "../sampleData";
+import { sampleWeapons, reloadSecondsFor } from "../sampleData";
 import { DEFAULT_OPTIMIZATION } from "../../store";
 import type { GearPiece, GearSlot, GearAttrKey } from "../sampleData";
 
@@ -533,5 +533,39 @@ describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
     // nie dieselbe Kombination aus Gear UND Waffe doppelt:
     const full = res.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id);
     expect(new Set(full).size).toBe(full.length);
+  });
+});
+
+describe("BER-3: Dauer-DPS, Schaden/Magazin, Zeit bis leeres Magazin (Issue #116)", () => {
+  const stats = { wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} };
+  const w = {
+    ...sampleWeapons[0],
+    knowHow: 0,
+    magSize: 30,
+    rpm: 600,
+    reloadSeconds: 3,
+    attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0, core2Type: "chd" as const },
+  };
+  const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0 });
+
+  it("Burst-DPS bleibt unveraendert (ohne Nachladen)", () => {
+    expect(d.effectiveDps).toBeCloseTo(d.avgBulletDmg * 600 / 60, 6);
+  });
+
+  it("Dauer-DPS liegt unter Burst-DPS und beruecksichtigt Nachladezeit", () => {
+    expect(d.sustainedDps).toBeGreaterThan(0);
+    expect(d.sustainedDps).toBeLessThan(d.effectiveDps);
+    const secondsPerMag = 30 / (600 / 60);
+    expect(d.secondsPerMagazine).toBeCloseTo(secondsPerMag, 6);
+    expect(d.sustainedDps).toBeCloseTo((d.avgBulletDmg * 30) / (secondsPerMag + 3), 6);
+  });
+
+  it("Schaden/Magazin = Trefferschaden x Magazingroesse", () => {
+    expect(d.damagePerMagazine).toBeCloseTo(d.avgBulletDmg * 30, 6);
+  });
+
+  it("Typ-Standard-Nachladezeit, wenn keine Waffen-Angabe vorliegt", () => {
+    expect(reloadSecondsFor({ type: "ar" })).toBeGreaterThan(0);
+    expect(reloadSecondsFor({ type: "ar", reloadSeconds: 1.5 })).toBe(1.5);
   });
 });

@@ -263,7 +263,12 @@ export function buildCandidatesFromOptimizer(
   const out: V4Candidate[] = [];
   for (const r of optimizerResults) {
     const vector = computeEffectVector(
-      axisContextFor(r.gear, r.damage.effectiveDps, ctx, role),
+      axisContextFor(
+        r.gear,
+        ctx.settings.targetMetric === "burst" ? r.damage.effectiveDps : r.damage.sustainedDps,
+        ctx,
+        role,
+      ),
     );
     const statsWithGearMods = applyWeaponAttrsToStats(
       applyGearModsToStats(r.stats, ctx, role),

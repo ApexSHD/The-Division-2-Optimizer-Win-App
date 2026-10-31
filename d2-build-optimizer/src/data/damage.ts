@@ -1,6 +1,6 @@
 import type { Weapon, GearSlot, GearAttr, GearAttrKey } from "./sampleData";
 import type { GearPiece } from "./sampleData";
-import { GEAR_ATTR_TYPES, gearAttrMax } from "./sampleData";
+import { GEAR_ATTR_TYPES, gearAttrMax, reloadSecondsFor } from "./sampleData";
 import type { OptimizationSettings } from "../store";
 import { shdBonusFor } from "../store";
 
@@ -44,6 +44,9 @@ export interface DamageBreakdown {
   finalChc: number;
   cappedChc: number;
   finalChd: number;
+  sustainedDps: number;
+  damagePerMagazine: number;
+  secondsPerMagazine: number;
 }
 
 const CHC_CAP = 60;
@@ -325,6 +328,13 @@ export function computeDamage(
   const rofMult = 1 + (weapon.attributes.core2Type === "rof" ? weapon.attributes.core2Val / 100 : 0);
   const effectiveDps = (avgBulletDmg * weapon.rpm * rofMult) / 60;
 
+  // BER-3: Dauer-DPS inkl. Nachladen (Typ-Standard, pro Waffe ueberschreibbar)
+  const magSize = weapon.magSize > 0 ? weapon.magSize : 1;
+  const reloadSeconds = reloadSecondsFor(weapon);
+  const secondsPerMagazine = magSize / ((weapon.rpm * rofMult) / 60);
+  const damagePerMagazine = avgBulletDmg * magSize;
+  const sustainedDps = damagePerMagazine / (secondsPerMagazine + reloadSeconds);
+
   return {
     rawHit,
     nonCritBody,
@@ -332,6 +342,9 @@ export function computeDamage(
     critHit,
     avgBulletDmg,
     effectiveDps,
+    sustainedDps,
+    damagePerMagazine,
+    secondsPerMagazine,
     finalChc,
     cappedChc: finalChc,
     finalChd: finalChdBase,
@@ -759,10 +772,12 @@ export function optimizeBuilds(
   // FIX #82: Schaden primaer. Verschwendete CHC nur als FEINAbzug (0,2 Prozentpunkte Waste
   // = 0,2 % Score-Malus) - ein paar Prozentpunkte Waste duerfen niemals einen echten
   // DPS-Vorteil schlagen (Review-Beispiel: 5,5 % DPS vs. 5 PP Waste).
+  const targetDps = (r: OptimizerResult) =>
+    settings.targetMetric === "burst" ? r.damage.effectiveDps : r.damage.sustainedDps;
   const effectiveScore = (r: OptimizerResult) => {
     const wasteMalus = Math.min(0.2, r.assumptions.wastedChc * 0.002);
     if (roleDriven) return r.roleScore.score * (1 - wasteMalus);
-    return r.damage.effectiveDps * (1 - wasteMalus);
+    return targetDps(r) * (1 - wasteMalus);
   };
   results.sort((a, b) => {
     if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;

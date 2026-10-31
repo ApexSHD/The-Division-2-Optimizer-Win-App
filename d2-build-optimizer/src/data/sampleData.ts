@@ -1,4 +1,21 @@
 export type WeaponType = "ar" | "smg" | "lmg" | "rifle" | "mmr" | "shotgun" | "pistol";
+
+export const RELOAD_SECONDS_BY_TYPE: Record<WeaponType, number> = {
+  ar: 2.4,
+  smg: 2.2,
+  lmg: 4.1,
+  rifle: 2.7,
+  mmr: 3.0,
+  shotgun: 3.6,
+  pistol: 1.9,
+};
+
+export function reloadSecondsFor(weapon: Partial<Weapon> & Pick<Weapon, "type">): number {
+  if (weapon.reloadSeconds !== undefined && weapon.reloadSeconds > 0) {
+    return weapon.reloadSeconds;
+  }
+  return RELOAD_SECONDS_BY_TYPE[weapon.type];
+}
 export type Rarity = "exotic" | "named" | "highend";
 export type WeaponAttrKey =
   | "dth" | "chc" | "chd" | "dttooc" | "hsd" | "dta" | "rof"
@@ -27,6 +44,7 @@ export interface Weapon {
   isPrototype: boolean;
   attributes: WeaponAttributes;
   innateHsd?: number;
+  reloadSeconds?: number;
 }
 
 export const WEAPON_ATTR_LABELS: Record<WeaponAttrKey, string> = {
@@ -96,6 +114,7 @@ export function normalizeWeapon(
     note: w.note,
     knowHow: isPrototype ? 30 : w.knowHow ?? 30,
     isPrototype,
+    reloadSeconds: w.reloadSeconds,
     attributes: {
       core1: attrs.core1 ?? god.core1,
       core2Type: attrs.core2Type ?? god.core2Type,

@@ -18,6 +18,7 @@ export interface AgentValues {
 export interface OptimizationSettings {
   role: import("./data/roles").RoleId | "";
   targetChc: number;
+  targetMetric: "burst" | "sustained";
   lockedGearIds: string[];
   anchorWeaponId: string;
   weaponTypeFilter: import("./data/sampleData").WeaponType | "";
@@ -79,6 +80,7 @@ export function shdBonusFor(level: number, key: string): number {
 }
 
 export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
+  targetMetric: "sustained",
   role: "",
   targetChc: 50,
   lockedGearIds: [],

@@ -26,7 +26,7 @@ import {
 import { SKILLS, AXES } from "../data/v4Data";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
-import { DB_VERSION } from "../data/sampleData";
+import { DB_VERSION, reloadSecondsFor } from "../data/sampleData";
 import type { WeaponType, Loadout, LoadoutMetrics } from "../data/sampleData";
 
 const ENEMY_PROFILE_PRESETS: Array<{ key: string; label: string; enemyHeadshotShare: number; hint: string }> = [
@@ -214,11 +214,13 @@ function SlotTile({
   changed,
   onToggleLock,
   locked,
+  contribution,
 }: {
   item: GearPiece | null;
   changed: boolean;
   onToggleLock?: (id: string) => void;
   locked?: boolean;
+  contribution?: string;
 }) {
   if (!item) {
     return <div className="field" style={{ border: "1px dashed var(--border, #555)", borderRadius: 6, padding: 8, minHeight: 96 }}>—</div>;
@@ -253,7 +255,14 @@ function SlotTile({
       </div>
       {attrs && <div style={{ fontSize: 11, lineHeight: 1.4 }}>{attrs}</div>}
       {item.talent && (
-        <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{item.talent}</div>
+        <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+          {item.talent} <span title="Talent fließt nicht in die Berechnung ein (FORMELN.md §8)">— nicht berechnet</span>
+        </div>
+      )}
+      {contribution && (
+        <div style={{ fontSize: 10, color: "var(--text-dim, #aaa)" }} title="Vergleich der Kandidaten mit und ohne dieses Teil (Näherung über die Ergebnisliste)">
+          Was bringt dieses Teil? {contribution}
+        </div>
       )}
       {onToggleLock && (
         <button
@@ -291,11 +300,26 @@ function LoadoutCard({
         : [...store.optimization.lockedGearIds, id],
     });
   const bySlot = new Map<GearSlot, GearPiece>(cand.gear.map((g) => [g.slot as GearSlot, g]));
+  const metricOf = (c: { damage: { effectiveDps: number; sustainedDps: number } }) =>
+    store.optimization.targetMetric === "burst" ? c.damage.effectiveDps : c.damage.sustainedDps;
+  const contributions = new Map<string, string>();
+  for (const g of cand.gear) {
+    const withPart = result.candidates.filter((c) => c.gear.some((x) => x.id === g.id));
+    const withoutPart = result.candidates.filter((c) => !c.gear.some((x) => x.id === g.id));
+    if (withPart.length === 0 || withoutPart.length === 0) continue;
+    const avg = (list: typeof result.candidates) => list.reduce((a, c) => a + metricOf(c), 0) / list.length;
+    const delta = ((avg(withPart) - avg(withoutPart)) / avg(withoutPart)) * 100;
+    contributions.set(
+      g.id,
+      `${delta >= 0 ? "+" : ""}${delta.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % DPS (Ø)`,
+    );
+  }
   const stats = cand.stats;
   const dpsTop = Math.max(
     ...result.ranked.map((b) => result.candidates.find((c) => c.id === b.id)?.damage.effectiveDps ?? 0),
   );
-  const dpsValue = cand.damage.effectiveDps;
+  const dpsValue =
+    store.optimization.targetMetric === "burst" ? cand.damage.effectiveDps : cand.damage.sustainedDps;
   const dpsShare = dpsTop > 0 ? (100 * dpsValue) / dpsTop : 100;
   const activeMetrics = active?.metrics ?? null;
   const dpsDeltaActive =
@@ -309,8 +333,17 @@ function LoadoutCard({
       : chcCapped + 0.01 >= (roleChcTarget ?? 0)
         ? `Ziel erreicht (${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % ≥ ${roleChcTarget} %)`
         : `Ziel verfehlt (${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % < ${roleChcTarget} %)`;
+  const metricLabel = store.optimization.targetMetric === "burst" ? "Burst-DPS" : "Dauer-DPS";
+  const sustained = cand.damage.sustainedDps;
+  const sustainedDeltaActive =
+    activeMetrics && activeMetrics.dps > 0
+      ? `${(((sustained - activeMetrics.dps) / activeMetrics.dps) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`
+      : null;
   const metrics: Array<[string, string, string]> = [
-    ["Effektiver DPS", dpsValue.toLocaleString("de-DE", { maximumFractionDigits: 0 }), dpsDeltaActive ? `Δ zu aktiv: ${dpsDeltaActive}` : "Kein aktives Loadout als Referenz"],
+    [`${metricLabel} (primär)`, dpsValue.toLocaleString("de-DE", { maximumFractionDigits: 0 }), dpsDeltaActive ? `Δ zu aktiv: ${dpsDeltaActive}` : "Kein aktives Loadout als Referenz"],
+    ["Burst-/Dauer-DPS", `${cand.damage.effectiveDps.toLocaleString("de-DE", { maximumFractionDigits: 0 })} / ${sustained.toLocaleString("de-DE", { maximumFractionDigits: 0 })}`, sustainedDeltaActive ? `Δ Dauer zu aktiv: ${sustainedDeltaActive}` : "Burst ohne, Dauer inkl. Nachladen"],
+    ["Schaden/Magazin", cand.damage.damagePerMagazine.toLocaleString("de-DE", { maximumFractionDigits: 0 }), `Magazin: ${cand.weapon.magSize} Schuss · Nachladen: ${reloadSecondsFor(cand.weapon).toLocaleString("de-DE", { maximumFractionDigits: 1 })} s`],
+    ["Zeit bis leeres Magazin", `${cand.damage.secondsPerMagazine.toLocaleString("de-DE", { maximumFractionDigits: 1 })} s`, ""],
     ["Kritische Trefferchance (CHC)", `${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`, chcState],
     ["Kritischer Trefferschaden (CHD)", `+${stats.chd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, `Cap 60 % für CHC beachtet`],
     ["Waffenschaden (WD)", `+${stats.wd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, ""],
@@ -414,6 +447,7 @@ function LoadoutCard({
               changed={Boolean(item) && !activeGearIds.has(item!.id)}
               onToggleLock={toggleLock}
               locked={Boolean(item) && lockedIds.has(item!.id)}
+              contribution={item ? contributions.get(item.id) : undefined}
             />
           );
         })}
@@ -430,7 +464,9 @@ function LoadoutCard({
             Grundschaden {cand.weapon.baseDamage.toLocaleString("de-DE")} · {cand.weapon.rpm} RPM
           </div>
           {cand.weapon.talent && (
-            <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{cand.weapon.talent}</div>
+            <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+              {cand.weapon.talent} <span title="Talent fließt nicht in die Berechnung ein (FORMELN.md §8)">— nicht berechnet</span>
+            </div>
           )}
         </div>
       </div>
@@ -441,17 +477,21 @@ function LoadoutCard({
 function AlternativesList({
   result,
   activeMetrics,
+  targetMetric,
 }: {
   result: V4BuildResult;
   activeMetrics: LoadoutMetrics | null;
+  targetMetric: "burst" | "sustained";
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const rows = result.ranked.map((b) => ({
     scored: b,
     cand: result.candidates.find((c) => c.id === b.id),
   }));
+  const metricOf = (c: { damage: { effectiveDps: number; sustainedDps: number } }) =>
+    targetMetric === "burst" ? c.damage.effectiveDps : c.damage.sustainedDps;
   const bestDps = Math.max(
-    ...rows.map((r) => r.cand?.damage.effectiveDps ?? 0),
+    ...rows.map((r) => (r.cand ? metricOf(r.cand) : 0)),
     0,
   );
   const weaponBest = new Map<string, { row: (typeof rows)[number]; rank: number }>();
@@ -468,7 +508,7 @@ function AlternativesList({
             <th style={{ textAlign: "left" }}>Rang</th>
             <th style={{ textAlign: "left" }}>Waffe</th>
             <th style={{ textAlign: "left" }}>Schwerpunkt</th>
-            <th style={{ textAlign: "right" }}>DPS</th>
+            <th style={{ textAlign: "right" }}>DPS ({targetMetric === "burst" ? "Burst" : "Dauer"})</th>
             <th style={{ textAlign: "right" }}>Δ zu Rang 1</th>
             {activeMetrics && <th style={{ textAlign: "right" }}>Δ zu aktiv</th>}
             <th style={{ textAlign: "left" }}>Status</th>
@@ -476,7 +516,7 @@ function AlternativesList({
         </thead>
         <tbody>
           {rows.slice(0, 12).map((r, i) => {
-            const dps = r.cand?.damage.effectiveDps ?? 0;
+            const dps = r.cand ? metricOf(r.cand) : 0;
             const deltaTop =
               bestDps > 0
                 ? `${(((dps - bestDps) / bestDps) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`
@@ -572,6 +612,7 @@ export function OptimizerView() {
   } | null>(null);
   const [running, setRunning] = useState(false);
   const [loadoutName, setLoadoutName] = useState("");
+  const [resultTab, setResultTab] = useState<"ergebnis" | "verbesserungen">("ergebnis");
 
   const saveActiveBestAsLoadout = () => {
     if (!result || !bestBuild) return;
@@ -594,7 +635,7 @@ export function OptimizerView() {
       roleId: roleKey,
       assumptions: result.assumptions.map((a) => a.label),
       metrics: {
-        dps: cand.damage.effectiveDps,
+        dps: store.optimization.targetMetric === "burst" ? cand.damage.effectiveDps : cand.damage.sustainedDps,
         chc: cand.stats.chc,
         chd: cand.stats.chd,
         wd: cand.stats.wd,
@@ -722,6 +763,59 @@ export function OptimizerView() {
             </button>
           )}
         </div>
+      </section>
+
+      <section className="field" style={{ display: "grid", gap: 6 }}>
+        <strong>Inventar-Status</strong>
+        {(() => {
+          const slots = (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => ({
+            slot,
+            count: store.gear.filter((g) => g.slot === slot).length,
+            cores: {
+              rot: store.gear.filter((g) => g.slot === slot && g.core === "wd").length,
+              blau: store.gear.filter((g) => g.slot === slot && g.core === "armour").length,
+              gelb: store.gear.filter((g) => g.slot === slot && g.core === "skill").length,
+            },
+          }));
+          const coreCount = (core: "wd" | "armour" | "skill") =>
+            store.gear.filter((g) => g.core === core).length;
+          const feasible = (requirements: Partial<{ wd: number; armour: number; skill: number }>) =>
+            (requirements.wd ?? 0) <= coreCount("wd") &&
+            (requirements.armour ?? 0) <= coreCount("armour") &&
+            (requirements.skill ?? 0) <= coreCount("skill");
+          const roleHints = ROLE_PROFILES.map((r) => {
+            const needs = r.minima
+              .filter((m): m is { kind: "core_distribution"; wd: number; skill?: number; armour?: number } => m.kind === "core_distribution")
+              .map((m) => ({ wd: m.wd ?? 0, armour: m.armour ?? 0, skill: m.skill ?? 0 }));
+            const ok = needs.length === 0 || needs.some((n) => feasible(n));
+            return { name: r.name, ok };
+          });
+          return (
+            <div style={{ fontSize: 12, display: "grid", gap: 4 }}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {slots.map((s) => (
+                  <span key={s.slot}>
+                    {SLOT_LABELS[s.slot]}: {s.count}{" "}
+                    <span style={{ color: "var(--text-dim, #aaa)" }}>
+                      (🔴 {s.cores.rot} · 🔵 {s.cores.blau} · 🟡 {s.cores.gelb})
+                    </span>
+                  </span>
+                ))}
+                <span>Waffen: {store.weapons.length}</span>
+              </div>
+              <div>
+                Rollen mit diesem Inventar möglich:{" "}
+                {roleHints.filter((r) => r.ok).map((r) => r.name).join(", ") || "— (Kernverteilung zu einseitig)"}
+                {roleHints.some((r) => !r.ok) && (
+                  <span style={{ color: "var(--text-dim, #aaa)" }}>
+                    {" "}
+                    — nicht möglich: {roleHints.filter((r) => !r.ok).map((r) => r.name).join(", ")} (siehe Verbesserungen-Tab nach der Berechnung)
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       <section className="field" style={{ display: "grid", gap: 12 }}>
@@ -920,6 +1014,21 @@ export function OptimizerView() {
             <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>%</span>
           </label>
           <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            Zielmetrik
+            <select
+              value={store.optimization.targetMetric}
+              onChange={(e) =>
+                store.setOptimization({
+                  ...store.optimization,
+                  targetMetric: e.target.value as "burst" | "sustained",
+                })
+              }
+            >
+              <option value="sustained">Dauer-DPS (inkl. Nachladen)</option>
+              <option value="burst">Burst-DPS (ohne Nachladen)</option>
+            </select>
+          </label>
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
             CHC-Zielwert
             <input
               type="number"
@@ -1080,8 +1189,37 @@ export function OptimizerView() {
 
       {result && (
         <>
+          <div className="tabs" style={{ display: "flex", gap: 6 }}>
+            <button
+              className={`btn ${resultTab === "ergebnis" ? "btn-primary" : ""}`}
+              onClick={() => setResultTab("ergebnis")}
+            >
+              Ergebnis
+            </button>
+            <button
+              className={`btn ${resultTab === "verbesserungen" ? "btn-primary" : ""}`}
+              onClick={() => setResultTab("verbesserungen")}
+            >
+              Verbesserungen ({result.gaps.length})
+            </button>
+          </div>
+          {resultTab === "ergebnis" && (
           <section className="field" style={{ display: "grid", gap: 10 }}>
             <strong>Ergebnis — Inventar-Build</strong>
+            <div
+              style={{
+                border: "1px dashed var(--warn, #e6a23c)",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: 12,
+                background: "rgba(230,162,60,0.06)",
+              }}
+            >
+              ⚠ <strong>Nicht modelliert:</strong> Waffen-/Gear-Talente, Exotic-Perks und
+              Stack-Effekte fließen nicht in die Berechnung ein. Details: Dokumentation
+              „docs/FORMELN.md“, Abschnitt 8 („Bewusst nicht abgebildet“). Betroffene Teile sind
+              in den Kacheln mit „nicht berechnet“ gekennzeichnet.
+            </div>
             {bestIsApproximation && (
               <div style={{ border: "1px solid var(--warn, #e6a23c)", borderRadius: 6, padding: "6px 10px", background: "rgba(230,162,60,0.08)" }}>
                 <strong>Kein zulässiges Build — Beste Näherung:</strong> Dieses Build verletzt die
@@ -1239,11 +1377,14 @@ export function OptimizerView() {
                 </>
               );
             })()}
-            <AlternativesList result={result.inventar} activeMetrics={store.builds.find((b) => b.id === store.activeBuildId)?.metrics ?? null} />
+            <AlternativesList result={result.inventar} activeMetrics={store.builds.find((b) => b.id === store.activeBuildId)?.metrics ?? null} targetMetric={store.optimization.targetMetric} />
           </section>
+          )}
 
+          {resultTab === "verbesserungen" && (
+          <>
           <section className="field" style={{ display: "grid", gap: 8 }}>
-            <strong>Lückenanalyse — Top-3-Empfehlungen</strong>
+            <strong>Verbesserungen — Empfehlungen nach erwartetem Gewinn</strong>
             {result.gaps.length === 0 && <div>Keine Abweichungen — dein Inventar enthält bereits das Optimum.</div>}
             {result.gaps.map((g) => (
               <div key={`${g.slot}-${g.rank}`} style={{ fontSize: 13 }}>
@@ -1265,6 +1406,8 @@ export function OptimizerView() {
               </div>
             ))}
           </section>
+          </>
+          )}
         </>
       )}
     </div>
