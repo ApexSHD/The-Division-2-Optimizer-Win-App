@@ -5,6 +5,10 @@ import {
   difficultyInfo,
   ESCALATION_SCALING,
   DIFFICULTIES,
+  allowedDifficulties,
+  defaultDifficultyFor,
+  prototypeCapActive,
+  stackSetHint,
 } from "../difficultyProfiles";
 
 describe("Schwierigkeitsgrade: Vorgabe-Tabelle des Auftraggebers", () => {
@@ -72,5 +76,50 @@ describe("Zeit zum Toeten (TTK)", () => {
 
   it("DPS 0 -> kein TTK (null)", () => {
     expect(timeToKillSeconds("heroic", "elite", 1, 0)).toBeNull();
+  });
+});
+
+describe("Spielmodus-Abhaengigkeiten (Auftraggeber, korrigierte Tabelle)", () => {
+  it("Offene Welt/Vergeltung: Heroisch, Herausfordernd, Schwer, Normal (kein Story)", () => {
+    expect(allowedDifficulties("openworld")).toEqual(["heroic", "challenging", "hard", "normal"]);
+    expect(allowedDifficulties("countdown")).toEqual(["heroic", "challenging", "hard", "normal"]);
+    expect(allowedDifficulties("openworld")).not.toContain("story");
+  });
+
+  it("Missionen: Eskalation 10-0 gefolgt von Legendaer bis Story", () => {
+    const missions = allowedDifficulties("missions");
+    expect(missions[0]).toBe("escalation10");
+    expect(missions[10]).toBe("escalation0");
+    expect(missions).toContain("legendary");
+    expect(missions).toContain("story");
+    expect(missions.length).toBe(17);
+  });
+
+  it("Raid: Normal und Story; Incursion: nur Normal; PvP: leer (Konzept spaeter)", () => {
+    expect(allowedDifficulties("raid")).toEqual(["normal", "story"]);
+    expect(allowedDifficulties("incursion")).toEqual(["normal"]);
+    expect(allowedDifficulties("pvp")).toEqual([]);
+  });
+
+  it("Vorbelegung: Raid/Incursion -> Normal, sonst Heroisch", () => {
+    expect(defaultDifficultyFor("raid")).toBe("normal");
+    expect(defaultDifficultyFor("incursion")).toBe("normal");
+    expect(defaultDifficultyFor("openworld")).toBe("heroic");
+    expect(defaultDifficultyFor(undefined)).toBe("heroic");
+  });
+
+  it("Prototyp-Deckelung nur bei Raid/Incursion aktiv", () => {
+    expect(prototypeCapActive("raid")).toBe(true);
+    expect(prototypeCapActive("incursion")).toBe(true);
+    expect(prototypeCapActive("missions")).toBe(false);
+    expect(prototypeCapActive(undefined)).toBe(false);
+  });
+
+  it("Stack-Hinweis: kurze Kaempfe bei Schwer, volle Stacks ab Heroisch/Eskalation", () => {
+    expect(stackSetHint("hard", ["Striker"])).toContain("kaum auf");
+    expect(stackSetHint("challenging", ["Striker"])).toContain("Westen-/Rucksack-Talent");
+    expect(stackSetHint("heroic", ["Striker"])).toContain("wirken voll");
+    expect(stackSetHint("escalation8", ["Striker", "Heartbreaker"])).toContain("wirken voll");
+    expect(stackSetHint("heroic", [])).toBeNull();
   });
 });

@@ -153,3 +153,73 @@ export function timeToKillSeconds(
   if (effectiveDps <= 0) return null;
   return enemyPoolM(key, rank, teamSize) * 1_000_000 / effectiveDps;
 }
+
+
+/** Spielmodus-Optionen des Fragebogens (gameMode-Frage). */
+export type GameModeKey = "openworld" | "missions" | "countdown" | "raid" | "incursion" | "pvp";
+
+/**
+ * Zulaessige Schwierigkeiten je Spielmodus (Vorgabe des Auftraggebers, 31.10.2026):
+ * - Offene Welt / Vergeltung: Heroisch, Herausfordernd, Schwer, Normal
+ * - Missionen: Eskalation 10-0 ODER Legendär, Heroisch, Herausfordernd, Schwer, Normal, Story
+ * - Raid: Normal, Story
+ * - Incursion: Normal
+ * - Dark Zone/PvP: Konzept folgt spaeter (leer)
+ */
+export const GAME_MODE_DIFFICULTIES: Record<GameModeKey, DifficultyKey[]> = {
+  openworld: ["heroic", "challenging", "hard", "normal"],
+  countdown: ["heroic", "challenging", "hard", "normal"],
+  missions: [
+    "escalation10", "escalation9", "escalation8", "escalation7", "escalation6",
+    "escalation5", "escalation4", "escalation3", "escalation2", "escalation1", "escalation0",
+    "legendary", "heroic", "challenging", "hard", "normal", "story",
+  ],
+  raid: ["normal", "story"],
+  incursion: ["normal"],
+  pvp: [],
+};
+
+export function allowedDifficulties(gameMode: string | undefined): DifficultyKey[] {
+  const key = (gameMode ?? "") as GameModeKey;
+  return GAME_MODE_DIFFICULTIES[key] ?? GAME_MODE_DIFFICULTIES.missions;
+}
+
+/** Sinnvolle Vorbelegung je Spielmodus. */
+export function defaultDifficultyFor(gameMode: string | undefined): DifficultyKey {
+  switch (gameMode) {
+    case "raid":
+    case "incursion":
+      return "normal";
+    case "openworld":
+    case "countdown":
+    case "missions":
+    default:
+      return "heroic";
+  }
+}
+
+/**
+ * Prototyp-Deckelung: In Raid und Incursion gibt es keine Prototyp-Boni —
+ * Prototyp-Werte zaehlen nur bis zum High-End-Maximalwert (Auftraggeber-Vorgabe:
+ * Stuermermaske WD 20 % -> 15 %, CHD 17 % -> 12 %).
+ */
+export function prototypeCapActive(gameMode: string | undefined): boolean {
+  return gameMode === "raid" || gameMode === "incursion";
+}
+
+/**
+ * Stack-Sets (Stapel-basierte Boni): Bei schweren Schwierigkeitsgraden sind Kämpfe
+ * kurz — Stacks bauen sich kaum auf, Westen-/Rucksack-Talent ist oft besser.
+ * Ab Heroisch/Eskalation wirken Stacks voll (lange Kämpfe).
+ */
+export function stackSetHint(difficultyKey: string, activeStackSets: string[]): string | null {
+  if (activeStackSets.length === 0) return null;
+  const heavy = ["heroic", "legendary"].includes(difficultyKey) || difficultyKey.startsWith("escalation");
+  if (heavy) {
+    return `Lange Kämpfe bei dieser Schwierigkeit — Stack-Boni (${activeStackSets.join(", ")}) wirken voll.`;
+  }
+  return `Kurze Kämpfe bei dieser Schwierigkeit — Stacks (${activeStackSets.join(", ")}) bauen sich kaum auf. Prüfe Westen-/Rucksack-Talent statt hoher Stacks.`;
+}
+
+/** Markennamen der Stack-Sets (fuer stackSetHint, Kleinbuchstaben-Matching). */
+export const STACK_SET_NAMES = ["striker", "heartbreaker", "umbra"];
