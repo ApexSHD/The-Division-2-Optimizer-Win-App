@@ -269,6 +269,7 @@ export interface AppState {
   activeBuildId: string;
   onboardingDone: boolean;
   addBuild: (b: Loadout) => void;
+  updateBuild: (b: Loadout) => void;
   removeBuild: (id: string) => void;
   setActiveBuildId: (id: string) => void;
   setOnboardingDone: (done: boolean) => void;
@@ -468,6 +469,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addBuild: (b) =>
       mutate((d) => ({ ...d, builds: [...d.builds, b] })),
     setActiveBuildId: (id) => mutate((d) => ({ ...d, activeBuildId: id })),
+    updateBuild: (b) =>
+      mutate((d) => ({ ...d, builds: d.builds.map((x) => (x.id === b.id ? b : x)) })),
     removeBuild: (id) =>
       mutate((d) => ({
         ...d,
