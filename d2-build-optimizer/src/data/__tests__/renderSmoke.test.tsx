@@ -21,13 +21,13 @@ describe("OptimizerView Render-Smoke (Fix schwarzer Bildschirm)", () => {
     expect(html).toContain("Rahmen anpassen");
   });
 
-  it("rendert Inventar-Status und Leerzustand (Wizard Schritt 1)", () => {
+  it("rendert Inventar-Status und Rollen (Wizard Schritt 1)", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
     );
     expect(html).toContain("Inventar-Status");
     expect(html).toContain("DPS Krit");
-    expect(html).toContain("Noch keine Gear-Teile erfasst");
+    expect(html).not.toContain("Zielmetrik");
   });
 });
 
