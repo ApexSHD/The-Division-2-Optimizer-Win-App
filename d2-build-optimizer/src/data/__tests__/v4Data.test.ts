@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import modsJson from "../../db/mod.json";
 import {
   IMMUNITY_THRESHOLDS,
   SKILLS,
@@ -161,5 +162,55 @@ describe("Immunitätsschwellen & bestätigte Caps (Nutzervorgabe 29.11.)", () =>
     const pfe = HARD_CAPS.find((c) => c.attr === "pfe");
     expect(pfe?.cap).toBe(80);
     expect(pfe?.value_status).toBe("bestätigt");
+  });
+});
+
+describe("Waffen-Mod-Maxwerte (Nutzervorgabe mods_v3)", () => {
+  interface WeaponMod {
+    name: string;
+    slotTypes: string[];
+    bonus: { type: string; val: number } | null;
+    penalty?: { type: string; val: number } | null;
+    note?: string;
+  }
+  const mods = (modsJson as unknown as {
+    version: string;
+    slots: Record<string, WeaponMod[]>;
+    special_exclusive: Array<{ name: string; spec: string }>;
+  });
+
+  it("mod.json ist mods_v3 mit Spezial-Exklusiv-Mods", () => {
+    expect(mods.version).toBe("mods_v3");
+    expect(mods.special_exclusive).toHaveLength(2);
+    expect(mods.special_exclusive.some((m) => m.spec === "technician")).toBe(true);
+    expect(mods.special_exclusive.some((m) => m.spec === "firewall")).toBe(true);
+  });
+
+  it("Max-Werte je Platz: Optik CHC 5 / CHD 10 / HSD 10, Mündung CHD 10 / CHC 5, Unterlauf CHC 5", () => {
+    const find = (slot: string, name: string) =>
+      mods.slots[slot].find((m) => m.name === name);
+    expect(find("optic", "PRO Red Dot Sight (Rugged Mini Reflex)")?.bonus).toEqual({ type: "chc", val: 5 });
+    expect(find("optic", "EXPS3 Holo Sight (Russisches Rotpunkt)")?.bonus).toEqual({ type: "chd", val: 10 });
+    expect(find("optic", "VX-1 Scope 12x")?.bonus).toEqual({ type: "hsd", val: 10 });
+    expect(find("muzzle", "Omega 5.56/7.62 Suppressor")?.bonus).toEqual({ type: "chd", val: 10 });
+    expect(find("muzzle", "Praezisions-Muendungsbremse")?.bonus).toEqual({ type: "chc", val: 5 });
+    expect(find("underbarrel", "Kompakter Laserpointer")?.bonus).toEqual({ type: "chc", val: 5 });
+  });
+
+  it("Alter Fehler korrigiert: Unterlauf-CHC war +10 %, korrekt ist +5 %", () => {
+    const laser = mods.slots.underbarrel.find(
+      (m) => m.name === "Compact Coupled Small Laser Pointer",
+    );
+    expect(laser?.bonus?.val).toBe(5);
+  });
+
+  it("Magazin-Highlights: Robustes +20 Pat., LMG-Tasche +50 (mit Nachlade-Malus), Shotgun-Röhrenfeder +30 % Nachladen", () => {
+    const robust = mods.slots.magazine.find((m) => m.name.includes("Robustes erweitertes"));
+    expect(robust?.bonus).toEqual({ type: "magSize", val: 20 });
+    const lmgBelt = mods.slots.magazine.find((m) => m.name.includes("Grosse Tasche"));
+    expect(lmgBelt?.bonus).toEqual({ type: "magSize", val: 50 });
+    expect(lmgBelt?.penalty).toEqual({ type: "reloadSpeed", val: -10 });
+    const tube = mods.slots.magazine.find((m) => m.name.includes("Röhrenfeder"));
+    expect(tube?.bonus).toEqual({ type: "reloadSpeed", val: 30 });
   });
 });

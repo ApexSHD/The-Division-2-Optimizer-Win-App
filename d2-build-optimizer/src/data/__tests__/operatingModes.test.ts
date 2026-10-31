@@ -215,7 +215,7 @@ describe("Gear-Mods (Maske, Weste, Rucksack) in der V4-Bewertung", () => {
       version: string;
       gear_mods: Record<string, Array<{ attr: string; val: number }>>;
     };
-    expect(mods.version).toBe("mods_v2");
+    expect(mods.version).toBe("mods_v3");
     const chc = mods.gear_mods.offensive.find((m) => m.attr === "chc");
     expect(chc?.val).toBe(6.0);
     const chd = mods.gear_mods.offensive.find((m) => m.attr === "chd");
