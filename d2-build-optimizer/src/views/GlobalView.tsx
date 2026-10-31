@@ -1,7 +1,6 @@
 import { useStore, shdBonusFor, SHD_WATCH_ATTRIBUTES } from "../store";
 import { I18nContext } from "../i18n";
 import { useContext, useState } from "react";
-import { OptimizationSettingsPanel } from "../components/OptimizationSettingsPanel";
 
 function WatchBonusTable({ shdLevel }: { shdLevel: number }) {
   const categories: { key: keyof typeof SHD_WATCH_ATTRIBUTES; label: string }[] = [
@@ -118,11 +117,11 @@ export function GlobalView() {
       </div>
 
 
-      <h3 style={{ margin: "22px 0 8px" }}>Einstellungen für Optimierung</h3>
-      <OptimizationSettingsPanel
-        optimization={store.optimization}
-        onChange={store.setOptimization}
-      />
+      <p className="settings-hint" style={{ marginTop: 16 }}>
+        Gegnerprofil, CHC-/HSD-Zielwerte und Zielmetrik werden im <strong>Optimierer</strong>
+        (Abschnitt „Rahmen“) konfiguriert — inklusive Gegnertyp-Presets (Standard, Elite, Named,
+        Lebensenergie, Kopfschuss-Fokus, Eigen).
+      </p>
     </div>
   );
 }

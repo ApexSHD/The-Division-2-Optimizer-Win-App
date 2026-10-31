@@ -32,24 +32,71 @@ import { DB_VERSION, reloadSecondsFor } from "../data/sampleData";
 import { weaponFingerprint, gearFingerprint } from "../data/loadoutIntegrity";
 import type { WeaponType, Loadout, LoadoutMetrics } from "../data/sampleData";
 
-const ENEMY_PROFILE_PRESETS: Array<{ key: string; label: string; enemyHeadshotShare: number; hint: string }> = [
+interface EnemyPreset {
+  key: string;
+  label: string;
+  enemyHeadshotShare: number;
+  enemyArmorShare: number;
+  enemyHealthShare: number;
+  enemyOocShare: number;
+  hint: string;
+}
+
+// Gegnertyp-Presets: typische Gegner-Mixe (multiplikative Attribute DTA/DTH/DTToOC wirken je Mix unterschiedlich)
+const ENEMY_PROFILE_PRESETS: EnemyPreset[] = [
   {
     key: "standard",
-    label: "Standard",
+    label: "Standard (gemischt)",
     enemyHeadshotShare: 0,
-    hint: "Bodyshots — Kopfschuss-Anteil 0 %.",
+    enemyArmorShare: 80,
+    enemyHealthShare: 20,
+    enemyOocShare: 70,
+    hint: "Bodyshots, gemischte Gegner: ~80 % Rüstungsleiste, ~70 % ungedeckt — DTA und DTToOC wirken.",
+  },
+  {
+    key: "elite",
+    label: "Nur Elite",
+    enemyHeadshotShare: 0,
+    enemyArmorShare: 90,
+    enemyHealthShare: 10,
+    enemyOocShare: 60,
+    hint: "Elite-Gegner (Raids/Legendär): dicke Rüstungsleiste — DTA bringt am meisten, DTToOC etwas weniger (Elites decken sich öfter).",
+  },
+  {
+    key: "named",
+    label: "Nur Benannt (Named Bosses)",
+    enemyHeadshotShare: 10,
+    enemyArmorShare: 95,
+    enemyHealthShare: 5,
+    enemyOocShare: 50,
+    hint: "Named/Bosse: fast nur Rüstungsleiste, decken sich häufig — DTA volle Wirkung, DTToOC geringer.",
+  },
+  {
+    key: "health",
+    label: "Nur Lebensenergie (z. B. OG-Builds)",
+    enemyHeadshotShare: 20,
+    enemyArmorShare: 0,
+    enemyHealthShare: 100,
+    enemyOocShare: 80,
+    hint: "Gegner mit Lebensenergie-Struktur (z. B. OG-Content): DTA bringt nichts, DTH volle Wirkung.",
   },
   {
     key: "kopfschuss",
     label: "Kopfschuss-Fokus",
     enemyHeadshotShare: 40,
-    hint: "Anteil der Treffer auf den Kopf 40 % — Voraussetzung für DPS-Kopfschuss-Rollen.",
+    enemyArmorShare: 80,
+    enemyHealthShare: 20,
+    enemyOocShare: 70,
+    hint: "Anteil der Treffer auf den Kopf 40 % — Voraussetzung für DPS-Kopfschuss-Rollen; HSD wirkt auf jeden Kopftreffer.",
   },
   {
     key: "eigen",
     label: "Eigen",
     enemyHeadshotShare: -1,
-    hint: "Kopfschuss-Anteil frei einstellbar.",
+    enemyArmorShare: -1,
+    enemyHealthShare: -1,
+    enemyOocShare: -1,
+    hint: "Alle Anteile frei einstellbar.",
   },
 ];
 
@@ -285,11 +332,12 @@ function LoadoutCard({
   result,
   cand,
   roleChcTarget,
+  roleHsdTarget,
 }: {
   result: V4BuildResult;
-
   cand: V4Candidate;
   roleChcTarget: number | null;
+  roleHsdTarget: number | null;
 }) {
   const store = useStore();
   const active = store.builds.find((b) => b.id === store.activeBuildId) ?? null;
@@ -350,7 +398,15 @@ function LoadoutCard({
     ["Kritische Trefferchance (CHC)", `${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`, chcState],
     ["Kritischer Trefferschaden (CHD)", `+${stats.chd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, `Cap 60 % für CHC beachtet`],
     ["Waffenschaden (WD)", `+${stats.wd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, ""],
-    ["Kopfschussschaden (HSD)", `+${stats.hsd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, ""],
+    [
+      "Kopfschussschaden (HSD)",
+      `+${stats.hsd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`,
+      roleHsdTarget === null
+        ? ""
+        : stats.hsd + 0.01 >= roleHsdTarget
+          ? `Ziel erreicht (${stats.hsd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % ≥ ${roleHsdTarget} %)`
+          : `Ziel verfehlt (${stats.hsd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % < ${roleHsdTarget} %)`,
+    ],
   ];
   return (
     <div style={{ display: "grid", gap: 10 }}>
@@ -714,11 +770,23 @@ export function OptimizerView() {
     store.setOptimization({ ...store.optimization, enemyHeadshotShare: v });
   const selectedPreset =
     ENEMY_PROFILE_PRESETS.find(
-      (p) => p.enemyHeadshotShare === store.optimization.enemyHeadshotShare,
-    ) ?? ENEMY_PROFILE_PRESETS[2];
+      (p) =>
+        p.enemyHeadshotShare >= 0 &&
+        p.enemyHeadshotShare === store.optimization.enemyHeadshotShare &&
+        p.enemyArmorShare === store.optimization.enemyArmorShare &&
+        p.enemyHealthShare === store.optimization.enemyHealthShare &&
+        p.enemyOocShare === store.optimization.enemyOocShare,
+    ) ?? ENEMY_PROFILE_PRESETS[ENEMY_PROFILE_PRESETS.length - 1];
   const selectPreset = (presetKey: string) => {
     const preset = ENEMY_PROFILE_PRESETS.find((p) => p.key === presetKey);
-    if (preset && preset.enemyHeadshotShare >= 0) setEnemyHeadshotShare(preset.enemyHeadshotShare);
+    if (!preset || preset.enemyHeadshotShare < 0) return;
+    store.setOptimization({
+      ...store.optimization,
+      enemyHeadshotShare: preset.enemyHeadshotShare,
+      enemyArmorShare: preset.enemyArmorShare,
+      enemyHealthShare: preset.enemyHealthShare,
+      enemyOocShare: preset.enemyOocShare,
+    });
   };
 
   const runGenerationRef = useRef(0);
@@ -785,18 +853,8 @@ export function OptimizerView() {
       <section className="field">
         <h2 style={{ margin: 0 }}>Build-Optimierung V4</h2>
         <p style={{ margin: 0, color: "var(--text-dim, #aaa)" }}>
-{"Rolle wählen, optional Rahmen anpassen, berechnen"}
+{"Rolle wählen, optional Rahmen anpassen, am Ende „Builds berechnen“"}
         </p>
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", position: "sticky", top: 0, zIndex: 5, background: "var(--bg, #1b1d21)", padding: "6px 0" }}>
-          <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0 || store.weapons.length === 0}>
-            {running ? "Berechne…" : "Builds berechnen"}
-          </button>
-          {running && (
-            <button className="btn" onClick={cancelOptimization}>
-              Abbrechen
-            </button>
-          )}
-        </div>
       </section>
 
       <section className="field" style={{ display: "grid", gap: 6 }}>
@@ -1078,6 +1136,25 @@ export function OptimizerView() {
             />
             <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>%</span>
           </label>
+          {needsHeadshotShare && (
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              HSD-Zielwert
+              <input
+                type="number"
+                min={0}
+                max={300}
+                value={store.optimization.targetHsd}
+                onChange={(e) =>
+                  store.setOptimization({
+                    ...store.optimization,
+                    targetHsd: Math.max(0, Math.min(300, Number(e.target.value))),
+                  })
+                }
+                style={{ width: 64, textAlign: "center" }}
+              />
+              <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>%</span>
+            </label>
+          )}
         </div>
         <small style={{ color: "var(--text-dim, #aaa)" }}>
           {selectedPreset.hint} Alle Werte wirken direkt auf die nächste Berechnung. Charakterdaten (SHD, Spezialisierung) bleiben in „Global“.
@@ -1206,9 +1283,14 @@ export function OptimizerView() {
       </section>
 
       <section className="field" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0}>
+        <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0 || store.weapons.length === 0}>
           {running ? "Berechne…" : "Builds berechnen"}
         </button>
+        {running && (
+          <button className="btn" onClick={cancelOptimization}>
+            Abbrechen
+          </button>
+        )}
         {store.weapons.length === 0 && (
           <span style={{ color: "var(--warn, #e6a23c)" }}>
             Noch keine Waffen erfasst — bitte zuerst Waffen importieren (Ansicht „Waffen“, CSV-Import).
@@ -1300,7 +1382,14 @@ export function OptimizerView() {
             {bestBuild && (() => {
               const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
               if (!cand) return null;
-              return <LoadoutCard result={result.inventar} cand={cand} roleChcTarget={role.chcTarget} />;
+              return (
+                <LoadoutCard
+                  result={result.inventar}
+                  cand={cand}
+                  roleChcTarget={role.chcTarget}
+                  roleHsdTarget={needsHeadshotShare ? store.optimization.targetHsd : null}
+                />
+              );
             })()}
             {bestBuild && (() => {
               const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
