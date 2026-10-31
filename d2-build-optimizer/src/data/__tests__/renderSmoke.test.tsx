@@ -4,6 +4,8 @@ import * as React from "react";
 import { OptimizerView } from "../../views/OptimizerView";
 import { OnboardingWizard } from "../../components/OnboardingWizard";
 import { DashboardView } from "../../views/DashboardView";
+import { LoadoutsView } from "../../views/LoadoutsView";
+import App from "../../App";
 import { StoreProvider } from "../../store";
 
 describe("OptimizerView Render-Smoke (Fix schwarzer Bildschirm)", () => {
@@ -58,5 +60,32 @@ describe("DashboardView Render-Smoke (Lastenheft Dashboard)", () => {
     expect(html).toContain("Zustand der Daten");
     expect(html).toContain("Optimierer starten");
     expect(html).toContain("Build-Tipp");
+  });
+});
+
+describe("LoadoutsView + Nav-Gruppen (Nav-Relaunch)", () => {
+  it("rendert die Loadouts-Tabelle mit allen Werte-Spalten", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(LoadoutsView)),
+    );
+    expect(html).toContain("Loadouts");
+    expect(html).toContain("Name");
+    expect(html).toContain("Rolle");
+    expect(html).toContain("DPS");
+    expect(html).toContain("CHC");
+    expect(html).toContain("CHD");
+    expect(html).toContain("Rüstung");
+    expect(html).toContain("Gespeichert");
+    expect(html).toContain("Zuletzt gespeichert");
+  });
+
+  it("Nav zeigt Gruppen-Header im PowerToys-Stil", () => {
+    const html = renderToString(React.createElement(StoreProvider, null, React.createElement(App)));
+    expect(html).toContain("nav-group-title");
+    expect(html).toContain("Inventar");
+    expect(html).toContain("Optimierung");
+    expect(html).toContain("Einstellungen");
+    expect(html).toContain("Loadouts");
+    expect(html).toContain("Startseite");
   });
 });
