@@ -9,6 +9,7 @@ import { ChartPlaceholder } from "../components/ChartPlaceholder";
 import { getDb } from "../data/db";
 import type { WeaponPreset, DisplayTalent } from "../data/db";
 import { TALENT_DISPLAY_TYPE_MAP, talentsAllowedForWeapon, carrierForTalent } from "../data/db";
+import { tWeaponAttr, type ItemLang } from "../i18n/itemNames";
 import type { Weapon, WeaponType, WeaponAttrKey } from "../data/sampleData";
 import { weaponsToCsv, weaponsFromCsv } from "../data/weaponCsv";
 import {
@@ -50,6 +51,7 @@ function newWeapon(id: string): Weapon {
 export function WeaponsView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
+  const itemLang: ItemLang = store.lang;
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<Weapon | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -319,13 +321,13 @@ export function WeaponsView() {
     {
       key: "attr2",
       label: "Attribut 2",
-      render: (w) => `${WEAPON_ATTR_LABELS[w.attributes.core2Type]} +${w.attributes.core2Val} %`,
+      render: (w) => `${tWeaponAttr(w.attributes.core2Type, itemLang, WEAPON_ATTR_LABELS[w.attributes.core2Type])} +${w.attributes.core2Val} %`,
       sortValue: (w) => w.attributes.core2Val,
     },
     {
       key: "attr3",
       label: "Attribut 3",
-      render: (w) => `${WEAPON_ATTR_LABELS[w.attributes.minorType]} +${w.attributes.minorVal} %`,
+      render: (w) => `${tWeaponAttr(w.attributes.minorType, itemLang, WEAPON_ATTR_LABELS[w.attributes.minorType])} +${w.attributes.minorVal} %`,
       sortValue: (w) => w.attributes.minorVal,
     },
     {
@@ -656,7 +658,7 @@ export function WeaponsView() {
                 );
               })()}
             </Field>
-            <Field label={`Kern 2: ${WEAPON_ATTR_LABELS[editing.attributes.core2Type]}`}>
+            <Field label={`Kern 2: ${tWeaponAttr(editing.attributes.core2Type, itemLang, WEAPON_ATTR_LABELS[editing.attributes.core2Type])}`}>
               {WEAPON_CORE2_BY_TYPE[editing.type] === null ? (
                 <select
                   value={editing.attributes.core2Type}
@@ -673,7 +675,7 @@ export function WeaponsView() {
                   }}
                 >
                   {(Object.keys(WEAPON_ATTR_LABELS) as WeaponAttrKey[]).map((k) => (
-                    <option key={k} value={k}>{WEAPON_ATTR_LABELS[k]}</option>
+                    <option key={k} value={k}>{tWeaponAttr(k, itemLang, WEAPON_ATTR_LABELS[k])}</option>
                   ))}
                 </select>
               ) : (
@@ -726,7 +728,7 @@ export function WeaponsView() {
                   .filter((k) => k !== editing.attributes.core2Type || editing.rarity === "exotic")
                   .map((k) => (
                     <option key={k} value={k} disabled={k === editing.attributes.core2Type}>
-                      {WEAPON_ATTR_LABELS[k]}
+                      {tWeaponAttr(k, itemLang, WEAPON_ATTR_LABELS[k])}
                     </option>
                   ))}
               </select>
