@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import {
   GOALS,
@@ -212,9 +212,13 @@ const CORE_LABELS: Record<string, string> = {
 function SlotTile({
   item,
   changed,
+  onToggleLock,
+  locked,
 }: {
   item: GearPiece | null;
   changed: boolean;
+  onToggleLock?: (id: string) => void;
+  locked?: boolean;
 }) {
   if (!item) {
     return <div className="field" style={{ border: "1px dashed var(--border, #555)", borderRadius: 6, padding: 8, minHeight: 96 }}>—</div>;
@@ -251,6 +255,16 @@ function SlotTile({
       {item.talent && (
         <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{item.talent}</div>
       )}
+      {onToggleLock && (
+        <button
+          className="btn"
+          style={{ fontSize: 10, padding: "2px 8px", marginTop: 4 }}
+          onClick={() => onToggleLock(item.id)}
+          title={locked ? "Sperre aufheben — Teil darf wieder getauscht werden" : "Teil festlegen — muss in jedem Build verwendet werden"}
+        >
+          {locked ? "🔓 Sperre aufheben" : "🔒 Muss verwendet werden"}
+        </button>
+      )}
     </div>
   );
 }
@@ -268,6 +282,14 @@ function LoadoutCard({
   const store = useStore();
   const active = store.builds.find((b) => b.id === store.activeBuildId) ?? null;
   const activeGearIds = new Set(Object.values(active?.gearIds ?? {}));
+  const lockedIds = new Set(store.optimization.lockedGearIds);
+  const toggleLock = (id: string) =>
+    store.setOptimization({
+      ...store.optimization,
+      lockedGearIds: lockedIds.has(id)
+        ? store.optimization.lockedGearIds.filter((x) => x !== id)
+        : [...store.optimization.lockedGearIds, id],
+    });
   const bySlot = new Map<GearSlot, GearPiece>(cand.gear.map((g) => [g.slot as GearSlot, g]));
   const stats = cand.stats;
   const dpsTop = Math.max(
@@ -314,9 +336,18 @@ function LoadoutCard({
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
-        {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => (
-          <SlotTile key={slot} item={bySlot.get(slot) ?? null} changed={!activeGearIds.has(bySlot.get(slot)?.id ?? "")} />
-        ))}
+        {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => {
+          const item = bySlot.get(slot) ?? null;
+          return (
+            <SlotTile
+              key={slot}
+              item={item}
+              changed={Boolean(item) && !activeGearIds.has(item!.id)}
+              onToggleLock={toggleLock}
+              locked={Boolean(item) && lockedIds.has(item!.id)}
+            />
+          );
+        })}
         <SlotTile item={null} changed={false} />
         <div
           className="field"
@@ -546,10 +577,18 @@ export function OptimizerView() {
     if (preset && preset.enemyHeadshotShare >= 0) setEnemyHeadshotShare(preset.enemyHeadshotShare);
   };
 
+  const runGenerationRef = useRef(0);
+  const cancelOptimization = () => {
+    runGenerationRef.current += 1;
+    setRunning(false);
+  };
+
   const runOptimization = () => {
     if (store.weapons.length === 0 || store.gear.length === 0) return;
+    const generation = ++runGenerationRef.current;
     setRunning(true);
     setTimeout(() => {
+      if (generation !== runGenerationRef.current) return;
       const ctx: ModeContext = {
         mode: "inventar",
         roleKey,
@@ -583,6 +622,7 @@ export function OptimizerView() {
         ctx,
       });
       const bestVector = (inventar.best ?? inventar.ranked[0])?.vector;
+      if (generation !== runGenerationRef.current) return;
       setResult({
         inventar,
         gaps: gaps.recommendations,
@@ -601,8 +641,18 @@ export function OptimizerView() {
       <section className="field">
         <h2 style={{ margin: 0 }}>Build-Optimierung V4</h2>
         <p style={{ margin: 0, color: "var(--text-dim, #aaa)" }}>
-{"Ziel wählen, Fragebogen beantworten, beste Builds berechnen"}
+{"Rolle wählen, optional Rahmen anpassen, berechnen"}
         </p>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", position: "sticky", top: 0, zIndex: 5, background: "var(--bg, #1b1d21)", padding: "6px 0" }}>
+          <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0 || store.weapons.length === 0}>
+            {running ? "Berechne…" : "Builds berechnen"}
+          </button>
+          {running && (
+            <button className="btn" onClick={cancelOptimization}>
+              Abbrechen
+            </button>
+          )}
+        </div>
       </section>
 
       <section className="field" style={{ display: "grid", gap: 12 }}>
@@ -615,7 +665,6 @@ export function OptimizerView() {
                 setGoalKey(g.key);
                 const first = ROLE_PROFILES.find((r) => r.ziel === g.key);
                 if (first) setRoleKey(first.key);
-                setAnswers([]);
               }}
             >
               {g.name}
@@ -631,7 +680,6 @@ export function OptimizerView() {
                 className={`btn ${roleKey === rk ? "btn-primary" : ""}`}
                 onClick={() => {
                   setRoleKey(rk);
-                  setAnswers([]);
                   setExpertWeights(null);
                 }}
               >
@@ -682,10 +730,12 @@ export function OptimizerView() {
         </div>
       </section>
 
-      <section className="field" style={{ display: "grid", gap: 10 }}>
-        <strong>
-          Fragebogen ({answeredCount}/{questions.length} beantwortet)
-        </strong>
+      <details className="field" style={{ display: "grid", gap: 10 }}>
+        <summary style={{ cursor: "pointer" }}>
+          <strong>
+            Fragebogen (optional, {answeredCount}/{questions.length} beantwortet) — Antworten bleiben beim Rollenwechsel erhalten
+          </strong>
+        </summary>
         {questions.map((q) => {
           const answer = answers.find((a) => a.questionKey === q.key);
           return (
@@ -773,7 +823,7 @@ export function OptimizerView() {
             </select>
           </label>
         </div>
-      </section>
+      </details>
 
       <section className="field" style={{ display: "grid", gap: 10 }}>
         <strong>Rahmen — Gegnerprofil & CHC-Ziel (früher „Global“)</strong>
@@ -820,6 +870,37 @@ export function OptimizerView() {
         <small style={{ color: "var(--text-dim, #aaa)" }}>
           {selectedPreset.hint} Alle Werte wirken direkt auf die nächste Berechnung. Charakterdaten (SHD, Spezialisierung) bleiben in „Global“.
         </small>
+        {(store.optimization.lockedGearIds.length > 0 || store.optimization.anchorWeaponId) && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", fontSize: 12 }}>
+            <span style={{ color: "var(--text-dim, #aaa)" }}>Aktive Sperren:</span>
+            {store.optimization.anchorWeaponId && (
+              <span className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+                🔫 Waffe: {store.weapons.find((w) => w.id === store.optimization.anchorWeaponId)?.name ?? "?"}
+              </span>
+            )}
+            {store.optimization.lockedGearIds.map((id) => (
+              <span key={id} className="tag" style={{ padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border, #555)" }}>
+                🔒 {(() => {
+                  const g = store.gear.find((x) => x.id === id);
+                  return g ? `${g.brand} (${SLOT_LABELS[g.slot] ?? g.slot})` : id;
+                })()}
+              </span>
+            ))}
+            <button
+              className="btn"
+              style={{ fontSize: 11, padding: "2px 8px" }}
+              onClick={() =>
+                store.setOptimization({
+                  ...store.optimization,
+                  lockedGearIds: [],
+                  anchorWeaponId: "",
+                })
+              }
+            >
+              Alle Sperren aufheben
+            </button>
+          </div>
+        )}
         {headshotShareMissing && (
           <div style={{ border: "1px solid var(--warn, #e6a23c)", borderRadius: 6, padding: "6px 10px", background: "rgba(230,162,60,0.08)", display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <span>
