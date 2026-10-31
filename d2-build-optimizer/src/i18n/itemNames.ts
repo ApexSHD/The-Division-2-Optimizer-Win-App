@@ -1,6 +1,8 @@
 import attributeNamesJson from "./attributeNames.json";
 import talentNamesJson from "./talentNames.json";
 import weaponNamesJson from "./weaponNames.json";
+import gearSetNamesJson from "./gearSetNames.json";
+import gearDbJson from "../db/gear.json";
 
 export type ItemLang = "de" | "en";
 
@@ -87,6 +89,30 @@ export function tWeaponName(dbName: string, lang: ItemLang, fallback: string): s
   const exact = WEAPON_NAMES[dbName] ?? WEAPON_NAMES[dbName.replace(/\s*\(.*\)\s*$/, "").trim()];
   if (!exact) return fallback;
   return exact[lang] ?? fallback;
+}
+
+const GEAR_SET_NAMES = gearSetNamesJson as unknown as Record<string, AttrEntry>;
+
+const GEAR_SET_NAME_TO_KEY: Record<string, string> = (() => {
+  const db = gearDbJson as unknown as {
+    green_set_info?: Record<string, { name?: string }>;
+  };
+  const out: Record<string, string> = {};
+  for (const [key, info] of Object.entries(db.green_set_info ?? {})) {
+    if (info?.name) out[info.name] = key;
+  }
+  return out;
+})();
+
+/**
+ * Gearset-Name uebersetzen. Akzeptiert DB-Key ('striker') oder DB-Namen
+ * ('Striker's Battlegear'); Zuordnung via gear.json green_set_info.
+ */
+export function tGearSetName(dbNameOrKey: string, lang: ItemLang, fallback: string): string {
+  const key = GEAR_SET_NAMES[dbNameOrKey] ? dbNameOrKey : GEAR_SET_NAME_TO_KEY[dbNameOrKey];
+  if (!key) return fallback;
+  const entry = GEAR_SET_NAMES[key];
+  return entry?.[lang] ?? fallback;
 }
 
 const ITEM_NAMES: Record<string, AttrEntry> = {};

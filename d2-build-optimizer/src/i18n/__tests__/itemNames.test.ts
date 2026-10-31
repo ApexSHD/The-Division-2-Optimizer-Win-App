@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tCore, tGearAttr, tWeaponAttr, tItemName, tTalentName, tWeaponName } from "../itemNames";
+import { tCore, tGearAttr, tWeaponAttr, tItemName, tTalentName, tWeaponName, tGearSetName } from "../itemNames";
 
 describe("ItemName-i18n: Attribut- und Kern-Uebersetzungen (Auftraggeber-Liste 1)", () => {
   it("Kernattribute DE<->EN (Waffenschaden/Weapon Damage, Ruestung/Armor, Skill Tier)", () => {
@@ -87,5 +87,31 @@ describe("Exotische Waffen-Namen DE<->EN (Auftraggeber-Liste 3, unvollstaendig)"
     expect(tWeaponName("Regulus", "de", "x")).toBe("Regulus");
     expect(tWeaponName("ACR", "de", "ACR")).toBe("ACR");
     expect(tWeaponName("Unbekannte Waffe", "en", "DB-Name")).toBe("DB-Name");
+  });
+});
+
+describe("Gearset-Namen DE<->EN (Auftraggeber-Liste 4)", () => {
+  it("Komplett uebersetzte Sets per DB-Key", () => {
+    expect(tGearSetName("striker", "de", "x")).toBe("St\u00fcrmer-Kampfausr\u00fcstung");
+    expect(tGearSetName("truepatriot", "de", "x")).toBe("Wahrer Patriot");
+    expect(tGearSetName("ongoing", "de", "x")).toBe("Aktivierte Direktive");
+    expect(tGearSetName("acesandeights", "de", "x")).toBe("Asse und Achten");
+    expect(tGearSetName("foundry", "de", "x")).toBe("Gie\u00dferei-Bollwerk");
+    expect(tGearSetName("eclipse", "de", "x")).toBe("Eclipse-Protokoll");
+    expect(tGearSetName("huntersfury", "de", "x")).toBe("Zorn des J\u00e4gers");
+  });
+
+  it("DB-Namen werden auf Keys gemappt ('Striker's Battlegear' -> Stuermer)", () => {
+    expect(tGearSetName("Striker's Battlegear", "de", "x")).toBe("St\u00fcrmer-Kampfausr\u00fcstung");
+    expect(tGearSetName("Tip of the Spear", "de", "x")).toBe("Spitze des Speers");
+    expect(tGearSetName("Negotiator's Dilemma", "de", "x")).toBe("Dilemma des Verhandlungsf\u00fchrers");
+  });
+
+  it("Ident-Eintraege und EN-Richtung, Fallback fuer nicht gelieferte Sets", () => {
+    expect(tGearSetName("hardwired", "de", "x")).toBe("Hard Wired");
+    expect(tGearSetName("heartbreaker", "de", "x")).toBe("Heartbreaker");
+    expect(tGearSetName("umbra", "de", "x")).toBe("Umbra Initiative");
+    expect(tGearSetName("striker", "en", "x")).toBe("Striker's Battlegear");
+    expect(tGearSetName("refactor", "de", "Refactor")).toBe("Refactor");
   });
 });
