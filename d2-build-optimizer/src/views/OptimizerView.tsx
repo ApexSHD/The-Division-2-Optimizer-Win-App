@@ -747,6 +747,9 @@ export function OptimizerView() {
   const [running, setRunning] = useState(false);
   const [loadoutName, setLoadoutName] = useState("");
   const [resultTab, setResultTab] = useState<"ergebnis" | "verbesserungen">("ergebnis");
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+  const step1Done = roleKey !== "";
+  const step3Done = result !== null && !running;
 
   const saveActiveBestAsLoadout = () => {
     if (!result || !bestBuild) return;
@@ -935,6 +938,7 @@ export function OptimizerView() {
       const cappedCount = prototypeCapped
         ? store.gear.filter((g) => g.prototype).length + store.weapons.filter((w) => w.isPrototype).length
         : 0;
+      setWizardStep(3);
       setResult({
         inventar,
         gaps: gaps.recommendations,
@@ -965,8 +969,42 @@ export function OptimizerView() {
       <section className="field">
         <h2 style={{ margin: 0 }}>Build-Optimierung V4</h2>
         <p style={{ margin: 0, color: "var(--text-dim, #aaa)" }}>
-{"Rolle wählen, optional Rahmen anpassen, am Ende „Builds berechnen“"}
+{"Rolle wählen → Rahmen prüfen → Builds berechnen"}
         </p>
+      </section>
+
+      <section className="field" style={{ padding: "12px 4px 0" }}>
+        <div className="wizard-progress" role="tablist" aria-label="Optimierungsschritte">
+          <div
+            className="wizard-progress-line"
+            style={{ width: `calc(${(wizardStep - 1) * 50}% - ${(wizardStep - 1) * 0}px)` }}
+          />
+          {([1, 2, 3] as const).map((n) => {
+            const label = n === 1 ? "Rolle wählen" : n === 2 ? "Rahmen anpassen" : "Berechnen";
+            const state =
+              (n === 1 && step1Done && wizardStep !== 1) || (n === 3 && step3Done) || (n === 2 && wizardStep === 3)
+                ? "completed"
+                : wizardStep === n
+                  ? "active"
+                  : "";
+            return (
+              <button
+                key={n}
+                type="button"
+                className={`wizard-step ${state}`}
+                onClick={() => setWizardStep(n)}
+                role="tab"
+                aria-selected={wizardStep === n}
+                aria-label={`Schritt ${n}: ${label}`}
+              >
+                <span className="wizard-step-circle">
+                  {state === "completed" ? "\u2713" : n}
+                </span>
+                <span className="wizard-step-label">{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       <section className="field" style={{ display: "grid", gap: 6 }}>
@@ -1048,6 +1086,7 @@ export function OptimizerView() {
                 onClick={() => {
                   setRoleKey(rk);
                   setExpertWeights(null);
+                  setWizardStep((prev) => (prev < 2 ? 2 : prev));
                 }}
               >
                 {r.name}
@@ -1055,6 +1094,11 @@ export function OptimizerView() {
             );
           })}
         </div>
+        {wizardStep === 1 && step1Done && (
+          <button className="btn btn-primary" onClick={() => setWizardStep(2)}>
+            Weiter — Rahmen prüfen →
+          </button>
+        )}
       </section>
 
       <section className="field" style={{ display: "grid", gap: 6 }}>
@@ -1097,6 +1141,7 @@ export function OptimizerView() {
         </div>
       </section>
 
+      {wizardStep >= 2 ? (
       <details className="field" style={{ display: "grid", gap: 10 }}>
         <summary style={{ cursor: "pointer" }}>
           <strong>
@@ -1191,9 +1236,11 @@ export function OptimizerView() {
           </label>
         </div>
       </details>
+      ) : null}
 
-      <section className="field" style={{ display: "grid", gap: 10 }}>
-        <strong>Rahmen — Gegnerprofil & CHC-Ziel (früher „Global“)</strong>
+      {wizardStep >= 2 ? (
+        <section className="field" style={{ display: "grid", gap: 10 }}>
+        <strong>Rahmen: Gegnerprofil und CHC-Ziel</strong>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
             Gegnerprofil
@@ -1330,7 +1377,9 @@ export function OptimizerView() {
           </div>
         )}
       </section>
+      ) : null}
 
+      {wizardStep >= 2 ? (
       <section className="field" style={{ display: "grid", gap: 8 }}>
         <strong>Spezialisierungs-Vorschlag (Ergebnis, kein Eingabefeld)</strong>
         <div>
@@ -1344,7 +1393,9 @@ export function OptimizerView() {
           übernommen oder durch eine feste Wahl ersetzt werden.
         </small>
       </section>
+      ) : null}
 
+      {wizardStep >= 2 ? (
       <section className="field" style={{ display: "grid", gap: 10 }}>
         <strong>Einschränkungen (optional)</strong>
         {store.weapons.length > 0 && (
@@ -1409,8 +1460,19 @@ export function OptimizerView() {
           </div>
         )}
       </section>
+      ) : null}
 
       <section className="field" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        {wizardStep < 3 && (
+          <button
+            className="btn btn-primary"
+            onClick={() => setWizardStep(3)}
+            disabled={!step1Done}
+            title={step1Done ? "Zum Berechnen fortfahren" : "Bitte zuerst eine Rolle wählen"}
+          >
+            Weiter zum Berechnen →
+          </button>
+        )}
         <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0 || store.weapons.length === 0}>
           {running ? "Berechne…" : "Builds berechnen"}
         </button>
