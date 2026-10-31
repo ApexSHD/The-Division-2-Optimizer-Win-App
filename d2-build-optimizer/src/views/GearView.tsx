@@ -66,7 +66,7 @@ export function GearView() {
   const usedAttrTypes = new Set(editing?.attributes.map((a) => a.type) ?? []);
   const talentOptions =
     editing && (editing.slot === "chest" || editing.slot === "backpack") && editing.brandType === "brand"
-      ? GEAR_TALENTS.filter((tal) => tal.slot === editing.slot)
+      ? GEAR_TALENTS.filter((tal) => tal.slot === editing.slot).slice().sort((a, b) => a.label.localeCompare(b.label, "de"))
       : [];
 
   function openEdit(g: GearPiece) {

@@ -93,7 +93,11 @@ export function WeaponsView() {
     const general = displayTalents;
     const cat = talentDisplayByType[TALENT_DISPLAY_TYPE_MAP[type]] ?? [];
     const allowed = talentsAllowedForWeapon(editing?.name ?? "", editing?.rarity === "named");
-    return { general: general.filter((x) => allowed(x.name)), cat: cat.filter((x) => allowed(x.name)) };
+    const byName = (a: DisplayTalent, b: DisplayTalent) => a.name.localeCompare(b.name, "de");
+    return {
+      general: general.filter((x) => allowed(x.name)).sort(byName),
+      cat: cat.filter((x) => allowed(x.name)).sort(byName),
+    };
   };
 
   function openEdit(w: Weapon) {

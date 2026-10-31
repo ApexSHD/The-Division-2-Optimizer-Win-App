@@ -42,3 +42,14 @@ describe("Talent-Vollst\u00e4ndigkeit je Waffengattung (Nutzer-Fund: Raserei nic
     }
   });
 });
+
+describe("Talent-Auswahl alphabetisch sortiert", () => {
+  it("talents-display-Kategorien sind alphabetisch sortiert (Nachlieferung Grundtalente)", () => {
+    const display = talentsDisplay as unknown as Record<string, Array<{ name: string }>>;
+    for (const [cat, tals] of Object.entries(display)) {
+      const names = tals.map((t) => t.name);
+      const sorted = [...names].sort((a, b) => a.localeCompare(b, "de"));
+      expect(names, cat).toEqual(sorted);
+    }
+  });
+});

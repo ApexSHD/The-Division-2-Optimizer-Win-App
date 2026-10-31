@@ -1,44 +1,69 @@
 {
   "Allgemeine Waffen": [
     {
-      "name": "Perfekter Brotkorb",
-      "description": "Treffer am Körper fügen einen Stack von +55% (70%) Kopfschuss-Schaden zum nächsten Kopfschuss für 10s hinzu. Maximal 3 (2) Stacks.",
+      "name": "Bewahrung",
+      "description": "Das Töten eines Gegners repariert 10% Rüstung über 5s. Kopfschuss-Tötungen verbessern die Reparatur um zusätzliche 10%.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Blind",
+      "description": "Verstärkt den Waffen-Schaden um +30% gegen geblendete Gegner. Nach 4 Tötungen wird Blindheit auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Brotkorb",
+      "description": "Treffer am Körper fügen einen Stack von +55% Kopfschuss-Schaden zum nächsten Kopfschuss für 10s hinzu. Maximal 3 Stacks.",
       "group": "Kopfschuss-Schaden"
     },
     {
-      "name": "Perfekter Killer",
-      "description": "Das Töten eines Gegners mit einem kritischen Treffer gewährt +70% (90%) kritischen Trefferschaden für 10s.",
-      "group": "Kritischer Trefferschaden"
-    },
-    {
-      "name": "Perfekte Bewahrung",
-      "description": "Das Töten eines Gegners repariert 10% (15%) Rüstung über 5s. Kopfschuss-Tötungen verbessern die Reparatur um zusätzliche 10% (15%).",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekter Optimist",
-      "description": "Schadensausgabe der Waffe wird um +3,5% (4,5%) für jede 10% Munition, die im Magazin fehlt, erhöht.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Perfekt strapaziert",
-      "description": "Erhalte +10% kritischen Trefferschaden für jede 0,5s, die du schießt. Stackt bis zu 5 (8) Mal.",
-      "group": "Kritischer Trefferschaden"
-    },
-    {
-      "name": "Perfekt nah und persönlich",
-      "description": "Das Töten eines Ziels im Nahbereich (7m) gewährt +30% (38%) Waffen-Schaden für 10s.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Perfekte flinke Hände",
-      "description": "Kritische Treffer fügen einen Stack von +3% (5%) Nachlade-Geschwindigkeit hinzu. Maximal 40 Stacks.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekter Sadist",
-      "description": "Verstärkt den Waffen-Schaden um +30% (35%) gegen blutende Gegner. Nach 4 (3) Tötungen wird Blutung auf den nächsten Gegner angewendet, den du triffst.",
+      "name": "Donnerkeil",
+      "description": "Verstärkt den Schaden um 30% gegen schockierte Ziele. Nach 4 Tötungen wird Schock auf den nächsten Gegner angewendet, den du triffst.",
       "group": "Verstärker"
+    },
+    {
+      "name": "Druckpunkt",
+      "description": "Verstärkt den Waffen-Schaden um 15% gegen Gegner unter Status-Effekten.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Entzündet",
+      "description": "Verstärkt den Waffen-Schaden um +25% gegen brennende Gegner. Nach 4 Tötungen wird Brennen auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Flachlage",
+      "description": "Verstärkt den Waffen-Schaden um 15% gegen gepulste Gegner. Nach 4 Tötungen wird Puls auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Flinke Hände",
+      "description": "Kritische Treffer fügen einen Stack von +3% Nachlade-Geschwindigkeit hinzu. Maximal 40 Stacks.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Immobilisieren",
+      "description": "Verstärkt den Waffen-Schaden um 20% gegen gefesselte Gegner. Nach 4 Tötungen wird Fesseln auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Killer",
+      "description": "Das Töten eines Gegners mit einem kritischen Treffer gewährt +70% kritischen Trefferschaden für 10s.",
+      "group": "Kritischer Trefferschaden"
+    },
+    {
+      "name": "Kopfkratzer",
+      "description": "Fügt 30% verstärkten Schaden gegen verwirrte Gegner zu. Nach 4 Tötungen wird Verwirrung auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Nah und persönlich",
+      "description": "Das Töten eines Ziels im Nahbereich (7m) gewährt +30% Waffen-Schaden für 10s.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Optimist",
+      "description": "Schadensausgabe der Waffe wird um +3,5% für jede 10% Munition, die im Magazin fehlt, erhöht.",
+      "group": "Waffen-Schaden"
     },
     {
       "name": "Perfekt blind",
@@ -51,14 +76,19 @@
       "group": "Verstärker"
     },
     {
+      "name": "Perfekt immobilisieren",
+      "description": "Verstärkt den Waffen-Schaden um 20% (25%) gegen gefesselte Gegner. Nach 4 (3) Tötungen wird Fesseln auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfekt nah und persönlich",
+      "description": "Das Töten eines Ziels im Nahbereich (7m) gewährt +30% (38%) Waffen-Schaden für 10s.",
+      "group": "Waffen-Schaden"
+    },
+    {
       "name": "Perfekt rachsüchtig",
       "description": "Das Töten eines Gegners mit einem Status-Effekt gewährt dir und allen Verbündeten im Umkreis von 15m (20m) +16% (21%) kritische Trefferchance und +16% (21%) kritischen Trefferschaden für 20s.",
       "group": "Kritische Trefferchance / Schaden"
-    },
-    {
-      "name": "Perfekter Schütze",
-      "description": "Verstärkt den Waffen-Schaden um 2% für jede 4m (3m), die du von deinem Ziel entfernt bist.",
-      "group": "Verstärker"
     },
     {
       "name": "Perfekt stabil",
@@ -66,23 +96,18 @@
       "group": "Nutzen"
     },
     {
-      "name": "Perfekter Spike",
-      "description": "Kopfschüsse gewähren +20% (25%) Fähigkeiten-Schaden für 15s.",
-      "group": "Fähigkeiten-Schaden"
+      "name": "Perfekt strapaziert",
+      "description": "Erhalte +10% kritischen Trefferschaden für jede 0,5s, die du schießt. Stackt bis zu 5 (8) Mal.",
+      "group": "Kritischer Trefferschaden"
     },
     {
-      "name": "Perfekte Verlängerung",
-      "description": "Kopfschüsse gewähren +75% Status-Effekt-Schaden und -Dauer für den nächsten Status-Effekt, den du anwendest. Abklingzeit: 20s (16s).",
-      "group": "Status-Effekt"
+      "name": "Perfekt synchronisiert",
+      "description": "Das Treffen eines Gegners gewährt +15% (20%) Fähigkeiten-Schaden für 5s. Das Verwenden einer Fähigkeit oder das Schädigen eines Gegners mit einer Fähigkeit gewährt +15% (20%) Waffen-Schaden für 5s.",
+      "group": "Waffen-Schaden / Fähigkeiten-Schaden"
     },
     {
-      "name": "Perfekte Reformation",
-      "description": "Kopfschüsse gewähren +60% (80%) Fähigkeiten-Reparatur für 15s.",
-      "group": "Fähigkeiten-Reparatur"
-    },
-    {
-      "name": "Perfekte Zukunft",
-      "description": "Waffen-Tötungen gewähren +1 Fähigkeiten-Stufe für 15s (19s). Stackt bis zu 3 (4) Mal. Waffen-Tötungen bei Fähigkeiten-Stufe 6 gewähren Überladung für 15s. Überladungs-Abklingzeit: 90s.",
+      "name": "Perfekte Bewahrung",
+      "description": "Das Töten eines Gegners repariert 10% (15%) Rüstung über 5s. Kopfschuss-Tötungen verbessern die Reparatur um zusätzliche 10% (15%).",
       "group": "Nutzen"
     },
     {
@@ -91,24 +116,14 @@
       "group": "Verstärker"
     },
     {
-      "name": "Perfekter Vorschlaghammer",
-      "description": "Schadensverursachung mit einer Granate wendet eine Markierung auf das Ziel an. Markierte Ziele erhalten 15% (20%) mehr Schaden an der Rüstung und haben -20% (30%) Bewegungsgeschwindigkeit.",
-      "group": "Verstärker (nur gegen Rüstung)"
+      "name": "Perfekte flinke Hände",
+      "description": "Kritische Treffer fügen einen Stack von +3% (5%) Nachlade-Geschwindigkeit hinzu. Maximal 40 Stacks.",
+      "group": "Nutzen"
     },
     {
-      "name": "Perfekter Donnerkeil",
-      "description": "Verstärkt den Schaden um 30% (35%) gegen schockierte Ziele. Nach 4 (3) Tötungen wird Schock auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Perfekt synchronisiert",
-      "description": "Das Treffen eines Gegners gewährt +15% (20%) Fähigkeiten-Schaden für 5s. Das Verwenden einer Fähigkeit oder das Schädigen eines Gegners mit einer Fähigkeit gewährt +15% (20%) Waffen-Schaden für 5s.",
-      "group": "Waffen-Schaden / Fähigkeiten-Schaden"
-    },
-    {
-      "name": "Perfekter Druckpunkt",
-      "description": "Verstärkt den Waffen-Schaden um 15% (20%) gegen Gegner unter Status-Effekten.",
-      "group": "Verstärker"
+      "name": "Perfekte Reformation",
+      "description": "Kopfschüsse gewähren +60% (80%) Fähigkeiten-Reparatur für 15s.",
+      "group": "Fähigkeiten-Reparatur"
     },
     {
       "name": "Perfekte Stromlinie",
@@ -116,8 +131,53 @@
       "group": "Waffen-Schaden"
     },
     {
-      "name": "Perfekt immobilisieren",
-      "description": "Verstärkt den Waffen-Schaden um 20% (25%) gegen gefesselte Gegner. Nach 4 (3) Tötungen wird Fesseln auf den nächsten Gegner angewendet, den du triffst.",
+      "name": "Perfekte Verlängerung",
+      "description": "Kopfschüsse gewähren +75% Status-Effekt-Schaden und -Dauer für den nächsten Status-Effekt, den du anwendest. Abklingzeit: 20s (16s).",
+      "group": "Status-Effekt"
+    },
+    {
+      "name": "Perfekte Zukunft",
+      "description": "Waffen-Tötungen gewähren +1 Fähigkeiten-Stufe für 15s (19s). Stackt bis zu 3 (4) Mal. Waffen-Tötungen bei Fähigkeiten-Stufe 6 gewähren Überladung für 15s. Überladungs-Abklingzeit: 90s.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekter Brotkorb",
+      "description": "Treffer am Körper fügen einen Stack von +55% (70%) Kopfschuss-Schaden zum nächsten Kopfschuss für 10s hinzu. Maximal 3 (2) Stacks.",
+      "group": "Kopfschuss-Schaden"
+    },
+    {
+      "name": "Perfekter Donnerkeil",
+      "description": "Verstärkt den Schaden um 30% (35%) gegen schockierte Ziele. Nach 4 (3) Tötungen wird Schock auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfekter Druckpunkt",
+      "description": "Verstärkt den Waffen-Schaden um 15% (20%) gegen Gegner unter Status-Effekten.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfekter Killer",
+      "description": "Das Töten eines Gegners mit einem kritischen Treffer gewährt +70% (90%) kritischen Trefferschaden für 10s.",
+      "group": "Kritischer Trefferschaden"
+    },
+    {
+      "name": "Perfekter Kopfkratzer",
+      "description": "Fügt 30% (35%) verstärkten Schaden gegen verwirrte Gegner zu. Nach 4 Tötungen wird Verwirrung auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfekter Optimist",
+      "description": "Schadensausgabe der Waffe wird um +3,5% (4,5%) für jede 10% Munition, die im Magazin fehlt, erhöht.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Perfekter Sadist",
+      "description": "Verstärkt den Waffen-Schaden um +30% (35%) gegen blutende Gegner. Nach 4 (3) Tötungen wird Blutung auf den nächsten Gegner angewendet, den du triffst.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfekter Schütze",
+      "description": "Verstärkt den Waffen-Schaden um 2% für jede 4m (3m), die du von deinem Ziel entfernt bist.",
       "group": "Verstärker"
     },
     {
@@ -126,59 +186,14 @@
       "group": "Waffen-Schaden"
     },
     {
-      "name": "Perfekter Kopfkratzer",
-      "description": "Fügt 30% (35%) verstärkten Schaden gegen verwirrte Gegner zu. Nach 4 Tötungen wird Verwirrung auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
+      "name": "Perfekter Spike",
+      "description": "Kopfschüsse gewähren +20% (25%) Fähigkeiten-Schaden für 15s.",
+      "group": "Fähigkeiten-Schaden"
     },
     {
-      "name": "Brotkorb",
-      "description": "Treffer am Körper fügen einen Stack von +55% Kopfschuss-Schaden zum nächsten Kopfschuss für 10s hinzu. Maximal 3 Stacks.",
-      "group": "Kopfschuss-Schaden"
-    },
-    {
-      "name": "Killer",
-      "description": "Das Töten eines Gegners mit einem kritischen Treffer gewährt +70% kritischen Trefferschaden für 10s.",
-      "group": "Kritischer Trefferschaden"
-    },
-    {
-      "name": "Bewahrung",
-      "description": "Das Töten eines Gegners repariert 10% Rüstung über 5s. Kopfschuss-Tötungen verbessern die Reparatur um zusätzliche 10%.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Optimist",
-      "description": "Schadensausgabe der Waffe wird um +3,5% für jede 10% Munition, die im Magazin fehlt, erhöht.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Strapaziert",
-      "description": "Erhalte +10% kritischen Trefferschaden für jede 0,5s, die du schießt. Stackt bis zu 5 Mal.",
-      "group": "Kritischer Trefferschaden"
-    },
-    {
-      "name": "Nah und persönlich",
-      "description": "Das Töten eines Ziels im Nahbereich (7m) gewährt +30% Waffen-Schaden für 10s.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Flinke Hände",
-      "description": "Kritische Treffer fügen einen Stack von +3% Nachlade-Geschwindigkeit hinzu. Maximal 40 Stacks.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Sadist",
-      "description": "Verstärkt den Waffen-Schaden um +30% gegen blutende Gegner. Nach 4 Tötungen wird Blutung auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Blind",
-      "description": "Verstärkt den Waffen-Schaden um +30% gegen geblendete Gegner. Nach 4 Tötungen wird Blindheit auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Entzündet",
-      "description": "Verstärkt den Waffen-Schaden um +25% gegen brennende Gegner. Nach 4 Tötungen wird Brennen auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
+      "name": "Perfekter Vorschlaghammer",
+      "description": "Schadensverursachung mit einer Granate wendet eine Markierung auf das Ziel an. Markierte Ziele erhalten 15% (20%) mehr Schaden an der Rüstung und haben -20% (30%) Bewegungsgeschwindigkeit.",
+      "group": "Verstärker (nur gegen Rüstung)"
     },
     {
       "name": "Rachsüchtig",
@@ -186,68 +201,18 @@
       "group": "Kritische Trefferchance / Schaden"
     },
     {
-      "name": "Schütze",
-      "description": "Verstärkt den Waffen-Schaden um 2% für jede 4m, die du von deinem Ziel entfernt bist.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Stabil",
-      "description": "Treffer gewähren einen Stack von +1% Genauigkeit und Stabilität. Bei 100 Stacks werden die Stacks verbraucht, um das Magazin nachzufüllen.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Spike",
-      "description": "Kopfschüsse gewähren +20% Fähigkeiten-Schaden für 15s.",
-      "group": "Fähigkeiten-Schaden"
-    },
-    {
-      "name": "Verlängerung",
-      "description": "Kopfschüsse gewähren +75% Status-Effekt-Schaden und -Dauer für den nächsten Status-Effekt, den du anwendest. Abklingzeit: 20s.",
-      "group": "Status-Effekt"
-    },
-    {
       "name": "Reformation",
       "description": "Kopfschüsse gewähren +60% Fähigkeiten-Reparatur für 15s.",
       "group": "Fähigkeiten-Reparatur"
     },
     {
-      "name": "Zukunft",
-      "description": "Waffen-Tötungen gewähren +1 Fähigkeiten-Stufe für 15s. Stackt bis zu 3 Mal. Waffen-Tötungen bei Fähigkeiten-Stufe 6 gewähren Überladung für 15s. Überladungs-Abklingzeit: 90s.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Flachlage",
-      "description": "Verstärkt den Waffen-Schaden um 15% gegen gepulste Gegner. Nach 4 Tötungen wird Puls auf den nächsten Gegner angewendet, den du triffst.",
+      "name": "Sadist",
+      "description": "Verstärkt den Waffen-Schaden um +30% gegen blutende Gegner. Nach 4 Tötungen wird Blutung auf den nächsten Gegner angewendet, den du triffst.",
       "group": "Verstärker"
     },
     {
-      "name": "Vorschlaghammer",
-      "description": "Schadensverursachung mit einer Granate wendet eine Markierung auf das Ziel an. Markierte Ziele erhalten 15% mehr Schaden an der Rüstung und haben -20% Bewegungsgeschwindigkeit.",
-      "group": "Verstärker (nur gegen Rüstung)"
-    },
-    {
-      "name": "Donnerkeil",
-      "description": "Verstärkt den Schaden um 30% gegen schockierte Ziele. Nach 4 Tötungen wird Schock auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Synchronisiert",
-      "description": "Das Treffen eines Gegners gewährt +15% Fähigkeiten-Schaden für 5s. Das Verwenden einer Fähigkeit oder das Schädigen eines Gegners mit einer Fähigkeit gewährt +15% Waffen-Schaden für 5s.",
-      "group": "Waffen-Schaden / Fähigkeiten-Schaden"
-    },
-    {
-      "name": "Druckpunkt",
-      "description": "Verstärkt den Waffen-Schaden um 15% gegen Gegner unter Status-Effekten.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Stromlinie",
-      "description": "Erhöht den Waffen-Schaden um 42%, wenn keine Fähigkeiten eingesetzt oder im Cooldown sind.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Immobilisieren",
-      "description": "Verstärkt den Waffen-Schaden um 20% gegen gefesselte Gegner. Nach 4 Tötungen wird Fesseln auf den nächsten Gegner angewendet, den du triffst.",
+      "name": "Schütze",
+      "description": "Verstärkt den Waffen-Schaden um 2% für jede 4m, die du von deinem Ziel entfernt bist.",
       "group": "Verstärker"
     },
     {
@@ -256,26 +221,81 @@
       "group": "Waffen-Schaden"
     },
     {
-      "name": "Kopfkratzer",
-      "description": "Fügt 30% verstärkten Schaden gegen verwirrte Gegner zu. Nach 4 Tötungen wird Verwirrung auf den nächsten Gegner angewendet, den du triffst.",
-      "group": "Verstärker"
+      "name": "Spike",
+      "description": "Kopfschüsse gewähren +20% Fähigkeiten-Schaden für 15s.",
+      "group": "Fähigkeiten-Schaden"
+    },
+    {
+      "name": "Stabil",
+      "description": "Treffer gewähren einen Stack von +1% Genauigkeit und Stabilität. Bei 100 Stacks werden die Stacks verbraucht, um das Magazin nachzufüllen.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Strapaziert",
+      "description": "Erhalte +10% kritischen Trefferschaden für jede 0,5s, die du schießt. Stackt bis zu 5 Mal.",
+      "group": "Kritischer Trefferschaden"
+    },
+    {
+      "name": "Stromlinie",
+      "description": "Erhöht den Waffen-Schaden um 42%, wenn keine Fähigkeiten eingesetzt oder im Cooldown sind.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Synchronisiert",
+      "description": "Das Treffen eines Gegners gewährt +15% Fähigkeiten-Schaden für 5s. Das Verwenden einer Fähigkeit oder das Schädigen eines Gegners mit einer Fähigkeit gewährt +15% Waffen-Schaden für 5s.",
+      "group": "Waffen-Schaden / Fähigkeiten-Schaden"
+    },
+    {
+      "name": "Verlängerung",
+      "description": "Kopfschüsse gewähren +75% Status-Effekt-Schaden und -Dauer für den nächsten Status-Effekt, den du anwendest. Abklingzeit: 20s.",
+      "group": "Status-Effekt"
+    },
+    {
+      "name": "Vorschlaghammer",
+      "description": "Schadensverursachung mit einer Granate wendet eine Markierung auf das Ziel an. Markierte Ziele erhalten 15% mehr Schaden an der Rüstung und haben -20% Bewegungsgeschwindigkeit.",
+      "group": "Verstärker (nur gegen Rüstung)"
+    },
+    {
+      "name": "Zukunft",
+      "description": "Waffen-Tötungen gewähren +1 Fähigkeiten-Stufe für 15s. Stackt bis zu 3 Mal. Waffen-Tötungen bei Fähigkeiten-Stufe 6 gewähren Überladung für 15s. Überladungs-Abklingzeit: 90s.",
+      "group": "Nutzen"
     }
   ],
   "Gewehre": [
+    {
+      "name": "Bumerang",
+      "description": "Kritische Treffer haben eine 50% Chance, die Kugel zurück ins Magazin zu bringen. Wenn eine Kugel zurückgebracht wird, erhält der nächste Schuss +40% erhöhten Schaden.",
+      "group": "Dynamisch"
+    },
     {
       "name": "Entschlossen",
       "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen beliebigen Gegner ein garantierter (kritischer) Kopfschuss.",
       "group": "Nutzen"
     },
     {
-      "name": "Von hinten",
-      "description": "Verstärkt den Waffen-Schaden um +20% gegen Gegner, die dich nicht anvisieren.",
-      "group": "Verstärker"
+      "name": "Glücksschuss",
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
     },
     {
-      "name": "Perfekter Schütze",
-      "description": "Kopfschüsse fügen einen Stack von +10% (11%) Waffen-Schaden für 5s hinzu. Maximal 5 (6) Stacks. Zusätzliche Kopfschüsse aktualisieren die Dauer.",
-      "group": "Waffen-Schaden"
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Perfekt entschlossen",
+      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekt hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Perfekt von hinten",
+      "description": "Verstärkt den Waffen-Schaden um +20% (25%) gegen Gegner, die dich nicht anvisieren.",
+      "group": "Verstärker"
     },
     {
       "name": "Perfekter Bumerang",
@@ -288,24 +308,19 @@
       "group": "Nutzen"
     },
     {
-      "name": "Perfekt entschlossen",
-      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt von hinten",
-      "description": "Verstärkt den Waffen-Schaden um +20% (25%) gegen Gegner, die dich nicht anvisieren.",
-      "group": "Verstärker"
-    },
-    {
       "name": "Perfekter Präzisionsschlag",
       "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf. Maximal 3 Stacks. Das Treffen eines Gegners im Nahbereich (20m) verwendet alle Stacks, um 20% verstärkten Schaden zu gewähren.",
       "group": "Verstärker"
     },
     {
-      "name": "Perfekt hin und her",
-      "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
-      "group": "Schussfrequenz / Waffen-Schaden"
+      "name": "Perfekter Schütze",
+      "description": "Kopfschüsse fügen einen Stack von +10% (11%) Waffen-Schaden für 5s hinzu. Maximal 5 (6) Stacks. Zusätzliche Kopfschüsse aktualisieren die Dauer.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "group": "Verstärker"
     },
     {
       "name": "Rifleman",
@@ -313,56 +328,16 @@
       "group": "Waffen-Schaden"
     },
     {
-      "name": "Bumerang",
-      "description": "Kritische Treffer haben eine 50% Chance, die Kugel zurück ins Magazin zu bringen. Wenn eine Kugel zurückgebracht wird, erhält der nächste Schuss +40% erhöhten Schaden.",
-      "group": "Dynamisch"
-    },
-    {
-      "name": "Glücksschuss",
-      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Präzisionsschlag",
-      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "name": "Von hinten",
+      "description": "Verstärkt den Waffen-Schaden um +20% gegen Gegner, die dich nicht anvisieren.",
       "group": "Verstärker"
-    },
-    {
-      "name": "Hin und her",
-      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
-      "group": "Schussfrequenz / Waffen-Schaden"
     }
   ],
   "Sturmgewehre": [
     {
-      "name": "Perfekt kurzsichtig",
-      "description": "Erhält +80% (100%) Stabilität auf Kosten von -35% optimaler Reichweite.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt leer",
-      "description": "Das Nachladen aus dem leeren Magazin gewährt +60% (80%) Waffen-Handhabung für 10s.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt abgemessen",
-      "description": "Die obere Hälfte des Magazins hat +25% Schussfrequenz und -25% (-30%) Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Schussfrequenz und +30% (38%) Gesamt-Waffen-Schaden.",
+      "name": "Abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
       "group": "Schussfrequenz / Waffen-Schaden"
-    },
-    {
-      "name": "Perfekt überlaufend",
-      "description": "Jedes 3. (2.) Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt stabilisieren",
-      "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Präzisionsschlag",
-      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
-      "group": "Verstärker"
     },
     {
       "name": "Hin und her",
@@ -380,81 +355,61 @@
       "group": "Nutzen"
     },
     {
-      "name": "Abgemessen",
-      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
+      "name": "Perfekt abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Schussfrequenz und -25% (-30%) Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Schussfrequenz und +30% (38%) Gesamt-Waffen-Schaden.",
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
-      "name": "Überlaufend",
-      "description": "Jedes 3. Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%.",
+      "name": "Perfekt kurzsichtig",
+      "description": "Erhält +80% (100%) Stabilität auf Kosten von -35% optimaler Reichweite.",
       "group": "Nutzen"
     },
     {
-      "name": "Stabilisieren",
-      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
-      "group": "Nutzen"
-    }
-  ],
-  "Präzisionsgewehre": [
-    {
-      "name": "Erstblut",
-      "description": "Wenn gezielt (Zielfernrohr mit 8-facher Vergrößerung oder höher), gewährt dein erster Schuss aus dem Kampf heraus oder nach einem vollständigen Nachladen aus dem leeren Magazin Kopfschuss-Schaden, egal wo er trifft.",
+      "name": "Perfekt leer",
+      "description": "Das Nachladen aus dem leeren Magazin gewährt +60% (80%) Waffen-Handhabung für 10s.",
       "group": "Nutzen"
     },
     {
-      "name": "Entschlossen",
-      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen beliebigen Gegner ein garantierter (kritischer) Kopfschuss.",
+      "name": "Perfekt stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
       "group": "Nutzen"
     },
     {
-      "name": "Von hinten",
-      "description": "Verstärkt den Waffen-Schaden um +20% gegen Gegner, die dich nicht anvisieren.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Perfekt nackt",
-      "description": "Das Treffen eines Gegners ohne Rüstung gewährt +50% Kopfschuss-Schaden für 5s (8s).",
-      "group": "Kopfschuss-Schaden"
-    },
-    {
-      "name": "Perfektes Erstblut",
-      "description": "Wenn gezielt, gewährt dein erster (2) Schuss nach dem Kampf oder nach dem vollständigen Nachladen aus dem leeren Magazin Kopfschuss-Schaden an jedem getroffenen Körperteil. Erfordert ein Zielfernrohr mit 8-facher Vergrößerung oder höher.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekter Glücksschuss",
-      "description": "Magazinkapazität wird um 20% (30%) erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt entschlossen",
-      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt von hinten",
-      "description": "Verstärkt den Waffen-Schaden um +20% (25%) gegen Gegner, die dich nicht anvisieren.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Perfekter Präzisionsschlag",
-      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf. Maximal 3 Stacks. Das Treffen eines Gegners im Nahbereich (20m) verwendet alle Stacks, um 20% verstärkten Schaden zu gewähren.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Perfekt hin und her",
-      "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
-      "group": "Schussfrequenz / Waffen-Schaden"
-    },
-    {
-      "name": "Glücksschuss",
-      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "name": "Perfekt überlaufend",
+      "description": "Jedes 3. (2.) Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%.",
       "group": "Nutzen"
     },
     {
       "name": "Präzisionsschlag",
       "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
       "group": "Verstärker"
+    },
+    {
+      "name": "Stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Überlaufend",
+      "description": "Jedes 3. Nachladen aus dem leeren Magazin erhöht die Basis-Magazinkapazität um 100%.",
+      "group": "Nutzen"
+    }
+  ],
+  "Präzisionsgewehre": [
+    {
+      "name": "Entschlossen",
+      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen beliebigen Gegner ein garantierter (kritischer) Kopfschuss.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Erstblut",
+      "description": "Wenn gezielt (Zielfernrohr mit 8-facher Vergrößerung oder höher), gewährt dein erster Schuss aus dem Kampf heraus oder nach einem vollständigen Nachladen aus dem leeren Magazin Kopfschuss-Schaden, egal wo er trifft.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Glücksschuss",
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
     },
     {
       "name": "Hin und her",
@@ -465,27 +420,10 @@
       "name": "Nackt",
       "description": "Das Treffen eines Gegners ohne Rüstung gewährt +50% Kopfschuss-Schaden für 5s.",
       "group": "Kopfschuss-Schaden"
-    }
-  ],
-  "Maschinenpistolen": [
-    {
-      "name": "Perfekter Außenseiter",
-      "description": "Nach dem Töten eines Gegners erhältst du +100% (150%) optimale Reichweite und +100% (125%) Genauigkeit für 10s.",
-      "group": "Nutzen"
     },
     {
-      "name": "Perfekt unerschütterlich",
-      "description": "Das Wechseln zu dieser Waffe gewährt +300% (400%) Waffen-Handhabung für 5s. Tötungen aktualisieren den Buff. Das Wechseln weg deaktiviert dies für alle Waffen für 5s.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt abgemessen",
-      "description": "Die obere Hälfte des Magazins hat +25% Schussfrequenz und -25% (-30%) Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Schussfrequenz und +30% (38%) Gesamt-Waffen-Schaden.",
-      "group": "Schussfrequenz / Waffen-Schaden"
-    },
-    {
-      "name": "Perfekt stabilisieren",
-      "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "name": "Perfekt entschlossen",
+      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
       "group": "Nutzen"
     },
     {
@@ -494,23 +432,85 @@
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
-      "name": "Hin und her",
-      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
-      "group": "Schussfrequenz / Waffen-Schaden"
+      "name": "Perfekt nackt",
+      "description": "Das Treffen eines Gegners ohne Rüstung gewährt +50% Kopfschuss-Schaden für 5s (8s).",
+      "group": "Kopfschuss-Schaden"
     },
+    {
+      "name": "Perfekt von hinten",
+      "description": "Verstärkt den Waffen-Schaden um +20% (25%) gegen Gegner, die dich nicht anvisieren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfekter Glücksschuss",
+      "description": "Magazinkapazität wird um 20% (30%) erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekter Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf. Maximal 3 Stacks. Das Treffen eines Gegners im Nahbereich (20m) verwendet alle Stacks, um 20% verstärkten Schaden zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Perfektes Erstblut",
+      "description": "Wenn gezielt, gewährt dein erster (2) Schuss nach dem Kampf oder nach dem vollständigen Nachladen aus dem leeren Magazin Kopfschuss-Schaden an jedem getroffenen Körperteil. Erfordert ein Zielfernrohr mit 8-facher Vergrößerung oder höher.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
+      "name": "Von hinten",
+      "description": "Verstärkt den Waffen-Schaden um +20% gegen Gegner, die dich nicht anvisieren.",
+      "group": "Verstärker"
+    }
+  ],
+  "Maschinenpistolen": [
     {
       "name": "Abgemessen",
       "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
-      "name": "Stabilisieren",
-      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "name": "Außenseiter",
+      "description": "Nach dem Töten eines Gegners erhältst du +100% optimale Reichweite und +100% Genauigkeit für 10s.",
       "group": "Nutzen"
     },
     {
-      "name": "Außenseiter",
-      "description": "Nach dem Töten eines Gegners erhältst du +100% optimale Reichweite und +100% Genauigkeit für 10s.",
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Perfekt abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Schussfrequenz und -25% (-30%) Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Schussfrequenz und +30% (38%) Gesamt-Waffen-Schaden.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Perfekt hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% (13%) Schussfrequenz und +9% (+12%) Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Schussfrequenz und +4,5% Waffen-Schaden für 10s.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Perfekt stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekt unerschütterlich",
+      "description": "Das Wechseln zu dieser Waffe gewährt +300% (400%) Waffen-Handhabung für 5s. Tötungen aktualisieren den Buff. Das Wechseln weg deaktiviert dies für alle Waffen für 5s.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekter Außenseiter",
+      "description": "Nach dem Töten eines Gegners erhältst du +100% (150%) optimale Reichweite und +100% (125%) Genauigkeit für 10s.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
       "group": "Nutzen"
     },
     {
@@ -521,13 +521,18 @@
   ],
   "Leichte Maschinengewehre": [
     {
-      "name": "Perfekt entfesselt",
-      "description": "Gewährt +18% (22%) Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit.",
+      "name": "Abgemessen",
+      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Aus den Angeln",
+      "description": "Gewährt +18% Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit.",
       "group": "Waffen-Schaden"
     },
     {
-      "name": "Perfekte Raserei",
-      "description": "Für jede 10 (8) Kugeln im Magazin erhältst du +3% Schussfrequenz und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst.",
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
@@ -536,19 +541,9 @@
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
-      "name": "Perfekt überwältigen",
-      "description": "Das Unterdrücken eines Gegners, der nicht bereits unterdrückt ist, gewährt +10% (12%) Waffen-Schaden für 12 Sekunden. Maximal 4 Stacks.",
+      "name": "Perfekt entfesselt",
+      "description": "Gewährt +18% (22%) Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit.",
       "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Perfekter Präzisionsschlag",
-      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf. Maximal 3 Stacks. Das Treffen eines Gegners im Nahbereich (20m) verwendet alle Stacks, um 20% verstärkten Schaden zu gewähren.",
-      "group": "Verstärker"
-    },
-    {
-      "name": "Perfekt stabilisieren",
-      "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
-      "group": "Nutzen"
     },
     {
       "name": "Perfekt hin und her",
@@ -556,34 +551,39 @@
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
+      "name": "Perfekt stabilisieren",
+      "description": "Das Abfeuern der Waffe erhöht die Waffen-Genauigkeit um 1% und die Waffen-Stabilität um 1% pro Schuss bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekt überwältigen",
+      "description": "Das Unterdrücken eines Gegners, der nicht bereits unterdrückt ist, gewährt +10% (12%) Waffen-Schaden für 12 Sekunden. Maximal 4 Stacks.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Perfekte Raserei",
+      "description": "Für jede 10 (8) Kugeln im Magazin erhältst du +3% Schussfrequenz und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst.",
+      "group": "Schussfrequenz / Waffen-Schaden"
+    },
+    {
+      "name": "Perfekter Präzisionsschlag",
+      "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf. Maximal 3 Stacks. Das Treffen eines Gegners im Nahbereich (20m) verwendet alle Stacks, um 20% verstärkten Schaden zu gewähren.",
+      "group": "Verstärker"
+    },
+    {
       "name": "Präzisionsschlag",
       "description": "Das Töten von Gegnern in mehr als 20m Entfernung baut Stacks auf (max. 3). Das Treffen eines Gegners innerhalb 20m verwendet alle Stacks, um 20% verstärkten Schaden gegen Gegner innerhalb 20m für 5s zu gewähren.",
       "group": "Verstärker"
     },
     {
-      "name": "Hin und her",
-      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
-      "group": "Schussfrequenz / Waffen-Schaden"
-    },
-    {
-      "name": "Abgemessen",
-      "description": "Die obere Hälfte des Magazins hat +25% Feuerrate und -25% Waffen-Schaden. Die untere Hälfte des Magazins hat -18% Feuerrate und +30% Gesamt-Waffen-Schaden. (Hier modelliert: untere Magazinhälfte.)",
+      "name": "Raserei",
+      "description": "Für jede 10 Kugeln in der Magazinkapazität erhältst du +3% Feuerrate und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst. (Wert: 50-Schuss-Magazin.)",
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
       "name": "Stabilisieren",
       "description": "Das Abfeuern der Waffe erhöht Genauigkeit und Stabilität um 1% pro Schuss, bis zu 60%. Wenn du aufhörst zu schießen, setzen sich die Boni nach 4 Sekunden zurück.",
       "group": "Nutzen"
-    },
-    {
-      "name": "Aus den Angeln",
-      "description": "Gewährt +18% Waffen-Schaden auf Kosten von -25% Stabilität und -25% Genauigkeit.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Raserei",
-      "description": "Für jede 10 Kugeln in der Magazinkapazität erhältst du +3% Feuerrate und +3% Waffen-Schaden für 9s, wenn du aus dem leeren Magazin nachlädst. (Wert: 50-Schuss-Magazin.)",
-      "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
       "name": "Überwältigen",
@@ -593,9 +593,24 @@
   ],
   "Schrotflinten": [
     {
-      "name": "Perfektes Klopfen",
-      "description": "3 (2) aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s.",
+      "name": "Aufgepumpt",
+      "description": "Das Nachladen gewährt +1,2% Waffen-Schaden für 10s. Stackt bis zu 25 Mal.",
       "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Draufhauen",
+      "description": "3 aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s.",
+      "group": "Waffen-Schaden"
+    },
+    {
+      "name": "Dreist",
+      "description": "Erhalte +3,5% verstärkten Schaden auf den nächsten Schuss für jeden Pellet, der das Ziel trifft, wenn mindestens 6 Pellets treffen. (Wert: 6 Pellets; bis 8 Pellets möglich.)",
+      "group": "Verstärker (additiv)"
+    },
+    {
+      "name": "Hin und her",
+      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
+      "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
       "name": "Perfekt aufgepumpt",
@@ -613,27 +628,32 @@
       "group": "Schussfrequenz / Waffen-Schaden"
     },
     {
-      "name": "Hin und her",
-      "description": "Das Wechseln zu dieser Waffe gewährt +10% Feuerrate und +9% Waffen-Schaden für 10s. Das Wechseln von dieser Waffe gewährt +5% Feuerrate und +4,5% Waffen-Schaden für 10s. Erhalt einer der Boni entfernt den vorherigen.",
-      "group": "Schussfrequenz / Waffen-Schaden"
-    },
-    {
-      "name": "Draufhauen",
-      "description": "3 aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s.",
+      "name": "Perfektes Klopfen",
+      "description": "3 (2) aufeinanderfolgende Tötungen füllen das Magazin nach und gewähren +40% Waffen-Schaden für 10s.",
       "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Aufgepumpt",
-      "description": "Das Nachladen gewährt +1,2% Waffen-Schaden für 10s. Stackt bis zu 25 Mal.",
-      "group": "Waffen-Schaden"
-    },
-    {
-      "name": "Dreist",
-      "description": "Erhalte +3,5% verstärkten Schaden auf den nächsten Schuss für jeden Pellet, der das Ziel trifft, wenn mindestens 6 Pellets treffen. (Wert: 6 Pellets; bis 8 Pellets möglich.)",
-      "group": "Verstärker (additiv)"
     }
   ],
   "Pistolen": [
+    {
+      "name": "Bergung",
+      "description": "Das Töten eines Ziels hat eine 70% Chance, das Magazin nachzufüllen.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Finisher",
+      "description": "Das Wechseln von dieser Waffe innerhalb von 10s nach dem Töten eines Gegners gewährt +30% kritische Trefferchance und +30% kritischen Trefferschaden für 15s.",
+      "group": "Kritische Trefferchance / Schaden"
+    },
+    {
+      "name": "Glücksschuss",
+      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
+      "group": "Nutzen"
+    },
+    {
+      "name": "Perfekt entschlossen",
+      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
+      "group": "Nutzen"
+    },
     {
       "name": "Perfekte Bergung",
       "description": "Das Töten eines Ziels hat eine +70% (85%) Chance, das Magazin nachzufüllen.",
@@ -648,26 +668,6 @@
       "name": "Perfekter Glücksschuss",
       "description": "Magazinkapazität wird um 20% (30%) erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
       "group": "Nutzen"
-    },
-    {
-      "name": "Perfekt entschlossen",
-      "description": "Nach dem Töten eines Gegners mit einem Kopfschuss wird der nächste Treffer auf einen Gegner ein garantierter (kritischer) Kopfschuss.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Glücksschuss",
-      "description": "Magazinkapazität wird um 20% erhöht. Verfehlte Schüsse aus Deckung haben eine 100% Chance, ins Magazin zurückzukehren.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Bergung",
-      "description": "Das Töten eines Ziels hat eine 70% Chance, das Magazin nachzufüllen.",
-      "group": "Nutzen"
-    },
-    {
-      "name": "Finisher",
-      "description": "Das Wechseln von dieser Waffe innerhalb von 10s nach dem Töten eines Gegners gewährt +30% kritische Trefferchance und +30% kritischen Trefferschaden für 15s.",
-      "group": "Kritische Trefferchance / Schaden"
     }
   ]
 }
