@@ -7,7 +7,7 @@ import type { Loadout } from "../data/sampleData";
 import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
 
-export function LoadoutsView() {
+export function LoadoutsView({ embedded = false }: { embedded?: boolean }) {
   const store = useStore();
   const [sortKey, setSortKey] = useState<string>("timestamp");
 
@@ -116,7 +116,7 @@ export function LoadoutsView() {
   ];
 
   return (
-    <div>
+    <div style={embedded ? { margin: 0 } : undefined}>
       <DataTable
         rows={rows}
         columns={columns}
