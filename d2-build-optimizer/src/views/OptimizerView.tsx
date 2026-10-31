@@ -37,6 +37,8 @@ import {
   allowedDifficulties,
   defaultDifficultyFor,
   prototypeCapActive,
+  applyPrototypeCapToGear,
+  applyPrototypeCapToWeapon,
   stackSetHint,
   STACK_SET_NAMES,
   type DifficultyKey,
@@ -916,19 +918,39 @@ export function OptimizerView() {
         slots: Record<string, Array<{ name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;
       }).slots;
       const opts = { modsBySlot };
-      const inventar = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "inventar" }, opts);
+      const prototypeCapped = prototypeCapActive(gameModeAnswer);
+      const weaponsForRun = prototypeCapped
+        ? store.weapons.map(applyPrototypeCapToWeapon)
+        : store.weapons;
+      const gearForRun = prototypeCapped ? applyPrototypeCapToGear(store.gear) : store.gear;
+      const inventar = optimizeV4(weaponsForRun, gearForRun, { ...ctx, mode: "inventar" }, opts);
       const gaps = analyzeGaps({
-        weapons: store.weapons,
-        inventarGear: store.gear,
-        fullGear: store.gear,
+        weapons: weaponsForRun,
+        inventarGear: gearForRun,
+        fullGear: gearForRun,
         ctx,
       });
       const bestVector = (inventar.best ?? inventar.ranked[0])?.vector;
       if (generation !== runGenerationRef.current) return;
+      const cappedCount = prototypeCapped
+        ? store.gear.filter((g) => g.prototype).length + store.weapons.filter((w) => w.isPrototype).length
+        : 0;
       setResult({
         inventar,
         gaps: gaps.recommendations,
-        assumptions: bestVector ? bestVector.assumptions : [],
+        assumptions: bestVector
+          ? [
+              ...bestVector.assumptions,
+              ...(cappedCount > 0
+                ? [{
+                    key: "prototype-cap",
+                    label: `Prototyp-Deckelung (Raid/Incursion): ${cappedCount} Prototyp-Teil(e) auf High-End-Maxima gerechnet`,
+                    value: cappedCount,
+                    source: "Spielmodus",
+                  }]
+                : []),
+            ]
+          : [],
       });
       setRunning(false);
     }, 30);

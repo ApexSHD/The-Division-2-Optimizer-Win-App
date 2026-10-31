@@ -9,7 +9,10 @@ import {
   defaultDifficultyFor,
   prototypeCapActive,
   stackSetHint,
+  applyPrototypeCapToGear,
+  applyPrototypeCapToWeapon,
 } from "../difficultyProfiles";
+import { normalizeGear, normalizeWeapon } from "../sampleData";
 
 describe("Schwierigkeitsgrade: Vorgabe-Tabelle des Auftraggebers", () => {
   it("Heroic Solo-Pools exakt wie Vorgabe (Rot 3,0 / Veteran 6,0 / Elite 11,0 / Named 27,0 Mio)", () => {
@@ -121,5 +124,93 @@ describe("Spielmodus-Abhaengigkeiten (Auftraggeber, korrigierte Tabelle)", () =>
     expect(stackSetHint("heroic", ["Striker"])).toContain("wirken voll");
     expect(stackSetHint("escalation8", ["Striker", "Heartbreaker"])).toContain("wirken voll");
     expect(stackSetHint("heroic", [])).toBeNull();
+  });
+});
+
+describe("Rechnerische Prototyp-Deckelung (Raid/Incursion)", () => {
+  const mkProtoGear = () =>
+    normalizeGear({
+      id: "proto-mask",
+      slot: "mask",
+      brand: "Striker's Battlegear",
+      brandType: "brand",
+      core: "wd",
+      coreValue: 22.5,
+      attributes: [
+        { type: "wd", value: 20 },
+        { type: "chd", value: 17 },
+      ],
+      talent: null,
+      prototype: true,
+    });
+
+  it("Auftraggeber-Beispiel: WD 20 % -> 15 %, CHD 17 % -> 12 % (High-End-Maxima)", () => {
+    const [capped] = applyPrototypeCapToGear([mkProtoGear()]);
+    const wd = capped.attributes.find((a) => a.type === "wd")!;
+    const chd = capped.attributes.find((a) => a.type === "chd")!;
+    expect(wd.value).toBe(15);
+    expect(chd.value).toBe(12);
+  });
+
+  it("Prototyp-Kern WD 22,5 -> 15 (High-End-Max)", () => {
+    const [capped] = applyPrototypeCapToGear([mkProtoGear()]);
+    expect(capped.coreValue).toBe(15);
+  });
+
+  it("Nicht-Prototyp-Teile bleiben unveraendert; Werte unterhalb des Caps bleiben stehen", () => {
+    const normal = normalizeGear({
+      id: "normal-mask",
+      slot: "mask",
+      brand: "Grupo Sombra S.A.",
+      brandType: "brand",
+      core: "wd",
+      coreValue: 10,
+      attributes: [{ type: "chc", value: 5 }],
+      talent: null,
+      prototype: false,
+    });
+    const [cappedNormal] = applyPrototypeCapToGear([normal]);
+    expect(cappedNormal.coreValue).toBe(10);
+    expect(cappedNormal.attributes[0].value).toBe(5);
+    const lowProto = normalizeGear({
+      ...normal,
+      id: "low-proto",
+      prototype: true,
+      coreValue: 8,
+      attributes: [{ type: "chc", value: 3 }],
+    });
+    const [cappedLow] = applyPrototypeCapToGear([lowProto]);
+    expect(cappedLow.coreValue).toBe(8);
+    expect(cappedLow.attributes[0].value).toBe(3);
+  });
+
+  it("Prototyp-Waffe: Kern 1 (22,5 -> 15) und Attribute gedeckelt", () => {
+    const protoWeapon = normalizeWeapon({
+      id: "proto-w",
+      name: "Proto-Waffe",
+      type: "ar",
+      isPrototype: true,
+      attributes: {
+        core1: 22.5,
+        core2Type: "dth",
+        core2Val: 30,
+        minorType: "dttooc",
+        minorVal: 15,
+      },
+    });
+    const capped = applyPrototypeCapToWeapon(protoWeapon);
+    expect(capped.attributes.core1).toBe(15);
+    expect(capped.attributes.core2Val).toBe(21);
+    expect(capped.attributes.minorVal).toBe(10);
+  });
+
+  it("Nicht-Prototyp-Waffe bleibt unveraendert", () => {
+    const normal = normalizeWeapon({
+      id: "normal-w",
+      name: "N",
+      type: "ar",
+      isPrototype: false,
+    });
+    expect(applyPrototypeCapToWeapon(normal)).toBe(normal);
   });
 });
