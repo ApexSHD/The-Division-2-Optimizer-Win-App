@@ -9,7 +9,7 @@ import { ChartPlaceholder } from "../components/ChartPlaceholder";
 import { getDb } from "../data/db";
 import type { WeaponPreset, DisplayTalent } from "../data/db";
 import { TALENT_DISPLAY_TYPE_MAP, talentsAllowedForWeapon, carrierForTalent } from "../data/db";
-import { tWeaponAttr, type ItemLang } from "../i18n/itemNames";
+import { tWeaponAttr, tTalentName, type ItemLang } from "../i18n/itemNames";
 import type { Weapon, WeaponType, WeaponAttrKey } from "../data/sampleData";
 import { weaponsToCsv, weaponsFromCsv } from "../data/weaponCsv";
 import {
@@ -333,7 +333,7 @@ export function WeaponsView() {
     {
       key: "talent",
       label: t.weapons.columns.talent,
-      render: (w) => w.talent,
+      render: (w) => (w.talent ? tTalentName(w.talent, itemLang, w.talent) : "–"),
       sortValue: (w) => w.talent,
     },
     {
@@ -769,14 +769,14 @@ export function WeaponsView() {
                   <optgroup label="Allgemeine Waffen">
                     {talentOptions(editing.type).general.map((tal) => (
                       <option key={tal.name} value={tal.name}>
-                        {tal.name.startsWith("Perfekt") ? `★ ${tal.name}` : tal.name}
+                        {tal.name.startsWith("Perfekt") ? `★ ${tTalentName(tal.name, itemLang, tal.name)}` : tTalentName(tal.name, itemLang, tal.name)}
                       </option>
                     ))}
                   </optgroup>
                   <optgroup label={`${TALENT_DISPLAY_TYPE_MAP[editing.type]} (Gattungs-Talente)`}>
                     {talentOptions(editing.type).cat.map((tal) => (
                       <option key={tal.name} value={tal.name}>
-                        {tal.name.startsWith("Perfekt") ? `★ ${tal.name}` : tal.name}
+                        {tal.name.startsWith("Perfekt") ? `★ ${tTalentName(tal.name, itemLang, tal.name)}` : tTalentName(tal.name, itemLang, tal.name)}
                       </option>
                     ))}
                   </optgroup>

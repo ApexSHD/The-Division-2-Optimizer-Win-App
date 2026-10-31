@@ -1,4 +1,5 @@
 import attributeNamesJson from "./attributeNames.json";
+import talentNamesJson from "./talentNames.json";
 
 export type ItemLang = "de" | "en";
 
@@ -55,10 +56,17 @@ export function tTalentGroup(group: string, lang: ItemLang, fallback: string): s
 }
 
 /**
- * Waffen-/Gear-/Talent-NAMEN: Platzhalter bis die zugehoerigen
- * Namens-Listen des Auftraggebers vorliegen (siehe itemNames-Struktur).
- * Der mechanismus greift spaeter auf dieselbe Fallback-Logik zurueck.
+ * Talent-Namen (DE-DB-Label -> EN), Auftraggeber-Liste 2 + talent.json-Namen.
+ * Waffen-/Gear-NAMEN folgen als weitere Listen.
  */
+const TALENT_NAMES = talentNamesJson as unknown as Record<string, AttrEntry>;
+
+export function tTalentName(deLabel: string, lang: ItemLang, fallback: string): string {
+  const entry = TALENT_NAMES[deLabel];
+  if (!entry) return fallback;
+  return entry[lang] ?? fallback;
+}
+
 const ITEM_NAMES: Record<string, AttrEntry> = {};
 
 export function tItemName(kind: "weapon" | "gear" | "talent", id: string, lang: ItemLang, fallback: string): string {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tCore, tGearAttr, tWeaponAttr, tItemName } from "../itemNames";
+import { tCore, tGearAttr, tWeaponAttr, tItemName, tTalentName } from "../itemNames";
 
 describe("ItemName-i18n: Attribut- und Kern-Uebersetzungen (Auftraggeber-Liste 1)", () => {
   it("Kernattribute DE<->EN (Waffenschaden/Weapon Damage, Ruestung/Armor, Skill Tier)", () => {
@@ -40,5 +40,30 @@ describe("ItemName-i18n: Attribut- und Kern-Uebersetzungen (Auftraggeber-Liste 1
     expect(tGearAttr("chc", "de", "x")).toBe("Kritische Trefferchance");
     expect(tGearAttr("unbekannt", "en", "Fallback-Text")).toBe("Fallback-Text");
     expect(tItemName("weapon", "whatever", "en", "DB-Name")).toBe("DB-Name");
+  });
+});
+
+describe("Talent-Namen DE<->EN (Auftraggeber-Liste 2)", () => {
+  it("Schadens-/Kill-Talente", () => {
+    expect(tTalentName("Strapaziert", "en", "x")).toBe("Strained");
+    expect(tTalentName("Brotkorb", "en", "x")).toBe("Breadbasket");
+    expect(tTalentName("Nah und persönlich", "en", "x")).toBe("Close & Personal");
+    expect(tTalentName("Bumerang", "en", "x")).toBe("Boomerang");
+  });
+
+  it("Statuseffekt- und Fertigkeiten-/Utility-Talente", () => {
+    expect(tTalentName("Entzündet", "en", "x")).toBe("Ignited");
+    expect(tTalentName("Blind", "en", "x")).toBe("Eyeless");
+    expect(tTalentName("Synchronisiert", "en", "x")).toBe("In Sync");
+    expect(tTalentName("Zukunft", "en", "x")).toBe("Future Perfect");
+    expect(tTalentName("Flinke Hände", "en", "x")).toBe("Fast Hands");
+    expect(tTalentName("Bewahrung", "en", "x")).toBe("Preservation");
+  });
+
+  it("Gattungs-Talente (Raserei etc.) und DE-Fallback", () => {
+    expect(tTalentName("Raserei", "en", "x")).toBe("Frenzy");
+    expect(tTalentName("Aus den Angeln", "en", "x")).toBe("Unhinged");
+    expect(tTalentName("Raserei", "de", "x")).toBe("x"); // DE-Anzeige laeuft ueber DB-Label, Fallback
+    expect(tTalentName("Unbekanntes Talent", "en", "DB-Name")).toBe("DB-Name");
   });
 });
