@@ -1,0 +1,53 @@
+{
+  "note": "Waffen-Namen DE<->EN. Key = DB-Name (meist EN-Basisname, ggf. mit Klammerzusatz). Quelle: Auftraggeber-Liste 3 (exotische Waffen, 31.10.2026, 'nicht vollstaendndig'). Fallback: kein Eintrag -> DB-Name.",
+  "assaultRifles": {
+    "Eagle Bearer": { "de": "Adlertr\u00e4ger", "en": "Eagle Bearer" },
+    "Chameleon": { "de": "Cham\u00e4leon", "en": "Chameleon" },
+    "Capacitor": { "de": "Kondensator", "en": "Capacitor" },
+    "The Bighorn": { "de": "The Bighorn", "en": "The Bighorn" },
+    "St. Elmo's Engine": { "de": "St.-Elmos-Feuer", "en": "St. Elmo's Engine" }
+  },
+  "submachineGuns": {
+    "The Chatterbox": { "de": "Die Schnatterente", "en": "The Chatterbox" },
+    "Lady Death": { "de": "Lady Death", "en": "Lady Death" },
+    "Backfire": { "de": "Gegenfeuer", "en": "Backfire" },
+    "Ouroboros (Vector SBR .45 ACP)": { "de": "Ouroboros", "en": "Ouroboros" },
+    "Ouroboros": { "de": "Ouroboros", "en": "Ouroboros" }
+  },
+  "rifles": {
+    "Merciless": { "de": "Gnadenlos", "en": "Merciless" },
+    "Ruthless": { "de": "Skrupellos", "en": "Ruthless" },
+    "Diamondback": { "de": "Diamantklapperschlange", "en": "Diamondback" },
+    "The Ravenous": { "de": "The Ravenous", "en": "The Ravenous" },
+    "Doctor Home (M1A CQB)": { "de": "Doctor Home", "en": "Doctor Home" },
+    "Doctor Home": { "de": "Doctor Home", "en": "Doctor Home" }
+  },
+  "marksmanRifles": {
+    "Nemesis": { "de": "Nemesis", "en": "Nemesis" },
+    "Mantis (Covert SRS)": { "de": "Mantis", "en": "Mantis" },
+    "Mantis": { "de": "Mantis", "en": "Mantis" },
+    "Dread Edict": { "de": "Dread Edict", "en": "Dread Edict" },
+    "Sacrum Imperium": { "de": "Sacrum Imperium", "en": "Sacrum Imperium" }
+  },
+  "lightMachineGuns": {
+    "Pestilence (M249 B)": { "de": "Pestilenz", "en": "Pestilence" },
+    "Pestilence": { "de": "Pestilenz", "en": "Pestilence" },
+    "Bullet King": { "de": "Bullet King", "en": "Bullet King" },
+    "Bluescreen": { "de": "Bluescreen", "en": "Bluescreen" },
+    "Iron Lung (MG5)": { "de": "Eiserne Lunge", "en": "Iron Lung" },
+    "Iron Lung": { "de": "Eiserne Lunge", "en": "Iron Lung" }
+  },
+  "shotguns": {
+    "Sweet Dreams": { "de": "S\u00fc\u00dfe Tr\u00e4ume", "en": "Sweet Dreams" },
+    "Lullaby": { "de": "Wiegenlied", "en": "Lullaby" },
+    "Scorpio": { "de": "Scorpio", "en": "Scorpio" }
+  },
+  "sidearms": {
+    "Liberty": { "de": "Freiheit", "en": "Liberty" },
+    "Regulus": { "de": "Regulus", "en": "Regulus" },
+    "Busy Little Bee (Custom PF45)": { "de": "Flei\u00dfiges Bienchen", "en": "Busy Little Bee" },
+    "Busy Little Bee": { "de": "Flei\u00dfiges Bienchen", "en": "Busy Little Bee" },
+    "Mosquito (Military M9)": { "de": "Moskito", "en": "Mosquito" },
+    "Mosquito": { "de": "Moskito", "en": "Mosquito" }
+  }
+}

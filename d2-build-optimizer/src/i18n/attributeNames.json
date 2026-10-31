@@ -1,0 +1,59 @@
+{
+  "note": "DE<->EN-Mapping fuer Kern-/Offensiv-/Defensiv-/Fertigkeiten-Attribute. Key = interne Attr-ID (sampleData.ts), 'de'/'en' = Anzeige. Quelle: Auftraggeber-Vorgabe 31.10.2026 (Division 2 Attribute DE/EN). Waffen-/Gear-/Talent-Namen folgen in separaten Listen.",
+  "cores": {
+    "wd": { "de": "Waffenschaden", "en": "Weapon Damage" },
+    "armour": { "de": "Rüstung", "en": "Armor" },
+    "skill": { "de": "Fertigkeiten-Tier", "en": "Skill Tier" }
+  },
+  "weaponAttrs": {
+    "chc": { "de": "Kritische Trefferchance", "en": "Critical Hit Chance (CHC)" },
+    "chd": { "de": "Kritischer Trefferschaden", "en": "Critical Hit Damage (CHD)" },
+    "hsd": { "de": "Kopfschussschaden", "en": "Headshot Damage (HSD)" },
+    "dta": { "de": "Rüstungsschaden", "en": "Damage to Armor (DtA)" },
+    "dth": { "de": "Gesundheitsschaden", "en": "Damage to Health (DtH)" },
+    "dttooc": { "de": "Schaden gegen ungedeckte Ziele", "en": "Damage to Targets Out of Cover (DtTooc)" }
+  },
+  "gearAttrs": {
+    "chc": { "de": "Kritische Trefferchance", "en": "Critical Hit Chance (CHC)" },
+    "chd": { "de": "Kritischer Trefferschaden", "en": "Critical Hit Damage (CHD)" },
+    "hsd": { "de": "Kopfschussschaden", "en": "Headshot Damage (HSD)" },
+    "wd": { "de": "Waffenschaden", "en": "Weapon Damage" },
+    "dta": { "de": "Rüstungsschaden", "en": "Damage to Armor (DtA)" },
+    "dth": { "de": "Gesundheitsschaden", "en": "Damage to Health (DtH)" },
+    "dttooc": { "de": "Schaden gegen ungedeckte Ziele", "en": "Damage to Targets Out of Cover (DtTooc)" },
+    "wh": { "de": "Waffen-Handhabung", "en": "Weapon Handling" },
+    "armorregen": { "de": "Rüstungsregeneration", "en": "Armor Regen" },
+    "aok": { "de": "Rüstung bei Tötung", "en": "Armor On Kill (AoK)" },
+    "health": { "de": "Lebensenergie", "en": "Health" },
+    "hazard": { "de": "Gefahrenschutz", "en": "Hazard Protection (HazPro)" },
+    "pfe": { "de": "Schutz vor Eliten", "en": "Protection from Elites (PfE)" },
+    "explres": { "de": "Explosionswiderstand", "en": "Explosive Resistance" },
+    "skilldmg": { "de": "Fertigkeitenschaden", "en": "Skill Damage" },
+    "skillhaste": { "de": "Fertigkeitentempo", "en": "Skill Haste" },
+    "repair": { "de": "Reparaturfertigkeiten", "en": "Repair Skills" },
+    "incomrepair": { "de": "Eingehende Reparaturen", "en": "Incoming Repairs" },
+    "status": { "de": "Statuseffekte", "en": "Status Effects" },
+    "skillduration": { "de": "Fertigkeiten-Dauer", "en": "Skill Duration" }
+  },
+  "weaponStatsExtra": {
+    "magSize": { "de": "Magazingröße", "en": "Mag Size" },
+    "handling": { "de": "Waffen-Handhabung", "en": "Weapon Handling" },
+    "range": { "de": "Optimale Reichweite", "en": "Optimal Range" },
+    "rof": { "de": "Feuerrate", "en": "Rate of Fire (RoF)" },
+    "reloadSpeed": { "de": "Nachladegeschwindigkeit", "en": "Reload Speed" },
+    "accuracy": { "de": "Präzision", "en": "Accuracy" },
+    "stability": { "de": "Stabilität", "en": "Stability" },
+    "swapSpeed": { "de": "Wechselgeschwindigkeit", "en": "Swap Speed" },
+    "armorOnKill": { "de": "Rüstung bei Tötung", "en": "Armor On Kill (AoK)" }
+  },
+  "talentGroups": {
+    "Waffen-Schaden": { "de": "Waffen-Schaden", "en": "Weapon Damage" },
+    "Kritische Trefferchance / Schaden": { "de": "Kritische Trefferchance / Schaden", "en": "Critical Hit Chance / Damage" },
+    "Kopfschuss-Schaden": { "de": "Kopfschuss-Schaden", "en": "Headshot Damage" },
+    "Dynamisch": { "de": "Dynamisch", "en": "Dynamic" },
+    "Nutzen": { "de": "Nutzen", "en": "Utility" },
+    "Verstärker": { "de": "Verstärker", "en": "Amplifier" },
+    "Verstärker (additiv)": { "de": "Verstärker (additiv)", "en": "Amplifier (additive)" },
+    "Schussfrequenz / Waffen-Schaden": { "de": "Schussfrequenz / Waffen-Schaden", "en": "Rate of Fire / Weapon Damage" }
+  }
+}

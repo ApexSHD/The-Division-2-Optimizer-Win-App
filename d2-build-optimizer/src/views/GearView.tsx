@@ -15,6 +15,7 @@ import {
   gearCoreMax,
 } from "../data/sampleData";
 import { gearToCsv, gearFromCsv } from "../data/gearCsv";
+import { tCore, tGearAttr, type ItemLang } from "../i18n/itemNames";
 
 import { ImportPreview, type PreviewRow } from "../components/ImportPreview";
 
@@ -35,6 +36,7 @@ function newGear(id: string): GearPiece {
 export function GearView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
+  const itemLang: ItemLang = store.lang;
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<GearPiece | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -292,10 +294,10 @@ export function GearView() {
   }
 
   const attrText = (g: GearPiece) =>
-    g.attributes.map((a) => `${GEAR_ATTR_TYPES[a.type]?.label ?? a.type} +${a.value}`).join(", ");
+    g.attributes.map((a) => `${tGearAttr(a.type, itemLang, GEAR_ATTR_TYPES[a.type]?.label ?? a.type)} +${a.value}`).join(", ");
 
   const coreText = (g: GearPiece) =>
-    `${GEAR_CORE_LABELS[g.core]}: ${g.core === "skill" ? `Tier ${g.coreValue}` : `+${g.coreValue.toLocaleString("de-DE")}${g.core === "wd" ? " %" : ""}`}`;
+    `${tCore(g.core, itemLang, GEAR_CORE_LABELS[g.core])}: ${g.core === "skill" ? `Tier ${g.coreValue}` : `+${g.coreValue.toLocaleString("de-DE")}${g.core === "wd" ? " %" : ""}`}`;
 
   const columns: Column<GearPiece>[] = [
     {
@@ -612,7 +614,7 @@ export function GearView() {
                     }}
                   >
                     {(Object.keys(GEAR_CORE_LABELS) as GearCoreType[]).map((k) => (
-                      <option key={k} value={k}>{GEAR_CORE_LABELS[k]}</option>
+                      <option key={k} value={k}>{tCore(k, itemLang, GEAR_CORE_LABELS[k])}</option>
                     ))}
                   </select>
                   <input
