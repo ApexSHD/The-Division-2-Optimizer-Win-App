@@ -367,7 +367,7 @@ export function optimizeV4(
     ctx.shdLevel,
     ctx.settings,
     {
-      maxResults: opts.maxResults ?? 30,
+      maxResults: opts.maxResults ?? 50,
       spec: ctx.spec,
       considerMods: true,
       modsBySlot: opts.modsBySlot as never,
