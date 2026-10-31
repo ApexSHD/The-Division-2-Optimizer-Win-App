@@ -117,6 +117,7 @@ export interface UserData {
   gear: GearPiece[];
   builds: Loadout[];
   activeBuildId: string;
+  onboardingDone: boolean;
 }
 
 const SCHEMA_VERSION = 1;
@@ -136,6 +137,7 @@ function defaultUserData(): UserData {
     gear: [],
     builds: [],
     activeBuildId: "",
+    onboardingDone: false,
   };
 }
 
@@ -173,6 +175,7 @@ function sanitize(raw: unknown): UserData {
       : [],
     builds: Array.isArray(r.builds) ? r.builds : [],
     activeBuildId: typeof r.activeBuildId === "string" ? r.activeBuildId : "",
+    onboardingDone: Boolean(r.onboardingDone),
   };
 }
 
@@ -204,8 +207,10 @@ export interface AppState {
   db: Db | null;
   builds: Loadout[];
   activeBuildId: string;
+  onboardingDone: boolean;
   addBuild: (b: Loadout) => void;
   setActiveBuildId: (id: string) => void;
+  setOnboardingDone: (done: boolean) => void;
   status: string;
   setStatus: (s: string) => void;
   progress: number | null;
@@ -385,9 +390,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     db,
     builds: userData.builds,
     activeBuildId: userData.activeBuildId,
+    onboardingDone: userData.onboardingDone,
     addBuild: (b) =>
       mutate((d) => ({ ...d, builds: [...d.builds, b] })),
     setActiveBuildId: (id) => mutate((d) => ({ ...d, activeBuildId: id })),
+    setOnboardingDone: (done) => mutate((d) => ({ ...d, onboardingDone: done })),
     status,
     setStatus,
     progress,

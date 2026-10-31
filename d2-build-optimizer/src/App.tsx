@@ -11,6 +11,7 @@ import { CompareView } from "./views/CompareView";
 import { OptimizerView } from "./views/OptimizerView";
 import { AdminView } from "./views/AdminView";
 import { SettingsView } from "./views/SettingsView";
+import { OnboardingWizard } from "./components/OnboardingWizard";
 import { DB_VERSION } from "./data/sampleData";
 
 function useThemeEffect() {
@@ -344,6 +345,9 @@ function Shell() {
         <ValuesSidebar />
       </div>
       <StatusBar />
+      {!store.onboardingDone && store.weapons.length === 0 && store.gear.length === 0 && (
+        <OnboardingWizard />
+      )}
     </>
   );
 }
