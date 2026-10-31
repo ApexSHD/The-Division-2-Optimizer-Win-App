@@ -81,8 +81,26 @@ export function OptimizationSettingsPanel({
         <h4 className="settings-section-title">Talente</h4>
         <div className="hint" style={{ padding: "8px 10px" }}>
           Talente, Exotic-Perks und Stack-Effekte werden aktuell <strong>nicht</strong> in die
-          Berechnung eingerechnet (siehe Annahmen-Panel je Ergebnis und docs/FORMELN.md Abschnitt 8).
-          Die Einbindung ist als Feature geplant.
+          Berechnung eingerechnet (siehe „Nicht modelliert“-Banner im Ergebnis und
+          docs/FORMELN.md Abschnitt 8). Die Schalter sind daher deaktiviert, bis die Berechnung
+          umgesetzt ist; betroffene Teile werden im Ergebnis mit „nicht berechnet“ gekennzeichnet.
+        </div>
+        <div style={{ display: "grid", gap: 6, opacity: 0.5 }}>
+          {([
+            ["considerWeaponTalents", "Waffentalente berechnen"],
+            ["considerGearTalents", "Gear-Talente berechnen"],
+            ["considerExoticPerks", "Exotic-Perks berechnen"],
+          ] as const).map(([key, label]) => (
+            <label key={key} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={Boolean(optimization[key])}
+                disabled
+                title="Noch nicht implementiert — siehe docs/FORMELN.md Abschnitt 8"
+              />
+              {label}
+            </label>
+          ))}
         </div>
       </section>
 
