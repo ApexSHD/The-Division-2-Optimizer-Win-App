@@ -146,7 +146,9 @@ export function computeInventoryKpis(
 }
 
 export function roleKings(loadouts: Loadout[]): RoleKing[] {
-  const roleIds = new Set(loadouts.map((l) => l.roleId));
+  const roleIds = new Set(
+    loadouts.map((l) => l.roleId).filter((id): id is string => Boolean(id)),
+  );
   const result: RoleKing[] = [];
   for (const roleId of roleIds) {
     const best = loadouts
