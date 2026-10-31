@@ -6,6 +6,7 @@ import type { Translation } from "./i18n/de";
 import type { GearPiece } from "./data/sampleData";
 import { GlobalView } from "./views/GlobalView";
 import { DashboardView } from "./views/DashboardView";
+import { LoadoutsView } from "./views/LoadoutsView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
 import { CompareView } from "./views/CompareView";
@@ -133,29 +134,55 @@ function Nav() {
   const store = useStore();
   const { t } = useContext(I18nContext);
 
-  const items: { id: typeof store.view; label: string; icon: string }[] = [
-    { id: "dashboard", label: "Dashboard", icon: "🏠" },
-    { id: "global", label: t.nav.global, icon: "🌍" },
-    { id: "weapons", label: t.nav.weapons, icon: "🔫" },
-    { id: "gear", label: t.nav.gear, icon: "🧦" },
-    { id: "optimizer", label: t.nav.optimizer, icon: "🎯" },
-    { id: "compare", label: t.nav.compare, icon: "⚖" },
-    { id: "admin", label: t.nav.admin, icon: "🗄" },
-    { id: "settings", label: t.nav.settings, icon: "⚙" },
+  type NavEntry = { id: typeof store.view; label: string; icon: string };
+  type NavGroup = { title: string | null; entries: NavEntry[] };
+  const groups: NavGroup[] = [
+    {
+      title: null,
+      entries: [{ id: "dashboard", label: "Startseite", icon: "\ud83c\udfe0" }],
+    },
+    {
+      title: "Inventar",
+      entries: [
+        { id: "weapons", label: t.nav.weapons, icon: "\ud83d\udd2b" },
+        { id: "gear", label: t.nav.gear, icon: "\ud83e\udde6" },
+      ],
+    },
+    {
+      title: "Optimierung",
+      entries: [
+        { id: "optimizer", label: t.nav.optimizer, icon: "\ud83c\udfaf" },
+        { id: "loadouts", label: "Loadouts", icon: "\ud83e\uddf1" },
+        { id: "compare", label: t.nav.compare, icon: "\u2696" },
+      ],
+    },
+    {
+      title: "Einstellungen",
+      entries: [
+        { id: "global", label: t.nav.global, icon: "\ud83c\udf0d" },
+        { id: "admin", label: t.nav.admin, icon: "\ud83d\uddc3" },
+        { id: "settings", label: t.nav.settings, icon: "\u2699" },
+      ],
+    },
   ];
 
   return (
     <nav className="nav" aria-label="Hauptnavigation">
-      {items.map((it) => (
-        <button
-          key={it.id}
-          className={`nav-item ${store.view === it.id ? "active" : ""}`}
-          onClick={() => store.setView(it.id)}
-          aria-current={store.view === it.id ? "page" : undefined}
-        >
-          <span className="nav-icon" aria-hidden>{it.icon}</span>
-          {it.label}
-        </button>
+      {groups.map((group, gi) => (
+        <div key={group.title ?? `group-${gi}`} className="nav-group">
+          {group.title && <div className="nav-group-title">{group.title}</div>}
+          {group.entries.map((it) => (
+            <button
+              key={it.id}
+              className={`nav-item ${store.view === it.id ? "active" : ""}`}
+              onClick={() => store.setView(it.id)}
+              aria-current={store.view === it.id ? "page" : undefined}
+            >
+              <span className="nav-icon" aria-hidden>{it.icon}</span>
+              {it.label}
+            </button>
+          ))}
+        </div>
       ))}
     </nav>
   );
@@ -294,6 +321,7 @@ function WorkArea() {
 
   const titles: Record<typeof store.view, { title: string; sub: string }> = {
     dashboard: { title: "Dashboard", sub: "Inventar, Lücken, Loadouts und Datenstatus auf einen Blick" },
+    loadouts: { title: "Loadouts", sub: "Alle gespeicherten Builds mit ihren Werten" },
     global: { title: t.global.title, sub: t.global.subtitle },
     weapons: { title: t.weapons.title, sub: t.weapons.subtitle },
     gear: { title: t.gear.title, sub: t.gear.subtitle },
@@ -317,6 +345,7 @@ function WorkArea() {
         {store.view === "weapons" && <WeaponsView />}
         {store.view === "gear" && <GearView />}
         {store.view === "optimizer" && <OptimizerView />}
+        {store.view === "loadouts" && <LoadoutsView />}
         {store.view === "compare" && <CompareView />}
         {store.view === "admin" && <AdminView />}
         {store.view === "settings" && <SettingsView />}

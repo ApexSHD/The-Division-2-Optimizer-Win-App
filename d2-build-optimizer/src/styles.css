@@ -1220,3 +1220,39 @@ kbd {
   min-height: 320px;
   overflow: auto;
 }
+
+/* Nav-Gruppen im PowerToys-Stil: fette Header, eingerueckte Eintraege */
+:root {
+  --accent-soft: rgba(245, 124, 31, 0.16);
+}
+
+.nav-group {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-group:first-of-type {
+  margin-top: 0;
+}
+
+.nav-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint, #777);
+  padding: 6px 12px 4px;
+}
+
+.nav-item {
+  padding: 8px 12px 8px 16px;
+}
+
+.nav-item.active {
+  background: var(--accent-soft, rgba(79, 156, 249, 0.16));
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent);
+}

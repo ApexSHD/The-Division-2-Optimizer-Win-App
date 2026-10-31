@@ -5,7 +5,7 @@ import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalize
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
-export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "optimizer" | "compare" | "admin" | "settings";
+export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "optimizer" | "loadouts" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
 
 export interface AgentValues {
@@ -247,6 +247,7 @@ export interface AppState {
   activeBuildId: string;
   onboardingDone: boolean;
   addBuild: (b: Loadout) => void;
+  removeBuild: (id: string) => void;
   setActiveBuildId: (id: string) => void;
   setOnboardingDone: (done: boolean) => void;
   status: string;
@@ -445,6 +446,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addBuild: (b) =>
       mutate((d) => ({ ...d, builds: [...d.builds, b] })),
     setActiveBuildId: (id) => mutate((d) => ({ ...d, activeBuildId: id })),
+    removeBuild: (id) =>
+      mutate((d) => ({
+        ...d,
+        builds: d.builds.filter((b) => b.id !== id),
+        activeBuildId: d.activeBuildId === id ? "" : d.activeBuildId,
+      })),
     setOnboardingDone: (done) => mutate((d) => ({ ...d, onboardingDone: done })),
     status,
     setStatus,
