@@ -20,6 +20,12 @@ const HEADERS = [
   "Feuerrate",
   "Magazingröße",
   "Know-How",
+  "Kopfschuss-Grundwert",
+  "Nachladezeit (s)",
+  "Mod Optik",
+  "Mod Mündung",
+  "Mod Unterlauf",
+  "Mod Magazin",
 ];
 
 const TYPE_LABELS: Record<WeaponType, string> = {
@@ -74,6 +80,12 @@ export function weaponsToCsv(weapons: Weapon[]): string {
         String(w.rpm),
         String(w.magSize),
         String(w.knowHow),
+        w.innateHsd !== undefined ? formatNumberDe(w.innateHsd) : "",
+        w.reloadSeconds !== undefined ? formatNumberDe(w.reloadSeconds) : "",
+        ...(["optic", "muzzle", "underbarrel", "magazine"] as const).map((slot) => {
+          const mod = w.equippedMods?.find((m) => m.slot === slot);
+          return mod ? attrLabel(mod.attr, mod.value) : "";
+        }),
       ]
         .map(csvEscape)
         .join(CSV_SEPARATOR),
@@ -184,7 +196,13 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
   const a3Idx = col("attribut 3");
   const baseDmgIdx = col("grundschaden");
   const rpmIdx = col("feuerrate");
-  const magIdx = col("magazingr");
+  const magIdx = col("magazingröße") >= 0 ? col("magazingröße") : col("magazingr");
+  const innateHsdIdx = col("kopfschuss-grundwert");
+  const reloadIdx = col("nachladezeit");
+  const modOpticIdx = col("mod optik");
+  const modMuzzleIdx = col("mod mündung");
+  const modUnderIdx = col("mod unterlauf");
+  const modMagIdx = col("mod magazin");
 
   const weapons: Weapon[] = [];
   const warnings: string[] = [];
@@ -248,6 +266,21 @@ export function weaponsFromCsv(csv: string, makeId: () => string): CsvImportResu
         baseDamage: baseDmgIdx >= 0 ? parseGermanNumber(cells[baseDmgIdx] ?? "0") : undefined,
         rpm: rpmIdx >= 0 ? parseGermanNumber(cells[rpmIdx] ?? "0") : undefined,
         magSize: magIdx >= 0 ? parseGermanNumber(cells[magIdx] ?? "0") : undefined,
+        innateHsd: innateHsdIdx >= 0 && (cells[innateHsdIdx] ?? "").trim() ? parseGermanNumber(cells[innateHsdIdx] ?? "0") : undefined,
+        reloadSeconds: reloadIdx >= 0 && (cells[reloadIdx] ?? "").trim() ? parseGermanNumber(cells[reloadIdx] ?? "0") : undefined,
+        equippedMods: (() => {
+          const modSlots: Array<{ slot: "optic" | "muzzle" | "underbarrel" | "magazine"; idx: number }> = [
+            { slot: "optic", idx: modOpticIdx },
+            { slot: "muzzle", idx: modMuzzleIdx },
+            { slot: "underbarrel", idx: modUnderIdx },
+            { slot: "magazine", idx: modMagIdx },
+          ];
+          const mods = modSlots
+            .map(({ slot, idx }) => (idx >= 0 ? { slot, mod: idx >= 0 ? parseAttrCell(cells[idx] ?? "") : null } : null))
+            .filter((m): m is { slot: "optic" | "muzzle" | "underbarrel" | "magazine"; mod: { type: WeaponAttrKey; value: number } } => Boolean(m && m.mod))
+            .map((m) => ({ slot: m.slot, attr: m.mod.type, value: m.mod.value }));
+          return mods.length > 0 ? mods : undefined;
+        })(),
         attributes:
           core1 !== undefined || core2Type !== undefined || minorType !== undefined
             ? {

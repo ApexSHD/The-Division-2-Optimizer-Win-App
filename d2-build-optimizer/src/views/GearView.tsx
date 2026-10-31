@@ -15,6 +15,7 @@ import {
   gearCoreMax,
 } from "../data/sampleData";
 import { gearToCsv, gearFromCsv } from "../data/gearCsv";
+import { ImportPreview, type PreviewRow } from "../components/ImportPreview";
 
 function newGear(id: string): GearPiece {
   return {
@@ -151,6 +152,11 @@ export function GearView() {
     store.setStatus(isNew ? `${editing.brand} angelegt` : `${editing.brand} gespeichert`);
   }
 
+  function onSaveAndNext() {
+    onSave();
+    openNew();
+  }
+
   function onDelete() {
     if (!editing || isNew) return;
     if (!confirm(`${editing.brand} ${t.common.delete}?`)) return;
@@ -189,25 +195,84 @@ export function GearView() {
     }
   }
 
-  async function onImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  const SLOT_LABELS: Record<GearSlot, string> = {
+    mask: "Maske",
+    chest: "Weste",
+    holster: "Holster",
+    backpack: "Rucksack",
+    gloves: "Handschuhe",
+    kneepads: "Knieschoner",
+  };
+
+  const [preview, setPreview] = useState<{
+    fileName: string;
+    rows: PreviewRow[];
+    gear: GearPiece[];
+    skippedRows: number;
+    warnings: string[];
+  } | null>(null);
+
+  async function readImportFile(file: File) {
     try {
       const text = await file.text();
       const { gear, skippedRows, warnings } = gearFromCsv(text, () =>
         `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       );
-      if (gear.length === 0) {
-        store.setStatus("CSV-Import: keine gültigen Gear-Teile gefunden");
-        return;
+      const rows: PreviewRow[] = gear.map((g, i) => ({
+        key: `${g.id}-${i}`,
+        label: `${g.brand} (${SLOT_LABELS[g.slot] ?? g.slot})${g.talent ? ` · ${g.talent}` : ""}`,
+        detail: g.prototype ? "Prototyp — Kern/Attribute mit Prototyp-Maximum" : "",
+        status: "ok" as const,
+      }));
+      const warned = new Set<string>();
+      for (const warning of warnings) {
+        const match = warning.match(/^„(.+?)“/);
+        const key = match ? match[1] : warning;
+        if (warned.has(key)) continue;
+        warned.add(key);
+        const rowIdx = rows.findIndex((r) => r.label.startsWith(`${key} (`) || r.label === key);
+        if (rowIdx >= 0) {
+          rows[rowIdx] = { ...rows[rowIdx], status: "warn", detail: warning };
+        } else {
+          rows.push({ key: `warn-${rows.length}`, label: key, detail: warning, status: "warn" });
+        }
       }
-      const gearKey = (g: GearPiece) =>
-        `${g.slot}::${g.brand}::${g.brandType}::${g.core}::${g.coreValue}::${g.attributes.map((a) => `${a.type}:${a.value}`).join(",")}::${g.talent ?? ""}::${g.prototype ? 1 : 0}`;
+      if (gear.length === 0 && skippedRows > 0) {
+        rows.push({
+          key: "no-rows",
+          label: `${skippedRows} Zeile(n) unlesbar`,
+          detail: warnings.join(" · ") || "Spalten passen nicht zur Vorlage.",
+          status: "error",
+        });
+      }
+      setPreview({ fileName: file.name, rows, gear, skippedRows, warnings });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      store.setStatus(
+        `CSV-Import fehlgeschlagen: ${msg}. Lösung: Spalten „Slot“ und „Marke/Set“ sind Pflicht — Vorlage über „CSV exportieren“ erzeugen und daran orientieren.`,
+      );
+    }
+  }
+
+  async function onImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await readImportFile(file);
+  }
+
+  function confirmImport(mode: "replace" | "merge") {
+    if (!preview) return;
+    const gearKey = (g: GearPiece) =>
+      `${g.slot}::${g.brand}::${g.brandType}::${g.core}::${g.coreValue}::${g.attributes.map((a) => `${a.type}:${a.value}`).join(",")}::${g.talent ?? ""}::${g.prototype ? 1 : 0}::${g.mod ? `${g.mod.attr}:${g.mod.value}` : ""}`;
+    if (mode === "replace") {
+      store.setGear(preview.gear);
+      store.setStatus(`${preview.gear.length} Gear-Teil(e) importiert (Inventar ersetzt)`);
+    } else {
       const seen = new Set(store.gear.map(gearKey));
       const toImport: GearPiece[] = [];
       let duplicates = 0;
-      for (const g of gear) {
+      for (const g of preview.gear) {
         const key = gearKey(g);
         if (seen.has(key)) {
           duplicates++;
@@ -217,13 +282,11 @@ export function GearView() {
         toImport.push(g);
       }
       store.addGearBulk(toImport);
-      store.setStatus(`${toImport.length} Gear-Teil(e) importiert${duplicates ? `, ${duplicates} Duplikat(e) übersprungen` : ""}${skippedRows ? `, ${skippedRows} Zeile(n) übersprungen` : ""}${warnings.length ? `, ⚠ ${warnings.join(" ⚠ ")}` : ""}`);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      store.setStatus(
-        `CSV-Import fehlgeschlagen: ${msg}. Lösung: Spalten „Slot“ und „Marke/Set“ sind Pflicht — Vorlage über „CSV exportieren“ erzeugen und daran orientieren.`,
-      );
+      const parts = [`${toImport.length} Gear-Teil(e) importiert`];
+      if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen`);
+      store.setStatus(parts.join(", "));
     }
+    setPreview(null);
   }
 
   const attrText = (g: GearPiece) =>
@@ -347,6 +410,28 @@ export function GearView() {
         }
       />
 
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files?.[0];
+          if (file && file.name.toLowerCase().endsWith(".csv")) readImportFile(file);
+        }}
+      >
+      </div>
+
+      <ImportPreview
+        open={preview !== null}
+        title="CSV-Import — Vorschau (Gear)"
+        fileName={preview?.fileName ?? ""}
+        rows={preview?.rows ?? []}
+        itemCount={preview?.gear.length ?? 0}
+        skippedRows={preview?.skippedRows ?? 0}
+        existingCount={store.gear.length}
+        onCancel={() => setPreview(null)}
+        onConfirm={confirmImport}
+      />
+
       <SidePanel
         open={panelOpen}
         title={editing && !isNew ? t.gear.edit : t.gear.new}
@@ -359,6 +444,11 @@ export function GearView() {
             <span className="spacer" />
             <button className="btn" onClick={() => setPanelOpen(false)}>{t.common.cancel}</button>
             <button className="btn btn-accent" onClick={onSave}>{t.common.save}</button>
+            {isNew && (
+              <button className="btn btn-accent" onClick={onSaveAndNext} title="Speichern und direkt das nächste Teil erfassen">
+                Speichern + nächstes
+              </button>
+            )}
           </>
         }
       >

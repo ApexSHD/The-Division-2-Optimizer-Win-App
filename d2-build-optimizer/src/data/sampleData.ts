@@ -29,6 +29,12 @@ export interface WeaponAttributes {
   minorVal: number;
 }
 
+export interface WeaponMod {
+  slot: "optic" | "muzzle" | "underbarrel" | "magazine";
+  attr: WeaponAttrKey;
+  value: number;
+}
+
 export interface Weapon {
   id: string;
   name: string;
@@ -45,6 +51,7 @@ export interface Weapon {
   attributes: WeaponAttributes;
   innateHsd?: number;
   reloadSeconds?: number;
+  equippedMods?: WeaponMod[];
 }
 
 export const WEAPON_ATTR_LABELS: Record<WeaponAttrKey, string> = {
@@ -115,6 +122,8 @@ export function normalizeWeapon(
     knowHow: isPrototype ? 30 : w.knowHow ?? 30,
     isPrototype,
     reloadSeconds: w.reloadSeconds,
+    equippedMods: w.equippedMods,
+    innateHsd: w.innateHsd,
     attributes: {
       core1: attrs.core1 ?? god.core1,
       core2Type: attrs.core2Type ?? god.core2Type,
@@ -147,6 +156,7 @@ export interface GearPiece {
   attributes: GearAttr[];
   talent: string | null;
   prototype: boolean;
+  mod?: { attr: GearAttrKey; value: number } | null;
 }
 
 export const GEAR_CORE_LABELS: Record<GearCoreType, string> = {
@@ -226,6 +236,7 @@ export function normalizeGear(g: Partial<GearPiece> & Pick<GearPiece, "id" | "sl
     attributes,
     talent: g.talent ?? null,
     prototype,
+    mod: g.mod && GEAR_ATTR_TYPES[g.mod.attr] ? g.mod : null,
   };
 }
 
