@@ -265,7 +265,10 @@ export function buildCandidatesFromOptimizer(
     const vector = computeEffectVector(
       axisContextFor(r.gear, r.damage.effectiveDps, ctx, role),
     );
-    const statsWithGearMods = applyGearModsToStats(r.stats, ctx, role);
+    const statsWithGearMods = applyWeaponAttrsToStats(
+      applyGearModsToStats(r.stats, ctx, role),
+      r.weapon,
+    );
     const setRuleOk = enforceGearSetRule(r.gear, ctx.gearSetOptions ?? {});
     const adm = !setRuleOk
       ? { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Gearset-Regel: 4 Set-Teile bzw. Set-Weste/-Rucksack fehlen", actual: null, required: null }] }
@@ -445,6 +448,45 @@ const SLOT_LABEL_GEAR_MODS: Record<string, string> = {
   chest: "Weste",
   backpack: "Rucksack",
 };
+
+function applyWeaponAttrsToStats(
+  stats: import("./damage").BuildStats,
+  weapon: Weapon,
+): import("./damage").BuildStats {
+  const next: import("./damage").BuildStats = {
+    ...stats,
+    sources: Object.fromEntries(
+      Object.entries(stats.sources).map(([k, v]) => [k, [...v]]),
+    ),
+  };
+  const wa = weapon.attributes;
+  const push = (attr: string, label: string, value: number) => {
+    if (value === 0) return;
+    const key = attr as keyof import("./damage").BuildStats;
+    (next[key] as number) += value;
+    (next.sources[attr] ??= []).push({ itemId: weapon.id, label, value });
+  };
+  push("wd", "Waffe — Kern", wa.core1);
+  const attrLabels: Record<string, string> = {
+    chc: "chc",
+    chd: "chd",
+    hsd: "hsd",
+    dth: "dth",
+    dta: "dta",
+    dttooc: "dttooc",
+    rof: "rof",
+  };
+  if (attrLabels[wa.core2Type]) {
+    push(attrLabels[wa.core2Type], "Waffe — Attribut 2", wa.core2Val);
+  }
+  if (attrLabels[wa.minorType]) {
+    push(attrLabels[wa.minorType], "Waffe — Attribut 3", wa.minorVal);
+  }
+  if (weapon.innateHsd) {
+    push("hsd", "Waffe — angeborener Kopfschuss", weapon.innateHsd);
+  }
+  return next;
+}
 
 function defaultSetBonusCatalog(): SetBonusCatalog {
   const gearDb = gearJson as unknown as {

@@ -488,3 +488,39 @@ describe("Waffen-Baum: +15 % WD je Spec universell (Nutzervorgabe final)", () =>
     }
   });
 });
+
+describe("Waffen-Attribute in der Übersicht/Herkunft (Bugfix 31.10.: Werte der Waffe fehlten)", () => {
+  const fill = (): GearPiece[] =>
+    (["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as GearSlot[]).map((s, i) =>
+      gear(s, "wd", [{ type: "chc", value: 9 }], `fill-${i}`),
+    );
+
+  it("Waffen-Kern, Attribut 2/3 und Innate-HSD erscheinen in Übersicht und Herkunfts-Tabelle", () => {
+    const lexingtonLike: typeof sampleWeapons[0] = {
+      ...sampleWeapons[0],
+      id: "w-lex",
+      name: "Lexington",
+      type: "ar",
+      innateHsd: 55,
+      attributes: {
+        core1: 22.5,
+        core2Type: "dth",
+        core2Val: 31.5,
+        minorType: "dttooc",
+        minorVal: 15,
+      },
+    };
+    const result = optimizeV4([lexingtonLike], fill(), modeCtx({ roleKey: "dps_krit" }));
+    expect(result.candidates.length).toBeGreaterThan(0);
+    const first = result.candidates[0];
+    const src = (attr: string, part: string) =>
+      (first.stats.sources[attr] ?? []).filter((x) => x.label.includes(part));
+    expect(src("wd", "Waffe — Kern").length).toBe(1);
+    expect(src("wd", "Waffe — Kern")[0].value).toBe(22.5);
+    expect(src("dth", "Waffe — Attribut 2")[0].value).toBe(31.5);
+    expect(src("dttooc", "Waffe — Attribut 3")[0].value).toBe(15);
+    expect(src("hsd", "angeborener Kopfschuss")[0].value).toBe(55);
+    expect(first.stats.dttooc).toBeGreaterThanOrEqual(15);
+    expect(first.stats.hsd).toBeGreaterThanOrEqual(55);
+  }, 30000);
+});
