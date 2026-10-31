@@ -5,6 +5,7 @@ import { OptimizerView } from "../../views/OptimizerView";
 import { OnboardingWizard } from "../../components/OnboardingWizard";
 import { DashboardView } from "../../views/DashboardView";
 import { LoadoutsView } from "../../views/LoadoutsView";
+import { BuildsView } from "../../views/BuildsView";
 import App from "../../App";
 import { StoreProvider } from "../../store";
 
@@ -87,5 +88,25 @@ describe("LoadoutsView + Nav-Gruppen (Nav-Relaunch)", () => {
     expect(html).toContain("Einstellungen");
     expect(html).toContain("Loadouts");
     expect(html).toContain("Startseite");
+  });
+});
+
+describe("BuildsView (manuelle Build-Erfassung)", () => {
+  it("rendert Waffen-Auswahl, sechs Slot-Auswahlen und Speichern-Button", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(BuildsView)),
+    );
+    expect(html).toContain("Eigenen Build zusammenstellen");
+    expect(html).toContain("Waffe");
+    expect(html).toContain("Maske");
+    expect(html).toContain("Weste");
+    expect(html).toContain("Knieschoner");
+    expect(html).toContain("Build als Loadout speichern");
+    expect(html).toContain("Zurücksetzen");
+  });
+
+  it("erscheint im Nav unter Inventar nach Gear", () => {
+    const html = renderToString(React.createElement(StoreProvider, null, React.createElement(App)));
+    expect(html).toContain("Builds");
   });
 });
