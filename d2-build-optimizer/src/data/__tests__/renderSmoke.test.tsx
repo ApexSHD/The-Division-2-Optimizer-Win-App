@@ -21,6 +21,6 @@ describe("OptimizerView Render-Smoke (Fix schwarzer Bildschirm)", () => {
     );
     expect(html).toContain("Teamgröße");
     expect(html).toContain("Skills (2 Plätze)");
-    expect(html).toContain("Kein Inventar erfasst");
+    expect(html).toContain("Noch keine Gear-Teile erfasst");
   });
 });

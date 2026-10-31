@@ -8,11 +8,11 @@ import {
 } from "../data/roleProfiles";
 import {
   optimizeV4,
-  reachability,
   bestGearModsForRole,
   type ModeContext,
   type V4BuildResult,
 } from "../data/operatingModes";
+import type { MinimumViolation } from "../data/roleProfiles";
 import { analyzeGaps, GAP_STAGE_C_NOTE, type GapRecommendation } from "../data/gapAnalysis";
 import {
   questionsForRole,
@@ -25,6 +25,27 @@ import { SKILLS, AXES } from "../data/v4Data";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
 import type { WeaponType } from "../data/sampleData";
+
+const ENEMY_PROFILE_PRESETS: Array<{ key: string; label: string; enemyHeadshotShare: number; hint: string }> = [
+  {
+    key: "standard",
+    label: "Standard",
+    enemyHeadshotShare: 0,
+    hint: "Bodyshots — Kopfschuss-Anteil 0 %.",
+  },
+  {
+    key: "kopfschuss",
+    label: "Kopfschuss-Fokus",
+    enemyHeadshotShare: 40,
+    hint: "Anteil der Treffer auf den Kopf 40 % — Voraussetzung für DPS-Kopfschuss-Rollen.",
+  },
+  {
+    key: "eigen",
+    label: "Eigen",
+    enemyHeadshotShare: -1,
+    hint: "Kopfschuss-Anteil frei einstellbar.",
+  },
+];
 
 const GEARSET_NAMES: string[] = Object.values(
   (gearJson as unknown as { green_set_info: Record<string, { name?: string }> }).green_set_info,
@@ -51,7 +72,7 @@ const SLOT_LABELS: Record<string, string> = {
   holster: "Holster",
   backpack: "Rucksack",
   gloves: "Handschuhe",
-  kneepads: "Kniekehlen",
+  kneepads: "Knieschoner",
 };
 
 const GEAR_ATTR_SHORT: Record<string, string> = {
@@ -156,8 +177,20 @@ function RadarChart({ normalized }: { normalized: Record<AxisKey, number> }) {
   );
 }
 
-function reachabilityPercentText(v: number | null): string {
-  return v === null ? "—" : `${v.toFixed(1)} %`;
+function violationText(v: MinimumViolation): string {
+  const actual =
+    v.actual === null || v.actual === undefined
+      ? "—"
+      : `${v.actual.toLocaleString("de-DE", { maximumFractionDigits: 1 })}${
+          v.kind === "headshot_share" || v.kind === "chc" ? " %" : ""
+        }`;
+  const required =
+    v.required === null || v.required === undefined
+      ? "—"
+      : `${v.required.toLocaleString("de-DE", { maximumFractionDigits: 1 })}${
+          v.kind === "headshot_share" || v.kind === "chc" ? " %" : ""
+        }`;
+  return `${v.label} — ist ${actual}, erforderlich ${required}`;
 }
 
 function valueText(v: number): string {
@@ -175,7 +208,6 @@ export function OptimizerView() {
   const [expertWeights, setExpertWeights] = useState<AxisWeights | null>(null);
   const [teamSize, setTeamSize] = useState(4);
   const [skillKeys, setSkillKeys] = useState<string[]>(["hive/restorer"]);
-  const [mode, setMode] = useState<"inventar" | "ziel">("inventar");
   const [targetSet, setTargetSet] = useState("");
   const [weaponType, setWeaponType] = useState<WeaponType | "">("");
   const [forcedWeaponId, setForcedWeaponId] = useState("");
@@ -183,8 +215,6 @@ export function OptimizerView() {
   const [requireSetBackpack, setRequireSetBackpack] = useState(true);
   const [result, setResult] = useState<{
     inventar: V4BuildResult;
-    ziel: V4BuildResult;
-    reach: ReturnType<typeof reachability>;
     gaps: GapRecommendation[];
     assumptions: EffectVector["assumptions"];
   } | null>(null);
@@ -215,6 +245,18 @@ export function OptimizerView() {
     () => suggestSpecialization(roleKey, effectiveWeights, teamSize, selectedSkills),
     [roleKey, effectiveWeights, teamSize, selectedSkills],
   );
+  const needsHeadshotShare = role.minima.some((m) => m.kind === "headshot_share");
+  const headshotShareMissing = needsHeadshotShare && store.optimization.enemyHeadshotShare <= 0;
+  const setEnemyHeadshotShare = (v: number) =>
+    store.setOptimization({ ...store.optimization, enemyHeadshotShare: v });
+  const selectedPreset =
+    ENEMY_PROFILE_PRESETS.find(
+      (p) => p.enemyHeadshotShare === store.optimization.enemyHeadshotShare,
+    ) ?? ENEMY_PROFILE_PRESETS[2];
+  const selectPreset = (presetKey: string) => {
+    const preset = ENEMY_PROFILE_PRESETS.find((p) => p.key === presetKey);
+    if (preset && preset.enemyHeadshotShare >= 0) setEnemyHeadshotShare(preset.enemyHeadshotShare);
+  };
 
   const runOptimization = () => {
     if (store.weapons.length === 0 || store.gear.length === 0) return;
@@ -246,19 +288,15 @@ export function OptimizerView() {
       }).slots;
       const opts = { modsBySlot };
       const inventar = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "inventar" }, opts);
-      const ziel = optimizeV4(store.weapons, store.gear, { ...ctx, mode: "ziel" }, opts);
-      const reach = reachability(inventar, ziel);
       const gaps = analyzeGaps({
         weapons: store.weapons,
         inventarGear: store.gear,
         fullGear: store.gear,
         ctx,
       });
-      const bestVector = inventar.best?.vector;
+      const bestVector = (inventar.best ?? inventar.ranked[0])?.vector;
       setResult({
         inventar,
-        ziel,
-        reach,
         gaps: gaps.recommendations,
         assumptions: bestVector ? bestVector.assumptions : [],
       });
@@ -266,7 +304,9 @@ export function OptimizerView() {
     }, 30);
   };
 
-  const bestBuild: ScoredBuild | null = result?.inventar.best ?? null;
+  const bestBuild: ScoredBuild | null = result?.inventar.best ?? result?.inventar.ranked[0] ?? null;
+  const bestIsApproximation = Boolean(result && !result.inventar.best && result.inventar.ranked.length > 0);
+  const bestViolations: MinimumViolation[] = bestBuild?.violations ?? [];
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -447,6 +487,64 @@ export function OptimizerView() {
         </div>
       </section>
 
+      <section className="field" style={{ display: "grid", gap: 10 }}>
+        <strong>Rahmen — Gegnerprofil & CHC-Ziel (früher „Global“)</strong>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            Gegnerprofil
+            <select value={selectedPreset.key} onChange={(e) => selectPreset(e.target.value)}>
+              {ENEMY_PROFILE_PRESETS.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            Kopfschuss-Anteil
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={store.optimization.enemyHeadshotShare}
+              onChange={(e) => setEnemyHeadshotShare(Math.max(0, Math.min(100, Number(e.target.value))))}
+              style={{ width: 64, textAlign: "center" }}
+            />
+            <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>%</span>
+          </label>
+          <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            CHC-Zielwert
+            <input
+              type="number"
+              min={10}
+              max={60}
+              value={store.optimization.targetChc}
+              onChange={(e) =>
+                store.setOptimization({
+                  ...store.optimization,
+                  targetChc: Math.max(10, Math.min(60, Number(e.target.value))),
+                })}
+              style={{ width: 64, textAlign: "center" }}
+            />
+            <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>%</span>
+          </label>
+        </div>
+        <small style={{ color: "var(--text-dim, #aaa)" }}>
+          {selectedPreset.hint} Alle Werte wirken direkt auf die nächste Berechnung. Charakterdaten (SHD, Spezialisierung) bleiben in „Global“.
+        </small>
+        {headshotShareMissing && (
+          <div style={{ border: "1px solid var(--warn, #e6a23c)", borderRadius: 6, padding: "6px 10px", background: "rgba(230,162,60,0.08)", display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <span>
+              <strong>Voraussetzung der Rolle {role.name} nicht erfüllt:</strong> Der Kopfschuss-Anteil
+              im Gegnerprofil muss über 0 % liegen, sonst ist kein zulässiges Build möglich.
+            </span>
+            <button className="btn" onClick={() => setEnemyHeadshotShare(40)}>
+              Kopfschuss-Anteil auf 40 % setzen
+            </button>
+          </div>
+        )}
+      </section>
+
       <section className="field" style={{ display: "grid", gap: 8 }}>
         <strong>Spezialisierungs-Vorschlag (Ergebnis, kein Eingabefeld)</strong>
         <div>
@@ -530,16 +628,14 @@ export function OptimizerView() {
         <button className="btn btn-primary" onClick={runOptimization} disabled={running || store.gear.length === 0}>
           {running ? "Berechne…" : "Builds berechnen"}
         </button>
-        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          Betriebsart
-          <select value={mode} onChange={(e) => setMode(e.target.value as "inventar" | "ziel")}>
-            <option value="inventar">Inventar-Build</option>
-            <option value="ziel">Ziel-Build</option>
-          </select>
-        </label>
+        {store.weapons.length === 0 && (
+          <span style={{ color: "var(--warn, #e6a23c)" }}>
+            Noch keine Waffen erfasst — bitte zuerst Waffen importieren (Ansicht „Waffen“, CSV-Import).
+          </span>
+        )}
         {store.gear.length === 0 && (
           <span style={{ color: "var(--warn, #e6a23c)" }}>
-            Kein Inventar erfasst — bitte zuerst Gear anlegen.
+            Noch keine Gear-Teile erfasst — bitte zuerst Gear importieren (Ansicht „Gear“, CSV-Import).
           </span>
         )}
       </section>
@@ -547,17 +643,34 @@ export function OptimizerView() {
       {result && (
         <>
           <section className="field" style={{ display: "grid", gap: 10 }}>
-            <strong>Ergebnis — {mode === "inventar" ? "Inventar-Build" : "Ziel-Build"}</strong>
-            {result.inventar.noAdmissibleHint && (
+            <strong>Ergebnis — Inventar-Build</strong>
+            {bestIsApproximation && (
+              <div style={{ border: "1px solid var(--warn, #e6a23c)", borderRadius: 6, padding: "6px 10px", background: "rgba(230,162,60,0.08)" }}>
+                <strong>Kein zulässiges Build — Beste Näherung:</strong> Dieses Build verletzt die
+                Mindestanforderungen der Rolle. Details siehe unten („Nicht erfüllte Anforderungen").
+                Behebungsvorschläge finden sich in der Lückenanalyse.
+              </div>
+            )}
+            {result.inventar.noAdmissibleHint && !bestIsApproximation && (
               <div style={{ color: "var(--warn, #e6a23c)" }}>{result.inventar.noAdmissibleHint}</div>
             )}
             {result.inventar.skillHint && (
               <div style={{ color: "var(--warn, #e6a23c)" }}>{result.inventar.skillHint}</div>
             )}
-            <div>
-              Erreichungsgrad (Inventar / Ziel):{" "}
-              <strong>{reachabilityPercentText(result.reach.reachabilityPercent)}</strong>
-            </div>
+            {bestViolations.length > 0 && (
+              <details style={{ border: "1px solid var(--warn, #e6a23c)", borderRadius: 6, padding: "6px 10px" }}>
+                <summary style={{ cursor: "pointer", color: "var(--warn, #e6a23c)" }}>
+                  <strong>Nicht erfüllte Anforderungen ({bestViolations.length})</strong>
+                </summary>
+                <ul style={{ margin: "6px 0 0", paddingLeft: 18, fontSize: 13 }}>
+                  {bestViolations.map((v, i) => (
+                    <li key={`${v.kind}-${i}`}>
+                      {violationText(v)}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
             {bestBuild && (
               <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
                 <RadarChart normalized={bestBuild.normalized} />

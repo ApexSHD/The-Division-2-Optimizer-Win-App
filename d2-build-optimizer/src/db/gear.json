@@ -438,7 +438,7 @@
     },
     "Festive Delivery": {
       "slot": "Rucksack",
-      "brand": "Grupo Shadow S.A.",
+      "brand": "Grupo Sombra S.A.",
       "cls": "named",
       "proto": true,
       "core": "wd",
@@ -632,7 +632,7 @@
     },
     "Door-Kicker's Knock": {
       "slot": "Weste",
-      "brand": "Grupo Shadow S.A.",
+      "brand": "Grupo Sombra S.A.",
       "cls": "named",
       "proto": true,
       "core": "wd",
@@ -2399,7 +2399,7 @@
       "wd_bonus": "2p: +24% Shotgun-Schaden"
     },
     "grupo": {
-      "name": "Grupo Shadow S.A.",
+      "name": "Grupo Sombra S.A.",
       "group": "dps",
       "fragments": [
         "grupo",
