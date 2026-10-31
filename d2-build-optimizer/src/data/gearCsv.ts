@@ -1,5 +1,6 @@
 import type { GearPiece, GearSlot, GearCoreType, GearAttrKey } from "./sampleData";
 import { GEAR_CORE_LABELS, GEAR_ATTR_TYPES, normalizeGear, gearCoreMax } from "./sampleData";
+import { resolveNameAlias } from "./aliasResolver";
 
 const CSV_SEPARATOR = ";";
 
@@ -12,6 +13,7 @@ const HEADERS = [
   "2. Attribut",
   "3. Attribut",
   "Talent",
+  "Mod",
 ];
 
 const SLOT_LABELS: Record<GearSlot, string> = {
@@ -57,6 +59,7 @@ export function gearToCsv(gear: GearPiece[]): string {
         attrs[0] ?? "",
         attrs[1] ?? "",
         g.talent ?? "",
+        g.mod ? `${GEAR_ATTR_TYPES[g.mod.attr]?.label ?? g.mod.attr} +${formatNumberDe(g.mod.value)}` : "",
       ]
         .map(csvEscape)
         .join(CSV_SEPARATOR),
@@ -182,17 +185,29 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
   const a2Idx = col("2. attribut");
   const a3Idx = col("3. attribut");
   const talentIdx = col("talent");
+  const modIdx = col("mod");
 
   const gear: GearPiece[] = [];
   const warnings: string[] = [];
   let skippedRows = 0;
   outer: for (const line of lines.slice(1)) {
     const cells = splitCsvLine(line);
-    const brand = (cells[brandIdx] ?? "").trim();
-    if (!brand) {
+    const brandRaw = (cells[brandIdx] ?? "").trim();
+    if (!brandRaw) {
       warnings.push(`Zeile übersprungen — Spalte „Marke/Set“ ist leer. Bitte Marke oder Set ergänzen.`);
       skippedRows++;
       continue;
+    }
+    const brandResolved = resolveNameAlias(brandRaw, "brands");
+    const brandSetResolved = resolveNameAlias(brandRaw, "gearsets");
+    const brand =
+      brandSetResolved.suggestionUsed || brandSetResolved.canonical !== brandRaw
+        ? brandSetResolved.canonical
+        : brandResolved.canonical;
+    if (brand !== brandRaw) {
+      warnings.push(
+        `„${brandRaw}“ als „${brand}“ erkannt (Alias-Tabelle).`,
+      );
     }
     const brandType = rarityIdx >= 0 ? parseRarity(cells[rarityIdx] ?? "") : "brand";
     const isExotic = brandType === "exotic";
@@ -240,7 +255,21 @@ export function gearFromCsv(csv: string, makeId: () => string): GearCsvImportRes
             )
           : undefined,
         attributes: attrs,
-        talent: talentIdx >= 0 && (cells[talentIdx] ?? "").trim() ? (cells[talentIdx] ?? "").trim() : null,
+        mod: (() => {
+          const rawMod = modIdx >= 0 ? (cells[modIdx] ?? "").trim() : "";
+          if (!rawMod) return null;
+          const parsed = parseAttr(rawMod);
+          return parsed ? { attr: parsed.type, value: parsed.value } : null;
+        })(),
+        talent: (() => {
+          const rawTalent = talentIdx >= 0 ? (cells[talentIdx] ?? "").trim() : "";
+          if (!rawTalent) return null;
+          const resolved = resolveNameAlias(rawTalent, "talents");
+          if (resolved.canonical !== rawTalent) {
+            warnings.push(`Talent „${rawTalent}“ als „${resolved.canonical}“ erkannt (Alias-Tabelle).`);
+          }
+          return resolved.canonical;
+        })(),
         prototype: protoIdx >= 0
           ? (cells[protoIdx] ?? "").trim().toLowerCase().startsWith("j") && !isExotic
           : !isExotic,

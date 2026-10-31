@@ -4,6 +4,7 @@ import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
 import type { Column } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
+import { ImportPreview, type PreviewRow } from "../components/ImportPreview";
 import { ChartPlaceholder } from "../components/ChartPlaceholder";
 import { getDb } from "../data/db";
 import type { WeaponPreset, DisplayTalent } from "../data/db";
@@ -119,6 +120,12 @@ export function WeaponsView() {
     });
   }
 
+  function onSaveAndNext() {
+    onSave();
+    if (!editing || !editing.name.trim()) return;
+    openNew();
+  }
+
   function onSave() {
     if (!editing) return;
     if (!editing.name.trim()) {
@@ -175,25 +182,75 @@ export function WeaponsView() {
     }
   }
 
-  async function onImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  const [preview, setPreview] = useState<{
+    fileName: string;
+    rows: PreviewRow[];
+    weapons: Weapon[];
+    skippedRows: number;
+    warnings: string[];
+  } | null>(null);
+
+  async function readImportFile(file: File) {
     try {
       const text = await file.text();
       const { weapons, skippedRows, warnings } = weaponsFromCsv(text, () =>
         `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       );
-      if (weapons.length === 0) {
-        store.setStatus("CSV-Import: keine gültigen Waffen gefunden");
-        return;
+      const rows: PreviewRow[] = weapons.map((w, i) => ({
+        key: `${w.id}-${i}`,
+        label: `${w.name} (${w.type.toUpperCase()}${w.talent ? ` · ${w.talent}` : ""})`,
+        detail: w.isPrototype ? "Prototyp — Kern/Attribute mit Prototyp-Maximum" : "",
+        status: "ok" as const,
+      }));
+      const warned = new Set<string>();
+      for (const warning of warnings) {
+        const match = warning.match(/^„(.+?)“/);
+        const key = match ? match[1] : warning;
+        if (warned.has(key)) continue;
+        warned.add(key);
+        const rowIdx = rows.findIndex((r) => r.label.startsWith(`${key} (`) || r.label === key);
+        if (rowIdx >= 0) {
+          rows[rowIdx] = { ...rows[rowIdx], status: "warn", detail: warning };
+        } else {
+          rows.push({ key: `warn-${rows.length}`, label: key, detail: warning, status: "warn" });
+        }
       }
-      const weaponKey = (w: import("../data/sampleData").Weapon) =>
-        `${w.name}::${w.type}::${w.baseDamage}::${w.knowHow}::${w.modSlots.join(",")}::${w.attributes.core1}::${w.attributes.core2Type ?? ""}::${w.attributes.core2Val ?? 0}`;
+      if (weapons.length === 0 && skippedRows > 0) {
+        rows.push({
+          key: "no-rows",
+          label: `${skippedRows} Zeile(n) unlesbar`,
+          detail: warnings.join(" · ") || "Spalten passen nicht zur Vorlage.",
+          status: "error",
+        });
+      }
+      setPreview({ fileName: file.name, rows, weapons, skippedRows, warnings });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      store.setStatus(
+        `CSV-Import fehlgeschlagen: ${msg}. Lösung: Spalten „Name“, „Typ“, „Attribut 1–3“ prüfen — Vorlage über „CSV exportieren“ erzeugen und daran orientieren.`,
+      );
+    }
+  }
+
+  async function onImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await readImportFile(file);
+  }
+
+  function confirmImport(mode: "replace" | "merge") {
+    if (!preview) return;
+    const weaponKey = (w: Weapon) =>
+      `${w.name}::${w.type}::${w.baseDamage}::${w.knowHow}::${w.modSlots.join(",")}::${w.attributes.core1}::${w.attributes.core2Type ?? ""}::${w.attributes.core2Val ?? 0}`;
+    if (mode === "replace") {
+      store.setWeapons(preview.weapons);
+      store.setStatus(`${preview.weapons.length} Waffe(n) importiert (Inventar ersetzt)`);
+    } else {
       const seen = new Set(store.weapons.map(weaponKey));
-      const toImport: import("../data/sampleData").Weapon[] = [];
+      const toImport: Weapon[] = [];
       let duplicates = 0;
-      for (const w of weapons) {
+      for (const w of preview.weapons) {
         const key = weaponKey(w);
         if (seen.has(key)) {
           duplicates++;
@@ -204,16 +261,10 @@ export function WeaponsView() {
       }
       store.addWeaponBulk(toImport);
       const parts = [`${toImport.length} Waffe(n) importiert`];
-      if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen (nur bei identischen Werten)`);
-      if (skippedRows) parts.push(`${skippedRows} Zeile(n) ungültig`);
-      if (warnings.length) parts.push(`⚠ ${warnings.join(" ⚠ ")}`);
+      if (duplicates) parts.push(`${duplicates} Duplikat(e) übersprungen`);
       store.setStatus(parts.join(", "));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      store.setStatus(
-        `CSV-Import fehlgeschlagen: ${msg}. Lösung: Spalten „Name“, „Typ“, „Attribut 1–3“ prüfen — Vorlage über „CSV exportieren“ erzeugen und daran orientieren.`,
-      );
     }
+    setPreview(null);
   }
 
   const columns: Column<Weapon>[] = [
@@ -360,6 +411,28 @@ export function WeaponsView() {
         }
       />
 
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files?.[0];
+          if (file && file.name.toLowerCase().endsWith(".csv")) readImportFile(file);
+        }}
+      >
+      </div>
+
+      <ImportPreview
+        open={preview !== null}
+        title="CSV-Import — Vorschau (Waffen)"
+        fileName={preview?.fileName ?? ""}
+        rows={preview?.rows ?? []}
+        itemCount={preview?.weapons.length ?? 0}
+        skippedRows={preview?.skippedRows ?? 0}
+        existingCount={store.weapons.length}
+        onCancel={() => setPreview(null)}
+        onConfirm={confirmImport}
+      />
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 16 }}>
         <ChartPlaceholder label={`${t.compare.rpmChart} (RPM)`} />
         <ChartPlaceholder label={t.compare.topWeapons} />
@@ -377,6 +450,11 @@ export function WeaponsView() {
             <span className="spacer" />
             <button className="btn" onClick={() => setPanelOpen(false)}>{t.common.cancel}</button>
             <button className="btn btn-accent" onClick={onSave}>{t.common.save}</button>
+            {isNew && (
+              <button className="btn btn-accent" onClick={onSaveAndNext} title="Speichern und direkt die nächste Waffe erfassen">
+                Speichern + nächste
+              </button>
+            )}
           </>
         }
       >

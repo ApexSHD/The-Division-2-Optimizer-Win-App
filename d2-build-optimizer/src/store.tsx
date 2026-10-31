@@ -212,10 +212,12 @@ export interface AppState {
   setProgress: (p: number | null) => void;
   addWeapon: (w: Weapon) => void;
   addWeaponBulk: (ws: Weapon[]) => void;
+  setWeapons: (ws: Weapon[]) => void;
   updateWeapon: (w: Weapon) => void;
   removeWeapon: (id: string) => void;
   addGear: (g: GearPiece) => void;
   addGearBulk: (gs: GearPiece[]) => void;
+  setGear: (gs: GearPiece[]) => void;
   updateGear: (g: GearPiece) => void;
   removeGear: (id: string) => void;
   profiles: Profile[];
@@ -392,6 +394,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setProgress,
     addWeapon: (w) => mutate((d) => ({ ...d, weapons: [...d.weapons, w] })),
     addWeaponBulk: (ws) => mutate((d) => (ws.length === 0 ? d : { ...d, weapons: [...d.weapons, ...ws] })),
+    setWeapons: (ws) => mutate((d) => ({ ...d, weapons: ws })),
     updateWeapon: (w) =>
       mutate((d) => ({ ...d, weapons: d.weapons.map((x) => (x.id === w.id ? w : x)) })),
     removeWeapon: (id) =>
@@ -402,6 +405,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })),
     addGear: (g) => mutate((d) => ({ ...d, gear: [...d.gear, g] })),
     addGearBulk: (gs) => mutate((d) => (gs.length === 0 ? d : { ...d, gear: [...d.gear, ...gs] })),
+    setGear: (gs) => mutate((d) => ({ ...d, gear: gs })),
     updateGear: (g) =>
       mutate((d) => ({ ...d, gear: d.gear.map((x) => (x.id === g.id ? g : x)) })),
     removeGear: (id) =>
