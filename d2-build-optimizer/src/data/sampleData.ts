@@ -232,6 +232,22 @@ export interface Build {
   timestamp: string;
 }
 
+export interface LoadoutMetrics {
+  dps: number;
+  chc: number;
+  chd: number;
+  wd: number;
+  hsd: number;
+  armor: number;
+}
+
+export interface Loadout extends Build {
+  roleId: string;
+  assumptions: string[];
+  metrics: LoadoutMetrics;
+  dbVersion: string;
+}
+
 export const DB_VERSION = "weapons_v1 · gear_v1 · mods_v1";
 
 export const sampleWeapons: Weapon[] = [

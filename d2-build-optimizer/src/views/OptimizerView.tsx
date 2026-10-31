@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useStore, DEFAULT_OPTIMIZATION } from "../store";
 import {
   GOALS,
@@ -11,7 +11,9 @@ import {
   bestGearModsForRole,
   type ModeContext,
   type V4BuildResult,
+  type V4Candidate,
 } from "../data/operatingModes";
+import type { GearPiece, GearSlot } from "../data/sampleData";
 import type { MinimumViolation } from "../data/roleProfiles";
 import { analyzeGaps, GAP_STAGE_C_NOTE, type GapRecommendation } from "../data/gapAnalysis";
 import {
@@ -24,7 +26,8 @@ import {
 import { SKILLS, AXES } from "../data/v4Data";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
-import type { WeaponType, Build } from "../data/sampleData";
+import { DB_VERSION } from "../data/sampleData";
+import type { WeaponType, Loadout, LoadoutMetrics } from "../data/sampleData";
 
 const ENEMY_PROFILE_PRESETS: Array<{ key: string; label: string; enemyHeadshotShare: number; hint: string }> = [
   {
@@ -193,6 +196,255 @@ function violationText(v: MinimumViolation): string {
   return `${v.label} — ist ${actual}, erforderlich ${required}`;
 }
 
+const RARITY_LABELS: Record<string, string> = {
+  brand: "High-End",
+  gearset: "Gear-Set",
+  named: "Named",
+  exotic: "Exotic",
+};
+
+const CORE_LABELS: Record<string, string> = {
+  wd: "Waffenschaden",
+  armour: "Rüstung",
+  skill: "Skill-Stufe",
+};
+
+function SlotTile({
+  item,
+  changed,
+}: {
+  item: GearPiece | null;
+  changed: boolean;
+}) {
+  if (!item) {
+    return <div className="field" style={{ border: "1px dashed var(--border, #555)", borderRadius: 6, padding: 8, minHeight: 96 }}>—</div>;
+  }
+  const attrs = item.attributes
+    .map((a) => `${GEAR_ATTR_SHORT[a.type] ?? a.type} +${a.value.toLocaleString("de-DE")}`)
+    .join(", ");
+  return (
+    <div
+      className="field"
+      style={{
+        border: `1px solid ${changed ? "var(--ok, #67c23a)" : "var(--border, #555)"}`,
+        borderRadius: 6,
+        padding: 8,
+        minHeight: 96,
+        position: "relative",
+        background: changed ? "rgba(103,194,58,0.05)" : undefined,
+      }}
+      title={changed ? "Weicht vom aktuell getragenen Build ab" : undefined}
+    >
+      <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
+        {SLOT_LABELS[item.slot] ?? item.slot} {changed && <span title="Weicht vom aktuell getragenen Build ab">≠</span>}
+      </div>
+      <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>
+        {item.brand} <span style={{ fontSize: 10, color: "var(--text-dim, #aaa)" }}>({RARITY_LABELS[item.brandType] ?? item.brandType})</span>
+      </div>
+      <div style={{ fontSize: 12, lineHeight: 1.4 }}>
+        {CORE_LABELS[item.core] ?? item.core}
+        {item.core !== "skill" && item.coreValue !== undefined
+          ? ` +${item.coreValue.toLocaleString("de-DE")}${item.core === "wd" ? " %" : ""}`
+          : ""}
+      </div>
+      {attrs && <div style={{ fontSize: 11, lineHeight: 1.4 }}>{attrs}</div>}
+      {item.talent && (
+        <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{item.talent}</div>
+      )}
+    </div>
+  );
+}
+
+function LoadoutCard({
+  result,
+  cand,
+  roleChcTarget,
+}: {
+  result: V4BuildResult;
+
+  cand: V4Candidate;
+  roleChcTarget: number | null;
+}) {
+  const store = useStore();
+  const active = store.builds.find((b) => b.id === store.activeBuildId) ?? null;
+  const activeGearIds = new Set(Object.values(active?.gearIds ?? {}));
+  const bySlot = new Map<GearSlot, GearPiece>(cand.gear.map((g) => [g.slot as GearSlot, g]));
+  const stats = cand.stats;
+  const dpsTop = Math.max(
+    ...result.ranked.map((b) => result.candidates.find((c) => c.id === b.id)?.damage.effectiveDps ?? 0),
+  );
+  const dpsValue = cand.damage.effectiveDps;
+  const dpsShare = dpsTop > 0 ? (100 * dpsValue) / dpsTop : 100;
+  const activeMetrics = active?.metrics ?? null;
+  const dpsDeltaActive =
+    activeMetrics && activeMetrics.dps > 0
+      ? `${(((dpsValue - activeMetrics.dps) / activeMetrics.dps) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`
+      : null;
+  const chcCapped = Math.min(60, stats.chc);
+  const chcState =
+    roleChcTarget === null
+      ? "Ziel nicht relevant für diese Rolle"
+      : chcCapped + 0.01 >= (roleChcTarget ?? 0)
+        ? `Ziel erreicht (${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % ≥ ${roleChcTarget} %)`
+        : `Ziel verfehlt (${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} % < ${roleChcTarget} %)`;
+  const metrics: Array<[string, string, string]> = [
+    ["Effektiver DPS", dpsValue.toLocaleString("de-DE", { maximumFractionDigits: 0 }), dpsDeltaActive ? `Δ zu aktiv: ${dpsDeltaActive}` : "Kein aktives Loadout als Referenz"],
+    ["Kritische Trefferchance (CHC)", `${chcCapped.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %${stats.chc > 60 ? " (über Cap gedeckelt)" : ""}`, chcState],
+    ["Kritischer Trefferschaden (CHD)", `+${stats.chd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, `Cap 60 % für CHC beachtet`],
+    ["Waffenschaden (WD)", `+${stats.wd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, ""],
+    ["Kopfschussschaden (HSD)", `+${stats.hsd.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`, ""],
+  ];
+  return (
+    <div style={{ display: "grid", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+        {metrics.map(([label, value, hint]) => (
+          <div key={label} className="field" style={{ margin: 0, padding: "6px 10px", borderRadius: 6 }}>
+            <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{label}</div>
+            <div style={{ fontSize: 16, fontWeight: 600 }}>{value}</div>
+            {hint && <div style={{ fontSize: 10, color: "var(--text-dim, #aaa)" }}>{hint}</div>}
+          </div>
+        ))}
+      </div>
+      <div>
+        <div style={{ fontSize: 12, color: "var(--text-dim, #aaa)", marginBottom: 4 }}>
+          DPS-Anteil am besten Ergebnis: {dpsShare.toLocaleString("de-DE", { maximumFractionDigits: 1 })} %
+        </div>
+        <div style={{ height: 8, borderRadius: 4, background: "var(--border, #555)", overflow: "hidden" }}>
+          <div style={{ width: `${Math.max(0, Math.min(100, dpsShare))}%`, height: "100%", background: "var(--accent, #4f9cf9)" }} />
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
+        {(["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const).map((slot) => (
+          <SlotTile key={slot} item={bySlot.get(slot) ?? null} changed={!activeGearIds.has(bySlot.get(slot)?.id ?? "")} />
+        ))}
+        <SlotTile item={null} changed={false} />
+        <div
+          className="field"
+          style={{ border: "1px solid var(--border, #555)", borderRadius: 6, padding: 8, minHeight: 96, gridColumn: "span 2" }}
+        >
+          <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>Waffe 1</div>
+          <div style={{ fontWeight: 600, fontSize: 13 }}>
+            {cand.weapon.name} <span style={{ fontSize: 10, color: "var(--text-dim, #aaa)" }}>({cand.weapon.type.toUpperCase()})</span>
+          </div>
+          <div style={{ fontSize: 12 }}>
+            Grundschaden {cand.weapon.baseDamage.toLocaleString("de-DE")} · {cand.weapon.rpm} RPM
+          </div>
+          {cand.weapon.talent && (
+            <div style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{cand.weapon.talent}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AlternativesList({
+  result,
+  activeMetrics,
+}: {
+  result: V4BuildResult;
+  activeMetrics: LoadoutMetrics | null;
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const rows = result.ranked.map((b) => ({
+    scored: b,
+    cand: result.candidates.find((c) => c.id === b.id),
+  }));
+  const bestDps = Math.max(
+    ...rows.map((r) => r.cand?.damage.effectiveDps ?? 0),
+    0,
+  );
+  const weaponBest = new Map<string, { row: (typeof rows)[number]; rank: number }>();
+  for (const row of rows) {
+    const wid = row.cand?.weapon.id;
+    if (wid && !weaponBest.has(wid)) weaponBest.set(wid, { row, rank: weaponBest.size + 1 });
+  }
+  return (
+    <div style={{ display: "grid", gap: 8 }}>
+      <strong>Alternativen</strong>
+      <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={{ textAlign: "left" }}>Rang</th>
+            <th style={{ textAlign: "left" }}>Waffe</th>
+            <th style={{ textAlign: "left" }}>Schwerpunkt</th>
+            <th style={{ textAlign: "right" }}>DPS</th>
+            <th style={{ textAlign: "right" }}>Δ zu Rang 1</th>
+            {activeMetrics && <th style={{ textAlign: "right" }}>Δ zu aktiv</th>}
+            <th style={{ textAlign: "left" }}>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 12).map((r, i) => {
+            const dps = r.cand?.damage.effectiveDps ?? 0;
+            const deltaTop =
+              bestDps > 0
+                ? `${(((dps - bestDps) / bestDps) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`
+                : "—";
+            const deltaActive =
+              activeMetrics && activeMetrics.dps > 0
+                ? `${(((dps - activeMetrics.dps) / activeMetrics.dps) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %`
+                : null;
+            const setCount = new Set(
+              r.cand?.gear.filter((g) => g.brandType === "gearset").map((g) => g.brand) ?? [],
+            );
+            const brandCount = new Set(
+              r.cand?.gear.filter((g) => g.brandType === "brand").map((g) => g.brand) ?? [],
+            );
+            const focus = [
+              setCount.size > 0 ? `${[...setCount].join("/")}` : null,
+              brandCount.size > 0 ? `${brandCount.size} Marke(n)` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ");
+            return (
+              <React.Fragment key={r.scored.id}>
+                <tr
+                  style={{ cursor: "pointer", background: expanded === r.scored.id ? "rgba(79,156,249,0.08)" : undefined }}
+                  onClick={() => setExpanded(expanded === r.scored.id ? null : r.scored.id)}
+                >
+                  <td>{i + 1}</td>
+                  <td>{r.cand?.weapon.name ?? "—"}</td>
+                  <td style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>{focus || "—"}</td>
+                  <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                    {dps.toLocaleString("de-DE", { maximumFractionDigits: 0 })}
+                  </td>
+                  <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{deltaTop}</td>
+                  {activeMetrics && (
+                    <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>{deltaActive ?? "—"}</td>
+                  )}
+                  <td>
+                    {r.scored.admissible
+                      ? "✓ Zulässig"
+                      : `⚠ Näherung (${r.scored.violationCount} Verletzung(en))`}
+                  </td>
+                </tr>
+                {expanded === r.scored.id && r.cand && (
+                  <tr>
+                    <td colSpan={activeMetrics ? 7 : 6} style={{ fontSize: 11, color: "var(--text-dim, #aaa)", paddingBottom: 6 }}>
+                      {partsLabel(r.cand.gear, r.cand.weapon.name)}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={{ fontSize: 12 }}>
+        <strong>Bestes Build je Waffe:</strong>{" "}
+        {[...weaponBest.entries()]
+          .map(([wid, { row, rank }]) => `${row.cand?.weapon.name ?? wid} (Rang ${rank})`)
+          .join(" · ") || "—"}
+      </div>
+      <small style={{ color: "var(--text-dim, #aaa)" }}>
+        Klick auf eine Zeile zeigt die Teile. Ranggröße ist der absolute effektive DPS; der interne
+        Score wird nicht mehr angezeigt.
+      </small>
+    </div>
+  );
+}
+
 function valueText(v: number): string {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(2)} M`;
   if (v >= 1_000) return `${(v / 1_000).toFixed(1)} k`;
@@ -230,7 +482,7 @@ export function OptimizerView() {
     const name =
       loadoutName.trim() ||
       `${role.name} — ${cand.weapon.name} (${new Date().toLocaleDateString("de-DE")})`;
-    const build: Build = {
+    const build: Loadout = {
       id: `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       name,
       weaponIds: [cand.weapon.id],
@@ -239,6 +491,17 @@ export function OptimizerView() {
         ? `Beste Näherung — ${bestViolations.map((v) => v.label).join("; ")}`
         : `Gespeichert aus dem Optimierer (Rolle: ${role.name})`,
       timestamp: new Date().toISOString(),
+      roleId: roleKey,
+      assumptions: result.assumptions.map((a) => a.label),
+      metrics: {
+        dps: cand.damage.effectiveDps,
+        chc: cand.stats.chc,
+        chd: cand.stats.chd,
+        wd: cand.stats.wd,
+        hsd: cand.stats.hsd,
+        armor: bestBuild.vector.ehp,
+      },
+      dbVersion: DB_VERSION,
     };
     store.addBuild(build);
     store.setActiveBuildId(build.id);
@@ -712,25 +975,26 @@ export function OptimizerView() {
                 </div>
               </div>
             )}
-            {bestBuild && (
-              <div style={{ fontSize: 13 }}>
-                {(() => {
-                  const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
-                  return cand ? (
-                    <div style={{ marginBottom: 6 }}>
-                      <strong>Teile:</strong> {partsLabel(cand.gear, cand.weapon.name)}
-                    </div>
-                  ) : null;
-                })()}
-                <strong>Begründung:</strong>{" "}
-                {AXES.filter((a) => bestBuild.normalized[a] > 0)
-                  .map(
-                    (a) =>
-                      `${AXIS_LABELS[a]} ${bestBuild.normalized[a].toFixed(0)} %`,
-                  )
-                  .join(" · ")}
-              </div>
-            )}
+            {bestBuild && (() => {
+              const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+              if (!cand) return null;
+              return <LoadoutCard result={result.inventar} cand={cand} roleChcTarget={role.chcTarget} />;
+            })()}
+            {bestBuild && (() => {
+              const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+              if (!cand) return null;
+              return (
+                <div style={{ fontSize: 13 }}>
+                  <strong>Warum dieses Build?</strong>{" "}
+                  {AXES.filter((a) => bestBuild.normalized[a] > 0)
+                    .map(
+                      (a) =>
+                        `${AXIS_LABELS[a]} ${bestBuild.normalized[a].toFixed(0)} %`,
+                    )
+                    .join(" · ")}
+                </div>
+              );
+            })()}
             {bestBuild && (() => {
               const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
               if (!cand) return null;
@@ -825,34 +1089,7 @@ export function OptimizerView() {
                 </>
               );
             })()}
-            <details>
-              <summary style={{ cursor: "pointer" }}>Top-Builds ({result.inventar.ranked.length})</summary>
-              <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Score</th>
-                    <th>Zulässig</th>
-                    <th>Teile</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.inventar.ranked.slice(0, 10).map((b, i) => {
-                    const cand = result.inventar.candidates.find((c) => c.id === b.id);
-                    return (
-                      <tr key={b.id}>
-                        <td>{i + 1}</td>
-                        <td>{b.score.toFixed(1)}</td>
-                        <td>{b.admissible ? "✓" : `✗ (${b.violationCount})`}</td>
-                        <td style={{ fontSize: 11, color: "var(--text-dim, #aaa)" }}>
-                          {cand ? partsLabel(cand.gear, cand.weapon.name) : b.id}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </details>
+            <AlternativesList result={result.inventar} activeMetrics={store.builds.find((b) => b.id === store.activeBuildId)?.metrics ?? null} />
           </section>
 
           <section className="field" style={{ display: "grid", gap: 8 }}>
