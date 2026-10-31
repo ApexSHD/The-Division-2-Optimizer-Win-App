@@ -15,6 +15,18 @@ import {
   gearCoreMax,
 } from "../data/sampleData";
 import { gearToCsv, gearFromCsv } from "../data/gearCsv";
+import modsJson from "../db/mod.json";
+
+const GEAR_MOD_DB_VALUES: Record<string, number> = (() => {
+  const db = modsJson as unknown as {
+    gear_mods?: Record<string, Array<{ attr: string; val: number }>>;
+  };
+  const out: Record<string, number> = {};
+  for (const list of Object.values(db.gear_mods ?? {})) {
+    for (const m of list) out[m.attr] = m.val;
+  }
+  return out;
+})();
 import { ImportPreview, type PreviewRow } from "../components/ImportPreview";
 
 function newGear(id: string): GearPiece {
@@ -768,6 +780,61 @@ export function GearView() {
                 </p>
               )}
             </Field>
+
+            {["mask", "chest", "backpack"].includes(editing.slot) && (
+              <Field label="Mod (System-Mod-Platz)">
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <select
+                    value={editing.mod?.attr ?? ""}
+                    onChange={(e) => {
+                      const attr = e.target.value as import("../data/sampleData").GearAttrKey;
+                      if (!attr) {
+                        setEditing({ ...editing, mod: null });
+                        return;
+                      }
+                      const maxVal = GEAR_MOD_DB_VALUES[attr];
+                      setEditing({
+                        ...editing,
+                        mod: { attr, value: editing.mod?.value ?? maxVal ?? 0 },
+                      });
+                    }}
+                  >
+                    <option value="">– kein Mod erfasst –</option>
+                    {Object.entries(GEAR_MOD_DB_VALUES).map(([attr, val]) => (
+                      <option key={attr} value={attr}>
+                        {GEAR_ATTR_TYPES[attr as import("../data/sampleData").GearAttrKey]?.label ?? attr} (Max {val.toLocaleString("de-DE")})
+                      </option>
+                    ))}
+                  </select>
+                  {editing.mod && (
+                    <label style={{ display: "flex", gap: 4, alignItems: "center", fontSize: 13 }}>
+                      Wert
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.5"
+                        value={editing.mod.value}
+                        onChange={(e) =>
+                          setEditing({
+                            ...editing,
+                            mod: { attr: editing.mod!.attr, value: Math.max(0, Number(e.target.value)) },
+                          })
+                        }
+                        style={{ width: 90 }}
+                      />
+                      <span style={{ color: "var(--text-dim, #aaa)", fontSize: 12 }}>
+                        / Max {GEAR_MOD_DB_VALUES[editing.mod.attr]?.toLocaleString("de-DE") ?? "?"}
+                      </span>
+                    </label>
+                  )}
+                </div>
+                <p className="settings-hint">
+                  Beim Attribut-Wahl wird automatisch der Maximalwert aus der Mod-Datenbank
+                  eingesetzt — reduziere ihn auf deinen echten Wert. Ohne Erfassung rechnet die
+                  Engine mit Max-Roll-Annahme.
+                </p>
+              </Field>
+            )}
           </>
         )}
       </SidePanel>

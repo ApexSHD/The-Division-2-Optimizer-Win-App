@@ -84,7 +84,12 @@ export function weaponsToCsv(weapons: Weapon[]): string {
         w.reloadSeconds !== undefined ? formatNumberDe(w.reloadSeconds) : "",
         ...(["optic", "muzzle", "underbarrel", "magazine"] as const).map((slot) => {
           const mod = w.equippedMods?.find((m) => m.slot === slot);
-          return mod ? attrLabel(mod.attr, mod.value) : "";
+          if (!mod) return "";
+          const label =
+            mod.attr === "capacity"
+              ? `Magazingröße +${formatNumberDe(mod.value)} %`
+              : attrLabel(mod.attr as WeaponAttrKey, mod.value);
+          return label;
         }),
       ]
         .map(csvEscape)

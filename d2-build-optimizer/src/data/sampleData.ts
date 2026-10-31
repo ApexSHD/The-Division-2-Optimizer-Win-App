@@ -31,8 +31,10 @@ export interface WeaponAttributes {
 
 export interface WeaponMod {
   slot: "optic" | "muzzle" | "underbarrel" | "magazine";
-  attr: WeaponAttrKey;
+  attr: WeaponAttrKey | "capacity";
   value: number;
+  dbName?: string;
+  reloadPenalty?: number;
 }
 
 export interface Weapon {
