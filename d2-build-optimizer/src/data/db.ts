@@ -267,7 +267,7 @@ export interface GearPreset {
 }
 
 const NAMED_ATTR_PATTERNS: { key: string; pattern: RegExp }[] = [
-  { key: "dth", pattern: /Lebenspunktschaden/ },
+  { key: "dth", pattern: /Lebenspunktschaden|Lebensenergieschaden|Gesundheitsschaden/ },
   { key: "dttooc", pattern: /ungedeckte Ziele/ },
   { key: "dta", pattern: /Rüstungsschaden/ },
   { key: "hsd", pattern: /Kopfschussschaden/ },

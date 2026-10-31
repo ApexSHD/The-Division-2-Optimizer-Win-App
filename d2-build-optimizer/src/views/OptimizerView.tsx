@@ -1652,7 +1652,7 @@ export function OptimizerView() {
                 ["Kritischer Trefferschaden (CHD)", `${stats.chd.toFixed(1)} %`],
                 ["Kopfschussschaden (HSD)", `${stats.hsd.toFixed(1)} %`],
                 ["Rüstungsschaden (DTA)", `${stats.dta.toFixed(1)} %`],
-                ["Lebenspunktschaden (DTH)", `${stats.dth.toFixed(1)} %`],
+                ["Lebensenergieschaden (DTH)", `${stats.dth.toFixed(1)} %`],
                 ["Schaden gg. ungedeckte Ziele", `${stats.dttooc.toFixed(1)} %`],
                 ["Effektiver DPS", Math.round(cand.damage.effectiveDps).toLocaleString("de-DE")],
               ];
