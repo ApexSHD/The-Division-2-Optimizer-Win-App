@@ -114,6 +114,7 @@ export interface UserData {
   weapons: Weapon[];
   gear: GearPiece[];
   builds: Build[];
+  activeBuildId: string;
 }
 
 const SCHEMA_VERSION = 1;
@@ -132,6 +133,7 @@ function defaultUserData(): UserData {
     weapons: [],
     gear: [],
     builds: [],
+    activeBuildId: "",
   };
 }
 
@@ -168,6 +170,7 @@ function sanitize(raw: unknown): UserData {
         )
       : [],
     builds: Array.isArray(r.builds) ? r.builds : [],
+    activeBuildId: typeof r.activeBuildId === "string" ? r.activeBuildId : "",
   };
 }
 
@@ -198,6 +201,9 @@ export interface AppState {
   gearSets: BrandSet[];
   db: Db | null;
   builds: Build[];
+  activeBuildId: string;
+  addBuild: (b: Build) => void;
+  setActiveBuildId: (id: string) => void;
   status: string;
   setStatus: (s: string) => void;
   progress: number | null;
@@ -374,6 +380,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })),
     db,
     builds: userData.builds,
+    activeBuildId: userData.activeBuildId,
+    addBuild: (b) =>
+      mutate((d) => ({ ...d, builds: [...d.builds, b] })),
+    setActiveBuildId: (id) => mutate((d) => ({ ...d, activeBuildId: id })),
     status,
     setStatus,
     progress,

@@ -7,9 +7,9 @@ export function CompareView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
   const [tab, setTab] = useState<"weapons" | "sets" | "loadouts">("weapons");
-  const [selectedWeapons, setSelectedWeapons] = useState<string[]>(["w1", "w4"]);
-  const [selectedSets, setSelectedSets] = useState<string[]>(["b4", "b5"]);
-  const [selectedLoadouts, setSelectedLoadouts] = useState<string[]>(["l1", "l2"]);
+  const [selectedWeapons, setSelectedWeapons] = useState<string[]>([]);
+  const [selectedSets, setSelectedSets] = useState<string[]>([]);
+  const [selectedLoadouts, setSelectedLoadouts] = useState<string[]>([]);
 
   const tabs = [
     { key: "weapons" as const, label: t.compare.tabWeapons },

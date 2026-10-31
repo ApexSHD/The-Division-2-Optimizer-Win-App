@@ -24,7 +24,7 @@ import {
 import { SKILLS, AXES } from "../data/v4Data";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
-import type { WeaponType } from "../data/sampleData";
+import type { WeaponType, Build } from "../data/sampleData";
 
 const ENEMY_PROFILE_PRESETS: Array<{ key: string; label: string; enemyHeadshotShare: number; hint: string }> = [
   {
@@ -219,6 +219,31 @@ export function OptimizerView() {
     assumptions: EffectVector["assumptions"];
   } | null>(null);
   const [running, setRunning] = useState(false);
+  const [loadoutName, setLoadoutName] = useState("");
+
+  const saveActiveBestAsLoadout = () => {
+    if (!result || !bestBuild) return;
+    const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+    if (!cand) return;
+    const gearIds: Record<string, string> = {};
+    for (const g of cand.gear) gearIds[g.slot] = g.id;
+    const name =
+      loadoutName.trim() ||
+      `${role.name} — ${cand.weapon.name} (${new Date().toLocaleDateString("de-DE")})`;
+    const build: Build = {
+      id: `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+      name,
+      weaponIds: [cand.weapon.id],
+      gearIds,
+      note: bestIsApproximation
+        ? `Beste Näherung — ${bestViolations.map((v) => v.label).join("; ")}`
+        : `Gespeichert aus dem Optimierer (Rolle: ${role.name})`,
+      timestamp: new Date().toISOString(),
+    };
+    store.addBuild(build);
+    store.setActiveBuildId(build.id);
+    setLoadoutName("");
+  };
 
   const goal = GOALS.find((g) => g.key === goalKey) ?? GOALS[0];
   const role = roleProfile(roleKey);
@@ -706,6 +731,24 @@ export function OptimizerView() {
                   .join(" · ")}
               </div>
             )}
+            {bestBuild && (() => {
+              const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
+              if (!cand) return null;
+              return (
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 4 }}>
+                  <input
+                    type="text"
+                    placeholder="Loadout-Name (Vorschlag: Rolle — Waffe — Datum)"
+                    value={loadoutName}
+                    onChange={(e) => setLoadoutName(e.target.value)}
+                    style={{ flex: "1 1 240px" }}
+                  />
+                  <button className="btn" onClick={saveActiveBestAsLoadout}>
+                    💾 Als Loadout speichern
+                  </button>
+                </div>
+              );
+            })()}
             {bestBuild && (() => {
               const cand = result.inventar.candidates.find((c) => c.id === bestBuild.id);
               if (!cand) return null;
