@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { Weapon, GearPiece, Mod, BrandSet, Build, GearSlot } from "./data/sampleData";
+import type { Weapon, GearPiece, Mod, BrandSet, Loadout, GearSlot } from "./data/sampleData";
 import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalizeGear } from "./data/sampleData";
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
@@ -113,7 +113,7 @@ export interface UserData {
   optimization: OptimizationSettings;
   weapons: Weapon[];
   gear: GearPiece[];
-  builds: Build[];
+  builds: Loadout[];
   activeBuildId: string;
 }
 
@@ -200,9 +200,9 @@ export interface AppState {
   brandSets: BrandSet[];
   gearSets: BrandSet[];
   db: Db | null;
-  builds: Build[];
+  builds: Loadout[];
   activeBuildId: string;
-  addBuild: (b: Build) => void;
+  addBuild: (b: Loadout) => void;
   setActiveBuildId: (id: string) => void;
   status: string;
   setStatus: (s: string) => void;
