@@ -223,3 +223,58 @@ export function stackSetHint(difficultyKey: string, activeStackSets: string[]): 
 
 /** Markennamen der Stack-Sets (fuer stackSetHint, Kleinbuchstaben-Matching). */
 export const STACK_SET_NAMES = ["striker", "heartbreaker", "umbra"];
+
+/* ------------------------------------------------------------------ */
+/* Rechnerische Prototyp-Deckelung (Raid/Incursion: "kein Prototyp")   */
+/* ------------------------------------------------------------------ */
+
+import type { GearPiece, Weapon } from "./sampleData";
+import { gearAttrMax, GEAR_CORE_MAX, WEAPON_CORE1_MAX, WEAPON_CORE2_BY_TYPE, WEAPON_MINOR_MAX } from "./sampleData";
+
+/**
+ * Senkt Prototyp-Werte auf die High-End-Maxima ab (Raid/Incursion).
+ * Gear: Kern + Attribute; Waffe: Kern 1, Kern 2, Minor-Attribut.
+ * Beispiel (Auftraggeber): Stuermermaske WD 20 % -> 15 %, CHD 17 % -> 12 %.
+ */
+export function applyPrototypeCapToGear(gear: GearPiece[]): GearPiece[] {
+  return gear.map((g) => {
+    if (!g.prototype) return g;
+    const coreMax = GEAR_CORE_MAX[g.core];
+    const capped: GearPiece = {
+      ...g,
+      coreValue:
+        g.core === "skill"
+          ? Math.min(g.coreValue, 1)
+          : coreMax !== undefined
+            ? Math.min(g.coreValue, coreMax)
+            : g.coreValue,
+      attributes: g.attributes.map((a) => {
+        const max = gearAttrMax(a.type, false);
+        return max !== null && a.value > max ? { ...a, value: max } : a;
+      }),
+    };
+    return capped;
+  });
+}
+
+export function applyPrototypeCapToWeapon(weapon: Weapon): Weapon {
+  if (!weapon.isPrototype) return weapon;
+  const capAttr = (type: string | undefined, value: number | undefined) => {
+    if (type === undefined || value === undefined) return value;
+    const baseMax =
+      type === weapon.attributes.core2Type && WEAPON_CORE2_BY_TYPE[weapon.type]?.type === type
+        ? WEAPON_CORE2_BY_TYPE[weapon.type]!.max
+        : WEAPON_MINOR_MAX[type as keyof typeof WEAPON_MINOR_MAX];
+    if (baseMax === undefined) return value;
+    return Math.min(value, baseMax);
+  };
+  return {
+    ...weapon,
+    attributes: {
+      ...weapon.attributes,
+      core1: Math.min(weapon.attributes.core1, WEAPON_CORE1_MAX),
+      core2Val: capAttr(weapon.attributes.core2Type, weapon.attributes.core2Val) ?? weapon.attributes.core2Val,
+      minorVal: capAttr(weapon.attributes.minorType, weapon.attributes.minorVal) ?? weapon.attributes.minorVal,
+    },
+  };
+}
