@@ -5,6 +5,7 @@ import { I18nContext, I18nProvider } from "./i18n";
 import type { Translation } from "./i18n/de";
 import type { GearPiece } from "./data/sampleData";
 import { GlobalView } from "./views/GlobalView";
+import { DashboardView } from "./views/DashboardView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
 import { CompareView } from "./views/CompareView";
@@ -133,6 +134,7 @@ function Nav() {
   const { t } = useContext(I18nContext);
 
   const items: { id: typeof store.view; label: string; icon: string }[] = [
+    { id: "dashboard", label: "Dashboard", icon: "🏠" },
     { id: "global", label: t.nav.global, icon: "🌍" },
     { id: "weapons", label: t.nav.weapons, icon: "🔫" },
     { id: "gear", label: t.nav.gear, icon: "🧦" },
@@ -291,6 +293,7 @@ function WorkArea() {
   const { t } = useContext(I18nContext);
 
   const titles: Record<typeof store.view, { title: string; sub: string }> = {
+    dashboard: { title: "Dashboard", sub: "Inventar, Lücken, Loadouts und Datenstatus auf einen Blick" },
     global: { title: t.global.title, sub: t.global.subtitle },
     weapons: { title: t.weapons.title, sub: t.weapons.subtitle },
     gear: { title: t.gear.title, sub: t.gear.subtitle },
@@ -309,6 +312,7 @@ function WorkArea() {
         <div className="workarea-sub">{current.sub}</div>
       </div>
       <div className="workarea-content">
+        {store.view === "dashboard" && <DashboardView />}
         {store.view === "global" && <GlobalView />}
         {store.view === "weapons" && <WeaponsView />}
         {store.view === "gear" && <GearView />}

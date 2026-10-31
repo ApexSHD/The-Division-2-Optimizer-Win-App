@@ -241,6 +241,7 @@ export function WeaponsView() {
 
   function confirmImport(mode: "replace" | "merge") {
     if (!preview) return;
+    store.noteImport(preview.warnings, preview.skippedRows, "Waffen");
     const weaponKey = (w: Weapon) =>
       `${w.name}::${w.type}::${w.baseDamage}::${w.knowHow}::${w.modSlots.join(",")}::${w.attributes.core1}::${w.attributes.core2Type ?? ""}::${w.attributes.core2Val ?? 0}`;
     if (mode === "replace") {
