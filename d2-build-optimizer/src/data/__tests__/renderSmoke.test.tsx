@@ -17,16 +17,16 @@ describe("OptimizerView Render-Smoke (Fix schwarzer Bildschirm)", () => {
     );
     expect(html).toContain("Build-Optimierung V4");
     expect(html).toContain("DPS");
-    expect(html).toContain("Fragebogen");
-    expect(html).toContain("Spezialisierungs-Vorschlag");
+    expect(html).toContain("Rolle w\u00e4hlen");
+    expect(html).toContain("Rahmen anpassen");
   });
 
-  it("rendert Fragebogen-Optionen und Skill-Auswahl", () => {
+  it("rendert Inventar-Status und Leerzustand (Wizard Schritt 1)", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
     );
-    expect(html).toContain("Teamgröße");
-    expect(html).toContain("Skills (2 Plätze)");
+    expect(html).toContain("Inventar-Status");
+    expect(html).toContain("DPS Krit");
     expect(html).toContain("Noch keine Gear-Teile erfasst");
   });
 });
@@ -130,5 +130,26 @@ describe("Waffen-Bearbeitung: Mod-Plätze (Mods am Build)", () => {
     );
     expect(html).toContain("Know-How");
     expect(html).not.toContain("montierte Waffen-Mods");
+  });
+});
+
+describe("OptimizerView Wizard (Progress Bar)", () => {
+  it("rendert die 3 Schritt-Knoten mit Labels", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
+    );
+    expect(html).toContain("wizard-progress");
+    expect(html).toContain("Rolle w\u00e4hlen");
+    expect(html).toContain("Rahmen anpassen");
+    expect(html).toContain("Berechnen");
+  });
+
+  it("Schritt 1 ist aktiv, Schritt-2-Sektionen sind ausgeblendet", () => {
+    const html = renderToString(
+      React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
+    );
+    expect(html).not.toContain("Fragebogen (optional");
+    expect(html).not.toContain("Zielmetrik");
+    expect(html).not.toContain("Einschr\u00e4nkungen (optional)");
   });
 });

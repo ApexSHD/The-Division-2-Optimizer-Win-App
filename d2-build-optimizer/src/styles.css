@@ -1256,3 +1256,88 @@ kbd {
   font-weight: 600;
   box-shadow: inset 3px 0 0 var(--accent);
 }
+
+/* ---- Optimierer-Wizard: Progress Bar (3 Schritte) ---- */
+.wizard-progress {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 4px 12px 12px;
+}
+
+.wizard-progress::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: var(--border, #555);
+  z-index: 1;
+}
+
+.wizard-progress-line {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  height: 4px;
+  background: var(--accent, #f57c1f);
+  z-index: 2;
+  transition: width 0.3s ease;
+}
+
+.wizard-step {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  min-width: 120px;
+}
+
+.wizard-step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg, #1b1d21);
+  border: 4px solid var(--border, #555);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-dim, #aaa);
+  transition: all 0.3s ease;
+}
+
+.wizard-step-label {
+  font-size: 13px;
+  color: var(--text-dim, #aaa);
+  font-weight: 500;
+}
+
+.wizard-step.completed .wizard-step-circle {
+  background: var(--ok, #67c23a);
+  border-color: var(--ok, #67c23a);
+  color: #fff;
+}
+
+.wizard-step.completed .wizard-step-label {
+  color: var(--ok, #67c23a);
+}
+
+.wizard-step.active .wizard-step-circle {
+  border-color: var(--accent, #f57c1f);
+  color: var(--accent, #f57c1f);
+  font-size: 16px;
+}
+
+.wizard-step.active .wizard-step-label {
+  color: var(--accent, #f57c1f);
+  font-weight: 700;
+}
