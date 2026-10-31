@@ -2,6 +2,8 @@ import { useContext, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { ChartPlaceholder } from "../components/ChartPlaceholder";
+import { checkLoadoutIntegrity, buildCodeFromLoadout } from "../data/loadoutIntegrity";
+import { DB_VERSION } from "../data/sampleData";
 
 export function CompareView() {
   const store = useStore();
@@ -138,20 +140,71 @@ export function CompareView() {
             {selectedLoadouts.map((id) => {
               const b = store.builds.find((x) => x.id === id);
               if (!b) return null;
+              const integrity = checkLoadoutIntegrity(b, store.weapons, store.gear, DB_VERSION);
               return (
                 <div key={id} className="card">
                   <h4>{b.name}</h4>
                   <div className="card-sub">{b.note}</div>
+                  {integrity.outdated ? (
+                    <div
+                      style={{
+                        border: "1px solid var(--warn, #e6a23c)",
+                        borderRadius: 6,
+                        padding: "4px 8px",
+                        marginTop: 6,
+                        fontSize: 12,
+                        background: "rgba(230,162,60,0.08)",
+                      }}
+                      title="Teile wurden gelöscht/geändert oder die Datenbank wurde aktualisiert"
+                    >
+                      ⚠ Veraltet: {integrity.reasons.join(" · ")}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 12, color: "var(--ok, #67c23a)", marginTop: 6 }}>
+                      ✓ Aktuell
+                    </div>
+                  )}
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    Waffen: {b.weaponIds.map((wid) => store.weapons.find((w) => w.id === wid)?.name).join(", ")}
+                    Waffen: {b.weaponIds.map((wid) => store.weapons.find((w) => w.id === wid)?.name ?? `(gelöscht: ${wid})`).join(", ")}
                   </div>
-                  <button
-                    className="btn btn-danger"
-                    style={{ marginTop: 10 }}
-                    onClick={() => toggle(selectedLoadouts, setSelectedLoadouts, id)}
-                  >
-                    {t.common.remove}
-                  </button>
+                  <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        const { code } = buildCodeFromLoadout(b, store.weapons, store.gear);
+                        navigator.clipboard?.writeText(code).then(
+                          () => store.setStatus(`Build-Code kopiert: ${code.slice(0, 24)}…`),
+                          () => store.setStatus(`Build-Code: ${code}`),
+                        );
+                      }}
+                      title="Kompakter Code zum Teilen des Loadouts (Zwischenablage)"
+                    >
+                      📋 Build-Code
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        const { text } = buildCodeFromLoadout(b, store.weapons, store.gear);
+                        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `loadout-${b.name.replace(/[^\w\-]+/g, "_")}.txt`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        store.setStatus("Loadout als Text exportiert");
+                      }}
+                      title="Loadout als Klartext-Datei exportieren"
+                    >
+                      📄 Textexport
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => toggle(selectedLoadouts, setSelectedLoadouts, id)}
+                    >
+                      {t.common.remove}
+                    </button>
+                  </div>
                 </div>
               );
             })}
