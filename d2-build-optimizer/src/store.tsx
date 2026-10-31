@@ -5,7 +5,7 @@ import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalize
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
 
-export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "optimizer" | "loadouts" | "compare" | "admin" | "settings";
+export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "builds" | "optimizer" | "loadouts" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
 
 export interface AgentValues {
