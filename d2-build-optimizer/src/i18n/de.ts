@@ -230,6 +230,7 @@ export const de = {
     calculating: "Berechnung l\u00e4uft \u2026",
     cancel: "Abbrechen",
     cancelled: "Berechnung abgebrochen.",
+    retry: "Erneut berechnen",
     upgradeExcludedHint: "Hinweis: Umbauten (Rekalibrieren/Optimieren) werden nicht berücksichtigt.",
     noCandidates: "Keine Aufräum-Kandidaten.",
     piece: "Teil",
