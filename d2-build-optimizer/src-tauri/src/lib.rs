@@ -136,6 +136,15 @@ fn read_text_file(path: String) -> Result<String, String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .setup(|app| {
+            if let Some(window) = app.get_webview_window("main") {
+                #[cfg(target_os = "windows")]
+                {
+                    let _ = window_vibrancy::apply_mica(&window, Some(false));
+                }
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             load_user_data,
             save_user_data,
