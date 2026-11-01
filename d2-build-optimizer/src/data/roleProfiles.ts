@@ -342,6 +342,7 @@ export interface ScoredBuild {
   normalized: Record<AxisKey, number>;
   score: number;
   violationCount: number;
+  meetsTargetChc: boolean;
 }
 
 export interface NormalizationSetInput {
@@ -350,6 +351,7 @@ export interface NormalizationSetInput {
   admissible: boolean;
   violations: MinimumViolation[];
   violationCount: number;
+  meetsTargetChc?: boolean;
 }
 
 export interface NormalizeOptions {
@@ -396,6 +398,7 @@ export function compareBuilds(
   role: RoleProfile,
 ): number {
   if (a.admissible !== b.admissible) return a.admissible ? -1 : 1;
+  if (a.meetsTargetChc !== b.meetsTargetChc) return a.meetsTargetChc ? -1 : 1;
   if (a.violationCount !== b.violationCount) return a.violationCount - b.violationCount;
   if (a.score !== b.score) return b.score - a.score;
   const ordered = [...AXES].sort((x, y) => role.weights[y] - role.weights[x]);
@@ -438,6 +441,7 @@ export function rankBuilds(
       normalized,
       score: scoreBuild(role, normalized),
       violationCount: c.violationCount,
+      meetsTargetChc: c.meetsTargetChc ?? false,
     };
   });
 

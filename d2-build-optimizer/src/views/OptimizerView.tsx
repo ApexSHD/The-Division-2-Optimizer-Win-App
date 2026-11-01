@@ -886,15 +886,20 @@ export function OptimizerView() {
   };
 
   const runGenerationRef = useRef(0);
+  const [progress, setProgress] = useState<{ phase: string; done: number; total: number } | null>(null);
+  const abortRef = useRef(false);
   const cancelOptimization = () => {
     runGenerationRef.current += 1;
+    abortRef.current = true;
     setRunning(false);
   };
 
   const runOptimization = () => {
     if (store.weapons.length === 0 || store.gear.length === 0) return;
     const generation = ++runGenerationRef.current;
+    abortRef.current = false;
     setRunning(true);
+    setProgress(null);
     setTimeout(() => {
       if (generation !== runGenerationRef.current) return;
       const ctx: ModeContext = {
@@ -930,7 +935,14 @@ export function OptimizerView() {
         ? store.weapons.map(applyPrototypeCapToWeapon)
         : store.weapons;
       const gearForRun = prototypeCapped ? applyPrototypeCapToGear(store.gear) : store.gear;
-      const inventar = optimizeV4(weaponsForRun, gearForRun, { ...ctx, mode: "inventar" }, opts);
+      const inventar = optimizeV4(weaponsForRun, gearForRun, { ...ctx, mode: "inventar" }, {
+        ...opts,
+        onProgress: (phase, done, total) => {
+          if (generation !== runGenerationRef.current) return;
+          setProgress({ phase, done, total });
+        },
+        shouldAbort: () => abortRef.current || generation !== runGenerationRef.current,
+      });
       const gaps = analyzeGaps({
         weapons: weaponsForRun,
         inventarGear: gearForRun,
@@ -1496,9 +1508,14 @@ export function OptimizerView() {
           {running ? "Berechne…" : "Builds berechnen"}
         </button>
         {running && (
-          <button className="btn" onClick={cancelOptimization}>
-            Abbrechen
-          </button>
+          <>
+            {progress && progress.total > 0 && (
+              <span className="badge">{progress.phase} {progress.done}/{progress.total}</span>
+            )}
+            <button className="btn" onClick={cancelOptimization}>
+              Abbrechen
+            </button>
+          </>
         )}
         {store.weapons.length === 0 && (
           <span style={{ color: "var(--warn, #e6a23c)" }}>

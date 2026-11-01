@@ -1110,13 +1110,13 @@ function piecesOfSet(setPieces: GearPiece[], targetSet: string, knownSets: Set<s
 // Specials (Talent/Named/Exotic/Set) werden davon unabhaengig immer gehalten
 const MAX_CANDIDATES_PER_SLOT = 8;
 
-function attrVector(g: GearPiece): Record<string, number> {
+export function attrVector(g: GearPiece): Record<string, number> {
   const v: Record<string, number> = { core: g.core === "wd" ? g.coreValue : 0 };
   for (const a of g.attributes) v[a.type] = (v[a.type] ?? 0) + a.value;
   return v;
 }
 
-function dominates(a: GearPiece, b: GearPiece): boolean {
+export function dominates(a: GearPiece, b: GearPiece): boolean {
   if (a.id === b.id) return false;
   const va = attrVector(a);
   const vb = attrVector(b);
@@ -1131,7 +1131,7 @@ function dominates(a: GearPiece, b: GearPiece): boolean {
   return better;
 }
 
-function pruneSlotCandidates(items: GearPiece[], locked: GearPiece[]): GearPiece[] {
+export function pruneSlotCandidates(items: GearPiece[], locked: GearPiece[]): GearPiece[] {
   if (items.length <= MAX_CANDIDATES_PER_SLOT) return items;
   const lockedIds = new Set(locked.map((g) => g.id));
   const kept: GearPiece[] = items.filter((g) => lockedIds.has(g.id));
