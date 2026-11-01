@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderToString } from "react-dom/server";
 import * as React from "react";
-import { OptimizerView } from "../../views/OptimizerView";
+import { OptimizerViewNew as OptimizerView } from "../../views/optimizer/OptimizerViewNew";
 import { OnboardingWizard } from "../../components/OnboardingWizard";
 import { DashboardView } from "../../views/DashboardView";
 import { LoadoutsView } from "../../views/LoadoutsView";
@@ -11,24 +11,24 @@ import { SettingsView } from "../../views/SettingsView";
 import App from "../../App";
 import { StoreProvider } from "../../store";
 
-describe("OptimizerView Render-Smoke (Fix schwarzer Bildschirm)", () => {
-  it("rendert ohne Laufzeitfehler (initiale Hooks-Reihenfolge, TDZ)", () => {
+describe("OptimizerViewNew Render-Smoke (CR-02 P1)", () => {
+  it("rendert ohne Laufzeitfehler: Titel, Inventar-Check, Auftragspanel", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
     );
-    expect(html).toContain("Build-Optimierung V4");
-    expect(html).toContain("DPS");
-    expect(html).toContain("Rolle w\u00e4hlen");
-    expect(html).toContain("Rahmen anpassen");
+    expect(html).toContain("Optimierung");
+    expect(html).toContain("Inventar-Check");
+    expect(html).toContain("Berechnen");
+    expect(html).toContain("DPS Krit");
   });
 
-  it("rendert Inventar-Status und Rollen (Wizard Schritt 1)", () => {
+  it("rendert Schnellstart-Abschnitte (Ziel, Kontext) aufgeklappt", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
     );
-    expect(html).toContain("Inventar-Status");
-    expect(html).toContain("DPS Krit");
-    expect(html).not.toContain("Zielmetrik");
+    expect(html).toContain("1 Ziel");
+    expect(html).toContain("2 Kontext");
+    expect(html).toContain("Spielmodus");
   });
 });
 
@@ -133,25 +133,13 @@ describe("Waffen-Bearbeitung: Mod-Plätze (Mods am Build)", () => {
     expect(html).not.toContain("montierte Waffen-Mods");
   });
 });
-
-describe("OptimizerView Wizard (Progress Bar)", () => {
-  it("rendert die 3 Schritt-Knoten mit Labels", () => {
+describe("OptimizerViewNew: kein Wizard mehr (CR-02 OP-1.1)", () => {
+  it("rendert keine wizard-progress-Schritte", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
     );
-    expect(html).toContain("wizard-progress");
-    expect(html).toContain("Rolle w\u00e4hlen");
-    expect(html).toContain("Rahmen anpassen");
-    expect(html).toContain("Berechnen");
-  });
-
-  it("Schritt 1 ist aktiv, Schritt-2-Sektionen sind ausgeblendet", () => {
-    const html = renderToString(
-      React.createElement(StoreProvider, null, React.createElement(OptimizerView)),
-    );
-    expect(html).not.toContain("Fragebogen (optional");
-    expect(html).not.toContain("Zielmetrik");
-    expect(html).not.toContain("Einschr\u00e4nkungen (optional)");
+    expect(html).not.toContain("wizard-progress");
+    expect(html).not.toContain("Rolle w\u00e4hlen");
   });
 });
 

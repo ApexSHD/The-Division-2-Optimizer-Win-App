@@ -54,7 +54,7 @@ export function AnalysisView() {
     handleRef.current = null;
     const ctx: ModeContext = {
       mode: "inventar",
-      roleKey: store.optimization.role || "weaponDps",
+      roleKey: "dps_krit",
       skills: [],
       teamSize: store.optimization.enemyTeamSize,
       shdLevel: store.agent.shdLevel,
@@ -69,7 +69,7 @@ export function AnalysisView() {
         gear: store.gear,
         weapons: store.weapons,
         builds: store.builds,
-        roleId: store.optimization.role || "weaponDps",
+        roleId: "dps_krit",
         ctx,
         keepMarkedIds: [],
       },
@@ -95,7 +95,7 @@ export function AnalysisView() {
           gear: store.gear,
           weapons: store.weapons,
           builds: store.builds,
-          roleId: store.optimization.role || "weaponDps",
+          roleId: "dps_krit",
           ctx,
           keepMarkedIds: [],
         });
@@ -121,7 +121,7 @@ export function AnalysisView() {
     setProgress({ phase: "", done: 0, total: 0 });
     const ctx: ModeContext = {
       mode: "inventar",
-      roleKey: store.optimization.role || "weaponDps",
+      roleKey: "dps_krit",
       skills: [],
       teamSize: store.optimization.enemyTeamSize,
       shdLevel: store.agent.shdLevel,
@@ -135,7 +135,7 @@ export function AnalysisView() {
         gear: store.gear,
         weapons: store.weapons,
         builds: store.builds,
-        roleId: store.optimization.role || "weaponDps",
+        roleId: "dps_krit",
         ctx,
         keepMarkedIds: [],
       },

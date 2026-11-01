@@ -69,6 +69,17 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 - Ergebnisliste der besten N Builds mit Begründung der Werte.
 - Berechnung im Hintergrund mit Fortschrittsanzeige und Abbruchmöglichkeit.
 
+### 4.4b Optimierung — Überarbeitung (CR-02)
+
+- Ein Rollenmodell (`roleProfiles.ts`); `roles.ts`, `OptimizationSettingsPanel`, `PresetPicker` und `OptimizationSettings.role` entfallen (harte Migration in `user-data.json`).
+- Neuer Workflow ohne Wizard: linke Spalte Auftrag (Abschnitte 1 Ziel, 2 Kontext, 3 Skills, 4 Regeln, 5 Erweitert — zugeklappt mit Zusammenfassung), rechte Spalte Ergebnis. Schnellstart: Rolle + Spielmodus + „Berechnen“.
+- Inventar-Check oben mit Eignungsampel je Rolle (möglich / eingeschränkt / nicht möglich, mit Begründung) und Hinweisen auf fehlende Waffentypen (z. B. keine Pistole).
+- Auftrag (`OptimizerRequest`) und Fingerprint des letzten Ergebnisses persistent; weicht Auftrag oder Inventar ab, trägt das Ergebnis einen „veraltet“-Badge.
+- Build-Karte mit allen Waffen-Slots (2 Primärwaffen + optionale Pistole), Gear-Tabelle, Kennzahlen (DPS, CHC, CHD, WD, Rüstung) mit Δ zum aktiven Build, Begründung und Übernahme (Loadout speichern mit allen Waffen/Gear/Mods, Zwischenablage teilen).
+- Waffen-Setup: 2 Primärwaffen + optionale Pistole, Exotic-Limit ≤ 1 exotische Waffe und ≤ 1 exotisches Gear; Zielmetrik um „Rotation“ (50/50-Mix beider Primärwaffen) erweitert. Sperren und Ausschlüsse (`excludedGearIds`/`excludedWeaponIds`) wirken hart vor der Suche.
+- Berechnung im eigenen Web Worker (`optimizerWorker.ts` + `optimizerClient.ts`): immer nur ein aktiver Run, Abbruch per `terminate()` wirkt sofort (< 1 s), Fortschritt pro Run-ID; UI bleibt bedienbar. Worker-Fehler fallen auf synchrone Berechnung zurück.
+- Verbesserungen (OP-4.7/OP-6.1) rechnen gegen den Ziel-Pool (`dbGearPool`) — gemeinsame Logik mit dem Reiter „Lücken“ der Inventaranalyse.
+
 ### 4.4a Optimierer-Performance & Hintergrundberechnung (Issue #61, TA-5)
 
 - `optimizeV4` nutzt statt des willkürlichen 2-Mio-Caps eine Beam-Suche über die Slots (`beamCombosBySlot` in `src/data/operatingModes.ts`): Dominanz-Vorfilterung pro Slot (`pruneSlotCandidates`), Top-K je Slot (Slot-Budget 25), Beam-Breite begrenzt, Exotic-Cap 1, Set-Synergie als Multiplikator in der Beam-Bewertung, Kandidaten-Auswahl analog Legacy (CHC-Ziel zuerst, dann Zielmetrik, dann Diversität).
