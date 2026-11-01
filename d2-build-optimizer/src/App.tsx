@@ -12,6 +12,7 @@ import { GearView } from "./views/GearView";
 import { CompareView } from "./views/CompareView";
 import { OptimizerView } from "./views/OptimizerView";
 import { AdminView } from "./views/AdminView";
+import { AnalysisView } from "./views/AnalysisView";
 import { SettingsView } from "./views/SettingsView";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { DB_VERSION } from "./data/sampleData";
@@ -146,6 +147,7 @@ function Nav() {
       entries: [
         { id: "weapons", label: t.nav.weapons, icon: "\ud83d\udd2b" },
         { id: "gear", label: t.nav.gear, icon: "\ud83e\udde6" },
+        { id: "analysis", label: t.nav.analysis, icon: "\ud83d\udcca" },
         { id: "builds", label: "Builds", icon: "\ud83e\udde9" },
       ],
     },
@@ -325,6 +327,7 @@ function WorkArea() {
     global: { title: t.global.title, sub: t.global.subtitle },
     weapons: { title: t.weapons.title, sub: t.weapons.subtitle },
     gear: { title: t.gear.title, sub: t.gear.subtitle },
+    analysis: { title: t.analysis.title, sub: t.analysis.subtitle },
     optimizer: { title: "Build-Optimierung V4", sub: "Ziele, Fragebogen, Wirkungsvektor" },
     compare: { title: t.compare.title, sub: t.compare.subtitle },
     admin: { title: t.admin.title, sub: t.admin.subtitle },
@@ -344,6 +347,7 @@ function WorkArea() {
         {store.view === "global" && <GlobalView />}
         {store.view === "weapons" && <WeaponsView />}
         {store.view === "gear" && <GearView />}
+        {store.view === "analysis" && <AnalysisView />}
         {store.view === "optimizer" && <OptimizerView />}
         {store.view === "builds" && <BuildsView />}
         {store.view === "compare" && <CompareView />}

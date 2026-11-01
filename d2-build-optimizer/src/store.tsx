@@ -7,7 +7,7 @@ import type { Db } from "./data/db";
 import { emptyUserDb, mergeDb, sanitizeUserDb } from "./data/userDb";
 import type { UserDbOverrides } from "./data/userDb";
 
-export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "builds" | "optimizer" | "compare" | "admin" | "settings";
+export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "analysis" | "builds" | "optimizer" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
 
 export interface AgentValues {
