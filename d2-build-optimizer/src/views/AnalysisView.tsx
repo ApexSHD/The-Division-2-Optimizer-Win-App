@@ -40,6 +40,7 @@ export function AnalysisView() {
   const [calcState, setCalcState] = useState<"idle" | "running" | "cancelled">("idle");
   const [progress, setProgress] = useState<{ phase: string; done: number; total: number }>({ phase: "", done: 0, total: 0 });
   const runRef = useRef(0);
+  const handleRef = useRef<ReturnType<typeof runAnalysisAsync> | null>(null);
 
   const gearDep = store.gear;
   const weaponsDep = store.weapons;
@@ -49,7 +50,8 @@ export function AnalysisView() {
 
   useEffect(() => {
     const generation = ++runRef.current;
-    let cancelledByCleanup = false;
+    handleRef.current?.cancel();
+    handleRef.current = null;
     const ctx: ModeContext = {
       mode: "inventar",
       roleKey: store.optimization.role || "weaponDps",
@@ -76,6 +78,7 @@ export function AnalysisView() {
         setProgress({ phase, done, total });
       },
     );
+    handleRef.current = handle;
     handle.promise
       .then((a) => {
         if (generation !== runRef.current) return;
@@ -83,8 +86,8 @@ export function AnalysisView() {
         setCalcState("idle");
       })
       .catch((err) => {
-        if (generation !== runRef.current || cancelledByCleanup) return;
-        if (err instanceof Error && err.message === "cancelled") {
+        if (generation !== runRef.current) return;
+        if (err instanceof Error && (err.message === "cancelled" || err.message === "superseded")) {
           setCalcState("cancelled");
           return;
         }
@@ -101,12 +104,14 @@ export function AnalysisView() {
         store.setStatus(`${a.calculating}: ${a.cancelled}`);
       });
     return () => {
-      cancelledByCleanup = true;
+      handleRef.current = null;
     };
   }, [gearDep, weaponsDep, buildsDep, optDep, agentDep]);
 
   const cancelAnalysis = () => {
     runRef.current += 1;
+    handleRef.current?.cancel();
+    handleRef.current = null;
     setCalcState("cancelled");
   };
 
