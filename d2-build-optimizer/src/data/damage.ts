@@ -147,56 +147,6 @@ export function specBonusFor(weapon: import("./sampleData").Weapon, spec: string
   };
 }
 
-export type RoleScoreKey = "weaponDps" | "skillBurst" | "statusCc" | "tankRegen";
-
-export interface RoleScore {
-  key: RoleScoreKey | "";
-  score: number;
-  label: string;
-}
-
-function roleScoreFor(gear: GearPiece[], key: string): RoleScore {
-  const sumAttr = (types: string[]) =>
-    gear.reduce(
-      (acc, g) =>
-        acc + g.attributes.filter((a) => types.includes(a.type)).reduce((x, a) => x + a.value, 0),
-      0,
-    );
-  const coreCount = (core: "wd" | "armour" | "skill") => gear.filter((g) => g.core === core).length;
-
-  switch (key) {
-    case "skillBurst": {
-      const skillDmg = sumAttr(["skilldmg"]);
-      const skillHaste = sumAttr(["skillhaste"]);
-      const tiers = coreCount("skill");
-      return {
-        key: "skillBurst",
-        score: Number((skillDmg + skillHaste * 0.5 + tiers * 10).toFixed(2)),
-        label: `Skill-Schaden +${skillDmg} % · Tempo +${skillHaste} % · ${tiers} Skill-Tier(s)`,
-      };
-    }
-    case "statusCc": {
-      const status = sumAttr(["status"]);
-      const haste = sumAttr(["skillhaste"]);
-      return {
-        key: "statusCc",
-        score: Number((status + haste * 0.25).toFixed(2)),
-        label: `Statuseffekte +${status} % · Skill-Tempo +${haste} %`,
-      };
-    }
-    case "tankRegen": {
-      const regen = sumAttr(["armorregen", "health", "hazard", "explres", "aok", "incomrepair"]);
-      const armors = coreCount("armour");
-      return {
-        key: "tankRegen",
-        score: Number((regen / 100 + armors * 10).toFixed(2)),
-        label: `Defensiv ${regen.toLocaleString("de-DE")} · ${armors} Rüstungs-Core(s)`,
-      };
-    }
-    default:
-      return { key: "", score: 0, label: "" };
-  }
-}
 
 export function enemyProfileFromSettings(o: OptimizationSettings): EnemyProfile {
   const armor = Math.max(0, Math.min(100, o.enemyArmorShare)) / 100;
@@ -422,7 +372,7 @@ export interface OptimizerResult {
   reasonParts: string[];
   slotExplanations: SlotExplanation[];
   warnings: OptimizerWarning[];
-  roleScore: RoleScore;
+  roleScore: { key: ""; score: number; label: string };
   assumptions: OptimizerAssumptions;
 }
 
@@ -792,7 +742,7 @@ export function optimizeBuilds(
 
   const brandBonus = (r: OptimizerResult) =>
     brandScoreBonusForCombo(r.gear, settings.preferredBrand);
-  const roleDriven = Boolean(settings.role) && settings.role !== "weaponDps";
+  const roleDriven = false;
   // FIX #82: Schaden primaer. Verschwendete CHC nur als FEINAbzug (0,2 Prozentpunkte Waste
   // = 0,2 % Score-Malus) - ein paar Prozentpunkte Waste duerfen niemals einen echten
   // DPS-Vorteil schlagen (Review-Beispiel: 5,5 % DPS vs. 5 PP Waste).
@@ -979,9 +929,7 @@ function runOptimizerPasses(
         if (targetSet && gearSetCount > 0) reasonParts.push(`${gearSetCount}\u00d7 ${settings.targetGearSet}`);
         if (exoticGear === 1) reasonParts.push("1 Exotic-Gear");
 
-        const roleScore = settings.role && settings.role !== "weaponDps"
-          ? roleScoreFor(combo, settings.role)
-          : { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" };
+        const roleScore = { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" };
 
         // FIX #82-3: Waffen-CHC (core2) zaehlt im Cap mit - Verschwendung korrekt berechnen
         const totalChcForWaste = stats.chc + (w.attributes.core2Type === "chc" ? w.attributes.core2Val : 0);

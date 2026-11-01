@@ -616,7 +616,7 @@ function AlternativesList({
 }: {
   result: V4BuildResult;
   activeMetrics: LoadoutMetrics | null;
-  targetMetric: "burst" | "sustained";
+  targetMetric: "burst" | "sustained" | "rotation";
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const rows = result.ranked.map((b) => ({

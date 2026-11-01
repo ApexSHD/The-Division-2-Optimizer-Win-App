@@ -12,7 +12,6 @@ import type { GearAttrKey } from "./sampleData";
 import { SOURCES, type SourceEntry } from "./v4Data";
 import { computeInventoryKpis } from "./dashboardData";
 import { normalizeAxes, roleProfile, scoreBuild } from "./roleProfiles";
-import type { RoleId } from "./roles";
 import { axisContextFor, optimizeV4, defaultSetBonusCatalog, type ModeContext, V4_ALL_SLOTS } from "./operatingModes";
 import { computeEffectVector, vectorToRecord } from "./axes";
 import { enemyProfileFromSettings, evaluateBuild } from "./damage";
@@ -173,7 +172,7 @@ export interface InventoryAnalysisInput {
   gear: GearPiece[];
   weapons: Weapon[];
   builds: Loadout[];
-  roleId?: RoleId | "";
+  roleId?: string;
   ctx?: ModeContext;
   fullGear?: GearPiece[];
   keepMarkedIds?: string[];
@@ -573,7 +572,7 @@ export function analyzeInventory(input: InventoryAnalysisInput): InventoryAnalys
       const pct = invScore !== null && zielScore !== null && zielScore > 0 ? (100 * invScore) / zielScore : null;
       reachabilityByRole.push({ roleId: roleKey, reachabilityPercent: pct === null ? null : Math.round(pct * 10) / 10 });
 
-      if (roleKey === profileRoleKeyFor(input.roleId || "weaponDps") && inv.candidates.length > 0 && ziel.candidates.length > 0) {
+      if (roleKey === profileRoleKeyFor(input.roleId || "dps_krit") && inv.candidates.length > 0 && ziel.candidates.length > 0) {
         const invCand = (invBest && inv.candidates.find((c) => c.id === invBest.id)) || inv.candidates[0];
         const zielCand = (zielBest && ziel.candidates.find((c) => c.id === zielBest.id)) || ziel.candidates[0];
         if (invCand && zielCand) {
@@ -678,16 +677,9 @@ export function analyzeInventory(input: InventoryAnalysisInput): InventoryAnalys
 import gearJson from "../db/gear.json";
 import { SLOT_DE_LABELS } from "./db";
 
-const ROLE_ID_TO_PROFILE_KEY: Record<RoleId, string> = {
-  weaponDps: "dps_krit",
-  skillBurst: "skill_schaden",
-  statusCc: "kontrolle",
-  tankRegen: "tank",
-};
-
-function profileRoleKeyFor(roleId: RoleId | ""): string {
-  return (roleId && ROLE_ID_TO_PROFILE_KEY[roleId]) || "dps_krit";
-} 
+function profileRoleKeyFor(roleId: string | undefined): string {
+  return roleId || "dps_krit";
+}
 
 /**
  * Ziel-Pool für die Lückenanalyse: das komplette Gear aus der Spiel-Datenbank

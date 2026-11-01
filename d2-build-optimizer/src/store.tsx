@@ -18,13 +18,15 @@ export interface AgentValues {
 }
 
 export interface OptimizationSettings {
-  role: import("./data/roles").RoleId | "";
   targetChc: number;
   targetHsd: number;
-  targetMetric: "burst" | "sustained";
+  targetMetric: "burst" | "sustained" | "rotation";
   difficultyKey: string;
+  gameMode: "openworld" | "raid" | "incursion" | "pve" | "pvp";
   enemyTeamSize: 1 | 2 | 3 | 4;
   lockedGearIds: string[];
+  excludedGearIds: string[];
+  excludedWeaponIds: string[];
   anchorWeaponId: string;
   weaponTypeFilter: import("./data/sampleData").WeaponType | "";
   qualityFilter: "all" | "godRoll";
@@ -89,9 +91,11 @@ export const DEFAULT_OPTIMIZATION: OptimizationSettings = {
   targetHsd: 100,
   difficultyKey: "heroic",
   enemyTeamSize: 4,
-  role: "",
   targetChc: 50,
   lockedGearIds: [],
+  excludedGearIds: [],
+  excludedWeaponIds: [],
+  gameMode: "openworld",
   anchorWeaponId: "",
   weaponTypeFilter: "",
   qualityFilter: "all",
@@ -172,7 +176,15 @@ export function sanitize(raw: unknown): UserData {
         season: a.season ?? "y8s3",
       };
     })(),
-    optimization: { ...DEFAULT_OPTIMIZATION, ...(r.optimization ?? {}) },
+    optimization: (() => {
+      const o = { ...DEFAULT_OPTIMIZATION, ...(r.optimization ?? {}) } as Record<string, unknown>;
+      delete o.role;
+      if (!Array.isArray(o.excludedGearIds)) o.excludedGearIds = [];
+      if (!Array.isArray(o.excludedWeaponIds)) o.excludedWeaponIds = [];
+      if (!["openworld", "raid", "incursion", "pve", "pvp"].includes(String(o.gameMode))) o.gameMode = "openworld";
+      if (o.targetMetric === "rotation") o.targetMetric = "sustained";
+      return o as unknown as UserData["optimization"];
+    })(),
     weapons: Array.isArray(r.weapons)
       ? (r.weapons as unknown[]).map((w) =>
           normalizeWeapon(w as Parameters<typeof normalizeWeapon>[0]),

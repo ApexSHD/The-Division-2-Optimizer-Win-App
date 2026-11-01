@@ -407,18 +407,15 @@ export function beamCombosBySlot(
     slotLists.push(pool);
   }
 
-  let beam: { combo: GearPiece[]; sc: number }[] = [{ combo: [], sc: 0 }];
-  for (let si = 0; si < slotLists.length; si++) {
-    const slot = slots[si];
-    if (si === 0) {
-      const seen0 = new Set<string>();
-      slotLists[0] = slotLists[0].filter((g) => {
-        const k = g.id;
-        if (seen0.has(k)) return false;
-        seen0.add(k);
-        return true;
-      });
-    }
+  const lockedInBeam = lockedGear.filter((g) => (bySlot.get(g.slot) ?? []).some((x) => x.id === g.id));
+  const lockedSlots = new Set(lockedInBeam.map((g) => g.slot));
+  const freeSlots = slots.filter((s) => !lockedSlots.has(s));
+  const slotListsFree = slotLists.filter((_, i) => !lockedSlots.has(slots[i]));
+  let beam: { combo: GearPiece[]; sc: number }[] = [
+    ...(lockedInBeam.length > 0 ? [{ combo: lockedInBeam, sc: 0 }] : [{ combo: [], sc: 0 }]),
+  ];
+  for (let si = 0; si < slotListsFree.length; si++) {
+    const slot = freeSlots[si];
     if (opts.shouldAbort?.()) {
       warnings.push("Abgebrochen – Teilergebnis (Beam-Suche).");
       break;
@@ -428,7 +425,7 @@ export function beamCombosBySlot(
     for (const partial of beam) {
       const partialStats = aggregateBuild(partial.combo, 0);
       const partialExotics = partial.combo.filter((g) => g.brandType === "exotic").length;
-      for (const item of slotLists[si]) {
+      for (const item of slotListsFree[si]) {
         if (item.brandType === "exotic" && partialExotics + 1 > exoticCap) continue;
         if (partial.combo.some((g) => g.slot === item.slot)) continue;
         const combo = [...partial.combo, item];
@@ -466,8 +463,15 @@ export function beamCombosBySlot(
     }
     next.sort((a, b) => b.sc - a.sc || (a.combo.map((g) => g.id).join("|") < b.combo.map((g) => g.id).join("|") ? -1 : 1));
     beam = next.slice(0, beamWidth);
+    if (lockedInBeam.length > 0) {
+      const withLocks = beam.map((b) => {
+        const missing = lockedInBeam.filter((g) => !b.combo.some((x) => x.id === g.id));
+        return missing.length > 0 ? { combo: [...b.combo, ...missing], sc: b.sc } : b;
+      });
+      beam = withLocks;
+    }
     if (gearsetSlots.has(slot)) {
-      const setItems = slotLists[si].filter((g) => g.brandType === "gearset");
+      const setItems = slotListsFree[si].filter((g) => g.brandType === "gearset");
       const forced: { combo: GearPiece[]; sc: number }[] = [];
       for (const partial of beam) {
         for (const item of setItems) {
@@ -492,9 +496,15 @@ export function beamCombosBySlot(
         beam = [...beam, ...add].sort((a, b) => b.sc - a.sc).slice(0, beamWidth * 2);
       }
     }
-    opts.onProgress?.(si + 1, slotLists.length);
+    opts.onProgress?.(si + 1, slotListsFree.length);
   }
-  return { combos: beam.map((b) => b.combo), warnings };
+  const lockedIdsFinal = new Set(lockedInBeam.map((g) => g.id));
+  const combos = beam.map((b) => {
+    const missing = lockedInBeam.filter((g) => !b.combo.some((x) => x.id === g.id));
+    return missing.length > 0 ? [...b.combo, ...missing] : b.combo;
+  });
+  void lockedIdsFinal;
+  return { combos, warnings };
 }
 
 export function optimizeV4(
@@ -517,7 +527,16 @@ export function optimizeV4(
   const warnings: string[] = [];
 
   const useBeam = opts.useBeam ?? true;
-  let candidateGear = gear;
+  const excludedGear = new Set(ctx.settings.excludedGearIds ?? []);
+  const excludedWeapons = new Set(ctx.settings.excludedWeaponIds ?? []);
+  const poolWeapons = weapons.filter((w) => !excludedWeapons.has(w.id));
+  let candidateGear = gear.filter((g) => !excludedGear.has(g.id));
+  if (candidateGear.length < gear.length) {
+    warnings.push(`Ausschluss aktiv: ${gear.length - candidateGear.length} Gear-Teil(e) vor der Suche entfernt.`);
+  }
+  if (poolWeapons.length < weapons.length) {
+    warnings.push(`Ausschluss aktiv: ${weapons.length - poolWeapons.length} Waffe(n) vor der Suche entfernt.`);
+  }
   if (ctx.mode === "ziel" && !useBeam) {
     const reduced = reduceSearchSpace(gear, role, opts.budgetPerSlot ?? 12);
     candidateGear = reduced.gear;
@@ -540,8 +559,8 @@ export function optimizeV4(
     const setBonusCatalog = (opts.setBonusCatalog as never) ?? defaultSetBonusCatalog();
     const profile = enemyProfileFromSettings(ctx.settings);
     const chcTarget = role.chcTarget ?? ctx.settings.targetChc;
-    const anchorWeapon = weapons.find((w) => w.id === ctx.settings.anchorWeaponId) ?? null;
-    let candidateWeapons = anchorWeapon ? [anchorWeapon] : weapons;
+    const anchorWeapon = poolWeapons.find((w) => w.id === ctx.settings.anchorWeaponId) ?? null;
+    let candidateWeapons = anchorWeapon ? [anchorWeapon] : poolWeapons;
     if (!anchorWeapon && ctx.settings.weaponTypeFilter) {
       const filtered = candidateWeapons.filter((w) => w.type === ctx.settings.weaponTypeFilter);
       if (filtered.length > 0) candidateWeapons = filtered;
@@ -661,7 +680,7 @@ export function optimizeV4(
     });
   } else {
     optimizerResults = optimizeBuilds(
-      weapons,
+      poolWeapons,
       candidateGear,
       ctx.shdLevel,
       ctx.settings,
