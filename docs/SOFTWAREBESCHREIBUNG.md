@@ -69,6 +69,19 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 - Ergebnisliste der besten N Builds mit Begründung der Werte.
 - Berechnung im Hintergrund mit Fortschrittsanzeige und Abbruchmöglichkeit.
 
+### 4.4a Optimierer-Performance & Hintergrundberechnung (Issue #61, TA-5)
+
+- `optimizeV4` nutzt statt des willkürlichen 2-Mio-Caps eine Beam-Suche über die Slots (`beamCombosBySlot` in `src/data/operatingModes.ts`): Dominanz-Vorfilterung pro Slot (`pruneSlotCandidates`), Top-K je Slot (Slot-Budget 25), Beam-Breite begrenzt, Exotic-Cap 1, Set-Synergie als Multiplikator in der Beam-Bewertung, Kandidaten-Auswahl analog Legacy (CHC-Ziel zuerst, dann Zielmetrik, dann Diversität).
+- Fortschritt (`onProgress(phase, done, total)`) und Abbruch (`shouldAbort()`) durchgereicht; Benchmark-Test: 150 Gear + 50 Waffen < 10 s (NFA-2).
+- Schwere Berechnungen (Inventaranalyse/Lückenanalyse, Optimierer) laufen in einem Web Worker (`src/workers/analysisWorker.ts` + `analysisClient.ts`); UI bleibt bedienbar, Fortschrittsanzeige und Abbrechen in AnalysisView und OptimizerView.
+
+### 4.5a Inventaranalyse
+
+- Neuer Menüpunkt „Inventaranalyse“ (Gruppe „Inventar“, zwischen Gear und Builds); reine Auswertung – verändert keine Inventardaten.
+- Sechs Reiter: Übersicht (Kennzahlen, Inventar-Gesundheit 0–100 mit Teilbewertungen, wichtigste Erkenntnisse mit Sprung), Gear (Slot-Kern-Matrix, Roll-Qualität mit Prototyp-Faktor, Datenqualität), Waffen (Typ-Abdeckung, Varianten-Familien, Talent-Abdeckung), Sets & Synergie (Set-Fortschritt, Slot-Konflikte, Exotic-Limit), Lücken (Erreichbarkeit je Rolle, Empfehlungen nach berechnetem Gewinn mit Bezugsquelle aus sources.json), Aufräumen (Duplikate, dominierte und ungenutzte Teile – nur Vorschläge, nie automatisches Löschen).
+- Rechenkern: `src/data/inventoryAnalysis.ts` (oberflächenfrei, `analyzeInventory(input) → InventoryAnalysis`, serialisierbar, deterministisch); nutzt `computeInventoryKpis`, `optimizeV4`, Rollenprofile und den bestehenden Schadenskern.
+- Abnahme-Fixtures: `tests/fixtures/gear-inventar-2026-11-01.csv` und `waffen-inventar-2026-11-01.csv` mit AK-Tests in `inventoryAnalysis.test.ts`.
+
 ### 4.5 Vergleich
 
 - Waffenvergleich (zwei oder mehr Waffen nebeneinander, Diagramme).

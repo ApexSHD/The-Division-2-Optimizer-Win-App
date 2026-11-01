@@ -13,8 +13,9 @@ import { SOURCES, type SourceEntry } from "./v4Data";
 import { computeInventoryKpis } from "./dashboardData";
 import { normalizeAxes, roleProfile, scoreBuild } from "./roleProfiles";
 import type { RoleId } from "./roles";
-import { axisContextFor, optimizeV4, type ModeContext, V4_ALL_SLOTS } from "./operatingModes";
+import { axisContextFor, optimizeV4, defaultSetBonusCatalog, type ModeContext, V4_ALL_SLOTS } from "./operatingModes";
 import { computeEffectVector, vectorToRecord } from "./axes";
+import { enemyProfileFromSettings, evaluateBuild } from "./damage";
 import type { AxisKey } from "./v4Data";
 
 export const ANALYSIS_SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
@@ -177,6 +178,9 @@ export interface InventoryAnalysisInput {
   fullGear?: GearPiece[];
   keepMarkedIds?: string[];
   analyzedAt?: string;
+  zielWeaponsSameAsInventar?: boolean;
+  onProgress?: (phase: string, done: number, total: number) => void;
+  shouldAbort?: () => boolean;
 }
 
 function rollClass(ratio: number): "top" | "mid" | "low" {
@@ -555,8 +559,12 @@ export function analyzeInventory(input: InventoryAnalysisInput): InventoryAnalys
     const fullGear = input.fullGear ?? dbGearPool(gear);
     for (const roleKey of profileKeys) {
       const role = roleProfile(roleKey);
-      const inv = optimizeV4(weapons, gear, { ...ctx, roleKey, mode: "inventar" }, { maxResults: 20 });
-      const ziel = optimizeV4(weapons, fullGear, { ...ctx, roleKey, mode: "ziel" }, { maxResults: 20, budgetPerSlot: 6 });
+      const inv = optimizeV4(weapons, gear, { ...ctx, roleKey, mode: "inventar" }, { maxResults: 50, budgetPerSlot: 25, beamWidth: 4000, onProgress: input.onProgress, shouldAbort: input.shouldAbort });
+      if (input.shouldAbort?.()) break;
+      const invTopWeapon = inv.candidates[0]?.weapon ?? weapons[0];
+      const zielWeapons = input.zielWeaponsSameAsInventar === false ? weapons : [invTopWeapon];
+      const ziel = optimizeV4(zielWeapons, fullGear, { ...ctx, roleKey, mode: "ziel" }, { maxResults: 50, budgetPerSlot: 25, beamWidth: 4000, onProgress: input.onProgress, shouldAbort: input.shouldAbort });
+      if (input.shouldAbort?.()) break;
       const invBest = inv.best ?? inv.ranked[0] ?? null;
       const zielBest = ziel.best ?? ziel.ranked[0] ?? null;
       void zielBest;
@@ -570,32 +578,43 @@ export function analyzeInventory(input: InventoryAnalysisInput): InventoryAnalys
         const zielCand = (zielBest && ziel.candidates.find((c) => c.id === zielBest.id)) || ziel.candidates[0];
         if (invCand && zielCand) {
           const zielBySlot = new Map(zielCand.gear.map((g) => [g.slot, g]));
+          const invWeaponId = invCand.weapon.id;
+          const invVecs = inv.candidates.filter((c) => c.weapon.id === invWeaponId).map((c) => vectorToRecord(c.vector));
+          const zielVecs = ziel.candidates.filter((c) => c.weapon.id === invWeaponId).map((c) => vectorToRecord(c.vector));
           const hybridVectors: Record<AxisKey, number>[] = [];
           const slots: GearSlot[] = [];
           const ideals: GearPiece[] = [];
-          const zielDps = ctx.settings.targetMetric === "burst" ? zielCand.damage.effectiveDps : zielCand.damage.sustainedDps;
           for (const slot of V4_ALL_SLOTS) {
             const current = invCand.gear.find((g) => g.slot === slot);
             const ideal = zielBySlot.get(slot);
             if (!ideal || !current || current.id === ideal.id) continue;
-            const withoutIdeal = zielCand.gear.map((g) => (g.slot === slot ? current : g));
-            const v = computeEffectVector(axisContextFor(withoutIdeal, zielDps, ctx, role));
+            const withIdeal = invCand.gear.map((g) => (g.slot === slot ? ideal : g));
+            const { damage: hybridDamage } = evaluateBuild(invCand.weapon, withIdeal, {
+              shdLevel: ctx.shdLevel,
+              profile: enemyProfileFromSettings(ctx.settings),
+              spec: ctx.spec,
+              setBonusCatalog: defaultSetBonusCatalog(),
+            });
+            const hybridDps = ctx.settings.targetMetric === "burst" ? hybridDamage.effectiveDps : hybridDamage.sustainedDps;
+            const v = computeEffectVector(axisContextFor(withIdeal, hybridDps, ctx, role));
             hybridVectors.push(vectorToRecord(v));
             slots.push(slot);
             ideals.push(ideal);
           }
           const allVectors = [
-            ...ziel.candidates.map((c) => vectorToRecord(c.vector)),
+            ...zielVecs,
+            ...invVecs,
             ...hybridVectors,
-            vectorToRecord(zielCand.vector),
+            vectorToRecord(invCand.vector),
           ];
           const normalized = normalizeAxes(allVectors);
-          const zielScoreNorm = scoreBuild(role, normalized[normalized.length - 1]);
+          const invScoreNorm = scoreBuild(role, normalized[normalized.length - 1]);
           const entries: GapRecommendationEntry[] = [];
           for (let i = 0; i < slots.length; i++) {
-            const gainScore = zielScoreNorm - scoreBuild(role, normalized[i]);
-            if (!Number.isFinite(gainScore) || gainScore <= 0) continue;
-            const gainPercent = zielScoreNorm > 0 ? (100 * gainScore) / zielScoreNorm : null;
+            const hybridIdx = zielVecs.length + invVecs.length + i;
+            const gainScore = scoreBuild(role, normalized[hybridIdx]) - invScoreNorm;
+            if (!Number.isFinite(gainScore) || gainScore <= 1e-9) continue;
+            const gainPercent = invScoreNorm > 0 ? (100 * gainScore) / invScoreNorm : null;
             const src = sourceForItem(ideals[i].brand);
             entries.push({
               rank: 0,
@@ -685,6 +704,8 @@ export function dbGearPool(owned: GearPiece[]): GearPiece[] {
       fixed: (string | number)[][];
       perk?: string;
     }>;
+    green_set_info: Record<string, { name?: string }>;
+    brand_set_info: Record<string, { name?: string }>;
   };
   const pool: GearPiece[] = Object.entries(db.gear_db).map(([name, g], i) => {
     const slot = SLOT_DE_LABELS[g.slot] ?? "mask";
@@ -695,13 +716,44 @@ export function dbGearPool(owned: GearPiece[]): GearPiece[] {
       brand: g.brand || name,
       brandType: g.cls === "exotic" ? "exotic" : "named",
       core,
-      coreValue: core === "wd" ? 15 : core === "armour" ? 18935 : 6,
-      attributes: (g.fixed ?? []).map(([k, v]) => ({ type: String(k) as GearAttrKey, value: Number(v) })),
+      coreValue: core === "wd" ? 22.5 : core === "armour" ? 170000 : 1.5,
+      attributes: [
+        ...(g.fixed ?? []).map(([k, v]) => ({ type: String(k) as GearAttrKey, value: Number(v) })),
+        ...(core === "wd" ? [{ type: "chc" as GearAttrKey, value: 10 }, { type: "chd" as GearAttrKey, value: 12 }] : []),
+        ...(core === "armour" ? [{ type: "health" as GearAttrKey, value: 18935 }] : []),
+        ...(core === "skill" ? [{ type: "skilldmg" as GearAttrKey, value: 10 }, { type: "skillhaste" as GearAttrKey, value: 12 }] : []),
+      ],
       talent: g.perk ?? null,
       prototype: g.proto ?? false,
       mod: null,
     };
   });
+  let synthIdx = 0;
+  const synthIdeal = (brand: string, brandType: "gearset" | "brand", slot: GearSlot): GearPiece => ({
+    id: `dbsynth-${synthIdx++}`,
+    slot,
+    brand,
+    brandType,
+    core: "wd",
+    coreValue: 22.5,
+    attributes: [
+      { type: "chc" as GearAttrKey, value: 10 },
+      { type: "chd" as GearAttrKey, value: 12 },
+    ],
+    talent: null,
+    prototype: true,
+    mod: null,
+  });
+  for (const info of Object.values(db.green_set_info ?? {})) {
+    const name = info.name ?? "";
+    if (!name) continue;
+    for (const slot of ANALYSIS_SLOTS) pool.push(synthIdeal(name, "gearset", slot));
+  }
+  for (const info of Object.values(db.brand_set_info ?? {})) {
+    const name = info.name ?? "";
+    if (!name) continue;
+    for (const slot of ANALYSIS_SLOTS) pool.push(synthIdeal(name, "brand", slot));
+  }
   void owned;
   return pool;
 }

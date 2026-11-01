@@ -237,6 +237,7 @@ describe("Ziele & Rollenprofile V4 (Issue #91, Lastenheft Abschnitt 3 und 5)", (
       violationCount: 0,
       normalized: zero,
       score: 0,
+      meetsTargetChc: true,
     });
     const a = mk("build-a", 500);
     const b = mk("build-b", 500);

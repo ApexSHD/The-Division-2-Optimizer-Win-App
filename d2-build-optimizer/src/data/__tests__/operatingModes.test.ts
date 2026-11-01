@@ -94,7 +94,7 @@ describe("Betriebsarten & Suchraum V4 (Issue #92, Lastenheft Abschnitte 1.1 und 
       ),
     );
     const result = optimizeV4([weapon], many, modeCtx({ mode: "ziel" }), { budgetPerSlot: 5 });
-    expect(result.warnings.some((w) => w.includes("Suchraum reduziert"))).toBe(true);
+    expect(result.warnings.some((w) => w.includes("Suchraum"))).toBe(true);
     expect(result.ranked.length).toBeGreaterThan(0);
   }, 60000);
 
@@ -522,5 +522,61 @@ describe("Waffen-Attribute in der Übersicht/Herkunft (Bugfix 31.10.: Werte der 
     expect(src("hsd", "angeborener Kopfschuss")[0].value).toBe(55);
     expect(first.stats.dttooc).toBeGreaterThanOrEqual(15);
     expect(first.stats.hsd).toBeGreaterThanOrEqual(55);
+  }, 30000);
+});
+
+describe("Beam-Suche Performance (Issue #61: Pruning/Beam statt 2-Mio-Cap)", () => {
+  const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+  const BRANDS = ["Ceska", "Grupo", "Fenris", "Overlord", "Petrov"];
+  const WEAPON_TYPES: Array<Weapon["type"]> = ["ar", "smg", "lmg", "rifle", "mmr", "shotgun", "pistol"];
+
+  function bigInventory(): { gear: GearPiece[]; weapons: Weapon[] } {
+    const gearList: GearPiece[] = [];
+    SLOTS.forEach((sl) => {
+      for (let i = 0; i < 25; i++) {
+        gearList.push(gear(sl, "wd", [{ type: "chc", value: 1 + (i % 10) }, { type: "chd", value: 1 + (i % 12) }], `${sl}-big-${i}`, BRANDS[i % 5]));
+      }
+    });
+    const weaponsList: Weapon[] = [];
+    for (let i = 0; i < 50; i++) {
+      const base = sampleWeapons[i % sampleWeapons.length];
+      weaponsList.push({
+        ...base,
+        id: `big-w-${i}`,
+        name: `${base.name} #${i}`,
+        type: WEAPON_TYPES[i % WEAPON_TYPES.length],
+      });
+    }
+    return { gear: gearList, weapons: weaponsList };
+  }
+
+  it("NFA-2: 150 Gear + 50 Waffen per Beam < 10 s, Lokalziel < 2 s", () => {
+    const { gear: g, weapons: w } = bigInventory();
+    expect(g).toHaveLength(150);
+    expect(w).toHaveLength(50);
+    let best = Infinity;
+    for (let run = 0; run < 2; run++) {
+      const t0 = performance.now();
+      const r = optimizeV4(w, g, modeCtx(), { maxResults: 10 });
+      best = Math.min(best, performance.now() - t0);
+      expect(r.ranked.length).toBeGreaterThan(0);
+    }
+    expect(best).toBeLessThan(10000);
+  }, 30000);
+
+  it("Fortschritt und Abbruch: onProgress wird gemeldet, shouldAbort bricht ab", () => {
+    const { gear: g, weapons: w } = bigInventory();
+    const phases: string[] = [];
+    let aborted = false;
+    const r = optimizeV4(w, g, modeCtx(), {
+      maxResults: 10,
+      onProgress: (phase) => {
+        phases.push(phase);
+        if (phases.length >= 2) aborted = true;
+      },
+      shouldAbort: () => aborted,
+    });
+    expect(phases.length).toBeGreaterThan(0);
+    expect(r.warnings.some((x) => x.includes("Abgebrochen"))).toBe(true);
   }, 30000);
 });

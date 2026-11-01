@@ -1,10 +1,11 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
-import { analyzeInventory, WEAPON_TYPE_LABELS } from "../data/inventoryAnalysis";
+import { WEAPON_TYPE_LABELS } from "../data/inventoryAnalysis";
 import type { AnalysisTabId, InventoryAnalysis } from "../data/inventoryAnalysis";
 import type { ModeContext } from "../data/operatingModes";
+import { runAnalysisAsync } from "../workers/analysisClient";
 import { tWeaponName, tTalentName, tGearSetName, type ItemLang } from "../i18n/itemNames";
 import type { GearSlot } from "../data/sampleData";
 
@@ -35,7 +36,19 @@ export function AnalysisView() {
   const itemLang: ItemLang = store.lang;
   const [tab, setTab] = useState<AnalysisTabId>("overview");
 
-  const analysis: InventoryAnalysis = useMemo(() => {
+  const [analysis, setAnalysis] = useState<InventoryAnalysis | null>(null);
+  const [calcState, setCalcState] = useState<"idle" | "running" | "cancelled">("idle");
+  const [progress, setProgress] = useState<{ phase: string; done: number; total: number }>({ phase: "", done: 0, total: 0 });
+  const runRef = useRef(0);
+
+  const gearDep = store.gear;
+  const weaponsDep = store.weapons;
+  const buildsDep = store.builds;
+  const optDep = store.optimization;
+  const agentDep = store.agent;
+
+  useEffect(() => {
+    const generation = ++runRef.current;
     const ctx: ModeContext = {
       mode: "inventar",
       roleKey: store.optimization.role || "weaponDps",
@@ -46,19 +59,59 @@ export function AnalysisView() {
       threatStatusShare: 0.3,
       spec: store.agent.spec,
     };
-    return analyzeInventory({
-      gear: store.gear,
-      weapons: store.weapons,
-      builds: store.builds,
-      roleId: store.optimization.role || "weaponDps",
-      ctx,
-      keepMarkedIds: [],
-    });
-  }, [store.gear, store.weapons, store.builds, store.optimization, store.agent]);
+    setCalcState("running");
+    setProgress({ phase: "", done: 0, total: 0 });
+    const handle = runAnalysisAsync(
+      {
+        gear: store.gear,
+        weapons: store.weapons,
+        builds: store.builds,
+        roleId: store.optimization.role || "weaponDps",
+        ctx,
+        keepMarkedIds: [],
+      },
+      (phase, done, total) => {
+        if (generation !== runRef.current) return;
+        setProgress({ phase, done, total });
+      },
+    );
+    handle.promise
+      .then((a) => {
+        if (generation !== runRef.current) return;
+        setAnalysis(a);
+        setCalcState("idle");
+      })
+      .catch(() => {
+        if (generation !== runRef.current) return;
+        setCalcState("cancelled");
+      });
+    return () => {
+      handle.cancel();
+    };
+  }, [gearDep, weaponsDep, buildsDep, optDep, agentDep]);
+
+  const cancelAnalysis = () => {
+    runRef.current += 1;
+    setCalcState("cancelled");
+  };
 
   const a = t.analysis;
   const gearById = useMemo(() => new Map(store.gear.map((g) => [g.id, g])), [store.gear]);
   const weaponById = useMemo(() => new Map(store.weapons.map((w) => [w.id, w])), [store.weapons]);
+
+  if (!analysis) {
+    return (
+      <div>
+        <div className="toolbar">
+          <span className="badge">{a.calculating}</span>
+          <span className="badge">{progress.phase} {progress.total > 0 ? `${progress.done}/${progress.total}` : ""}</span>
+          <span className="spacer" />
+          <button className="btn" onClick={cancelAnalysis}>{a.cancel}</button>
+        </div>
+        <div className="empty-state" style={{ padding: 24 }}>{a.calculating}</div>
+      </div>
+    );
+  }
 
   const smallInventory = analysis.gearTotal < 6 || analysis.weaponTotal < 3;
 
@@ -72,6 +125,13 @@ export function AnalysisView() {
       <div className="toolbar">
         <span className="badge">Stand: {new Date(analysis.analyzedAt).toLocaleString(store.lang === "de" ? "de-DE" : "en-US")}</span>
         {smallInventory && <span className="badge">{a.smallInventoryHint}</span>}
+        {calcState === "running" && (
+          <>
+            <span className="badge">{a.calculating} {progress.phase} {progress.total > 0 ? `${progress.done}/${progress.total}` : ""}</span>
+            <button className="btn" onClick={cancelAnalysis}>{a.cancel}</button>
+          </>
+        )}
+        {calcState === "cancelled" && <span className="badge">{a.cancelled}</span>}
         <span className="spacer" />
       </div>
 
