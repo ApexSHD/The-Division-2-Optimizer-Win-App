@@ -48,18 +48,25 @@ export function GearView() {
   const [filterRarity, setFilterRarity] = useState<"" | "brand" | "gearset" | "named" | "exotic">("");
 
   useEffect(() => {
-    getDb()
-      .then((db) => {
-        setPresets(db.gear);
-        setBrands(db.brandItems);
-        setGearSets(db.gearSetItems);
-      })
-      .catch(() => {
-        setPresets([]);
-        setBrands([]);
-        setGearSets([]);
-      });
-  }, []);
+    const db = store.db ?? null;
+    if (!db) {
+      getDb()
+        .then((base) => {
+          setPresets(base.gear);
+          setBrands(base.brandItems);
+          setGearSets(base.gearSetItems);
+        })
+        .catch(() => {
+          setPresets([]);
+          setBrands([]);
+          setGearSets([]);
+        });
+      return;
+    }
+    setPresets(db.gear);
+    setBrands(db.brandItems);
+    setGearSets(db.gearSetItems);
+  }, [store.db]);
 
   const presetsForSlot = (slot: GearSlot) => presets.filter((p) => p.slot === slot);
   const dbItem = editing ? presets.find((p) => p.name === editing.brand && p.slot === editing.slot) : undefined;
@@ -68,7 +75,10 @@ export function GearView() {
   const usedAttrTypes = new Set(editing?.attributes.map((a) => a.type) ?? []);
   const talentOptions =
     editing && (editing.slot === "chest" || editing.slot === "backpack") && editing.brandType === "brand"
-      ? GEAR_TALENTS.filter((tal) => tal.slot === editing.slot).slice().sort((a, b) => a.label.localeCompare(b.label, "de"))
+      ? (store.db?.gearTalents ?? GEAR_TALENTS)
+          .filter((tal) => tal.slot === editing.slot)
+          .slice()
+          .sort((a, b) => a.label.localeCompare(b.label, "de"))
       : [];
 
   function openEdit(g: GearPiece) {

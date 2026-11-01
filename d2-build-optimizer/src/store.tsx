@@ -4,6 +4,8 @@ import type { Weapon, WeaponMod, GearPiece, Mod, BrandSet, Loadout, GearSlot } f
 import { sampleMods, sampleBrandSets, sampleGearSets, normalizeWeapon, normalizeGear } from "./data/sampleData";
 import { getDb } from "./data/db";
 import type { Db } from "./data/db";
+import { emptyUserDb, mergeDb, sanitizeUserDb } from "./data/userDb";
+import type { UserDbOverrides } from "./data/userDb";
 
 export type ViewId = "dashboard" | "global" | "weapons" | "gear" | "builds" | "optimizer" | "compare" | "admin" | "settings";
 export type Theme = "dark" | "light" | "system";
@@ -124,6 +126,7 @@ export interface UserData {
   builds: Loadout[];
   activeBuildId: string;
   onboardingDone: boolean;
+  gameDb: UserDbOverrides;
 }
 
 const SCHEMA_VERSION = 1;
@@ -144,6 +147,7 @@ function defaultUserData(): UserData {
     builds: [],
     activeBuildId: "",
     onboardingDone: false,
+    gameDb: emptyUserDb(),
   };
 }
 
@@ -242,6 +246,7 @@ export function sanitize(raw: unknown): UserData {
       : [],
     activeBuildId: typeof r.activeBuildId === "string" ? r.activeBuildId : "",
     onboardingDone: Boolean(r.onboardingDone),
+    gameDb: sanitizeUserDb(r.gameDb),
   };
 }
 
@@ -274,6 +279,9 @@ export interface AppState {
   builds: Loadout[];
   activeBuildId: string;
   onboardingDone: boolean;
+  gameDb: UserDbOverrides;
+  setGameDbOverride: <K extends keyof UserDbOverrides>(category: K, key: string, entry: Partial<UserDbOverrides[K][string]> | null) => void;
+  resetGameDb: () => void;
   addBuild: (b: Loadout) => void;
   updateBuild: (b: Loadout) => void;
   removeBuild: (id: string) => void;
@@ -468,7 +476,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       name: b.name,
       bonuses: b.bonuses,
     })),
-    db,
+    db: db ? mergeDb(db, userData.gameDb) : null,
+    gameDb: userData.gameDb,
     builds: userData.builds,
     activeBuildId: userData.activeBuildId,
     onboardingDone: userData.onboardingDone,
@@ -491,6 +500,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     noteImport,
     progress,
     setProgress,
+    setGameDbOverride: (category, key, entry) =>
+      mutate((d) => ({ ...d, gameDb: { ...d.gameDb, [category]: { ...d.gameDb[category], [key]: entry } } })),
+    resetGameDb: () => mutate((d) => ({ ...d, gameDb: emptyUserDb() })),
     addWeapon: (w) => mutate((d) => ({ ...d, weapons: [...d.weapons, w] })),
     addWeaponBulk: (ws) => mutate((d) => (ws.length === 0 ? d : { ...d, weapons: [...d.weapons, ...ws] })),
     setWeapons: (ws) => mutate((d) => ({ ...d, weapons: ws })),

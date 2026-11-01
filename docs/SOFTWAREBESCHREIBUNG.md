@@ -75,11 +75,11 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 - Set-Vergleich (Brand-Sets / Gear-Sets im direkten Gegenüber).
 - Gespeicherte Builds als „Loadouts" vergleichen.
 
-### 4.6 Datenverwaltung (Admin)
+### 4.6 Waffen & Ausrüstung (DB)
 
-- Tabellen-Editor für Waffen-, Gear-, Brand-, Gear-Set- und Mod-Datenbank.
-- Validierung bei Eingabe; Änderungen als eigene „Benutzer-Datenbank" getrennt von den Standarddaten.
-- Zurücksetzen auf Standarddaten, Versionsanzeige der Datenbanken.
+- Editierbare Tabellen für die Spiel-Basisdaten: Waffen, Waffentalente, Gear, Gear-Talente, Brand-Sets, Gear-Sets und Mods (Hinzufügen, Bearbeiten, Löschen pro Eintrag).
+- Änderungen wirken unabhängig vom Inventar des Spielers und werden lokal beim Spieler im selben Datenverzeichnis wie das Inventar als Override gespeichert; die Standarddaten (JSON im App-Paket) bleiben unangetastet.
+- „Alle Anpassungen zurücksetzen" stellt die Standarddaten wieder her; Versionsanzeige der Datenbanken und Zähler der eigenen Anpassungen.
 
 ### 4.7 Import / Export
 
