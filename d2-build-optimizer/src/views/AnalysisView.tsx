@@ -49,6 +49,7 @@ export function AnalysisView() {
 
   useEffect(() => {
     const generation = ++runRef.current;
+    let cancelledByCleanup = false;
     const ctx: ModeContext = {
       mode: "inventar",
       roleKey: store.optimization.role || "weaponDps",
@@ -82,7 +83,7 @@ export function AnalysisView() {
         setCalcState("idle");
       })
       .catch((err) => {
-        if (generation !== runRef.current) return;
+        if (generation !== runRef.current || cancelledByCleanup) return;
         if (err instanceof Error && err.message === "cancelled") {
           setCalcState("cancelled");
           return;
@@ -100,13 +101,54 @@ export function AnalysisView() {
         store.setStatus(`${a.calculating}: ${a.cancelled}`);
       });
     return () => {
-      handle.cancel();
+      cancelledByCleanup = true;
     };
   }, [gearDep, weaponsDep, buildsDep, optDep, agentDep]);
 
   const cancelAnalysis = () => {
     runRef.current += 1;
     setCalcState("cancelled");
+  };
+
+  const retryAnalysis = () => {
+    runRef.current += 1;
+    setCalcState("running");
+    setProgress({ phase: "", done: 0, total: 0 });
+    const ctx: ModeContext = {
+      mode: "inventar",
+      roleKey: store.optimization.role || "weaponDps",
+      skills: [],
+      teamSize: store.optimization.enemyTeamSize,
+      shdLevel: store.agent.shdLevel,
+      settings: store.optimization,
+      threatStatusShare: 0.3,
+      spec: store.agent.spec,
+    };
+    const generation = runRef.current;
+    const handle = runAnalysisAsync(
+      {
+        gear: store.gear,
+        weapons: store.weapons,
+        builds: store.builds,
+        roleId: store.optimization.role || "weaponDps",
+        ctx,
+        keepMarkedIds: [],
+      },
+      (phase, done, total) => {
+        if (generation !== runRef.current) return;
+        setProgress({ phase, done, total });
+      },
+    );
+    handle.promise
+      .then((a) => {
+        if (generation !== runRef.current) return;
+        setAnalysis(a);
+        setCalcState("idle");
+      })
+      .catch(() => {
+        if (generation !== runRef.current) return;
+        setCalcState("cancelled");
+      });
   };
 
   const a = t.analysis;
@@ -145,7 +187,12 @@ export function AnalysisView() {
             <button className="btn" onClick={cancelAnalysis}>{a.cancel}</button>
           </>
         )}
-        {calcState === "cancelled" && <span className="badge">{a.cancelled}</span>}
+        {calcState === "cancelled" && (
+          <>
+            <span className="badge">{a.cancelled}</span>
+            <button className="btn" onClick={retryAnalysis}>{a.retry}</button>
+          </>
+        )}
         <span className="spacer" />
       </div>
 

@@ -232,6 +232,7 @@ export const en: Translation = {
     calculating: "Calculating\u2026",
     cancel: "Cancel",
     cancelled: "Calculation cancelled.",
+    retry: "Recalculate",
     upgradeExcludedHint: "Note: Recalibration/optimization is not taken into account.",
     noCandidates: "No cleanup candidates.",
     piece: "Item",
