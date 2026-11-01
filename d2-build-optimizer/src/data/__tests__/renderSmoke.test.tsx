@@ -156,19 +156,18 @@ describe("OptimizerView Wizard (Progress Bar)", () => {
 });
 
 describe("SettingsView im Windows-Stil (zweispaltig)", () => {
-  it("rendert Sidebar-Kategorien und Sprachauswahl im Darstellungs-Bereich", () => {
+  it("rendert Tabs und Sprachauswahl im Darstellungs-Bereich (Einheitsformat)", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(SettingsView)),
     );
-    expect(html).toContain("settings-layout");
-    expect(html).toContain("settings-nav");
+    expect(html).toContain('class=\"tabs\"');
     expect(html).toContain("Darstellung");
     expect(html).toContain("Sprache");
     expect(html).toContain("Deutsch");
     expect(html).toContain("English");
   });
 
-  it("weitere Kategorien (Daten, Updates, Über) sind in der Navigation vorhanden", () => {
+  it("weitere Kategorien (Daten, Updates, Über) sind als Tabs vorhanden", () => {
     const html = renderToString(
       React.createElement(StoreProvider, null, React.createElement(SettingsView)),
     );

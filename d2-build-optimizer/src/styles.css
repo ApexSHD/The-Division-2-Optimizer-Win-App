@@ -1347,58 +1347,28 @@ kbd {
   font-weight: 700;
 }
 
-/* ---- Einstellungen im WinToys-Stil (randlos, Sidebar mit eigenem Hintergrund) ---- */
-.settings-view .workarea-header {
-  display: none;
-}
-
-.settings-view .workarea-content {
-  padding: 0;
-}
-
-.settings-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 0;
-  min-height: 100%;
-  height: 100%;
-}
-
-.settings-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 12px;
-  background: var(--bg-alt, #232329);
-  border-right: 1px solid var(--border, #3d3d47);
-}
-
-.settings-nav-item {
+/* ---- Einstellungen: Einheitsformat wie Vergleich/Admin (Tabs oben, field-Boxen) ---- */
+.settings-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--text-dim, #b8b8c0);
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row label {
+  flex: 1;
   font-size: 14px;
-  text-align: left;
-  cursor: pointer;
-  width: 100%;
-  transition: background 0.15s ease;
 }
 
-.settings-nav-item:hover {
-  background: var(--bg-hover, #33333c);
-  color: var(--text, #f2f2f4);
-}
-
-.settings-nav-item.active {
-  background: var(--bg-hover, #33333c);
-  color: var(--text, #f2f2f4);
-  font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--accent, #f57c1f);
+.settings-row select,
+.settings-row input[type="text"] {
+  max-width: 260px;
 }
 
 .settings-content {
@@ -1415,31 +1385,8 @@ kbd {
 .settings-group-title {
   font-size: 13px;
   font-weight: 700;
-  margin: 24px 0 10px;
+  margin: 16px 0 6px;
   color: var(--text-faint, #8a8a94);
-}
-
-.settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border, #3d3d47);
-}
-
-.settings-row:last-child {
-  border-bottom: none;
-}
-
-.settings-row label {
-  flex: 1;
-  font-size: 14px;
-}
-
-.settings-row select,
-.settings-row input[type="text"] {
-  max-width: 240px;
 }
 
 
