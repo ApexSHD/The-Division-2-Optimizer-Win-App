@@ -35,10 +35,39 @@ describe("mergeDb (Spiel-Basisdaten + lokale Overrides)", () => {
   it("Brand-Items/Gear-Set-Items werden aus den gemergten Sets abgeleitet", async () => {
     const base = await getDb();
     const overrides = emptyUserDb();
-    overrides.brandSets["test_brand"] = { key: "test_brand", name: "Test Brand", bonuses: [{ pieces: 2, bonus: "+10% WD" }] };
+    overrides.brandSets["test_brand"] = { key: "test_brand", name: "Test Brand", bonusEntries: [{ pieces: 2, attr: "wd", val: 10 }] };
     const merged = mergeDb(base, overrides);
     expect(merged.brandSets.some((b) => b.key === "test_brand")).toBe(true);
     expect(merged.brandItems.some((b) => b.brand === "Test Brand")).toBe(true);
+  });
+
+  it("strukturierte Set-Boni (bonusEntries) ersetzen die Standardwerte, wd_by_weapon inkl. Waffentyp", async () => {
+    const base = await getDb();
+    const fenris = base.brandSets.find((b) => b.key === "fenris")!;
+    expect(fenris.bonusEntries.length).toBeGreaterThan(0);
+    const overrides = emptyUserDb();
+    overrides.brandSets["fenris"] = {
+      bonusEntries: [
+        { pieces: 1, attr: "wd_by_weapon", val: 15, weaponType: "AR" },
+        { pieces: 2, attr: "chc", val: 5 },
+      ],
+    };
+    const merged = mergeDb(base, overrides);
+    const m = merged.brandSets.find((b) => b.key === "fenris")!;
+    expect(m.bonusEntries).toEqual([
+      { pieces: 1, attr: "wd_by_weapon", val: 15, weaponType: "AR" },
+      { pieces: 2, attr: "chc", val: 5 },
+    ]);
+    expect(m.bonuses).toEqual([]);
+    expect(merged.setBonusAttrs).toContain("chc");
+  });
+
+  it("neue Attribute landen über attrNames im Dropdown-Stamm (setBonusAttrs)", async () => {
+    const base = await getDb();
+    const overrides = emptyUserDb();
+    overrides.attrNames["mein_attr"] = { de: "Mein Attribut", en: "My attribute" };
+    const merged = mergeDb(base, overrides);
+    expect(merged.setBonusAttrs).toContain("mein_attr");
   });
 
   it("sanitizeUserDb ist robust gegen ungültige Eingaben", () => {

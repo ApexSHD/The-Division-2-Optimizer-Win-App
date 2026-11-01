@@ -1,4 +1,21 @@
-import type { Db, WeaponPreset, TalentEntry, GearPreset, GearTalentEntry } from "./db";
+import type { Db, WeaponPreset, TalentEntry, GearPreset, GearTalentEntry, BrandBonusEntry, GearSetBonusEntry } from "./db";
+
+export interface BrandSetOverride {
+  key: string;
+  name?: string;
+  bonusEntries?: BrandBonusEntry[];
+}
+
+export interface GearSetOverride {
+  key: string;
+  name?: string;
+  bonusEntries?: GearSetBonusEntry[];
+}
+
+export interface AttrNameOverride {
+  de?: string;
+  en?: string;
+}
 
 export type BrandSetRow = Db["brandSets"][number];
 export type GearSetRow = Db["gearSets"][number];
@@ -9,9 +26,10 @@ export interface UserDbOverrides {
   weaponTalents: Record<string, Partial<TalentEntry> | null>;
   gear: Record<string, Partial<GearPreset> | null>;
   gearTalents: Record<string, Partial<GearTalentEntry> | null>;
-  brandSets: Record<string, Partial<BrandSetRow> | null>;
-  gearSets: Record<string, Partial<GearSetRow> | null>;
+  brandSets: Record<string, Partial<BrandSetOverride> | null>;
+  gearSets: Record<string, Partial<GearSetOverride> | null>;
   mods: Record<string, Partial<ModRow> | null>;
+  attrNames: Record<string, AttrNameOverride | null>;
 }
 
 export function emptyUserDb(): UserDbOverrides {
@@ -23,6 +41,7 @@ export function emptyUserDb(): UserDbOverrides {
     brandSets: {},
     gearSets: {},
     mods: {},
+    attrNames: {},
   };
 }
 
@@ -102,14 +121,80 @@ const newGearTalent = (key: string): GearTalentEntry => ({
   note: "",
 });
 
-const newBrandSet = (key: string): BrandSetRow => ({ key, name: key, bonuses: [] });
-const newGearSet = (key: string): GearSetRow => ({ key, name: key, bonuses: [] });
+const newBrandSet = (key: string): BrandSetRow => ({ key, name: key, bonuses: [], bonusEntries: [] });
+const newGearSet = (key: string): GearSetRow => ({ key, name: key, bonuses: [], bonusEntries: [] });
+
+function mergeBrandSets(
+  base: BrandSetRow[],
+  overrides: Record<string, Partial<BrandSetOverride> | null> | undefined,
+): BrandSetRow[] {
+  const result: BrandSetRow[] = [];
+  const handled = new Set<string>();
+  for (const item of base) {
+    handled.add(item.key);
+    const o = overrides?.[item.key];
+    if (o === null) continue;
+    result.push({
+      ...item,
+      name: o?.name ?? item.name,
+      bonusEntries: o?.bonusEntries ?? item.bonusEntries,
+      bonuses: o?.bonusEntries ? [] : item.bonuses,
+    });
+  }
+  for (const [key, o] of Object.entries(overrides ?? {})) {
+    if (handled.has(key) || !o) continue;
+    const fresh = newBrandSet(key);
+    result.push({
+      ...fresh,
+      name: o.name ?? key,
+      bonusEntries: o.bonusEntries ?? [],
+    });
+  }
+  return result;
+}
+
+function mergeGearSets(
+  base: GearSetRow[],
+  overrides: Record<string, Partial<GearSetOverride> | null> | undefined,
+): GearSetRow[] {
+  const result: GearSetRow[] = [];
+  const handled = new Set<string>();
+  for (const item of base) {
+    handled.add(item.key);
+    const o = overrides?.[item.key];
+    if (o === null) continue;
+    result.push({
+      ...item,
+      name: o?.name ?? item.name,
+      bonusEntries: o?.bonusEntries ?? item.bonusEntries,
+      bonuses: o?.bonusEntries ? [] : item.bonuses,
+    });
+  }
+  for (const [key, o] of Object.entries(overrides ?? {})) {
+    if (handled.has(key) || !o) continue;
+    const fresh = newGearSet(key);
+    result.push({
+      ...fresh,
+      name: o.name ?? key,
+      bonusEntries: o.bonusEntries ?? [],
+    });
+  }
+  return result;
+}
 const newMod = (name: string): ModRow => ({ name, slot: "optic", slotTypes: [], bonus: "", penalty: null });
 
 export function mergeDb(base: Db, overrides: UserDbOverrides | undefined): Db {
   if (!overrides) return base;
-  const brandSets = mergeByKey(base.brandSets, overrides.brandSets, (b) => b.key, newBrandSet);
-  const gearSets = mergeByKey(base.gearSets, overrides.gearSets, (s) => s.key, newGearSet);
+  const brandSets = mergeBrandSets(base.brandSets, overrides.brandSets);
+  const gearSets = mergeGearSets(base.gearSets, overrides.gearSets);
+  const setBonusAttrs = Array.from(
+    new Set([
+      ...base.setBonusAttrs,
+      ...brandSets.flatMap((b) => (b.bonusEntries ?? []).map((e) => e.attr)),
+      ...gearSets.flatMap((s) => (s.bonusEntries ?? []).map((e) => e.attr)),
+      ...Object.keys(overrides.attrNames ?? {}),
+    ]),
+  ).sort((a, b) => a.localeCompare(b));
   const allSlots = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"] as const;
   return {
     ...base,
@@ -119,8 +204,9 @@ export function mergeDb(base: Db, overrides: UserDbOverrides | undefined): Db {
     gearTalents: mergeByKey(base.gearTalents, overrides.gearTalents, (g) => g.key, newGearTalent),
     brandSets,
     gearSets,
-    brandItems: brandSets.map((b) => ({ brand: b.name, slots: [...allSlots] })),
-    gearSetItems: gearSets.map((s) => ({ key: s.key, name: s.name, slots: [...allSlots] })),
+    setBonusAttrs,
+    brandItems: brandSets.map((b) => ({ brand: b.name ?? b.key, slots: [...allSlots] })),
+    gearSetItems: gearSets.map((s) => ({ key: s.key, name: s.name ?? s.key, slots: [...allSlots] })),
     mods: mergeByKey(base.mods, overrides.mods, (m) => m.name, newMod),
   };
 }
