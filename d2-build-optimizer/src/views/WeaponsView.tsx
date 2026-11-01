@@ -63,18 +63,25 @@ export function WeaponsView() {
   const [filterTalent, setFilterTalent] = useState("");
 
   useEffect(() => {
-    getDb()
-      .then((db) => {
-        setPresets(db.weapons);
-        setDisplayTalents(db.displayTalents);
-        setTalentDisplayByType(db.talentDisplayByType);
-      })
-      .catch(() => {
-        setPresets([]);
-        setDisplayTalents([]);
-        setTalentDisplayByType({});
-      });
-  }, []);
+    const db = store.db ?? null;
+    if (!db) {
+      getDb()
+        .then((base) => {
+          setPresets(base.weapons);
+          setDisplayTalents(base.displayTalents);
+          setTalentDisplayByType(base.talentDisplayByType);
+        })
+        .catch(() => {
+          setPresets([]);
+          setDisplayTalents([]);
+          setTalentDisplayByType({});
+        });
+      return;
+    }
+    setPresets(db.weapons);
+    setDisplayTalents(db.displayTalents);
+    setTalentDisplayByType(db.talentDisplayByType);
+  }, [store.db]);
 
   const presetsForType = (type: WeaponType) => presets.filter((p) => p.typeKey === type);
   const currentPreset = presets.find((p) => p.name === editing?.name && p.typeKey === editing?.type);

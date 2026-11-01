@@ -308,6 +308,7 @@ export interface GearSetItemPreset {
 export interface Db {
   weapons: WeaponPreset[];
   talents: TalentEntry[];
+  gearTalents: GearTalentEntry[];
   brandItems: BrandItemPreset[];
   gearSetItems: GearSetItemPreset[];
   displayTalents: DisplayTalent[];
@@ -424,6 +425,8 @@ function load(): Db {
     description: tal.description,
   }));
 
+  const gearTalents: GearTalentEntry[] = GEAR_TALENTS;
+
   const brandItems: BrandItemPreset[] = Object.values(gearFile.brand_set_info).map((b) => ({
     brand: b.name,
     slots: ["mask", "chest", "holster", "backpack", "gloves", "kneepads"],
@@ -438,6 +441,7 @@ function load(): Db {
   return {
     weapons,
     talents,
+    gearTalents,
     brandItems,
     gearSetItems,
     displayTalents,
