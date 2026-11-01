@@ -334,7 +334,7 @@ function WorkArea() {
   const current = titles[store.view];
 
   return (
-    <main className="workarea">
+    <main className={`workarea ${store.view === "settings" ? "settings-view" : ""}`}>
       <div className="workarea-header">
         <h1 className="workarea-title">{current.title}</h1>
         <div className="workarea-sub">{current.sub}</div>
