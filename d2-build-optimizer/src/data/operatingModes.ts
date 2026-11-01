@@ -52,10 +52,16 @@ export interface ModeContext {
   };
 }
 
+export interface WeaponSlot {
+  slot: "primary1" | "primary2" | "pistol";
+  weapon: Weapon | null;
+}
+
 export interface V4Candidate {
   id: string;
   gear: GearPiece[];
   weapon: Weapon;
+  weapons: WeaponSlot[];
   vector: import("./axes").EffectVector;
   admissible: boolean;
   violations: MinimumViolation[];
@@ -292,9 +298,10 @@ export function buildCandidatesFromOptimizer(
         ? checkAdmissibility(admissibilityInput(r.gear, vector, role, ctx))
         : { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Exotic-Limit: höchstens ein exotisches Ausrüstungsteil", actual: null, required: null }] };
     out.push({
-      id: [...r.gear.map((g) => g.id)].sort().join("|") + "::" + r.weapon.id,
+      id: [...r.gear.map((g) => g.id)].sort().join("|") + "::" + r.weapon.id + weaponSlotsSuffix(r.weapons),
       gear: r.gear,
       weapon: r.weapon,
+      weapons: r.weapons,
       vector,
       admissible: adm.admissible,
       violations: adm.violations,
@@ -350,6 +357,93 @@ export function reduceSearchSpace(
     kept.push(...take.map((s) => s.g));
   }
   return { gear: kept, pruned: pruned.count };
+}
+
+export interface WeaponSlotPick {
+  slot: "primary1" | "primary2" | "pistol";
+  weapon: Weapon | null;
+}
+
+function weaponSlotsSuffix(slots: WeaponSlotPick[]): string {
+  const parts = slots.filter((x) => x.weapon).map((x) => `${x.slot}:${x.weapon!.id}`);
+  return parts.length > 0 ? ":" + parts.join(",") : "";
+}
+
+function isExoticWeapon(w: Weapon): boolean {
+  return w.rarity === "exotic";
+}
+
+/**
+ * Baut die Waffen-Slots für einen Kandidaten: 2 Primärwaffen (bestes Paar nach
+ * Zielmetrik, Exotic-Waffenlimit ≤ 1) plus optional 1 Pistole. Rotation-Metrik:
+ * gewichteter Mix beider Primärwaffen (50/50 je Slot, konfigurierbar über
+ * settings.userAssumptions). Ohne Pistole im Pool bleibt der Slot null.
+ */
+export function buildWeaponSlots(
+  poolWeapons: Weapon[],
+  targetMetric: "burst" | "sustained" | "rotation",
+  profile: import("./damage").EnemyProfile,
+  shdLevel: number,
+  spec: string,
+  setBonusCatalog?: unknown,
+  modsBySlot?: unknown,
+): WeaponSlotPick[] {
+  const metricOf = (w: Weapon) => {
+    const { damage } = evaluateBuild(w, [], {
+      shdLevel,
+      profile,
+      spec,
+      modsBySlot: modsBySlot as never,
+      setBonusCatalog: setBonusCatalog as never,
+    });
+    return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
+  };
+  const ranked = [...poolWeapons].sort((a, b) => metricOf(b) - metricOf(a));
+  const primaries: Weapon[] = [];
+  for (const w of ranked) {
+    if (primaries.length >= 2) break;
+    if (isExoticWeapon(w) && primaries.some(isExoticWeapon)) continue;
+    if (primaries.some((p) => p.id === w.id)) continue;
+    primaries.push(w);
+  }
+  const pistol = ranked.find((w) => w.type === "pistol" && !primaries.some((p) => p.id === w.id)) ?? null;
+  return [
+    { slot: "primary1", weapon: primaries[0] ?? null },
+    { slot: "primary2", weapon: primaries[1] ?? null },
+    { slot: "pistol", weapon: pistol },
+  ];
+}
+
+/**
+ * Kombinierte Schadensmetrik eines Waffen-Slots: bei Rotation zählt der Mix aus
+ * beiden Primärwaffen (je 50 % Anteil), sonst die führende Waffe (primary1).
+ */
+export function combinedWeaponDps(
+  slots: WeaponSlotPick[],
+  targetMetric: "burst" | "sustained" | "rotation",
+  profile: import("./damage").EnemyProfile,
+  shdLevel: number,
+  spec: string,
+  setBonusCatalog?: unknown,
+  modsBySlot?: unknown,
+): number {
+  const dpsOf = (w: Weapon | null) => {
+    if (!w) return 0;
+    const { damage } = evaluateBuild(w, [], {
+      shdLevel,
+      profile,
+      spec,
+      modsBySlot: modsBySlot as never,
+      setBonusCatalog: setBonusCatalog as never,
+    });
+    return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
+  };
+  const p1 = slots.find((x) => x.slot === "primary1")?.weapon ?? null;
+  const p2 = slots.find((x) => x.slot === "primary2")?.weapon ?? null;
+  if (targetMetric === "rotation") {
+    return dpsOf(p1) * 0.5 + dpsOf(p2) * 0.5;
+  }
+  return dpsOf(p1 ?? p2);
 }
 
 export const DEFAULT_BEAM_WIDTH = 2000;
@@ -595,7 +689,10 @@ export function optimizeV4(
       weaponDpsCache.set(w.id, ctx.settings.targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps);
     }
     const sortedWeapons = [...candidateWeapons].sort((a, b) => (weaponDpsCache.get(b.id) ?? 0) - (weaponDpsCache.get(a.id) ?? 0));
-    opts.onProgress?.("evaluate", 0, combos.length * Math.max(1, sortedWeapons.length));
+    const weaponSlots = buildWeaponSlots(sortedWeapons, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot);
+    const leadWeapon = weaponSlots.find((x) => x.slot === "primary1")?.weapon ?? sortedWeapons[0] ?? null;
+    const comboWeaponDps = combinedWeaponDps(weaponSlots, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot);
+    opts.onProgress?.("evaluate", 0, combos.length);
     for (const combo of combos) {
       if (opts.shouldAbort?.()) {
         warnings.push("Abgebrochen – Teilergebnis (Beam-Suche).");
@@ -604,8 +701,9 @@ export function optimizeV4(
       const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
       if (exoticGear > 1) continue;
       if (combo.length < SLOTS.length) continue;
-      for (const w of sortedWeapons) {
-        const key = combo.map((g) => g.id).join("|") + "::" + w.id;
+      for (const w of [leadWeapon]) {
+        if (!w) continue;
+        const key = combo.map((g) => g.id).join("|") + "::" + w.id + weaponSlotsSuffix(weaponSlots);
         if (seen.has(key)) continue;
         seen.add(key);
         const { stats, damage } = evaluateBuild(w, combo, {
@@ -619,6 +717,7 @@ export function optimizeV4(
         optimizerResults.push({
           rank: 0,
           weapon: w,
+          weapons: weaponSlots,
           gear: combo,
           stats,
           damage,
@@ -628,16 +727,20 @@ export function optimizeV4(
           reasonParts: [],
           slotExplanations: [],
           warnings: [] as OptimizerWarning[],
-          roleScore: { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" },
+          roleScore: { key: "" as const, score: comboWeaponDps, label: ctx.settings.targetMetric === "rotation" ? "Rotation-DPS" : "Waffen-DPS" },
           assumptions: { items: [], wastedChc: 0, overTargetChc: 0 },
         });
         evaluated++;
-        if (evaluated % 500 === 0) opts.onProgress?.("evaluate", evaluated, combos.length * Math.max(1, sortedWeapons.length));
+        if (evaluated % 500 === 0) opts.onProgress?.("evaluate", evaluated, combos.length);
       }
     }
     const keep = Math.max(opts.maxResults ?? 50, 200);
     const metric = (r: OptimizerResult) =>
-      ctx.settings.targetMetric === "burst" ? r.damage.effectiveDps : r.damage.sustainedDps;
+      ctx.settings.targetMetric === "burst"
+        ? r.damage.effectiveDps
+        : ctx.settings.targetMetric === "rotation"
+          ? r.roleScore.score
+          : r.damage.sustainedDps;
     const pre: OptimizerResult[] = [];
     for (const r of optimizerResults) {
       if (pre.length >= keep * 4) break;
@@ -664,10 +767,10 @@ export function optimizeV4(
       if (diverse.every((t) => gearDiffCount(t, r) >= 2)) diverse.push(r);
     }
     if (diverse.length < keep) {
-      const seen = new Set(diverse.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id));
+      const seen = new Set(diverse.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id + weaponSlotsSuffix(r.weapons)));
       for (const r of optimizerResults) {
         if (diverse.length >= keep) break;
-        const key = r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id;
+        const key = r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id + weaponSlotsSuffix(r.weapons);
         if (seen.has(key)) continue;
         seen.add(key);
         diverse.push(r);

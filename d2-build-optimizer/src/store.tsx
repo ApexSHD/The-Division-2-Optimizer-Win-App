@@ -17,6 +17,42 @@ export interface AgentValues {
   season: string;
 }
 
+export interface OptimizerRequest {
+  roleKey: string;
+  gameMode: OptimizationSettings["gameMode"];
+  difficultyKey: string;
+  teamSize: 1 | 2 | 3 | 4;
+  skills: string[];
+  spec: string;
+  targetMetric: OptimizationSettings["targetMetric"];
+  targetChc: number;
+  targetHsd: number;
+  lockedGearIds: string[];
+  excludedGearIds: string[];
+  excludedWeaponIds: string[];
+  targetGearSet: string;
+  weaponTypeFilter: OptimizationSettings["weaponTypeFilter"];
+  anchorWeaponId: string;
+}
+
+export const DEFAULT_OPTIMIZER_REQUEST: OptimizerRequest = {
+  roleKey: "dps_krit",
+  gameMode: "openworld",
+  difficultyKey: "heroic",
+  teamSize: 4,
+  skills: [],
+  spec: "sharpshooter",
+  targetMetric: "sustained",
+  targetChc: 50,
+  targetHsd: 100,
+  lockedGearIds: [],
+  excludedGearIds: [],
+  excludedWeaponIds: [],
+  targetGearSet: "",
+  weaponTypeFilter: "",
+  anchorWeaponId: "",
+};
+
 export interface OptimizationSettings {
   targetChc: number;
   targetHsd: number;
@@ -125,6 +161,7 @@ export interface UserData {
   lang: "de" | "en";
   agent: AgentValues;
   optimization: OptimizationSettings;
+  optimizerRequest: OptimizerRequest;
   weapons: Weapon[];
   gear: GearPiece[];
   builds: Loadout[];
@@ -146,6 +183,7 @@ function defaultUserData(): UserData {
     lang: "de",
     agent: { shdLevel: 1000, spec: "sharpshooter", mode: "pve", season: "y8s3" },
     optimization: DEFAULT_OPTIMIZATION,
+    optimizerRequest: DEFAULT_OPTIMIZER_REQUEST,
     weapons: [],
     gear: [],
     builds: [],
@@ -184,6 +222,14 @@ export function sanitize(raw: unknown): UserData {
       if (!["openworld", "raid", "incursion", "pve", "pvp"].includes(String(o.gameMode))) o.gameMode = "openworld";
       if (o.targetMetric === "rotation") o.targetMetric = "sustained";
       return o as unknown as UserData["optimization"];
+    })(),
+    optimizerRequest: (() => {
+      const q = { ...DEFAULT_OPTIMIZER_REQUEST, ...((r as { optimizerRequest?: Partial<OptimizerRequest> }).optimizerRequest ?? {}) };
+      if (!Array.isArray(q.lockedGearIds)) q.lockedGearIds = [];
+      if (!Array.isArray(q.excludedGearIds)) q.excludedGearIds = [];
+      if (!Array.isArray(q.excludedWeaponIds)) q.excludedWeaponIds = [];
+      if (!Array.isArray(q.skills)) q.skills = [];
+      return q;
     })(),
     weapons: Array.isArray(r.weapons)
       ? (r.weapons as unknown[]).map((w) =>
@@ -282,6 +328,10 @@ export interface AppState {
   setAgent: (a: AgentValues) => void;
   optimization: OptimizationSettings;
   setOptimization: (o: OptimizationSettings) => void;
+  optimizerRequest: OptimizerRequest;
+  setOptimizerRequest: (q: OptimizerRequest) => void;
+  lastOptimizerFingerprint: string | null;
+  setLastOptimizerFingerprint: (fp: string | null) => void;
   weapons: Weapon[];
   gear: GearPiece[];
   mods: Mod[];
@@ -470,6 +520,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setAgent: (a) => mutate((d) => ({ ...d, agent: a })),
     optimization: userData.optimization,
     setOptimization: (o) => mutate((d) => ({ ...d, optimization: o })),
+    optimizerRequest: userData.optimizerRequest,
+    setOptimizerRequest: (q) => mutate((d) => ({ ...d, optimizerRequest: q })),
+    lastOptimizerFingerprint: (userData as unknown as { lastOptimizerFingerprint?: string | null }).lastOptimizerFingerprint ?? null,
+    setLastOptimizerFingerprint: (fp) => mutate((d) => ({ ...d, lastOptimizerFingerprint: fp }) as UserData),
     weapons: userData.weapons,
     gear: userData.gear,
     mods: db?.mods.map((m) => ({

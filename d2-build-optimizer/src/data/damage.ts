@@ -360,9 +360,15 @@ export interface GapSuggestion {
   gainPercent: number;
 }
 
+export interface WeaponSlotEntry {
+  slot: "primary1" | "primary2" | "pistol";
+  weapon: Weapon | null;
+}
+
 export interface OptimizerResult {
   rank: number;
   weapon: Weapon;
+  weapons: WeaponSlotEntry[];
   gear: GearPiece[];
   stats: BuildStats;
   damage: DamageBreakdown;
@@ -950,6 +956,11 @@ function runOptimizerPasses(
         const candidate: OptimizerResult = {
           rank: 0,
           weapon: w,
+          weapons: [
+            { slot: "primary1", weapon: w },
+            { slot: "primary2", weapon: null },
+            { slot: "pistol", weapon: null },
+          ],
           gear: combo,
           stats,
           damage,

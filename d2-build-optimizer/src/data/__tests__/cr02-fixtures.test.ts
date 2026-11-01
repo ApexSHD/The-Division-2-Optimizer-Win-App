@@ -60,3 +60,31 @@ describe("CR-02 Fixtures (27 Gear / 19 Waffen)", () => {
     }
   });
 });
+
+describe("CR-02 P2: Waffenpaar + Pistole (AK-4/AK-5)", () => {
+  it("AK-4: Kandidat enthält 2 Primärwaffen, Pistole null mitInventar ohne Pistole", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, ctx(), { maxResults: 10 });
+    expect(r.candidates.length).toBeGreaterThan(0);
+    const c = r.candidates[0];
+    const primaries = c.weapons.filter((x) => x.slot.startsWith("primary") && x.weapon);
+    expect(primaries).toHaveLength(2);
+    expect(c.weapons.find((x) => x.slot === "pistol")?.weapon).toBeNull();
+  });
+
+  it("AK-5: nie mehr als 1 exotische Waffe im Waffen-Setup", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, ctx(), { maxResults: 10 });
+    for (const c of r.candidates) {
+      const exoticWeapons = c.weapons.filter((x) => x.weapon?.rarity === "exotic").length;
+      expect(exoticWeapons).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("Rotation-Metrik: kombinierte DPS beider Primärwaffen wird als Score genutzt", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, ctx({ targetMetric: "rotation" }), { maxResults: 5 });
+    expect(r.candidates.length).toBeGreaterThan(0);
+    expect(r.candidates[0].weapons.filter((x) => x.weapon && x.slot.startsWith("primary"))).toHaveLength(2);
+  });
+});
