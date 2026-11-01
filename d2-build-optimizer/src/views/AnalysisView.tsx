@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
-import { WEAPON_TYPE_LABELS } from "../data/inventoryAnalysis";
+import { analyzeInventory, WEAPON_TYPE_LABELS } from "../data/inventoryAnalysis";
 import type { AnalysisTabId, InventoryAnalysis } from "../data/inventoryAnalysis";
 import type { ModeContext } from "../data/operatingModes";
 import { runAnalysisAsync } from "../workers/analysisClient";
@@ -81,9 +81,23 @@ export function AnalysisView() {
         setAnalysis(a);
         setCalcState("idle");
       })
-      .catch(() => {
+      .catch((err) => {
         if (generation !== runRef.current) return;
-        setCalcState("cancelled");
+        if (err instanceof Error && err.message === "cancelled") {
+          setCalcState("cancelled");
+          return;
+        }
+        const fallback = analyzeInventory({
+          gear: store.gear,
+          weapons: store.weapons,
+          builds: store.builds,
+          roleId: store.optimization.role || "weaponDps",
+          ctx,
+          keepMarkedIds: [],
+        });
+        setAnalysis(fallback);
+        setCalcState("idle");
+        store.setStatus(`${a.calculating}: ${a.cancelled}`);
       });
     return () => {
       handle.cancel();

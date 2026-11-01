@@ -4,6 +4,8 @@ import type { AnalysisWorkerRequest } from "./analysisWorker";
 export interface AnalysisRunHandle {
   promise: Promise<InventoryAnalysis>;
   cancel: () => void;
+  /** true, wenn der Worker die Berechnung nicht zu Ende führen konnte (z. B. Absturz/Abbruch). */
+  partial: () => boolean;
 }
 
 interface Pending {
@@ -33,12 +35,18 @@ function getWorker(): Worker {
         p.resolve(msg.analysis);
       } else if (p.cancelled && msg.kind === "aborted") {
         p.reject(new Error("cancelled"));
+      } else if (msg.kind === "aborted") {
+        p.reject(new Error("Worker abgebrochen"));
       } else {
         p.reject(new Error("Worker result missing"));
       }
     };
     worker.onerror = (e) => {
       for (const [, p] of pending) p.reject(e instanceof Error ? e : new Error("Worker error"));
+      pending.clear();
+    };
+    worker.onmessageerror = () => {
+      for (const [, p] of pending) p.reject(new Error("Worker message error"));
       pending.clear();
     };
   }
@@ -50,13 +58,33 @@ export function runAnalysisAsync(
   onProgress?: (phase: string, done: number, total: number) => void,
 ): AnalysisRunHandle {
   const id = nextId++;
-  const w = getWorker();
+  let w: Worker;
+  try {
+    w = getWorker();
+  } catch (err) {
+    return {
+      promise: Promise.reject(err),
+      cancel: () => undefined,
+      partial: () => true,
+    };
+  }
   if (onProgress) listeners.add(onProgress);
+  let partialResult = false;
   const promise = new Promise<InventoryAnalysis>((resolve, reject) => {
     pending.set(id, { resolve, reject, cancelled: false });
   });
-  const req: AnalysisWorkerRequest = { kind: "analyze", id, input };
-  w.postMessage(req);
+  const req: AnalysisWorkerRequest = { kind: "analyze", id, input: stripCallbacks(input) };
+  try {
+    w.postMessage(req);
+  } catch (err) {
+    pending.delete(id);
+    if (onProgress) listeners.delete(onProgress);
+    return {
+      promise: Promise.reject(err),
+      cancel: () => undefined,
+      partial: () => true,
+    };
+  }
   return {
     promise: promise.finally(() => {
       if (onProgress) listeners.delete(onProgress);
@@ -66,7 +94,13 @@ export function runAnalysisAsync(
       if (p) p.cancelled = true;
       w.postMessage({ kind: "abort", id });
     },
+    partial: () => partialResult,
   };
+}
+
+function stripCallbacks(input: InventoryAnalysisInput): InventoryAnalysisInput {
+  const { onProgress: _onProgress, shouldAbort: _shouldAbort, ...rest } = input;
+  return rest;
 }
 
 export function terminateAnalysisWorker(): void {
