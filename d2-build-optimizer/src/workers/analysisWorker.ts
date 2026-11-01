@@ -45,8 +45,8 @@ self.onmessage = (ev: MessageEvent<AnalysisWorkerRequest | { kind: "abort"; id: 
       },
       shouldAbort: () => abortedIds.has(msg.id),
     });
-    abortedIds.delete(msg.id);
-    if (abortedIds.size === 0 && analysis) {
+    const wasAborted = abortedIds.delete(msg.id);
+    if (analysis && !wasAborted) {
       post({ kind: "result", id: msg.id, analysis });
     } else {
       post({ kind: "aborted", id: msg.id });
