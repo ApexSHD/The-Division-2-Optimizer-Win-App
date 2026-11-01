@@ -77,7 +77,10 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 
 ### 4.6 Waffen & Ausrüstung (DB)
 
-- Editierbare Tabellen für die Spiel-Basisdaten: Waffen, Waffentalente, Gear, Gear-Talente, Brand-Sets, Gear-Sets und Mods (Hinzufügen, Bearbeiten, Löschen pro Eintrag).
+- Editierbare Tabellen für die Spiel-Basisdaten: Waffen, Waffentalente, Gear, Gear-Talente, Brand-Sets, Gear-Sets, Mods und Attribute (Hinzufügen, Bearbeiten, Löschen pro Eintrag).
+- Brand-/Gear-Set-Boni werden strukturiert erfasst (Teile-Stufe, Attribut per Dropdown, Wert; bei „Waffenschaden nach Waffentyp“ zusätzlich der Waffentyp) – keine Freitext-Falscheingaben.
+- Separater Reiter „Attribute“ pflegt die DE/EN-Anzeigenamen der Set-Bonus-Attribute; die Dropdowns der Set-Tabs greifen darauf zurück.
+- Waffen-, Talent- und Set-Namen werden sprachabhängig über die bestehenden Namenslisten (weaponNames/talentNames/gearSetNames) angezeigt.
 - Änderungen wirken unabhängig vom Inventar des Spielers und werden lokal beim Spieler im selben Datenverzeichnis wie das Inventar als Override gespeichert; die Standarddaten (JSON im App-Paket) bleiben unangetastet.
 - „Alle Anpassungen zurücksetzen" stellt die Standarddaten wieder her; Versionsanzeige der Datenbanken und Zähler der eigenen Anpassungen.
 

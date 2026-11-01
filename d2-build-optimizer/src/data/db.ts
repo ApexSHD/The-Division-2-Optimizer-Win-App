@@ -210,6 +210,23 @@ export interface GearTalentEntry {
   note: string;
 }
 
+export interface BrandBonusEntry {
+  pieces: number;
+  attr: string;
+  val: number;
+  weaponType?: string;
+}
+
+export interface GearSetBonusEntry {
+  pieces: number;
+  attr: string;
+  val: number;
+}
+
+export const WD_BY_WEAPON_TYPES = ["AR", "MP", "LMG", "Rifle", "MMR", "Shotgun", "Pistol"] as const;
+
+export const WD_BY_WEAPON_ATTR = "wd_by_weapon";
+
 export const GEAR_TALENTS: GearTalentEntry[] = [
   { key: "gunslinger", slot: "chest", label: "Gunslinger", note: "Waffenwechsel erhöht den Waffenschaden 5s lang um +23%." },
   { key: "focus", slot: "chest", label: "Fokus", note: "+5% Waffenschaden pro Sekunde beim Zielen mit 8x oder stärker, bis max. +50%." },
@@ -314,8 +331,9 @@ export interface Db {
   displayTalents: DisplayTalent[];
   talentDisplayByType: Record<string, DisplayTalent[]>;
   gear: GearPreset[];
-  brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[]; numericBonusesPve?: Record<string, Record<string, unknown>> }[];
-  gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[]; numericBonuses?: Record<string, { attr: string; val: number }[]> }[];
+  brandSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[]; bonusEntries: BrandBonusEntry[]; numericBonusesPve?: Record<string, Record<string, unknown>> }[];
+  gearSets: { key: string; name: string; bonuses: { pieces: number; bonus: string }[]; bonusEntries: GearSetBonusEntry[]; numericBonuses?: Record<string, { attr: string; val: number }[]> }[];
+  setBonusAttrs: string[];
   mods: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }[];
   modSlots: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]>;
   versions: { weapons: string; gear: string; mods: string; talents: string };
@@ -376,23 +394,56 @@ function load(): Db {
     proto: g.proto ?? false,
   }));
 
-  const brandSets = Object.entries(gearFile.brand_set_info).map(([key, b]) => ({
-    key,
-    name: b.name,
-    bonuses: [b.weapon_hint ?? null, b["1p"] as string | undefined, b["2p"] as string | undefined, b["3p"] as string | undefined]
-      .filter((x): x is string => typeof x === "string" && x.length > 0)
-      .map((text, i) => ({ pieces: i + 1, bonus: text })),
-    numericBonusesPve: (b.bonuses_pve ?? {}) as Record<string, Record<string, unknown>>,
-  }));
+  const brandSets = Object.entries(gearFile.brand_set_info).map(([key, b]) => {
+    const bonusEntries: BrandBonusEntry[] = Object.entries(b.bonuses_pve ?? {}).flatMap(([pieces, obj]): BrandBonusEntry[] =>
+      Object.entries(obj as Record<string, unknown>).flatMap(([attr, raw]): BrandBonusEntry[] => {
+        if (attr === "wd_by_weapon" && typeof raw === "object" && raw !== null) {
+          return Object.entries(raw as Record<string, number>).map(([weaponType, val]) => ({
+            pieces: Number(pieces),
+            attr,
+            val: Number(val),
+            weaponType,
+          }));
+        }
+        return [{ pieces: Number(pieces), attr, val: Number(raw) }];
+      }),
+    );
+    return {
+      key,
+      name: b.name,
+      bonuses: [b.weapon_hint ?? null, b["1p"] as string | undefined, b["2p"] as string | undefined, b["3p"] as string | undefined]
+        .filter((x): x is string => typeof x === "string" && x.length > 0)
+        .map((text, i) => ({ pieces: i + 1, bonus: text })),
+      bonusEntries,
+      numericBonusesPve: (b.bonuses_pve ?? {}) as Record<string, Record<string, unknown>>,
+    };
+  });
 
-  const gearSets = Object.entries(gearFile.green_set_info).map(([key, s]) => ({
-    key,
-    name: s.name,
-    bonuses: [s.n2, s.n3, s.n4]
-      .filter((x): x is string => typeof x === "string" && x.length > 0)
-      .map((text, i) => ({ pieces: i + 2, bonus: text })),
-    numericBonuses: (s.bonuses ?? {}) as Record<string, { attr: string; val: number }[]>,
-  }));
+  const gearSets = Object.entries(gearFile.green_set_info).map(([key, s]) => {
+    const bonusEntries: GearSetBonusEntry[] = Object.entries(s.bonuses ?? {}).flatMap(([pieces, list]) =>
+      (list as { attr: string; val: number }[]).map((e) => ({
+        pieces: Number(pieces),
+        attr: e.attr,
+        val: Number(e.val),
+      })),
+    );
+    return {
+      key,
+      name: s.name,
+      bonuses: [s.n2, s.n3, s.n4]
+        .filter((x): x is string => typeof x === "string" && x.length > 0)
+        .map((text, i) => ({ pieces: i + 2, bonus: text })),
+      bonusEntries,
+      numericBonuses: (s.bonuses ?? {}) as Record<string, { attr: string; val: number }[]>,
+    };
+  });
+
+  const setBonusAttrs = Array.from(
+    new Set([
+      ...brandSets.flatMap((b) => b.bonusEntries.map((e) => e.attr)),
+      ...gearSets.flatMap((s) => s.bonusEntries.map((e) => e.attr)),
+    ]),
+  ).sort((a, b) => a.localeCompare(b));
 
   const modSlots = Object.fromEntries(
     Object.entries(modsFile.slots).map(([slot, list]) => [
@@ -451,6 +502,7 @@ function load(): Db {
     gear,
     brandSets,
     gearSets,
+    setBonusAttrs,
     mods,
     modSlots,
     versions: {
@@ -465,4 +517,37 @@ function load(): Db {
 export function getDb(): Promise<Db> {
   if (!dbPromise) dbPromise = Promise.resolve(load());
   return dbPromise;
+}
+
+export function setBonusCatalogFromDb(db: Db): {
+  brands: Record<string, Record<string, Record<string, unknown>>>;
+  greens: Record<string, Record<string, { attr: string; val: number }[]>>;
+} {
+  const brands: Record<string, Record<string, Record<string, unknown>>> = {};
+  for (const b of db.brandSets) {
+    const tiers: Record<string, Record<string, unknown>> = {};
+    for (const e of b.bonusEntries) {
+      const pk = String(e.pieces);
+      tiers[pk] = tiers[pk] ?? {};
+      if (e.attr === "wd_by_weapon" && e.weaponType) {
+        const cur = (tiers[pk]["wd_by_weapon"] as Record<string, number> | undefined) ?? {};
+        cur[e.weaponType] = e.val;
+        tiers[pk]["wd_by_weapon"] = cur;
+      } else {
+        tiers[pk][e.attr] = e.val;
+      }
+    }
+    brands[b.key.toLowerCase()] = tiers;
+  }
+  const greens: Record<string, Record<string, { attr: string; val: number }[]>> = {};
+  for (const s of db.gearSets) {
+    const tiers: Record<string, { attr: string; val: number }[]> = {};
+    for (const e of s.bonusEntries) {
+      const pk = String(e.pieces);
+      tiers[pk] = tiers[pk] ?? [];
+      tiers[pk].push({ attr: e.attr, val: e.val });
+    }
+    greens[s.key.toLowerCase()] = tiers;
+  }
+  return { brands, greens };
 }

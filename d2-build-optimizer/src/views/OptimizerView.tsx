@@ -14,6 +14,7 @@ import {
   type V4Candidate,
 } from "../data/operatingModes";
 import { bestModsForWeapon } from "../data/damage";
+import { setBonusCatalogFromDb } from "../data/db";
 import type { WeaponMod } from "../data/sampleData";
 import type { GearPiece, GearSlot } from "../data/sampleData";
 import type { MinimumViolation } from "../data/roleProfiles";
@@ -920,7 +921,10 @@ export function OptimizerView() {
       const modsBySlot = (modsJson as unknown as {
         slots: Record<string, Array<{ name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;
       }).slots;
-      const opts = { modsBySlot };
+      const opts = {
+        modsBySlot,
+        setBonusCatalog: store.db ? setBonusCatalogFromDb(store.db) : undefined,
+      };
       const prototypeCapped = prototypeCapActive(gameModeAnswer);
       const weaponsForRun = prototypeCapped
         ? store.weapons.map(applyPrototypeCapToWeapon)

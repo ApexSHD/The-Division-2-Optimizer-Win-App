@@ -59,6 +59,43 @@ export function tTalentGroup(group: string, lang: ItemLang, fallback: string): s
 }
 
 /**
+ * Set-Bonus-Attribute (Brand-/Gear-Sets, z. B. hsd, rof, wd_by_weapon):
+ * durchsucht alle Attribut-Tabellen inkl. Cores.
+ */
+export interface AttrNameOverride {
+  de?: string;
+  en?: string;
+}
+
+export function tSetBonusAttr(
+  attrKey: string,
+  lang: ItemLang,
+  fallback: string,
+  overrides?: Record<string, AttrNameOverride | null>,
+): string {
+  const o = overrides?.[attrKey];
+  if (o && typeof o === "object" && o[lang]) return o[lang] as string;
+  return (
+    DATA.gearAttrs[attrKey]?.[lang] ??
+    DATA.weaponAttrs[attrKey]?.[lang] ??
+    DATA.weaponStatsExtra[attrKey]?.[lang] ??
+    DATA.cores[attrKey]?.[lang] ??
+    fallback
+  );
+}
+
+/** Rohe DE/EN-Eintraege eines Set-Bonus-Attributs ( fuer den Attribut-Stamm im Admin-Bereich). */
+export function setBonusAttrEntry(attrKey: string): AttrEntry | null {
+  return (
+    DATA.gearAttrs[attrKey] ??
+    DATA.weaponAttrs[attrKey] ??
+    DATA.weaponStatsExtra[attrKey] ??
+    DATA.cores[attrKey] ??
+    null
+  );
+}
+
+/**
  * Talent-Namen (DE-DB-Label -> EN), Auftraggeber-Liste 2 + talent.json-Namen.
  * Waffen-/Gear-NAMEN folgen als weitere Listen.
  */

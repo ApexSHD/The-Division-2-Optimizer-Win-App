@@ -1,12 +1,13 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
-import { parseBonusLines, formatBonusLines } from "../data/userDb";
 import type { UserDbOverrides } from "../data/userDb";
-import type { WeaponPreset, TalentEntry, GearPreset, GearTalentEntry } from "../data/db";
+import type { WeaponPreset, TalentEntry, GearPreset, GearTalentEntry, BrandBonusEntry, GearSetBonusEntry } from "../data/db";
+import { WD_BY_WEAPON_ATTR, WD_BY_WEAPON_TYPES } from "../data/db";
 import type { WeaponTypeKey } from "../data/db";
+import { tWeaponName, tTalentName, tGearSetName, tSetBonusAttr, setBonusAttrEntry, type ItemLang } from "../i18n/itemNames";
 import type { GearSlot } from "../data/sampleData";
 
 type AdminTab =
@@ -16,7 +17,15 @@ type AdminTab =
   | "gearTalents"
   | "brands"
   | "gearSets"
-  | "mods";
+  | "mods"
+  | "attrs";
+
+interface SetBonusDraftRow {
+  pieces: number;
+  attr: string;
+  val: number;
+  weaponType: string;
+}
 
 type DraftValue = string | number | boolean;
 type Draft = Record<string, DraftValue>;
@@ -29,6 +38,7 @@ const TAB_CATEGORY: Record<AdminTab, keyof UserDbOverrides> = {
   brands: "brandSets",
   gearSets: "gearSets",
   mods: "mods",
+  attrs: "attrNames",
 };
 
 const WEAPON_TYPES: WeaponTypeKey[] = ["ar", "smg", "lmg", "rifle", "mmr", "shotgun", "pistol"];
@@ -78,8 +88,32 @@ function gearTalentDraft(g: GearTalentEntry): Draft {
   return { key: g.key, slot: g.slot, label: g.label, note: g.note };
 }
 
-function brandDraft(b: { key: string; name: string; bonuses: { pieces: number; bonus: string }[] }): Draft {
-  return { key: b.key, name: b.name, bonuses: formatBonusLines(b.bonuses) };
+function brandDraft(b: { key: string; name: string; bonusEntries: BrandBonusEntry[] }): { draft: Draft; bonusRows: SetBonusDraftRow[] } {
+  return {
+    draft: { key: b.key, name: b.name },
+    bonusRows: b.bonusEntries.map((e) => ({
+      pieces: e.pieces,
+      attr: e.attr,
+      val: e.val,
+      weaponType: e.weaponType ?? "",
+    })),
+  };
+}
+
+function gearSetDraft(s: { key: string; name: string; bonusEntries: GearSetBonusEntry[] }): { draft: Draft; bonusRows: SetBonusDraftRow[] } {
+  return {
+    draft: { key: s.key, name: s.name },
+    bonusRows: s.bonusEntries.map((e) => ({
+      pieces: e.pieces,
+      attr: e.attr,
+      val: e.val,
+      weaponType: "",
+    })),
+  };
+}
+
+function attrDraft(key: string, de: string, en: string): Draft {
+  return { key, de, en };
 }
 
 function modDraft(m: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }): Draft {
@@ -104,13 +138,15 @@ function emptyDraft(tab: AdminTab): Draft {
       return { key: "", slot: "chest", label: "", note: "" };
     case "brands":
     case "gearSets":
-      return { key: "", name: "", bonuses: "" };
+      return { key: "", name: "" };
     case "mods":
       return { name: "", slot: "optic", compat: "", bonus: "", penalty: "" };
+    case "attrs":
+      return { key: "", de: "", en: "" };
   }
 }
 
-function draftToEntry(tab: AdminTab, d: Draft): Record<string, unknown> {
+function draftToEntry(tab: AdminTab, d: Draft, bonusRows: SetBonusDraftRow[]): Record<string, unknown> {
   const num = (k: string) => Number(d[k] ?? 0) || 0;
   const str = (k: string) => String(d[k] ?? "");
   switch (tab) {
@@ -159,8 +195,28 @@ function draftToEntry(tab: AdminTab, d: Draft): Record<string, unknown> {
     case "gearTalents":
       return { key: str("key"), slot: str("slot") === "backpack" ? "backpack" : "chest", label: str("label") || str("key"), note: str("note") };
     case "brands":
-    case "gearSets":
-      return { key: str("key"), name: str("name") || str("key"), bonuses: parseBonusLines(str("bonuses")) };
+    case "gearSets": {
+      const rows = bonusRows.filter((r) => r.attr && r.pieces > 0 && Number.isFinite(r.val));
+      if (tab === "brands") {
+        return {
+          key: str("key"),
+          name: str("name") || str("key"),
+          bonusEntries: rows.map((r: SetBonusDraftRow) => ({
+            pieces: r.pieces,
+            attr: r.attr,
+            val: r.val,
+            weaponType: r.attr === WD_BY_WEAPON_ATTR ? r.weaponType || undefined : undefined,
+          })) as BrandBonusEntry[],
+        };
+      }
+      return {
+        key: str("key"),
+        name: str("name") || str("key"),
+        bonusEntries: rows.map((r: SetBonusDraftRow) => ({ pieces: r.pieces, attr: r.attr, val: r.val })) as GearSetBonusEntry[],
+      };
+    }
+    case "attrs":
+      return { de: str("de"), en: str("en") };
     case "mods":
       return {
         name: str("name"),
@@ -177,6 +233,16 @@ function draftKey(tab: AdminTab, d: Draft): string {
   return k.trim();
 }
 
+function bonusRowsToText(rows: SetBonusDraftRow[] | undefined, lang: ItemLang, attrOverrides?: Record<string, { de?: string; en?: string } | null>): string {
+  return (rows ?? [])
+    .map((r) => {
+      const attrLabel = tSetBonusAttr(r.attr, lang, r.attr, attrOverrides);
+      const w = r.attr === WD_BY_WEAPON_ATTR && r.weaponType ? ` (${r.weaponType})` : "";
+      return `${r.pieces}× ${attrLabel}${w} ${r.val > 0 ? "+" : ""}${r.val}`;
+    })
+    .join(" · ");
+}
+
 export function AdminView() {
   const store = useStore();
   const { t } = useContext(I18nContext);
@@ -185,6 +251,7 @@ export function AdminView() {
   const [isNew, setIsNew] = useState(false);
   const [originalKey, setOriginalKey] = useState("");
   const [draft, setDraft] = useState<Draft>(emptyDraft("weapons"));
+  const bonusRowsRef = useRef<SetBonusDraftRow[]>([]);
 
   const tabs: { key: AdminTab; label: string }[] = [
     { key: "weapons", label: t.admin.tabWeapons },
@@ -194,10 +261,12 @@ export function AdminView() {
     { key: "brands", label: t.admin.tabBrands },
     { key: "gearSets", label: t.admin.tabGearSets },
     { key: "mods", label: t.admin.tabMods },
+    { key: "attrs", label: t.admin.tabAttrs },
   ];
 
   const db = store.db;
   const f = t.admin.form;
+  const itemLang: ItemLang = store.lang;
 
   const customCount = Object.values(store.gameDb).reduce(
     (n, group) => n + Object.values(group).filter((v) => v !== null && v !== undefined).length,
@@ -208,21 +277,29 @@ export function AdminView() {
     setIsNew(true);
     setOriginalKey("");
     setDraft(emptyDraft(tab));
+    bonusRowsRef.current = [];
     setPanelOpen(true);
   }
 
-  function openEdit(key: string, d: Draft) {
+  function openEdit(key: string, d: Draft, bonusRows: SetBonusDraftRow[] = []) {
     setIsNew(false);
     setOriginalKey(key);
     setDraft(d);
+    bonusRowsRef.current = bonusRows;
     setPanelOpen(true);
   }
+
+  const [, setBonusRowsTick] = useState(0);
+  const setBonusRows = (rows: SetBonusDraftRow[]) => {
+    bonusRowsRef.current = rows;
+    setBonusRowsTick((n) => n + 1);
+  };
 
   function onSave() {
     const category = TAB_CATEGORY[tab];
     const key = draftKey(tab, draft);
     if (!key) return;
-    const entry = draftToEntry(tab, draft);
+    const entry = draftToEntry(tab, draft, bonusRowsRef.current);
     if (!isNew && originalKey && originalKey !== key) {
       store.setGameDbOverride(category, originalKey, null);
     }
@@ -237,8 +314,15 @@ export function AdminView() {
     store.setStatus(`${key} zurückgesetzt`);
   }
 
-  const rowActionsFor = <T,>(keyOf: (row: T) => string, draftOf: (row: T) => Draft) => [
-    { label: t.admin.editRow, onAction: (row: T) => openEdit(keyOf(row), draftOf(row)) },
+  const rowActionsFor = <T,>(keyOf: (row: T) => string, draftOf: (row: T) => Draft | { draft: Draft; bonusRows: SetBonusDraftRow[] }) => [
+    {
+      label: t.admin.editRow,
+      onAction: (row: T) => {
+        const d = draftOf(row);
+        if (typeof d === "object" && d !== null && "draft" in d) openEdit(keyOf(row), (d as { draft: Draft; bonusRows: SetBonusDraftRow[] }).draft, (d as { bonusRows: SetBonusDraftRow[] }).bonusRows);
+        else openEdit(keyOf(row), d as Draft);
+      },
+    },
     { label: t.admin.deleteRow, className: "btn btn-danger", onAction: (row: T) => onDelete(keyOf(row)) },
   ];
 
@@ -345,8 +429,86 @@ export function AdminView() {
             {textField("key", f.key)}
             {textField("name", f.name)}
             <Field label={f.bonuses}>
-              <textarea rows={4} value={String(draft.bonuses ?? "")} onChange={(e) => set("bonuses", e.target.value)} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {(bonusRowsRef.current ?? []).map((row, i) => (
+                  <div key={i} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <input
+                      type="number"
+                      min={1}
+                      max={6}
+                      value={row.pieces}
+                      title={f.pieces}
+                      style={{ width: 52 }}
+                      onChange={(e) =>
+                        setBonusRows((bonusRowsRef.current ?? []).map((r, j) => (j === i ? { ...r, pieces: Number(e.target.value) } : r)))
+                      }
+                    />
+                    <select
+                      value={row.attr}
+                      style={{ minWidth: 200 }}
+                      onChange={(e) =>
+                        setBonusRows((bonusRowsRef.current ?? []).map((r, j) => (j === i ? { ...r, attr: e.target.value } : r)))
+                      }
+                    >
+                      <option value="">—</option>
+                      {(db?.setBonusAttrs ?? []).map((a) => (
+                        <option key={a} value={a}>{tSetBonusAttr(a, itemLang, a, store.gameDb.attrNames)}</option>
+                      ))}
+                      {!db?.setBonusAttrs.includes(WD_BY_WEAPON_ATTR) && (
+                        <option value={WD_BY_WEAPON_ATTR}>{tSetBonusAttr(WD_BY_WEAPON_ATTR, itemLang, "Waffenschaden nach Waffentyp", store.gameDb.attrNames)}</option>
+                      )}
+                    </select>
+                    {row.attr === WD_BY_WEAPON_ATTR && tab === "brands" && (
+                      <select
+                        value={row.weaponType}
+                        onChange={(e) =>
+                          setBonusRows((bonusRowsRef.current ?? []).map((r, j) => (j === i ? { ...r, weaponType: e.target.value } : r)))
+                        }
+                      >
+                        <option value="">—</option>
+                        {WD_BY_WEAPON_TYPES.map((w) => (
+                          <option key={w} value={w}>{w}</option>
+                        ))}
+                      </select>
+                    )}
+                    <input
+                      type="number"
+                      step="any"
+                      value={row.val}
+                      title={f.value}
+                      style={{ width: 80 }}
+                      onChange={(e) =>
+                        setBonusRows((bonusRowsRef.current ?? []).map((r, j) => (j === i ? { ...r, val: Number(e.target.value) } : r)))
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      style={{ fontSize: 11, padding: "2px 8px" }}
+                      onClick={() => setBonusRows((bonusRowsRef.current ?? []).filter((_, j) => j !== i))}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ alignSelf: "flex-start", fontSize: 12 }}
+                  onClick={() => setBonusRows([...(bonusRowsRef.current ?? []), { pieces: 2, attr: "", val: 0, weaponType: "" }])}
+                >
+                  + {f.addBonusRow}
+                </button>
+              </div>
             </Field>
+          </>
+        );
+      case "attrs":
+        return (
+          <>
+            {textField("key", f.key)}
+            {textField("de", f.nameDe)}
+            {textField("en", f.nameEn)}
           </>
         );
       case "mods":
@@ -404,7 +566,7 @@ export function AdminView() {
           filterFn={(w, q) => w.name.toLowerCase().includes(q)}
           rowActions={rowActionsFor((w: WeaponPreset) => w.name, weaponDraft)}
           columns={[
-            { key: "name", label: t.weapons.columns.name, render: (w) => w.name, sortValue: (w) => w.name },
+            { key: "name", label: t.weapons.columns.name, render: (w) => tWeaponName(w.name, itemLang, w.name), sortValue: (w) => w.name },
             { key: "type", label: t.weapons.columns.type, render: (w) => t.weapons.types[w.typeKey] },
             { key: "rarity", label: t.weapons.columns.rarity, render: (w) => (w.isExotic ? t.weapons.rarities.exotic : w.isNamed ? t.weapons.rarities.named : t.weapons.rarities.highend) },
             { key: "dmg", label: "Basisschaden", render: (w) => w.baseDamage.toLocaleString("de-DE"), sortValue: (w) => w.baseDamage },
@@ -421,8 +583,8 @@ export function AdminView() {
           filterFn={(x, q) => x.name.toLowerCase().includes(q) || x.key.toLowerCase().includes(q)}
           rowActions={rowActionsFor((x: TalentEntry) => x.key, talentDraft)}
           columns={[
-            { key: "name", label: t.weapons.columns.name, render: (x) => x.name, sortValue: (x) => x.name },
-            { key: "label", label: "Label", render: (x) => x.label },
+            { key: "name", label: t.weapons.columns.name, render: (x) => tTalentName(x.name, itemLang, x.name), sortValue: (x) => x.name },
+            { key: "label", label: "Label", render: (x) => tTalentName(x.label, itemLang, x.label) },
             { key: "types", label: t.weapons.columns.type, render: (x) => x.weaponTypes.map((wt) => t.weapons.types[wt]).join(", ") },
             { key: "group", label: "Gruppe", render: (x) => x.group, sortValue: (x) => x.group },
           ]}
@@ -454,7 +616,7 @@ export function AdminView() {
           filterFn={(g, q) => g.label.toLowerCase().includes(q) || g.key.toLowerCase().includes(q)}
           rowActions={rowActionsFor((g: GearTalentEntry) => g.key, gearTalentDraft)}
           columns={[
-            { key: "label", label: t.gear.columns.talent, render: (g) => g.label, sortValue: (g) => g.label },
+            { key: "label", label: t.gear.columns.talent, render: (g) => tTalentName(g.label, itemLang, g.label), sortValue: (g) => g.label },
             { key: "slot", label: t.gear.columns.slot, render: (g) => t.gear.slots[g.slot] },
             { key: "note", label: "Notiz", render: (g) => g.note },
           ]}
@@ -470,7 +632,7 @@ export function AdminView() {
           rowActions={rowActionsFor((b) => b.key, brandDraft)}
           columns={[
             { key: "name", label: "Brand-Set", render: (b) => b.name, sortValue: (b) => b.name },
-            { key: "bonuses", label: "Boni", render: (b) => b.bonuses.map((x) => `${x.pieces}× ${x.bonus}`).join(" · ") },
+            { key: "bonuses", label: "Boni", render: (b) => bonusRowsToText(b.bonusEntries.map((e) => ({ pieces: e.pieces, attr: e.attr, val: e.val, weaponType: e.weaponType ?? "" })), itemLang) || "–" },
           ]}
         />
       )}
@@ -480,11 +642,32 @@ export function AdminView() {
           rows={db.gearSets}
           rowKey={(s) => s.key}
           searchPlaceholder={`${t.common.search}…`}
-          filterFn={(s, q) => s.name.toLowerCase().includes(q)}
-          rowActions={rowActionsFor((s) => s.key, brandDraft)}
+          filterFn={(s, q) => s.name.toLowerCase().includes(q) || tGearSetName(s.name, itemLang, s.name).toLowerCase().includes(q)}
+          rowActions={rowActionsFor((s) => s.key, gearSetDraft)}
           columns={[
-            { key: "name", label: "Gear-Set", render: (s) => s.name, sortValue: (s) => s.name },
-            { key: "bonuses", label: "Boni", render: (s) => s.bonuses.map((x) => `${x.pieces}× ${x.bonus}`).join(" · ") },
+            { key: "name", label: "Gear-Set", render: (s) => tGearSetName(s.key, itemLang, s.name), sortValue: (s) => s.name },
+            { key: "bonuses", label: "Boni", render: (s) => bonusRowsToText(s.bonusEntries.map((e) => ({ pieces: e.pieces, attr: e.attr, val: e.val, weaponType: "" })), itemLang) || "–" },
+          ]}
+        />
+      )}
+
+      {db && tab === "attrs" && (
+        <DataTable
+          rows={db.setBonusAttrs.map((key: string) => {
+            const base = setBonusAttrEntry(key);
+            const o = store.gameDb.attrNames[key];
+            const de = o && typeof o === "object" && o.de ? o.de : base?.de ?? key;
+            const en = o && typeof o === "object" && o.en ? o.en : base?.en ?? key;
+            return { key, de, en };
+          })}
+          rowKey={(a: { key: string; de: string; en: string }) => a.key}
+          searchPlaceholder={`${t.common.search}…`}
+          filterFn={(a: { key: string; de: string; en: string }, q) => a.key.toLowerCase().includes(q) || a.de.toLowerCase().includes(q) || a.en.toLowerCase().includes(q)}
+          rowActions={rowActionsFor((a: { key: string; de: string; en: string }) => a.key, (a: { key: string; de: string; en: string }) => attrDraft(a.key, a.de, a.en))}
+          columns={[
+            { key: "key", label: "Attribut-ID", render: (a: { key: string; de: string; en: string }) => a.key, sortValue: (a: { key: string; de: string; en: string }) => a.key },
+            { key: "de", label: f.nameDe, render: (a: { key: string; de: string; en: string }) => a.de, sortValue: (a: { key: string; de: string; en: string }) => a.de },
+            { key: "en", label: f.nameEn, render: (a: { key: string; de: string; en: string }) => a.en, sortValue: (a: { key: string; de: string; en: string }) => a.en },
           ]}
         />
       )}

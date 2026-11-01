@@ -53,6 +53,7 @@ const MOD_SLOT_LABELS: Record<string, string> = {
 };
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
+import { setBonusCatalogFromDb } from "../data/db";
 
 const SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
 
@@ -106,7 +107,9 @@ export function BuildsView() {
       profile: enemyProfileFromSettings(store.optimization),
       spec: store.agent.spec,
       modsBySlot,
-      setBonusCatalog: defaultSetBonusCatalog(),
+      setBonusCatalog: store.db
+        ? setBonusCatalogFromDb(store.db)
+        : defaultSetBonusCatalog(),
     };
     const gearWithMods: GearPiece[] = gear.map((g) =>
       buildGearMods[g.id]
