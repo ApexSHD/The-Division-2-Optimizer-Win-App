@@ -140,7 +140,7 @@ pub fn run() {
             if let Some(window) = app.get_webview_window("main") {
                 #[cfg(target_os = "windows")]
                 {
-                    let _ = window_vibrancy::apply_mica(&window, Some(window_vibrancy::MicaEffect::BASE));
+                    let _ = window_vibrancy::apply_mica(&window, Some(false));
                 }
             }
             Ok(())
