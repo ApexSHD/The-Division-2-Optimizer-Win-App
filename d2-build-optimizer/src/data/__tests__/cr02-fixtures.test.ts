@@ -3,6 +3,7 @@ import { gearFromCsv } from "../gearCsv";
 import { weaponsFromCsv } from "../weaponCsv";
 import { GEAR_INVENTORY_CSV_1, WEAPON_INVENTORY_CSV_1 } from "./fixtures/cr02Fixtures";
 import { optimizeV4, type ModeContext } from "../operatingModes";
+import { computeInventoryCheck } from "../../views/optimizer/inventoryCheck";
 import { DEFAULT_OPTIMIZATION } from "../../store";
 import type { GearPiece, Weapon } from "../sampleData";
 
@@ -86,5 +87,30 @@ describe("CR-02 P2: Waffenpaar + Pistole (AK-4/AK-5)", () => {
     const r = optimizeV4(weapons, gear, ctx({ targetMetric: "rotation" }), { maxResults: 5 });
     expect(r.candidates.length).toBeGreaterThan(0);
     expect(r.candidates[0].weapons.filter((x) => x.weapon && x.slot.startsWith("primary"))).toHaveLength(2);
+  });
+});
+
+describe("CR-02 AK-1/AK-8: Inventar-Check + Maßnahmenliste", () => {
+  it("AK-1: DPS-Rollen möglich, Tank/Skill/Support nicht möglich (nur rote Kerne)", () => {
+    const { gear, weapons } = load();
+    const check = computeInventoryCheck(gear, weapons);
+    const byKey = Object.fromEntries(check.roles.map((r) => [r.roleKey, r]));
+    expect(byKey["dps_krit"].feasibility).toBe("possible");
+    expect(byKey["dps_kopf"].feasibility).toBe("possible");
+    expect(byKey["tank"].feasibility).toBe("impossible");
+    expect(byKey["tank"].reason).toContain("blaue Kern");
+    expect(byKey["skill_schaden"].feasibility).toBe("impossible");
+    expect(check.missingWeaponTypes).toContain("MMR");
+    expect(check.missingWeaponTypes).toContain("Pistole");
+    expect(check.hasPistol).toBe(false);
+  });
+
+  it("AK-8: Rolle Tank liefert beste Näherung (kein Absturz, ranked nicht leer oder noAdmissibleHint gesetzt)", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, { ...ctx(), roleKey: "tank" }, { maxResults: 5 });
+    expect(r.ranked.length + (r.noAdmissibleHint ? 1 : 0)).toBeGreaterThan(0);
+    if (!r.best) {
+      expect(r.noAdmissibleHint).toBeTruthy();
+    }
   });
 });
