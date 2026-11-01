@@ -51,6 +51,10 @@ body {
   height: 100vh;
 }
 
+:root[data-theme="dark"] body {
+  background: transparent;
+}
+
 #root {
   height: 100vh;
   display: flex;
@@ -190,7 +194,7 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
   height: 40px;
-  background: var(--bg-alt);
+  background: transparent;
   border-bottom: 1px solid var(--border);
   user-select: none;
   flex-shrink: 0;
@@ -238,6 +242,7 @@ input[type="checkbox"] {
 
 /* ===== Hauptlayout ===== */
 .app-body {
+  background: transparent;
   flex: 1;
   display: flex;
   min-height: 0;
@@ -1435,4 +1440,46 @@ kbd {
 .settings-row select,
 .settings-row input[type="text"] {
   max-width: 240px;
+}
+
+
+/* ---- WinToys-Feinschliff: Mica + native Windows-11-Scrollbars ---- */
+:root {
+  background: var(--bg);
+}
+
+:root[data-theme="dark"] {
+  background: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-faint, #8a8a94) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-faint, #8a8a94);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim, #b8b8c0);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
