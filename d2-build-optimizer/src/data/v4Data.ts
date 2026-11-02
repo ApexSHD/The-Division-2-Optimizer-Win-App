@@ -194,6 +194,11 @@ const talentsDb = talentsJson as {
 };
 
 export const SKILLS: SkillEntry[] = skillsDb.skills;
+
+/** SKILLS inkl. Admin-Overrides aus dem Db (userDb.skills). */
+export function skillsWithOverrides(dbSkills?: SkillEntry[]): SkillEntry[] {
+  return dbSkills ?? SKILLS;
+}
 export const SPECIALIZATIONS: SpecializationEntry[] =
   specializationsDb.specializations;
 export const HARD_CAPS: HardCap[] = attributeRulesDb.hard_caps;

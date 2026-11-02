@@ -122,7 +122,7 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
       {roleNeedsSkills && (
       <Section title={o.sectionSkills} summary={request.skills.length > 0 ? request.skills.join(", ") : "—"}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 6 }}>
-          {SKILLS.map((s) => {
+          {(store.db?.skills ?? SKILLS).map((s) => {
             const active = request.skills.includes(s.key);
             return (
               <button

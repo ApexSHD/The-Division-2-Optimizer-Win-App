@@ -1,4 +1,6 @@
 import type { GearSlot } from "./sampleData";
+import skillsJson from "../db/skills.json";
+import type { SkillEntry } from "./v4Data";
 import weaponsJson from "../db/weapons.json";
 import gearJson from "../db/gear.json";
 import modsJson from "../db/mod.json";
@@ -336,7 +338,8 @@ export interface Db {
   setBonusAttrs: string[];
   mods: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }[];
   modSlots: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty: { type: string; val: number } | null }[]>;
-  versions: { weapons: string; gear: string; mods: string; talents: string };
+  skills: SkillEntry[];
+  versions: { weapons: string; gear: string; mods: string; talents: string; skills: string };
 }
 
 const CORE_LABELS: Record<string, string> = {
@@ -352,11 +355,18 @@ export function coreLabel(core: string): string {
 
 let dbPromise: Promise<Db> | null = null;
 
+interface SkillsFile {
+  version?: string;
+  skills: SkillEntry[];
+}
+
 function load(): Db {
   const weaponsFile = weaponsJson as unknown as WeaponsFile;
   const gearFile = gearJson as unknown as GearFile;
   const modsFile = modsJson as unknown as ModsFile;
   const talentsFile = talentsJson as unknown as TalentsFile;
+  const skillsFile = skillsJson as unknown as SkillsFile;
+  const skills: SkillEntry[] = skillsFile.skills;
 
   const weapons: WeaponPreset[] = weaponsFile.weapons
     .filter((w) => w.stats && typeof w.stats["Level 40 Damage"] === "number")
@@ -505,11 +515,13 @@ function load(): Db {
     setBonusAttrs,
     mods,
     modSlots,
+    skills,
     versions: {
       weapons: weaponsFile._meta?.version ?? "unbekannt",
       gear: gearFile.version,
       mods: modsFile.version,
       talents: talentsFile.version,
+      skills: skillsFile.version ?? "v1",
     },
   };
 }

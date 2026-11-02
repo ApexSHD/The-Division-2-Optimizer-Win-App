@@ -21,6 +21,21 @@ export type BrandSetRow = Db["brandSets"][number];
 export type GearSetRow = Db["gearSets"][number];
 export type ModRow = Db["mods"][number];
 
+export interface SkillOverride {
+  key: string;
+  name: string;
+  variants: Array<{
+    key: string;
+    name: string;
+    effect_type?: string;
+    description?: string;
+    duration?: number | null;
+    cooldown?: number | null;
+    charges?: number | null;
+    tiers?: Record<string, { effekt_skalierung?: number; abkuehlzeit_modifikator_pct?: number; fertigkeiten_lebensenergie_bonus_pct?: number }>;
+  }>;
+}
+
 export interface UserDbOverrides {
   weapons: Record<string, Partial<WeaponPreset> | null>;
   weaponTalents: Record<string, Partial<TalentEntry> | null>;
@@ -30,6 +45,7 @@ export interface UserDbOverrides {
   gearSets: Record<string, Partial<GearSetOverride> | null>;
   mods: Record<string, Partial<ModRow> | null>;
   attrNames: Record<string, AttrNameOverride | null>;
+  skills: Record<string, Partial<SkillOverride> | null>;
 }
 
 export function emptyUserDb(): UserDbOverrides {
@@ -42,6 +58,7 @@ export function emptyUserDb(): UserDbOverrides {
     gearSets: {},
     mods: {},
     attrNames: {},
+    skills: {},
   };
 }
 
@@ -208,7 +225,45 @@ export function mergeDb(base: Db, overrides: UserDbOverrides | undefined): Db {
     brandItems: brandSets.map((b) => ({ brand: b.name ?? b.key, slots: [...allSlots] })),
     gearSetItems: gearSets.map((s) => ({ key: s.key, name: s.name ?? s.key, slots: [...allSlots] })),
     mods: mergeByKey(base.mods, overrides.mods, (m) => m.name, newMod),
+    skills: mergeSkills(base.skills, overrides.skills),
   };
+}
+
+function mergeSkills(base: import("./db").Db["skills"], overrides: Record<string, Partial<SkillOverride> | null> | undefined): import("./db").Db["skills"] {
+  if (!overrides) return base;
+  const result = [...base];
+  const handled = new Set<string>();
+  for (let i = 0; i < result.length; i++) {
+    const item = result[i];
+    const o = overrides[item.key];
+    if (!o) continue;
+    handled.add(item.key);
+    result[i] = {
+      ...item,
+      name: o.name ?? item.name,
+      variants: o.variants
+        ? (() => {
+            const out = item.variants.map((baseV) => {
+              const oV = o.variants!.find((vv) => vv.key === baseV.key);
+              return oV ? ({ ...baseV, ...oV } as import("./v4Data").SkillVariant) : baseV;
+            });
+            for (const oV of o.variants) {
+              if (!out.some((v) => v.key === oV.key)) out.push(oV as import("./v4Data").SkillVariant);
+            }
+            return out;
+          })()
+        : item.variants,
+    };
+  }
+  for (const [key, o] of Object.entries(overrides)) {
+    if (handled.has(key) || !o) continue;
+    result.push({
+      key,
+      name: o.name ?? key,
+      variants: (o.variants ?? []).map((v) => ({ ...v }) as import("./v4Data").SkillVariant),
+    } as import("./v4Data").SkillEntry);
+  }
+  return result;
 }
 
 export function parseBonusLines(text: string): { pieces: number; bonus: string }[] {
