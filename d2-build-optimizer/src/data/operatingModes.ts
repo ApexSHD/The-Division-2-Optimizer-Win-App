@@ -517,7 +517,10 @@ export function beamCombosBySlot(
           return { g, sum };
         });
         scored.sort((a, b) => b.sum - a.sum || (a.g.id < b.g.id ? -1 : 1));
-        const specials = pool.filter((g) => lockedIds.has(g.id) || g.brandType !== "brand" || g.talent);
+        const targetSetLower = opts.targetSet?.toLowerCase();
+        const specials = pool.filter(
+          (g) => lockedIds.has(g.id) || (targetSetLower ? isSetPiece(g, targetSetLower) : false) || g.brandType !== "brand" || g.talent,
+        );
         const budget = Math.max(0, slotBudget - specials.length);
         pool = [...specials, ...scored.filter((x) => !specials.includes(x.g)).slice(0, budget).map((x) => x.g)];
         warnings.push(`Slot ${slot}: ${items.length} Teile auf ${pool.length} Kandidaten begrenzt (Top-${slotBudget} nach normalisiertem Beitrag).`);
@@ -526,7 +529,11 @@ export function beamCombosBySlot(
     slotLists.push(pool);
   }
 
-  const lockedInBeam = lockedGear.filter((g) => (bySlot.get(g.slot) ?? []).some((x) => x.id === g.id));
+  const targetSetLower0 = opts.targetSet?.toLowerCase();
+  const targetSetAnchors = targetSetLower0
+    ? slots.flatMap((slot) => (bySlot.get(slot) ?? []).filter((g) => isSetPiece(g, targetSetLower0)))
+    : [];
+  const lockedInBeam = [...lockedGear.filter((g) => (bySlot.get(g.slot) ?? []).some((x) => x.id === g.id)), ...targetSetAnchors];
   const lockedSlots = new Set(lockedInBeam.map((g) => g.slot));
   const freeSlots = slots.filter((s) => !lockedSlots.has(s));
   const slotListsFree = slotLists.filter((_, i) => !lockedSlots.has(slots[i]));
@@ -617,22 +624,22 @@ export function beamCombosBySlot(
     }
     opts.onProgress?.(si + 1, slotListsFree.length);
   }
-  // CR-02: targetSet hart erzwingen — Combos ohne 4 Teile des Ziel-Sets fallen raus
-  let combosAll = beam.map((b) => {
+  let combos = beam.map((b) => {
     const missing = lockedInBeam.filter((g) => !b.combo.some((x) => x.id === g.id));
     return missing.length > 0 ? [...b.combo, ...missing] : b.combo;
   });
+  // CR-02: targetSet hart erzwingen — Combos ohne 4 Teile des Ziel-Sets fallen raus
   if (opts.targetSet) {
     const setLower = opts.targetSet.toLowerCase();
-    const withSet = combosAll.filter((c) => c.filter((g) => isSetPiece(g, setLower)).length >= 4);
+    const withSet = combos.filter((c) => c.filter((g) => isSetPiece(g, setLower)).length >= 4);
     if (withSet.length > 0) {
-      combosAll = withSet;
-      warnings.push(`Gearset-Ziel „${opts.targetSet}“: ${combosAll.length} Kandidaten mit 4 Set-Teilen.`);
+      combos = withSet;
+      warnings.push(`Gearset-Ziel „${opts.targetSet}“: ${combos.length} Kandidaten mit 4 Set-Teilen.`);
     } else {
-      warnings.push(`Gearset-Ziel „${opts.targetSet}“ nicht mit 4 Teilen erreichbar — alle Kandidaten behalten (Fallback).`);
+      warnings.push(`Gearset-Regel: Ziel „${opts.targetSet}“ nicht mit 4 Teilen erreichbar — kein zulässiges Build (Fallback: alle Kandidaten behalten).`);
     }
   }
-  return { combos: combosAll, warnings };
+  return { combos, warnings };
 }
 
 export function optimizeV4(
@@ -738,6 +745,9 @@ export function optimizeV4(
       const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
       if (exoticGear > 1) continue;
       if (combo.length < SLOTS.length) continue;
+      // CR-02: hartes Gearset-Ziel auch in der Evaluierung (Sicherheitsnetz)
+      const ts = effectiveGearSetOptions(ctx).targetSet;
+      if (ts && combo.filter((g) => isSetPiece(g, ts.toLowerCase())).length < 4) continue;
       for (const w of [leadWeapon]) {
         if (!w) continue;
         const key = combo.map((g) => g.id).join("|") + "::" + w.id + weaponSlotsSuffix(weaponSlots);
@@ -856,7 +866,8 @@ export function optimizeV4(
   );
 
   const best = ranking.bestAdmissible;
-  const noAdmissibleHint = best ? null : allViolationsLabel(ranking);
+  const gearsetWarn = warnings.find((w) => w.startsWith("Gearset-"));
+  const noAdmissibleHint = best ? null : gearsetWarn ?? allViolationsLabel(ranking);
   const skillHint = skillFitHint(
     role,
     hasHealSkill(ctx.skills),
