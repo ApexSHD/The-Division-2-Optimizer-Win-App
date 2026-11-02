@@ -10,7 +10,7 @@ import { BuildsView } from "./views/BuildsView";
 import { WeaponsView } from "./views/WeaponsView";
 import { GearView } from "./views/GearView";
 import { CompareView } from "./views/CompareView";
-import { OptimizerView } from "./views/OptimizerView";
+import { OptimizerViewNew as OptimizerView } from "./views/optimizer/OptimizerViewNew";
 import { AdminView } from "./views/AdminView";
 import { AnalysisView } from "./views/AnalysisView";
 import { SettingsView } from "./views/SettingsView";

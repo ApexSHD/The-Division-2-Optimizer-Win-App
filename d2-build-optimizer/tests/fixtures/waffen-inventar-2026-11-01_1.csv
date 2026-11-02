@@ -1,0 +1,20 @@
+﻿Name;Typ;Art;Prototyp;Attribut 1;Attribut 2;Attribut 3;Talent;Basis-DPS;Schaden/Magazin;Grundschaden;Feuerrate;Magazingröße;Know-How;Kopfschuss-Grundwert;Nachladezeit (s);Mod Optik;Mod Mündung;Mod Unterlauf;Mod Magazin
+Lexington;Sturmgewehr;Named;ja;Waffenschaden (WD) +22,5 %;Lebensenergieschaden (DTH) +31,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +15 %;Strapaziert;689.917;2.435.000;48700;850;50;30;;;;;;
+St. Elmo's Engine;Sturmgewehr;Exotic;nein;Waffenschaden (WD) +15 %;Lebensenergieschaden (DTH) +21 %;Schaden gg. ungedeckte Ziele (DTToOC) +10 %;Actum Est;664.530;3.283.560;46908;850;70;30;;;;;;
+Steel & Sons ACR;Gewehr;Exotic;nein;Waffenschaden (WD) +15 %;Kritischer Trefferschaden (CHD) +34 %;Schaden gg. ungedeckte Ziele (DTToOC) +10 %;Confirm & Execute;646.548;3.694.560;92364;420;40;30;;;;;;
+The Sheriff (Super 90);Schrotflinte;Exotic;nein;Waffenschaden (WD) +15 %;Rüstungsschaden (DTA) +12 %;Schaden gg. ungedeckte Ziele (DTToOC) +10 %;Autentico;2.505.733;7.517.200;939650;160;8;30;;;;;;
+SOCOM Mk16;Sturmgewehr;High-End;ja;Waffenschaden (WD) +22,5 %;Lebensenergieschaden (DTH) +31,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +15 %;Stromlinie;641.561;2.961.050;59221;650;50;30;;;;;;
+HK GR9;LMG;High-End;ja;Waffenschaden (WD) +22,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +17 %;Lebensenergieschaden (DTH) +14 %;Strapaziert;618.500;12.370.000;49480;750;250;30;;;;;;
+HK GR9;LMG;High-End;ja;Waffenschaden (WD) +19,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +17 %;Lebensenergieschaden (DTH) +12,5 %;Optimist;618.500;12.370.000;49480;750;250;30;;;;;;
+HK GR9;LMG;High-End;ja;Waffenschaden (WD) +22,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +17 %;Rüstungsschaden (DTA) +8 %;Flinke Hände;618.500;12.370.000;49480;750;250;30;;;;;;
+Huntsman;Sturmgewehr;Named;ja;Waffenschaden (WD) +22,5 %;Lebensenergieschaden (DTH) +31,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +10 %;Perfekte Raserei;679.095;2.263.650;45273;900;50;30;;;;;;
+G36 C;Sturmgewehr;High-End;ja;Waffenschaden (WD) +22,4 %;Lebensenergieschaden (DTH) +30,5 %;Kritischer Trefferschaden (CHD) +15 %;Strapaziert;657.050;2.628.200;52564;750;50;30;;;;;;
+Born Great (Military G36);Sturmgewehr;Named;ja;Waffenschaden (WD) +22,4 %;Lebensenergieschaden (DTH) +30 %;Schaden gg. ungedeckte Ziele (DTToOC) +15 %;Perfekt stabilisieren;657.050;2.628.200;52564;750;50;30;;;;;;
+SOCOM Mk16;Sturmgewehr;High-End;ja;Waffenschaden (WD) +22,5 %;Lebensenergieschaden (DTH) +24 %;Schaden gg. ungedeckte Ziele (DTToOC) +14 %;Strapaziert;641.561;2.961.050;59221;650;50;30;;;;;;
+Cold Relations (Enhanced PP-19);MP;Named;ja;Waffenschaden (WD) +15 %;Kritische Trefferchance (CHC) +31,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +15 %;Perfekt strapaziert;741.918;3.370.429;63593;700;53;30;;;;;;
+MG5;LMG;High-End;ja;Waffenschaden (WD) +22,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +16 %;Rüstungsschaden (DTA) +9 %;Strapaziert;724.293;5.432.200;54322;800;100;30;;;;;;
+Military MK46;LMG;High-End;ja;Waffenschaden (WD) +20,9 %;Schaden gg. ungedeckte Ziele (DTToOC) +17 %;Rüstungsschaden (DTA) +9 %;Killer;718.060;4.830.000;48300;892;100;30;;;;;;
+M249 B;LMG;High-End;ja;Waffenschaden (WD) +20,7 %;Schaden gg. ungedeckte Ziele (DTToOC) +17 %;Rüstungsschaden (DTA) +9 %;Raserei;684.250;7.245.000;48300;850;150;30;;;;;;
+Military M60 E4;LMG;High-End;ja;Waffenschaden (WD) +20,6 %;Schaden gg. ungedeckte Ziele (DTToOC) +16 %;Kritische Trefferchance (CHC) +14,25 %;Abgemessen;652.340;9.785.100;65234;600;150;30;;;;;;
+Infantry MG5;LMG;High-End;ja;Waffenschaden (WD) +22,5 %;Schaden gg. ungedeckte Ziele (DTToOC) +16 %;Kritischer Trefferschaden (CHD) +14 %;Raserei;697.787;5.233.400;52334;800;100;30;;;;;;
+Classic M1A;Gewehr;High-End;ja;Waffenschaden (WD) +22,4 %;Kritischer Trefferschaden (CHD) +51 %;Schaden gg. ungedeckte Ziele (DTToOC) +15 %;Killer;694.038;3.470.190;231346;180;15;30;;;;;;

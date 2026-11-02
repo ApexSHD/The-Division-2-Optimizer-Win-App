@@ -52,10 +52,16 @@ export interface ModeContext {
   };
 }
 
+export interface WeaponSlot {
+  slot: "primary1" | "primary2" | "pistol";
+  weapon: Weapon | null;
+}
+
 export interface V4Candidate {
   id: string;
   gear: GearPiece[];
   weapon: Weapon;
+  weapons: WeaponSlot[];
   vector: import("./axes").EffectVector;
   admissible: boolean;
   violations: MinimumViolation[];
@@ -292,9 +298,10 @@ export function buildCandidatesFromOptimizer(
         ? checkAdmissibility(admissibilityInput(r.gear, vector, role, ctx))
         : { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Exotic-Limit: höchstens ein exotisches Ausrüstungsteil", actual: null, required: null }] };
     out.push({
-      id: [...r.gear.map((g) => g.id)].sort().join("|") + "::" + r.weapon.id,
+      id: [...r.gear.map((g) => g.id)].sort().join("|") + "::" + r.weapon.id + weaponSlotsSuffix(r.weapons),
       gear: r.gear,
       weapon: r.weapon,
+      weapons: r.weapons,
       vector,
       admissible: adm.admissible,
       violations: adm.violations,
@@ -352,6 +359,93 @@ export function reduceSearchSpace(
   return { gear: kept, pruned: pruned.count };
 }
 
+export interface WeaponSlotPick {
+  slot: "primary1" | "primary2" | "pistol";
+  weapon: Weapon | null;
+}
+
+function weaponSlotsSuffix(slots: WeaponSlotPick[]): string {
+  const parts = slots.filter((x) => x.weapon).map((x) => `${x.slot}:${x.weapon!.id}`);
+  return parts.length > 0 ? ":" + parts.join(",") : "";
+}
+
+function isExoticWeapon(w: Weapon): boolean {
+  return w.rarity === "exotic";
+}
+
+/**
+ * Baut die Waffen-Slots für einen Kandidaten: 2 Primärwaffen (bestes Paar nach
+ * Zielmetrik, Exotic-Waffenlimit ≤ 1) plus optional 1 Pistole. Rotation-Metrik:
+ * gewichteter Mix beider Primärwaffen (50/50 je Slot, konfigurierbar über
+ * settings.userAssumptions). Ohne Pistole im Pool bleibt der Slot null.
+ */
+export function buildWeaponSlots(
+  poolWeapons: Weapon[],
+  targetMetric: "burst" | "sustained" | "rotation",
+  profile: import("./damage").EnemyProfile,
+  shdLevel: number,
+  spec: string,
+  setBonusCatalog?: unknown,
+  modsBySlot?: unknown,
+): WeaponSlotPick[] {
+  const metricOf = (w: Weapon) => {
+    const { damage } = evaluateBuild(w, [], {
+      shdLevel,
+      profile,
+      spec,
+      modsBySlot: modsBySlot as never,
+      setBonusCatalog: setBonusCatalog as never,
+    });
+    return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
+  };
+  const ranked = [...poolWeapons].sort((a, b) => metricOf(b) - metricOf(a));
+  const primaries: Weapon[] = [];
+  for (const w of ranked) {
+    if (primaries.length >= 2) break;
+    if (isExoticWeapon(w) && primaries.some(isExoticWeapon)) continue;
+    if (primaries.some((p) => p.id === w.id)) continue;
+    primaries.push(w);
+  }
+  const pistol = ranked.find((w) => w.type === "pistol" && !primaries.some((p) => p.id === w.id)) ?? null;
+  return [
+    { slot: "primary1", weapon: primaries[0] ?? null },
+    { slot: "primary2", weapon: primaries[1] ?? null },
+    { slot: "pistol", weapon: pistol },
+  ];
+}
+
+/**
+ * Kombinierte Schadensmetrik eines Waffen-Slots: bei Rotation zählt der Mix aus
+ * beiden Primärwaffen (je 50 % Anteil), sonst die führende Waffe (primary1).
+ */
+export function combinedWeaponDps(
+  slots: WeaponSlotPick[],
+  targetMetric: "burst" | "sustained" | "rotation",
+  profile: import("./damage").EnemyProfile,
+  shdLevel: number,
+  spec: string,
+  setBonusCatalog?: unknown,
+  modsBySlot?: unknown,
+): number {
+  const dpsOf = (w: Weapon | null) => {
+    if (!w) return 0;
+    const { damage } = evaluateBuild(w, [], {
+      shdLevel,
+      profile,
+      spec,
+      modsBySlot: modsBySlot as never,
+      setBonusCatalog: setBonusCatalog as never,
+    });
+    return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
+  };
+  const p1 = slots.find((x) => x.slot === "primary1")?.weapon ?? null;
+  const p2 = slots.find((x) => x.slot === "primary2")?.weapon ?? null;
+  if (targetMetric === "rotation") {
+    return dpsOf(p1) * 0.5 + dpsOf(p2) * 0.5;
+  }
+  return dpsOf(p1 ?? p2);
+}
+
 export const DEFAULT_BEAM_WIDTH = 2000;
 export const DEFAULT_SLOT_BUDGET = 25;
 
@@ -407,18 +501,15 @@ export function beamCombosBySlot(
     slotLists.push(pool);
   }
 
-  let beam: { combo: GearPiece[]; sc: number }[] = [{ combo: [], sc: 0 }];
-  for (let si = 0; si < slotLists.length; si++) {
-    const slot = slots[si];
-    if (si === 0) {
-      const seen0 = new Set<string>();
-      slotLists[0] = slotLists[0].filter((g) => {
-        const k = g.id;
-        if (seen0.has(k)) return false;
-        seen0.add(k);
-        return true;
-      });
-    }
+  const lockedInBeam = lockedGear.filter((g) => (bySlot.get(g.slot) ?? []).some((x) => x.id === g.id));
+  const lockedSlots = new Set(lockedInBeam.map((g) => g.slot));
+  const freeSlots = slots.filter((s) => !lockedSlots.has(s));
+  const slotListsFree = slotLists.filter((_, i) => !lockedSlots.has(slots[i]));
+  let beam: { combo: GearPiece[]; sc: number }[] = [
+    ...(lockedInBeam.length > 0 ? [{ combo: lockedInBeam, sc: 0 }] : [{ combo: [], sc: 0 }]),
+  ];
+  for (let si = 0; si < slotListsFree.length; si++) {
+    const slot = freeSlots[si];
     if (opts.shouldAbort?.()) {
       warnings.push("Abgebrochen – Teilergebnis (Beam-Suche).");
       break;
@@ -428,7 +519,7 @@ export function beamCombosBySlot(
     for (const partial of beam) {
       const partialStats = aggregateBuild(partial.combo, 0);
       const partialExotics = partial.combo.filter((g) => g.brandType === "exotic").length;
-      for (const item of slotLists[si]) {
+      for (const item of slotListsFree[si]) {
         if (item.brandType === "exotic" && partialExotics + 1 > exoticCap) continue;
         if (partial.combo.some((g) => g.slot === item.slot)) continue;
         const combo = [...partial.combo, item];
@@ -466,8 +557,15 @@ export function beamCombosBySlot(
     }
     next.sort((a, b) => b.sc - a.sc || (a.combo.map((g) => g.id).join("|") < b.combo.map((g) => g.id).join("|") ? -1 : 1));
     beam = next.slice(0, beamWidth);
+    if (lockedInBeam.length > 0) {
+      const withLocks = beam.map((b) => {
+        const missing = lockedInBeam.filter((g) => !b.combo.some((x) => x.id === g.id));
+        return missing.length > 0 ? { combo: [...b.combo, ...missing], sc: b.sc } : b;
+      });
+      beam = withLocks;
+    }
     if (gearsetSlots.has(slot)) {
-      const setItems = slotLists[si].filter((g) => g.brandType === "gearset");
+      const setItems = slotListsFree[si].filter((g) => g.brandType === "gearset");
       const forced: { combo: GearPiece[]; sc: number }[] = [];
       for (const partial of beam) {
         for (const item of setItems) {
@@ -492,9 +590,15 @@ export function beamCombosBySlot(
         beam = [...beam, ...add].sort((a, b) => b.sc - a.sc).slice(0, beamWidth * 2);
       }
     }
-    opts.onProgress?.(si + 1, slotLists.length);
+    opts.onProgress?.(si + 1, slotListsFree.length);
   }
-  return { combos: beam.map((b) => b.combo), warnings };
+  const lockedIdsFinal = new Set(lockedInBeam.map((g) => g.id));
+  const combos = beam.map((b) => {
+    const missing = lockedInBeam.filter((g) => !b.combo.some((x) => x.id === g.id));
+    return missing.length > 0 ? [...b.combo, ...missing] : b.combo;
+  });
+  void lockedIdsFinal;
+  return { combos, warnings };
 }
 
 export function optimizeV4(
@@ -517,7 +621,16 @@ export function optimizeV4(
   const warnings: string[] = [];
 
   const useBeam = opts.useBeam ?? true;
-  let candidateGear = gear;
+  const excludedGear = new Set(ctx.settings.excludedGearIds ?? []);
+  const excludedWeapons = new Set(ctx.settings.excludedWeaponIds ?? []);
+  const poolWeapons = weapons.filter((w) => !excludedWeapons.has(w.id));
+  let candidateGear = gear.filter((g) => !excludedGear.has(g.id));
+  if (candidateGear.length < gear.length) {
+    warnings.push(`Ausschluss aktiv: ${gear.length - candidateGear.length} Gear-Teil(e) vor der Suche entfernt.`);
+  }
+  if (poolWeapons.length < weapons.length) {
+    warnings.push(`Ausschluss aktiv: ${weapons.length - poolWeapons.length} Waffe(n) vor der Suche entfernt.`);
+  }
   if (ctx.mode === "ziel" && !useBeam) {
     const reduced = reduceSearchSpace(gear, role, opts.budgetPerSlot ?? 12);
     candidateGear = reduced.gear;
@@ -540,8 +653,8 @@ export function optimizeV4(
     const setBonusCatalog = (opts.setBonusCatalog as never) ?? defaultSetBonusCatalog();
     const profile = enemyProfileFromSettings(ctx.settings);
     const chcTarget = role.chcTarget ?? ctx.settings.targetChc;
-    const anchorWeapon = weapons.find((w) => w.id === ctx.settings.anchorWeaponId) ?? null;
-    let candidateWeapons = anchorWeapon ? [anchorWeapon] : weapons;
+    const anchorWeapon = poolWeapons.find((w) => w.id === ctx.settings.anchorWeaponId) ?? null;
+    let candidateWeapons = anchorWeapon ? [anchorWeapon] : poolWeapons;
     if (!anchorWeapon && ctx.settings.weaponTypeFilter) {
       const filtered = candidateWeapons.filter((w) => w.type === ctx.settings.weaponTypeFilter);
       if (filtered.length > 0) candidateWeapons = filtered;
@@ -576,7 +689,10 @@ export function optimizeV4(
       weaponDpsCache.set(w.id, ctx.settings.targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps);
     }
     const sortedWeapons = [...candidateWeapons].sort((a, b) => (weaponDpsCache.get(b.id) ?? 0) - (weaponDpsCache.get(a.id) ?? 0));
-    opts.onProgress?.("evaluate", 0, combos.length * Math.max(1, sortedWeapons.length));
+    const weaponSlots = buildWeaponSlots(sortedWeapons, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot);
+    const leadWeapon = weaponSlots.find((x) => x.slot === "primary1")?.weapon ?? sortedWeapons[0] ?? null;
+    const comboWeaponDps = combinedWeaponDps(weaponSlots, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot);
+    opts.onProgress?.("evaluate", 0, combos.length);
     for (const combo of combos) {
       if (opts.shouldAbort?.()) {
         warnings.push("Abgebrochen – Teilergebnis (Beam-Suche).");
@@ -585,8 +701,9 @@ export function optimizeV4(
       const exoticGear = combo.filter((g) => g.brandType === "exotic").length;
       if (exoticGear > 1) continue;
       if (combo.length < SLOTS.length) continue;
-      for (const w of sortedWeapons) {
-        const key = combo.map((g) => g.id).join("|") + "::" + w.id;
+      for (const w of [leadWeapon]) {
+        if (!w) continue;
+        const key = combo.map((g) => g.id).join("|") + "::" + w.id + weaponSlotsSuffix(weaponSlots);
         if (seen.has(key)) continue;
         seen.add(key);
         const { stats, damage } = evaluateBuild(w, combo, {
@@ -600,6 +717,7 @@ export function optimizeV4(
         optimizerResults.push({
           rank: 0,
           weapon: w,
+          weapons: weaponSlots,
           gear: combo,
           stats,
           damage,
@@ -609,16 +727,20 @@ export function optimizeV4(
           reasonParts: [],
           slotExplanations: [],
           warnings: [] as OptimizerWarning[],
-          roleScore: { key: "" as const, score: damage.effectiveDps, label: "Waffen-DPS" },
+          roleScore: { key: "" as const, score: comboWeaponDps, label: ctx.settings.targetMetric === "rotation" ? "Rotation-DPS" : "Waffen-DPS" },
           assumptions: { items: [], wastedChc: 0, overTargetChc: 0 },
         });
         evaluated++;
-        if (evaluated % 500 === 0) opts.onProgress?.("evaluate", evaluated, combos.length * Math.max(1, sortedWeapons.length));
+        if (evaluated % 500 === 0) opts.onProgress?.("evaluate", evaluated, combos.length);
       }
     }
     const keep = Math.max(opts.maxResults ?? 50, 200);
     const metric = (r: OptimizerResult) =>
-      ctx.settings.targetMetric === "burst" ? r.damage.effectiveDps : r.damage.sustainedDps;
+      ctx.settings.targetMetric === "burst"
+        ? r.damage.effectiveDps
+        : ctx.settings.targetMetric === "rotation"
+          ? r.roleScore.score
+          : r.damage.sustainedDps;
     const pre: OptimizerResult[] = [];
     for (const r of optimizerResults) {
       if (pre.length >= keep * 4) break;
@@ -645,10 +767,10 @@ export function optimizeV4(
       if (diverse.every((t) => gearDiffCount(t, r) >= 2)) diverse.push(r);
     }
     if (diverse.length < keep) {
-      const seen = new Set(diverse.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id));
+      const seen = new Set(diverse.map((r) => r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id + weaponSlotsSuffix(r.weapons)));
       for (const r of optimizerResults) {
         if (diverse.length >= keep) break;
-        const key = r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id;
+        const key = r.gear.map((g) => g.id).join("|") + "::" + r.weapon.id + weaponSlotsSuffix(r.weapons);
         if (seen.has(key)) continue;
         seen.add(key);
         diverse.push(r);
@@ -661,7 +783,7 @@ export function optimizeV4(
     });
   } else {
     optimizerResults = optimizeBuilds(
-      weapons,
+      poolWeapons,
       candidateGear,
       ctx.shdLevel,
       ctx.settings,

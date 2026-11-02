@@ -149,8 +149,8 @@ describe("Inventaranalyse gegen Beispieldaten (Lastenheft Abschnitt 10)", () => 
       teamSize: 4,
       shdLevel: 1000,
       settings: {
-        targetMetric: "sustained", targetHsd: 100, difficultyKey: "heroic", enemyTeamSize: 4,
-        role: "weaponDps", targetChc: 50, lockedGearIds: [], anchorWeaponId: "", weaponTypeFilter: "",
+        targetMetric: "sustained", gameMode: "openworld", excludedGearIds: [], excludedWeaponIds: [], targetHsd: 100, difficultyKey: "heroic", enemyTeamSize: 4,
+        targetChc: 50, lockedGearIds: [], anchorWeaponId: "", weaponTypeFilter: "",
         qualityFilter: "all", preferredBrand: "", considerWeaponTalents: true, considerGearTalents: true,
         considerExoticPerks: true, enemyArmorShare: 80, enemyHealthShare: 20, enemyOocShare: 70,
         enemyHeadshotShare: 0, requiredChest: false, requiredBackpack: false, targetGearSet: "",
@@ -158,7 +158,7 @@ describe("Inventaranalyse gegen Beispieldaten (Lastenheft Abschnitt 10)", () => 
       threatStatusShare: 0.3,
       spec: "sharpshooter",
     };
-    const a = analyzeInventory({ gear, weapons, builds: [], roleId: "weaponDps", ctx });
+    const a = analyzeInventory({ gear, weapons, builds: [], roleId: "dps_krit", ctx });
     expect(a.gapRecommendations.length).toBeGreaterThan(0);
     for (let i = 1; i < a.gapRecommendations.length; i++) {
       const prev = a.gapRecommendations[i - 1].gainPercent ?? -1;
