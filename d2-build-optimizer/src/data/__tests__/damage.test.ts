@@ -263,8 +263,8 @@ describe("optimizeBuilds — Set-Boni (Issue #67)", () => {
     const ar = sampleWeapons.find((w) => w.type === "ar")!;
     const resSg = optimizeBuilds([shotgun], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
     const resAr = optimizeBuilds([ar], gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1, setBonusCatalog: catalog });
-    expect((resSg[0].stats.sources.wd ?? []).some((x) => x.label.includes("SHOTGUN") && x.value === 24)).toBe(true);
-    expect((resAr[0].stats.sources.wd ?? []).some((x) => x.label.includes("SHOTGUN"))).toBe(false);
+    expect((resSg[0].stats.sources.wd ?? []).some((x) => x.label.includes("shotgun") && x.value === 24)).toBe(true);
+    expect((resAr[0].stats.sources.wd ?? []).some((x) => x.label.includes("shotgun"))).toBe(false);
   });
 
   it("Green-Set-Bonus (3 Teile Striker): CHC-Bonus aus Katalog", () => {

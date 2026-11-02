@@ -18,6 +18,16 @@ function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+// CR-02 P4: ascii-folded Normalisierung für Katalog-Matching (Diakritika entfernen),
+// damit z. B. „Česká Výroba S.R.O.“ gegen DB-Key „ceska“ matcht.
+function normalizeNameFolded(name: string): string {
+  return name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
 for (const [category, table] of Object.entries(ALIASES) as [AliasCategory, AliasTable][]) {
   const index = new Map<string, string>();
   for (const [canonical, aliasList] of Object.entries(table)) {
@@ -62,6 +72,20 @@ export function resolveNameAlias(
   if (!normalized) return { original: name, canonical: name, suggestionUsed: false };
   const exact = index.get(normalized);
   if (exact) return { original: name, canonical: exact, suggestionUsed: false };
+  // ascii-folded Fallback: suche canonical, dessen gefalteter Name prefix-matcht
+  const folded = normalizeNameFolded(name);
+  if (folded) {
+    let bestCanon: string | null = null;
+    let bestLen = 0;
+    for (const [alias, canonical] of index) {
+      const fa = normalizeNameFolded(alias);
+      if (fa && (folded.startsWith(fa) || fa.startsWith(folded)) && fa.length > bestLen) {
+        bestCanon = canonical;
+        bestLen = fa.length;
+      }
+    }
+    if (bestCanon) return { original: name, canonical: bestCanon, suggestionUsed: true };
+  }
   let best: { canonical: string; distance: number } | null = null;
   for (const [alias, canonical] of index) {
     const distance = levenshtein(normalized, alias);

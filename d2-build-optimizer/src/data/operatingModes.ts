@@ -397,6 +397,7 @@ export function buildWeaponSlots(
       modsBySlot: modsBySlot as never,
       setBonusCatalog: setBonusCatalog as never,
       considerTalents,
+      considerPerks: true,
     });
     return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
   };
@@ -439,6 +440,7 @@ export function combinedWeaponDps(
       modsBySlot: modsBySlot as never,
       setBonusCatalog: setBonusCatalog as never,
       considerTalents,
+      considerPerks: true,
     });
     return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
   };
@@ -690,6 +692,7 @@ export function optimizeV4(
         modsBySlot: opts.modsBySlot as never,
         setBonusCatalog: setBonusCatalog as never,
       considerTalents: ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents,
+          considerPerks: ctx.settings.considerExoticPerks,
       });
       weaponDpsCache.set(w.id, ctx.settings.targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps);
     }
@@ -718,6 +721,7 @@ export function optimizeV4(
           modsBySlot: opts.modsBySlot as never,
           setBonusCatalog: setBonusCatalog as never,
           considerTalents: ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents,
+          considerPerks: ctx.settings.considerExoticPerks,
         });
         const meetsTargetChc = damage.cappedChc >= chcTarget;
         optimizerResults.push({

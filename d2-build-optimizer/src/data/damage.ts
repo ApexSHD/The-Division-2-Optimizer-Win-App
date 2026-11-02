@@ -1,4 +1,5 @@
 import type { Weapon, GearSlot, GearAttr, GearAttrKey } from "./sampleData";
+import { resolveNameAlias } from "./aliasResolver";
 import { collectTalentContributions } from "./talentEffects";
 import type { GearPiece } from "./sampleData";
 import { GEAR_ATTR_TYPES, gearAttrMax, reloadSecondsFor } from "./sampleData";
@@ -424,6 +425,7 @@ export interface EvaluateContext {
   modsBySlot?: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>;
   setBonusCatalog?: SetBonusCatalog | null;
   considerTalents?: boolean;
+  considerPerks?: boolean;
 }
 
 /**
@@ -459,8 +461,8 @@ export function evaluateBuild(
     }
   }
   stats = applySetBonuses(stats, gear, weapon, ctx.setBonusCatalog ?? null);
-  if (ctx.considerTalents) {
-    const tc = collectTalentContributions(weapon, gear);
+  if (ctx.considerTalents || ctx.considerPerks) {
+    const tc = collectTalentContributions(weapon, gear, undefined, ctx.considerPerks ?? true);
     if (tc.wdPercent > 0) {
       stats.wd += tc.wdPercent;
       addStatSource(stats, "wd", `Talent: ${tc.weaponTalent?.name ?? "Gear-Talent"}`, tc.wdPercent, "talent");
@@ -561,6 +563,10 @@ const SET_BONUS_ATTR_MAP: Record<string, "chc" | "chd" | "hsd" | "wd" | "dta" | 
   chd: "chd",
   hsd: "hsd",
   wd: "wd",
+  dta: "dta",
+  dth: "dth",
+  dttooc: "dttooc",
+  hazard: "dta",
 };
 
 function applySetBonuses(
@@ -580,8 +586,26 @@ function applySetBonuses(
   const brandCounts = new Map<string, number>();
   for (const g of combo) {
     if (g.brandType === "brand") {
-      const key = g.brand.toLowerCase().split(" ")[0];
-      brandCounts.set(key, (brandCounts.get(key) ?? 0) + 1);
+      // CR-02 P4: Brand-Key über Alias-Tabelle auflösen (z. B. „Česká Výroba S.R.O.“ -> „Ceska Zbrojovka Group“ -> catalog-Key „ceska“),
+      // sonst greift der 2./3. Brand-Bonus nicht, wenn der Anzeigename nicht mit dem DB-Key übereinstimmt.
+      const resolved = resolveNameAlias(g.brand, "brands");
+      const key = (resolved.canonical || g.brand).toLowerCase();
+      // CR-02 P4: zusätzlich ascii-normalisiert gegen die Katalog-Keys matchen
+      // (z. B. „Česká Výroba S.R.O.“ -> „ceskavyrobasro“ -> prefix-match auf „ceska“)
+      const normKey = key.replace(/[^a-z0-9]/g, "");
+      const gNorm = g.brand.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const catalogKey =
+        catalog.brands[key] !== undefined
+          ? key
+          : Object.keys(catalog.brands).find(
+              (k) =>
+                k === normKey ||
+                key.startsWith(k) ||
+                k.startsWith(key.split(" ")[0]) ||
+                normKey.startsWith(k) ||
+                gNorm.startsWith(k),
+            ) ?? key;
+      brandCounts.set(catalogKey, (brandCounts.get(catalogKey) ?? 0) + 1);
     }
   }
   for (const [brandKey, count] of brandCounts) {
@@ -592,11 +616,21 @@ function applySetBonuses(
       for (const [attr, rawVal] of Object.entries(bonusObj)) {
         if (attr === "wd_by_weapon") {
           const byWeapon = rawVal as Record<string, number>;
-          const weaponKey = weapon.type.toUpperCase();
-          const val = byWeapon[weaponKey];
-          if (val) {
+          // CR-02 P4: DB nutzt DE-Gattungsnamen („Shotgun“, „AR“), interne Keys sind klein („shotgun“, „ar“)
+          const TYPE_ALIASES: Record<string, string[]> = {
+            shotgun: ["Shotgun"],
+            ar: ["AR", "Sturmgewehr"],
+            smg: ["MP", "SMG"],
+            lmg: ["LMG"],
+            rifle: ["Rifle", "Gewehr"],
+            mmr: ["MMR"],
+            pistol: ["Pistol", "Pistole"],
+          };
+          const candidates = [weapon.type.toUpperCase(), weapon.type, ...(TYPE_ALIASES[weapon.type] ?? [])];
+          const val = candidates.map((c) => byWeapon[c]).find((v) => v !== undefined);
+          if (val !== undefined) {
             next.wd += val;
-            addStatSource(next, "wd", `Set: ${brandKey} (${pieces} Teile, ${weaponKey})`, val, "set");
+            addStatSource(next, "wd", `Set: ${brandKey} (${pieces} Teile, ${weapon.type})`, val, "set");
           }
           continue;
         }
@@ -626,6 +660,9 @@ function applySetBonuses(
     for (const [pieces, bonuses] of Object.entries(tiers)) {
       if (count < Number(pieces)) continue;
       for (const b of bonuses) {
+        // CR-02 P4: Waffentyp-abhängige Boni (weapon-Flag) nur bei passender Waffe
+        const bWeapon = (b as { weapon?: string }).weapon;
+        if (bWeapon && bWeapon.toUpperCase() !== weapon.type.toUpperCase()) continue;
         const mapped = SET_BONUS_ATTR_MAP[b.attr];
         if (!mapped) continue;
         next[mapped] += b.val;

@@ -99,6 +99,7 @@ DTA (Rüstungsschaden), DTH (Lebenspunktschaden) und DTTOOC (Schaden gg. ungedec
 ## 7. Set-Boni (Brand & Green)
 
 - **Brand-Sets (1/2/3 Teile):** numerische `bonuses_pve` aus der DB, z. B. Česká 1p +8 % CHC (→ Kategorie CHC additiv). `wd_by_weapon`-Boni (z. B. +24 % Shotgun-Schaden) greifen **nur bei passender Waffengattung** und fließen in die WD-Kategorie.
+- **Brand-Sets (1/2/3 Teile) und Gear-Sets (2/3/4 Teile):** alle Stufen kumulativ (`count >= pieces`), Brand-Key über Alias-Tabelle + ASCII-Fold aufgelöst („Česká Výroba S.R.O.“ → `ceska`), `wd_by_weapon` über Gattungs-Aliase (shotgun → „Shotgun“) gematcht, `weapon`-Flag bei Green-Sets respektiert. 2./3. Brand-Bonus greift damit zuverlässig (CR-02 P4, getestet in `cr02-setboni.test.ts`).
 - **Green-Sets (2/3/4 Teile):** numerische `bonuses` aus der DB (z. B. Striker 3p +15 % Feuerrate — Feuerrate wird derzeit als Attribut nicht in DPS eingerechnet; nur CHC/CHD/HSD/WD-fähige Boni wirken).
 - **Nicht modelliert:** Stack-basierte 4er-Boni (z. B. Striker's Gamble). Die DB führt dazu ein `modeled`-Feld; Anzeige geplant im Annahmen-Panel (#64).
 
@@ -109,8 +110,8 @@ Diese im Spiel existierenden Effekte sind in der Engine derzeit **nicht** enthal
 1. ~~**Basis-Kopfschuss-Multiplikator**~~ **umgesetzt (CR-02 OP-6.6):** `HSD_BASE = 50` in `damage.ts` ist Teil des HSD-Topfs; Waffen-`innateHsd` (z. B. +55 % AR) wird weiterhin zusätzlich gerechnet. Gegen Spielwerte zu prüfen (#62).
 2. ~~**Basis-CHD**~~ **umgesetzt:** `CHD_BASE = 25` (bereits seit Kalibrierung 31.10. aktiv).
 3. **RPM-Preis-Multiplikatoren** und Waffenhandling-Effekte auf realen DPS
-4. ~~**Talente**~~ **teilweise umgesetzt (CR-02 P4):** `src/data/talentEffects.ts` modelliert Wirkungsklassen (permanent/stack/bedingt/team/unmodelliert) für priorisierte Talente (Strapaziert, Killer, Raserei, Unhinged, Overwhelm, Rifleman, Measured, Brazen, Finisher, Precision Strike) mit Standard-Annahmen (Stack-Uptime 0,8, bedingte Uptime). Schalter `considerWeaponTalents`/`considerGearTalents` wirken jetzt in `evaluateBuild` (`considerTalents`). Nicht modellierte Talente werden in der Build-Karte als „nicht berechnet“ gekennzeichnet.
-5. **Exotic-Perks** (Catharsis, Memento, Coyote's Mask usw.) — Schalter `considerExoticPerks` vorhanden, Perks selbst werden nur gekennzeichnet, nicht modelliert.
+4. ~~**Talente**~~ **umgesetzt (CR-02 P4, Pakete 1+2):** `src/data/talentEffects.ts` modelliert Wirkungsklassen (permanent/stack/bedingt/team/unmodelliert) für **alle 131 Waffentalente** aus `talents-display.json` (64 modelliert, Rest gekennzeichnet als unmodelliert) **und alle Gear-Talente** aus `talent.json` (Weste + Rucksack + Exotic/Set-Talente, inkl. Striker's Gamble als Stack: 0,65 % × 100 × 0,8). Standard-Annahmen: Stack-Uptime 0,8, bedingte Uptime je Talent, Kampf-Fenster 30 s (`DEFAULT_TALENT_ASSUMPTIONS`). Schalter `considerWeaponTalents`/`considerGearTalents` wirken in `evaluateBuild` (`considerTalents`).
+5. ~~**Exotic-Perks**~~ **teilweise umgesetzt (CR-02 P4 Paket 2):** schadensrelevante Perks modelliert (Catalyst +19,2 % WD, Memento +24 % WD, Coyote's Mask CHC/CHD, Bloody Knuckles +16,7 % WD, Overdogs/Blacklisters Amp, Sawyer's +24 % WD, Sarru +7,5 % WD, Catharsis +36 % WD); Schalter `considerExoticPerks` steuert über `considerPerks`. Übrige Perks (Tinkerer, Provocator, Collector …) werden als unmodelliert gekennzeichnet.
 
 Sobald ein Punkt implementiert wird, ist dieses Dokument fortzuschreiben und der Test in `src/data/__tests__/damage.test.ts` zu ergänzen.
 
