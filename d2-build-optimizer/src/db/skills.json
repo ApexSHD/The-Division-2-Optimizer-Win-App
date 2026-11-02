@@ -1,565 +1,2332 @@
 {
-  "version": "skills_v1",
-  "game_version": "TU22.x (offen)",
-  "data_stand": "2026-11-29",
-  "source": "Lastenheft V4 Abschnitt 7 (Issue #89); Spielkatalog, Grundwerte teils nicht offengelegt",
-  "note": "Grundwerte je Stufe, Wirkdauer und Abklingzeit sind Annahmen, solange value_status = 'Annahme'. Sie werden im Annahmen-Panel (Issue #64) angezeigt und vom Nutzer anpassbar. Null-Werte sind bei Umsetzung gegen Spiel/Community-Quellen zu erfassen. Skills und Varianten wählt der Spieler selbst (Lastenheft 3.1); die Engine optimiert nur die Ausrüstung.",
-  "value_status_legend": {
-    "bestätigt": "Wert aus offizieller Quelle / Spiel",
-    "Annahme": "Wert geschätzt, im Annahmen-Panel sichtbar und anpassbar",
-    "offen": "Wert noch nicht erfasst, bei Umsetzung nachtragen"
+ "version": "v3",
+ "game_version": "TU22.x (offen)",
+ "data_stand": "2026-11-29",
+ "source": "Lastenheft V4 Abschnitt 7 (Issue #89); Spielkatalog, Grundwerte teils nicht offengelegt",
+ "note": "Grundwerte je Stufe, Wirkdauer und Abklingzeit sind Annahmen, solange value_status = 'Annahme'. Sie werden im Annahmen-Panel (Issue #64) angezeigt und vom Nutzer anpassbar. Null-Werte sind bei Umsetzung gegen Spiel/Community-Quellen zu erfassen. Skills und Varianten wählt der Spieler selbst (Lastenheft 3.1); die Engine optimiert nur die Ausrüstung. | v3: Vollständige Skill-Liste (41 Varianten, 11 Skills) aus division2_skills.json (Tier-Skalierung pro Tier 0-6: Effekt-Skalierung, Abkühlzeit, Fertigkeiten-LP-Bonus).",
+ "value_status_legend": {
+  "bestätigt": "Wert aus offizieller Quelle / Spiel",
+  "Annahme": "Wert geschätzt, im Annahmen-Panel sichtbar und anpassbar",
+  "offen": "Wert noch nicht erfasst, bei Umsetzung nachtragen"
+ },
+ "skills": [
+  {
+   "key": "chem_launcher",
+   "name": "Chem.-Werfer",
+   "variants": [
+    {
+     "key": "oxidizer",
+     "name": "Oxidator",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": "Säure",
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": 4,
+     "description": "Säurewolke verursacht Skill-Schaden über Zeit.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "reinforcer",
+     "name": "Verstärker",
+     "effect_type": "heal",
+     "damage_kind": "repair",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Reparatur/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": 4,
+     "description": "Chemiewolke repariert Rüstung im Wirkungsbereich.",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "riot_foam",
+     "name": "Aufruhrschaum",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Festgesetzt",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": 6,
+     "cooldown": 10,
+     "charges": 4,
+     "description": "Schaum setzt Gegner fest (Statuseffekt, CC-Achse).",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "firestarter",
+     "name": "Brandstifter",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": "Brennen",
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": 4,
+     "description": "Brandfläche verursacht Brand-Schaden über Zeit.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    }
+   ]
   },
-  "skills": [
+  {
+   "key": "drone",
+   "name": "Drohne",
+   "variants": [
     {
-      "key": "chem_launcher",
-      "name": "Chemwerfer",
-      "variants": [
-        {
-          "key": "oxidizer",
-          "name": "Oxidator",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": "Säure",
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": 4,
-          "description": "Säurewolke verursacht Skill-Schaden über Zeit.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "reinforcer",
-          "name": "Verstärker",
-          "effect_type": "heal",
-          "damage_kind": "repair",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Reparatur/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": 4,
-          "description": "Chemiewolke repariert Rüstung im Wirkungsbereich.",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "riot_foam",
-          "name": "Aufruhrschaum",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Festgesetzt",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "Annahme",
-          "duration": 6,
-          "cooldown": 10,
-          "charges": 4,
-          "description": "Schaum setzt Gegner fest (Statuseffekt, CC-Achse).",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "firestarter",
-          "name": "Brandstifter",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": "Brennen",
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": 4,
-          "description": "Brandfläche verursacht Brand-Schaden über Zeit.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        }
-      ]
+     "key": "striker",
+     "name": "Angriffsdrohne",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Begleitdrohne greift Ziele automatisch an.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
     },
     {
-      "key": "drone",
-      "name": "Drohne",
-      "variants": [
-        {
-          "key": "striker",
-          "name": "Angriffsdrohne",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Begleitdrohne greift Ziele automatisch an.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "fixer",
-          "name": "Reparaturdrohne",
-          "effect_type": "heal",
-          "damage_kind": "repair",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Reparatur/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Repariert den Träger bzw. Verbündete.",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "defender",
-          "name": "Schutzdrohne",
-          "effect_type": "buff",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schadensreduktion",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Reduziert eingehenden Schaden (EHP-relevant).",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "bombardier",
-          "name": "Bomberdrohne",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Bombardiert einen markierten Bereich.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        }
-      ]
+     "key": "fixer",
+     "name": "Reparaturdrohne",
+     "effect_type": "heal",
+     "damage_kind": "repair",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Reparatur/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Repariert den Träger bzw. Verbündete.",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
     },
     {
-      "key": "hive",
-      "name": "Brut",
-      "variants": [
-        {
-          "key": "restorer",
-          "name": "Heilbrut",
-          "effect_type": "heal",
-          "damage_kind": "repair",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Reparatur/Ladung",
-          "value_status": "Annahme",
-          "duration": 15,
-          "cooldown": 60,
-          "charges": null,
-          "description": "Heilt automatisch Verbündete in der Nähe (Kernwerkzeug für Skill-Heiler).",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "reviver",
-          "name": "Wiederbelebung",
-          "effect_type": "heal",
-          "damage_kind": "revive",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Reparatur/Ladung",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Belebt besiegte Verbündete wieder; Pflicht-Frage im Fragebogen der Heil-/Support-Rollen.",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "booster",
-          "name": "Verstärker",
-          "effect_type": "buff",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Skill-Eile",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Erhöht Skill-Eile des Trägers (UPT-Achse).",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "stinger",
-          "name": "Stachelbrut",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": "Interferenz",
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Greift Gegner in der Nähe an und stört sie.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        }
-      ]
+     "key": "defender",
+     "name": "Schutzdrohne",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schadensreduktion",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Reduziert eingehenden Schaden (EHP-relevant).",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
     },
     {
-      "key": "seeker_mine",
-      "name": "Suchmine",
-      "variants": [
-        {
-          "key": "cluster",
-          "name": "Cluster",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/Ladung",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Zerlegt sich in Minen, die Ziele verfolgen.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "mender",
-          "name": "Heilmine",
-          "effect_type": "heal",
-          "damage_kind": "repair",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Reparatur/Ladung",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Verfolgt Verbündete und repariert sie (Kernwerkzeug für Skill-Heiler).",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "airburst",
-          "name": "Luftstoß",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": "Brennen",
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/Ladung",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Explosive Flächenschädigung mit Brand.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        }
-      ]
+     "key": "bombardier",
+     "name": "Bomberdrohne",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Bombardiert einen markierten Bereich.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
     },
     {
-      "key": "shield",
-      "name": "Schild",
-      "variants": [
-        {
-          "key": "bulwark",
-          "name": "Bollwerk",
-          "effect_type": "defense",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schild-HP",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Ballistischer Vollkörperschild; blockiert Waffengebrauch. Aggro-Werkzeug für Tank (Mindestwert-Regel #91).",
-          "scaling_type": "shield_hp",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "deflector",
-          "name": "Deflektor",
-          "effect_type": "defense",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schild-HP",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Reflektiert Projektile, solange der Schild steht.",
-          "scaling_type": "shield_hp",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "crusader",
-          "name": "Kreuzfahrer",
-          "effect_type": "defense",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schild-HP",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Erlaubt Waffengebrauch mit Einhandwaffe.",
-          "scaling_type": "shield_hp",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "guardian",
-          "name": "Beschützer",
-          "effect_type": "buff",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Team-Schaden",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Erhöht den Schaden von Verbündeten im Schutz des Schildes (BUF-relevant).",
-          "scaling_type": "shield_hp",
-          "scaling_value_status": "Annahme"
-        }
-      ]
-    },
-    {
-      "key": "decoy",
-      "name": "Köder",
-      "variants": [
-        {
-          "key": "standard",
-          "name": "Hologramm",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Aggro",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Zieht Aggro auf sich; Aggro-Werkzeug für Tank (Mindestwert-Regel #91).",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        }
-      ]
-    },
-    {
-      "key": "firefly",
-      "name": "Feuerfliege",
-      "variants": [
-        {
-          "key": "blinder",
-          "name": "Blender",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Geblendet",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Blendet Gegner im Sichtfeld (CC-Achse, geringere Effektgewichtung nach Lastenheft 4.4).",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "demolisher",
-          "name": "Demolierer",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Festgesetzt",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Fixiert Gegner an schwachen Punkten (höhere Effektgewichtung nach Lastenheft 4.4).",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "burster",
-          "name": "Zerleger",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Schock",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Ketten-Schock zwischen markierten Gegnern (höhere Effektgewichtung nach Lastenheft 4.4).",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        }
-      ]
-    },
-    {
-      "key": "turret",
-      "name": "Geschützturm",
-      "variants": [
-        {
-          "key": "assault",
-          "name": "Sturm",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Automatischer Turm gegen Ziele in Reichweite.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "sniper",
-          "name": "Scharfschütze",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/Schuss",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Langsame Präzisionsschüsse.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "incinerator",
-          "name": "Brandwerfer",
-          "effect_type": "damage",
-          "damage_kind": "skill_damage",
-          "status_effect": "Brennen",
-          "base_value_per_tier": null,
-          "value_unit": "Schaden/s",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Kegelförmiger Brandstrahl.",
-          "scaling_type": "damage",
-          "scaling_value_status": "Annahme"
-        }
-      ]
-    },
-    {
-      "key": "pulse",
-      "name": "Aufklärungsradar",
-      "variants": [
-        {
-          "key": "standard",
-          "name": "Standard",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Markiert",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Markiert Gegner durch Wände.",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "jammer",
-          "name": "Störsender",
-          "effect_type": "cc",
-          "damage_kind": null,
-          "status_effect": "Interferenz",
-          "base_value_per_tier": null,
-          "value_unit": null,
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Stört und deaktiviert Gegner-Skills.",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        },
-        {
-          "key": "agent",
-          "name": "Agentenradar",
-          "effect_type": "buff",
-          "damage_kind": null,
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Team-Buff",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Erhöht Schaden des Teams gegen markierte Gegner (BUF-Achse).",
-          "scaling_type": "cc_duration",
-          "scaling_value_status": "Annahme"
-        }
-      ]
-    },
-    {
-      "key": "healing_launcher",
-      "name": "Heilwerfer",
-      "variants": [
-        {
-          "key": "standard",
-          "name": "Heilwerfer",
-          "effect_type": "heal",
-          "damage_kind": "repair",
-          "status_effect": null,
-          "base_value_per_tier": null,
-          "value_unit": "Reparatur/Projektil",
-          "value_status": "offen",
-          "duration": null,
-          "cooldown": null,
-          "charges": null,
-          "description": "Direkter Heil-Projektilwerfer (Zielheilung, Burst-Heil-Fenster).",
-          "scaling_type": "repair",
-          "scaling_value_status": "Annahme"
-        }
-      ]
+     "key": "tactician",
+     "name": "Aufklärer-Drohne (Tactician)",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Aufklärer-Drohne (Tactician) (Spezialisierung (Präzisionsschütze)). Hauptattribute: Scan-Radius. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Spezialisierung (Präzisionsschütze)",
+     "hauptattribute": "Scan-Radius",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
     }
-  ],
-  "scaling_rules": {
-    "_note": "Skalierungslogik je Skill-Kategorie (Nutzervorgabe 29.11.): Schaden +35%/Rang (Rang 6 = +210% Basisschaden), Reparatur +20%/Rang (+120% auf Rang 6), CC +20% Effektdauer pro Rang oder zusaetzliche Ziele, Ballistischer Schild Hybrid +40% LP/Rang (gelbe UND blaue Kerne), Overcharge bricht Rang-6-Limit kurzzeitig (15 s, z.B. Talent Zukunftssicher / Acostas Umhaengetasche).",
-    "damage_per_rank": 35,
-    "repair_per_rank": 20,
-    "cc_duration_per_rank": 20,
-    "shield_hp_per_rank": 40,
-    "overcharge": {
-      "duration": 15,
-      "note": "Effizienzen verdoppelt, Radien vergroessert, Abklingzeiten entfallen"
+   ]
+  },
+  {
+   "key": "hive",
+   "name": "Drohnenstock",
+   "variants": [
+    {
+     "key": "restorer",
+     "name": "Heilbrut",
+     "effect_type": "heal",
+     "damage_kind": "repair",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Reparatur/Ladung",
+     "value_status": "Annahme",
+     "duration": 15,
+     "cooldown": 60,
+     "charges": null,
+     "description": "Heilt automatisch Verbündete in der Nähe (Kernwerkzeug für Skill-Heiler).",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "reviver",
+     "name": "Wiederbelebung",
+     "effect_type": "heal",
+     "damage_kind": "revive",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Reparatur/Ladung",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Belebt besiegte Verbündete wieder; Pflicht-Frage im Fragebogen der Heil-/Support-Rollen.",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "booster",
+     "name": "Verstärker",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Skill-Eile",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Erhöht Skill-Eile des Trägers (UPT-Achse).",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "stinger",
+     "name": "Stachelbrut",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": "Interferenz",
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Greift Gegner in der Nähe an und stört sie.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "artificer",
+     "name": "Handwerker-Drohnenstock (Artificer)",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Handwerker-Drohnenstock (Artificer) (Spezialisierung (Techniker)). Hauptattribute: Fertigkeiten-Reparatur/Buff. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Spezialisierung (Techniker)",
+     "hauptattribute": "Fertigkeiten-Reparatur/Buff",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
     }
+   ]
+  },
+  {
+   "key": "seeker_mine",
+   "name": "Suchermine",
+   "variants": [
+    {
+     "key": "cluster",
+     "name": "Cluster",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/Ladung",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Zerlegt sich in Minen, die Ziele verfolgen.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "mender",
+     "name": "Heilmine",
+     "effect_type": "heal",
+     "damage_kind": "repair",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Reparatur/Ladung",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Verfolgt Verbündete und repariert sie (Kernwerkzeug für Skill-Heiler).",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "airburst",
+     "name": "Luftstoß",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": "Brennen",
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/Ladung",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Explosive Flächenschädigung mit Brand.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "spreng_suchermine",
+     "name": "Spreng-Suchermine",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Spreng-Suchermine (Standard). Hauptattribute: Explosionsschaden, Abkühlzeit. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Standard",
+     "hauptattribute": "Explosionsschaden, Abkühlzeit",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "shield",
+   "name": "Schild",
+   "variants": [
+    {
+     "key": "bulwark",
+     "name": "Bollwerk",
+     "effect_type": "defense",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schild-HP",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Ballistischer Vollkörperschild; blockiert Waffengebrauch. Aggro-Werkzeug für Tank (Mindestwert-Regel #91).",
+     "scaling_type": "shield_hp",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    },
+    {
+     "key": "deflector",
+     "name": "Deflektor",
+     "effect_type": "defense",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schild-HP",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Reflektiert Projektile, solange der Schild steht.",
+     "scaling_type": "shield_hp",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    },
+    {
+     "key": "crusader",
+     "name": "Kreuzfahrer",
+     "effect_type": "defense",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schild-HP",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Erlaubt Waffengebrauch mit Einhandwaffe.",
+     "scaling_type": "shield_hp",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    },
+    {
+     "key": "guardian",
+     "name": "Beschützer",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Team-Schaden",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Erhöht den Schaden von Verbündeten im Schutz des Schildes (BUF-relevant).",
+     "scaling_type": "shield_hp",
+     "scaling_value_status": "Annahme"
+    },
+    {
+     "key": "striker",
+     "name": "Stürmer-Schild (Striker)",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Stürmer-Schild (Striker) (Spezialisierung (Feuerwand)). Hauptattribute: Schadensbonus pro Gegner. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Spezialisierung (Feuerwand)",
+     "hauptattribute": "Schadensbonus pro Gegner",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "decoy",
+   "name": "Köder",
+   "variants": [
+    {
+     "key": "standard",
+     "name": "Hologramm",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Aggro",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Zieht Aggro auf sich; Aggro-Werkzeug für Tank (Mindestwert-Regel #91).",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "firefly",
+   "name": "Glühwürmchen",
+   "variants": [
+    {
+     "key": "blinder",
+     "name": "Blender",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Geblendet",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Blendet Gegner im Sichtfeld (CC-Achse, geringere Effektgewichtung nach Lastenheft 4.4).",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "demolisher",
+     "name": "Demolierer",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Festgesetzt",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Fixiert Gegner an schwachen Punkten (höhere Effektgewichtung nach Lastenheft 4.4).",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "burster",
+     "name": "Zerleger",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Schock",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Ketten-Schock zwischen markierten Gegnern (höhere Effektgewichtung nach Lastenheft 4.4).",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "turret",
+   "name": "Geschütz",
+   "variants": [
+    {
+     "key": "assault",
+     "name": "Sturm",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Automatischer Turm gegen Ziele in Reichweite.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    },
+    {
+     "key": "sniper",
+     "name": "Scharfschütze",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/Schuss",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Langsame Präzisionsschüsse.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    },
+    {
+     "key": "incinerator",
+     "name": "Brandwerfer",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": "Brennen",
+     "base_value_per_tier": null,
+     "value_unit": "Schaden/s",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Kegelförmiger Brandstrahl.",
+     "scaling_type": "damage",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    },
+    {
+     "key": "artillerie_gesch_tz",
+     "name": "Artillerie-Geschütz",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Artillerie-Geschütz (Spezialisierung (Zerstörungsexperte)). Hauptattribute: Explosionsschaden, Radius. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Spezialisierung (Zerstörungsexperte)",
+     "hauptattribute": "Explosionsschaden, Radius",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 20.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 40.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 60.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 80.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 100.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 120.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "pulse",
+   "name": "Impulsgeber",
+   "variants": [
+    {
+     "key": "standard",
+     "name": "Standard",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Markiert",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Markiert Gegner durch Wände.",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "jammer",
+     "name": "Störsender",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": "Interferenz",
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Stört und deaktiviert Gegner-Skills.",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "agent",
+     "name": "Agentenradar",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Team-Buff",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Erhöht Schaden des Teams gegen markierte Gegner (BUF-Achse).",
+     "scaling_type": "cc_duration",
+     "scaling_value_status": "Annahme"
+    },
+    {
+     "key": "fernscanner_impulsgeber",
+     "name": "Fernscanner-Impulsgeber",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Fernscanner-Impulsgeber (Standard). Hauptattribute: Abkühlzeit, Radius. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Standard",
+     "hauptattribute": "Abkühlzeit, Radius",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "banshee_impulsgeber",
+     "name": "Banshee-Impulsgeber",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Banshee-Impulsgeber (Spezialisierung (Richtschütze)). Hauptattribute: Verwirrungs-Dauer. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Spezialisierung (Richtschütze)",
+     "hauptattribute": "Verwirrungs-Dauer",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "achilles_impulsgeber",
+     "name": "Achilles-Impulsgeber",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Achilles-Impulsgeber (Warlords of New York). Hauptattribute: Schwachstellen-Schaden. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "Schwachstellen-Schaden",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "healing_launcher",
+   "name": "Heilwerfer",
+   "variants": [
+    {
+     "key": "standard",
+     "name": "Heilwerfer",
+     "effect_type": "heal",
+     "damage_kind": "repair",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": "Reparatur/Projektil",
+     "value_status": "offen",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Direkter Heil-Projektilwerfer (Zielheilung, Burst-Heil-Fenster).",
+     "scaling_type": "repair",
+     "scaling_value_status": "Annahme"
+    }
+   ]
+  },
+  {
+   "key": "haftbombe",
+   "name": "Haftbombe",
+   "variants": [
+    {
+     "key": "spreng_haftbombe",
+     "name": "Spreng-Haftbombe",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Spreng-Haftbombe (Warlords of New York). Hauptattribute: Explosionsschaden. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "Explosionsschaden",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "brand_haftbombe",
+     "name": "Brand-Haftbombe",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Brand-Haftbombe (Warlords of New York). Hauptattribute: Brandschaden, Dauer. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "Brandschaden, Dauer",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "emp_haftbombe",
+     "name": "EMP-Haftbombe",
+     "effect_type": "buff",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "EMP-Haftbombe (Warlords of New York). Hauptattribute: EMP-Dauer, Radius. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "EMP-Dauer, Radius",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "key": "falle",
+   "name": "Falle",
+   "variants": [
+    {
+     "key": "schockfalle",
+     "name": "Schockfalle",
+     "effect_type": "cc",
+     "damage_kind": null,
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Schockfalle (Warlords of New York). Hauptattribute: Schockdauer, Fallenanzahl. Tier-Skalierung siehe tiers.",
+     "scaling_type": "cc_duration",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "Schockdauer, Fallenanzahl",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.1,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.2,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.4,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.5,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "reparaturfalle",
+     "name": "Reparaturfalle",
+     "effect_type": "heal",
+     "damage_kind": "repair",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Reparaturfalle (Warlords of New York). Hauptattribute: Heilungsmenge. Tier-Skalierung siehe tiers.",
+     "scaling_type": "repair",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "Heilungsmenge",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    },
+    {
+     "key": "schrapnellfalle",
+     "name": "Schrapnellfalle",
+     "effect_type": "damage",
+     "damage_kind": "skill_damage",
+     "status_effect": null,
+     "base_value_per_tier": null,
+     "value_unit": null,
+     "value_status": "Annahme",
+     "duration": null,
+     "cooldown": null,
+     "charges": null,
+     "description": "Schrapnellfalle (Warlords of New York). Hauptattribute: Schaden pro Schrapnell. Tier-Skalierung siehe tiers.",
+     "scaling_type": "damage",
+     "kategorie": "Warlords of New York",
+     "hauptattribute": "Schaden pro Schrapnell",
+     "tiers": {
+      "Tier_0": {
+       "effekt_skalierung": 1.0,
+       "abkuehlzeit_modifikator_pct": -0.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_1": {
+       "effekt_skalierung": 1.15,
+       "abkuehlzeit_modifikator_pct": -5.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_2": {
+       "effekt_skalierung": 1.3,
+       "abkuehlzeit_modifikator_pct": -10.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_3": {
+       "effekt_skalierung": 1.45,
+       "abkuehlzeit_modifikator_pct": -15.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_4": {
+       "effekt_skalierung": 1.6,
+       "abkuehlzeit_modifikator_pct": -20.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_5": {
+       "effekt_skalierung": 1.75,
+       "abkuehlzeit_modifikator_pct": -25.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      },
+      "Tier_6": {
+       "effekt_skalierung": 1.9,
+       "abkuehlzeit_modifikator_pct": -30.0,
+       "fertigkeiten_lebensenergie_bonus_pct": 0.0
+      }
+     }
+    }
+   ]
   }
+ ],
+ "scaling_rules": {
+  "_note": "Skalierungslogik je Skill-Kategorie (Nutzervorgabe 29.11.): Schaden +35%/Rang (Rang 6 = +210% Basisschaden), Reparatur +20%/Rang (+120% auf Rang 6), CC +20% Effektdauer pro Rang oder zusaetzliche Ziele, Ballistischer Schild Hybrid +40% LP/Rang (gelbe UND blaue Kerne), Overcharge bricht Rang-6-Limit kurzzeitig (15 s, z.B. Talent Zukunftssicher / Acostas Umhaengetasche).",
+  "damage_per_rank": 35,
+  "repair_per_rank": 20,
+  "cc_duration_per_rank": 20,
+  "shield_hp_per_rank": 40,
+  "overcharge": {
+   "duration": 15,
+   "note": "Effizienzen verdoppelt, Radien vergroessert, Abklingzeiten entfallen"
+  }
+ }
 }
