@@ -22,7 +22,7 @@ function ctx(): ModeContext {
     skills: [],
     teamSize: 4,
     shdLevel: 1000,
-    settings: { ...DEFAULT_OPTIMIZATION },
+    settings: { ...DEFAULT_OPTIMIZATION, considerWeaponTalents: false, considerGearTalents: false, considerExoticPerks: false },
     threatStatusShare: 0.3,
     spec: "sharpshooter",
   };
