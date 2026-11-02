@@ -18,7 +18,8 @@ type AdminTab =
   | "brands"
   | "gearSets"
   | "mods"
-  | "attrs";
+  | "attrs"
+  | "skills";
 
 interface SetBonusDraftRow {
   pieces: number;
@@ -39,6 +40,7 @@ const TAB_CATEGORY: Record<AdminTab, keyof UserDbOverrides> = {
   gearSets: "gearSets",
   mods: "mods",
   attrs: "attrNames",
+  skills: "skills",
 };
 
 const WEAPON_TYPES: WeaponTypeKey[] = ["ar", "smg", "lmg", "rifle", "mmr", "shotgun", "pistol"];
@@ -116,6 +118,27 @@ function attrDraft(key: string, de: string, en: string): Draft {
   return { key, de, en };
 }
 
+function skillDraft(sk: import("../data/v4Data").SkillEntry): Draft {
+  return {
+    key: sk.key,
+    name: sk.name,
+    variants: sk.variants
+      .map((v) => {
+        const tiers = (v as unknown as { tiers?: Record<string, unknown> }).tiers;
+        return [
+          v.key,
+          v.name,
+          v.effect_type,
+          v.duration ?? "",
+          v.cooldown ?? "",
+          v.charges ?? "",
+          tiers ? JSON.stringify(tiers) : "",
+        ].join(" | ");
+      })
+      .join("\n"),
+  };
+}
+
 function modDraft(m: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }): Draft {
   return {
     name: m.name,
@@ -143,6 +166,8 @@ function emptyDraft(tab: AdminTab): Draft {
       return { name: "", slot: "optic", compat: "", bonus: "", penalty: "" };
     case "attrs":
       return { key: "", de: "", en: "" };
+    case "skills":
+      return { key: "", name: "", variants: "" };
   }
 }
 
@@ -225,11 +250,41 @@ function draftToEntry(tab: AdminTab, d: Draft, bonusRows: SetBonusDraftRow[]): R
         bonus: str("bonus"),
         penalty: str("penalty") || null,
       };
+    case "skills":
+      return {
+        key: str("key"),
+        name: str("name") || str("key"),
+        variants: str("variants")
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((l) => {
+            const [key, name, effect_type, duration, cooldown, charges, tiersJson] = l.split("|").map((x) => x.trim());
+            let tiers: Record<string, { effekt_skalierung?: number; abkuehlzeit_modifikator_pct?: number; fertigkeiten_lebensenergie_bonus_pct?: number }> | undefined;
+            if (tiersJson) {
+              try {
+                tiers = JSON.parse(tiersJson);
+              } catch {
+                tiers = undefined;
+              }
+            }
+            return {
+              key: key ?? "",
+              name: name ?? key ?? "",
+              effect_type: (effect_type as "damage" | "heal" | "cc" | "buff" | "defense") || "damage",
+              duration: duration ? Number(duration) : null,
+              cooldown: cooldown ? Number(cooldown) : null,
+              charges: charges ? Number(charges) : null,
+              tiers,
+            };
+          })
+          .filter((v) => v.key),
+      };
   }
 }
 
 function draftKey(tab: AdminTab, d: Draft): string {
-  const k = tab === "weapons" || tab === "gear" || tab === "mods" ? String(d.name ?? "") : String(d.key ?? "");
+  const k = tab === "weapons" || tab === "gear" || tab === "mods" || tab === "skills" ? (tab === "skills" ? String(d.key ?? "") : String(d.name ?? "")) : String(d.key ?? "");
   return k.trim();
 }
 
@@ -262,6 +317,7 @@ export function AdminView() {
     { key: "gearSets", label: t.admin.tabGearSets },
     { key: "mods", label: t.admin.tabMods },
     { key: "attrs", label: t.admin.tabAttrs },
+    { key: "skills", label: t.admin.tabSkills },
   ];
 
   const db = store.db;
@@ -511,6 +567,16 @@ export function AdminView() {
             {textField("en", f.nameEn)}
           </>
         );
+      case "skills":
+        return (
+          <>
+            {textField("key", f.skillKey)}
+            {textField("name", f.name)}
+            <Field label={f.variants}>
+              <textarea rows={8} value={String(draft.variants ?? "")} onChange={(e) => set("variants", e.target.value)} />
+            </Field>
+          </>
+        );
       case "mods":
         return (
           <>
@@ -535,7 +601,7 @@ export function AdminView() {
       <div className="toolbar">
         <span className="badge">
           {t.admin.dbVersion}: {db
-            ? `weapons ${db.versions.weapons} · gear ${db.versions.gear} · mods ${db.versions.mods} · talents ${db.versions.talents}`
+            ? `weapons ${db.versions.weapons} · gear ${db.versions.gear} · mods ${db.versions.mods} · talents ${db.versions.talents} · skills ${db.versions.skills}`
             : "—"}
         </span>
         <span className="badge">{customCount} {t.admin.customCount}</span>
@@ -668,6 +734,21 @@ export function AdminView() {
             { key: "key", label: "Attribut-ID", render: (a: { key: string; de: string; en: string }) => a.key, sortValue: (a: { key: string; de: string; en: string }) => a.key },
             { key: "de", label: f.nameDe, render: (a: { key: string; de: string; en: string }) => a.de, sortValue: (a: { key: string; de: string; en: string }) => a.de },
             { key: "en", label: f.nameEn, render: (a: { key: string; de: string; en: string }) => a.en, sortValue: (a: { key: string; de: string; en: string }) => a.en },
+          ]}
+        />
+      )}
+
+      {db && tab === "skills" && (
+        <DataTable
+          rows={db.skills}
+          rowKey={(sk) => sk.key}
+          searchPlaceholder={`${t.common.search}…`}
+          filterFn={(sk, q) => sk.name.toLowerCase().includes(q) || sk.key.toLowerCase().includes(q)}
+          rowActions={rowActionsFor((sk) => sk.key, skillDraft)}
+          columns={[
+            { key: "name", label: t.weapons.columns.name, render: (sk) => sk.name, sortValue: (sk) => sk.name },
+            { key: "key", label: "Key", render: (sk) => sk.key, sortValue: (sk) => sk.key },
+            { key: "variants", label: f.variants, render: (sk) => sk.variants.map((v) => v.name).join(", ") },
           ]}
         />
       )}
