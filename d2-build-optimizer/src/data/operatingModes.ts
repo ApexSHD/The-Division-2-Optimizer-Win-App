@@ -388,6 +388,7 @@ export function buildWeaponSlots(
   setBonusCatalog?: unknown,
   modsBySlot?: unknown,
   considerTalents = false,
+  weaponTypeFilter: string = "",
 ): WeaponSlotPick[] {
   const metricOf = (w: Weapon) => {
     const { damage } = evaluateBuild(w, [], {
@@ -402,8 +403,13 @@ export function buildWeaponSlots(
     return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
   };
   const ranked = [...poolWeapons].sort((a, b) => metricOf(b) - metricOf(a));
+  // CR-02 E2E-Feedback: weaponTypeFilter begrenzt die Primärwaffen-Auswahl auf die gewählte Gattung
+  const primaryPool = weaponTypeFilter
+    ? ranked.filter((w) => w.type === weaponTypeFilter)
+    : ranked;
+  const effectivePool = primaryPool.length > 0 ? primaryPool : ranked;
   const primaries: Weapon[] = [];
-  for (const w of ranked) {
+  for (const w of effectivePool) {
     if (primaries.length >= 2) break;
     if (isExoticWeapon(w) && primaries.some(isExoticWeapon)) continue;
     if (primaries.some((p) => p.id === w.id)) continue;
@@ -430,6 +436,7 @@ export function combinedWeaponDps(
   setBonusCatalog?: unknown,
   modsBySlot?: unknown,
   considerTalents = false,
+  weaponTypeFilter: string = "",
 ): number {
   const dpsOf = (w: Weapon | null) => {
     if (!w) return 0;
@@ -444,8 +451,11 @@ export function combinedWeaponDps(
     });
     return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
   };
-  const p1 = slots.find((x) => x.slot === "primary1")?.weapon ?? null;
-  const p2 = slots.find((x) => x.slot === "primary2")?.weapon ?? null;
+  const p1raw = slots.find((x) => x.slot === "primary1")?.weapon ?? null;
+  const p2raw = slots.find((x) => x.slot === "primary2")?.weapon ?? null;
+  const inFilter = (w: Weapon | null) => !w || !weaponTypeFilter || w.type === weaponTypeFilter;
+  const p1 = inFilter(p1raw) ? p1raw : p2raw;
+  const p2 = inFilter(p2raw) ? p2raw : null;
   if (targetMetric === "rotation") {
     return dpsOf(p1) * 0.5 + dpsOf(p2) * 0.5;
   }
@@ -697,9 +707,9 @@ export function optimizeV4(
       weaponDpsCache.set(w.id, ctx.settings.targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps);
     }
     const sortedWeapons = [...candidateWeapons].sort((a, b) => (weaponDpsCache.get(b.id) ?? 0) - (weaponDpsCache.get(a.id) ?? 0));
-    const weaponSlots = buildWeaponSlots(sortedWeapons, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot, ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents);
+    const weaponSlots = buildWeaponSlots(sortedWeapons, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot, ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents, ctx.settings.weaponTypeFilter);
     const leadWeapon = weaponSlots.find((x) => x.slot === "primary1")?.weapon ?? sortedWeapons[0] ?? null;
-    const comboWeaponDps = combinedWeaponDps(weaponSlots, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot, ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents);
+    const comboWeaponDps = combinedWeaponDps(weaponSlots, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot, ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents, ctx.settings.weaponTypeFilter);
     opts.onProgress?.("evaluate", 0, combos.length);
     for (const combo of combos) {
       if (opts.shouldAbort?.()) {
