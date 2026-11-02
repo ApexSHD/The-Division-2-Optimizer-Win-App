@@ -3,6 +3,7 @@ import { useStore } from "../store";
 import { I18nContext } from "../i18n";
 import { DataTable } from "../components/DataTable";
 import { SidePanel, Field } from "../components/SidePanel";
+import { SkillEditor, skillToValue, valueToSkill, emptySkillValue, type SkillEditorValue } from "./admin/SkillEditor";
 import type { UserDbOverrides } from "../data/userDb";
 import type { WeaponPreset, TalentEntry, GearPreset, GearTalentEntry, BrandBonusEntry, GearSetBonusEntry } from "../data/db";
 import { WD_BY_WEAPON_ATTR, WD_BY_WEAPON_TYPES } from "../data/db";
@@ -116,27 +117,6 @@ function gearSetDraft(s: { key: string; name: string; bonusEntries: GearSetBonus
 
 function attrDraft(key: string, de: string, en: string): Draft {
   return { key, de, en };
-}
-
-function skillDraft(sk: import("../data/v4Data").SkillEntry): Draft {
-  return {
-    key: sk.key,
-    name: sk.name,
-    variants: sk.variants
-      .map((v) => {
-        const tiers = (v as unknown as { tiers?: Record<string, unknown> }).tiers;
-        return [
-          v.key,
-          v.name,
-          v.effect_type,
-          v.duration ?? "",
-          v.cooldown ?? "",
-          v.charges ?? "",
-          tiers ? JSON.stringify(tiers) : "",
-        ].join(" | ");
-      })
-      .join("\n"),
-  };
 }
 
 function modDraft(m: { name: string; slot: string; slotTypes: string[]; bonus: string; penalty: string | null }): Draft {
@@ -304,6 +284,29 @@ export function AdminView() {
   const [tab, setTab] = useState<AdminTab>("weapons");
   const [panelOpen, setPanelOpen] = useState(false);
   const [isNew, setIsNew] = useState(false);
+  const [skillSearch, setSkillSearch] = useState("");
+  const [editingSkillKey, setEditingSkillKey] = useState("");
+  const [skillDraft, setSkillDraft] = useState<SkillEditorValue | null>(null);
+  const [skillDirty, setSkillDirty] = useState(false);
+
+  function selectSkill(sk: import("../data/v4Data").SkillEntry) {
+    setEditingSkillKey(sk.key);
+    setSkillDraft(skillToValue(sk));
+    setSkillDirty(false);
+  }
+
+  function saveSkillDraft() {
+    if (!skillDraft || !skillDraft.key.trim()) return;
+    const entry = valueToSkill(skillDraft);
+    const category = TAB_CATEGORY["skills"];
+    if (editingSkillKey && editingSkillKey !== skillDraft.key.trim()) {
+      store.setGameDbOverride(category, editingSkillKey, null);
+    }
+    store.setGameDbOverride(category, skillDraft.key.trim(), entry as never);
+    store.setStatus(`${skillDraft.key.trim()} gespeichert`);
+    setEditingSkillKey(skillDraft.key.trim());
+    setSkillDirty(false);
+  }
   const [originalKey, setOriginalKey] = useState("");
   const [draft, setDraft] = useState<Draft>(emptyDraft("weapons"));
   const bonusRowsRef = useRef<SetBonusDraftRow[]>([]);
@@ -330,6 +333,12 @@ export function AdminView() {
   );
 
   function openNew() {
+    if (tab === "skills") {
+      setSkillDraft(emptySkillValue());
+      setEditingSkillKey("");
+      setSkillDirty(true);
+      return;
+    }
     setIsNew(true);
     setOriginalKey("");
     setDraft(emptyDraft(tab));
@@ -739,18 +748,84 @@ export function AdminView() {
       )}
 
       {db && tab === "skills" && (
-        <DataTable
-          rows={db.skills}
-          rowKey={(sk) => sk.key}
-          searchPlaceholder={`${t.common.search}…`}
-          filterFn={(sk, q) => sk.name.toLowerCase().includes(q) || sk.key.toLowerCase().includes(q)}
-          rowActions={rowActionsFor((sk) => sk.key, skillDraft)}
-          columns={[
-            { key: "name", label: t.weapons.columns.name, render: (sk) => sk.name, sortValue: (sk) => sk.name },
-            { key: "key", label: "Key", render: (sk) => sk.key, sortValue: (sk) => sk.key },
-            { key: "variants", label: f.variants, render: (sk) => sk.variants.map((v) => v.name).join(", ") },
-          ]}
-        />
+        <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input
+              placeholder={`${t.common.search}…`}
+              value={skillSearch}
+              onChange={(e) => setSkillSearch(e.target.value)}
+              style={{ minWidth: 220 }}
+            />
+            <span className="spacer" />
+            <button className="btn btn-accent" onClick={() => { setSkillDraft(emptySkillValue()); setEditingSkillKey(""); setSkillDirty(true); }}>
+              {t.admin.addNew}
+            </button>
+            <button
+              className="btn btn-accent"
+              disabled={!skillDirty}
+              onClick={saveSkillDraft}
+            >
+              {t.common.save}
+            </button>
+            {editingSkillKey && (
+              <button
+                className="btn btn-danger"
+                onClick={() => { if (confirm(t.admin.deleteConfirm)) onDelete(editingSkillKey); }}
+              >
+                {t.admin.deleteRow}
+              </button>
+            )}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 12, alignItems: "start" }}>
+            <div role="listbox" aria-label={t.admin.tabSkills} style={{ display: "grid", gap: 4 }}>
+              {db.skills
+                .filter((sk) => !skillSearch || sk.name.toLowerCase().includes(skillSearch.toLowerCase()) || sk.key.toLowerCase().includes(skillSearch.toLowerCase()))
+                .map((sk) => (
+                  <button
+                    key={sk.key}
+                    type="button"
+                    role="option"
+                    aria-selected={editingSkillKey === sk.key}
+                    className={`btn ${editingSkillKey === sk.key ? "btn-primary" : ""}`}
+                    style={{ textAlign: "left" }}
+                    onClick={() => selectSkill(sk)}
+                  >
+                    {sk.name} <small style={{ color: "var(--text-dim, #aaa)" }}>({sk.variants.length})</small>
+                  </button>
+                ))}
+            </div>
+            <div className="field" style={{ padding: 12 }}>
+              {skillDraft ? (
+                <SkillEditor
+                  value={skillDraft}
+                  onChange={(v) => { setSkillDraft(v); setSkillDirty(true); }}
+                  labels={{
+                    skillKey: f.skillKey,
+                    name: f.name,
+                    variants: f.variants,
+                    addVariant: f.addVariant ?? "+ Variante",
+                    variantKey: f.variantKey,
+                    effectType: f.effectType,
+                    duration: f.duration ?? "Dauer (s)",
+                    cooldown: f.cooldown ?? "Cooldown (s)",
+                    charges: f.charges ?? "Ladungen",
+                    description: f.description,
+                    tiers: f.tiers ?? "Tier-Skalierung",
+                    tier: f.tier ?? "Tier",
+                    effekt: f.effekt ?? "Effekt ×",
+                    cdMod: f.cdMod ?? "Abkühlzeit %",
+                    hpBonus: f.hpBonus ?? "LP-Bonus %",
+                    remove: t.common.delete,
+                    selectSkill: f.selectSkill ?? "Skill wählen",
+                    selectVariant: f.selectVariant ?? "Variante wählen",
+                  }}
+                />
+              ) : (
+                <div className="hint">{f.selectSkill ?? "Skill links wählen oder neu anlegen."}</div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {db && tab === "mods" && (
@@ -773,6 +848,7 @@ export function AdminView() {
         {t.admin.validationOk} · {t.admin.standard}: {db ? db.weapons.length + db.gear.length + db.mods.length + db.talents.length + db.gearTalents.length + db.brandSets.length + db.gearSets.length : 0} {t.admin.rows} · {t.admin.user}: {customCount} {t.admin.rows}
       </div>
 
+      {tab !== "skills" && (
       <SidePanel
         open={panelOpen}
         title={isNew ? t.admin.addNew : t.admin.editRow}
@@ -787,6 +863,7 @@ export function AdminView() {
       >
         {renderForm()}
       </SidePanel>
+      )}
     </div>
   );
 }

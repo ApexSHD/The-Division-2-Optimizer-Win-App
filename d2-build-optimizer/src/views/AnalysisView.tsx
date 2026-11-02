@@ -333,7 +333,7 @@ export function AnalysisView() {
           />
           {analysis.weaponFamilies.length > 0 && (
             <>
-              <h3 style={{ margin: "16px 0 8px" }}>{a.variants}</h3>
+              <h3 style={{ margin: "16px 0 8px" }}>{a.variantsCount}</h3>
               <DataTable
                 rows={analysis.weaponFamilies}
                 rowKey={(f) => f.name}
