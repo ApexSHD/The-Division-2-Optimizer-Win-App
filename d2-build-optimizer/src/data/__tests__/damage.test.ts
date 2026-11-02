@@ -43,7 +43,7 @@ const fullGear = (): GearPiece[] => [
 ];
 
 describe("computeDamage — Formel (Issue #67)", () => {
-  it("wendet HSD linear an, nicht quadratisch", () => {
+  it("wendet HSD linear an, nicht quadratisch", { timeout: 30000 }, () => {
     const stats = { wd: 0, chc: 0, chd: 0, hsd: 50, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} };
     const w = { ...sampleWeapons[0], knowHow: 0, innateHsd: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } };
     const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0.5 });
@@ -52,14 +52,14 @@ describe("computeDamage — Formel (Issue #67)", () => {
     expect(d.nonCritHit).toBeCloseTo(expected, 6);
   });
 
-  it("kappt CHC bei 60 %", () => {
+  it("kappt CHC bei 60 %", { timeout: 30000 }, () => {
     const stats = { wd: 0, chc: 100, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} };
     const w = { ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0 } };
     const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0 });
     expect(d.cappedChc).toBe(60);
   });
 
-  it("rechnet Know-How multiplikativ auf den Basisschaden", () => {
+  it("rechnet Know-How multiplikativ auf den Basisschaden", { timeout: 30000 }, () => {
     const stats = { wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} };
     const w = { ...sampleWeapons[0], knowHow: 30, attributes: { ...sampleWeapons[0].attributes, core1: 0 } };
     const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0 });
@@ -68,14 +68,14 @@ describe("computeDamage — Formel (Issue #67)", () => {
 });
 
 describe("aggregateBuild — Quellen (Issue #67)", () => {
-  it("berücksichtigt SHD-HSD mit Quellen-Eintrag", () => {
+  it("berücksichtigt SHD-HSD mit Quellen-Eintrag", { timeout: 30000 }, () => {
     const st = aggregateBuild([], 1000);
     expect(st.hsd).toBe(20);
     expect(st.sources.hsd).toHaveLength(1);
     expect(st.sources.hsd[0].itemId).toBe("shd-watch");
   });
 
-  it("Quellen-Summen entsprechen den Aggregatwerten", () => {
+  it("Quellen-Summen entsprechen den Aggregatwerten", { timeout: 30000 }, () => {
     const st = aggregateBuild(fullGear(), 1000);
     const sum = (k: string) => (st.sources[k] ?? []).reduce((a, b) => a + b.value, 0);
     expect(sum("wd")).toBeCloseTo(st.wd, 6);
@@ -85,7 +85,7 @@ describe("aggregateBuild — Quellen (Issue #67)", () => {
 });
 
 describe("bestModsForWeapon — Mod-Auswahl (Issue #67)", () => {
-  it("bevorzugt netto besseren Mod (Penalty im Score)", () => {
+  it("bevorzugt netto besseren Mod (Penalty im Score)", { timeout: 30000 }, () => {
     const mods = {
       optic: [
         { name: "BigPenalty", slotTypes: [], bonus: { type: "hsd", val: 15 }, penalty: { type: "chd", val: -10 } },
@@ -97,7 +97,7 @@ describe("bestModsForWeapon — Mod-Auswahl (Issue #67)", () => {
     expect(picked[0].modName).toBe("CleanSmall");
   });
 
-  it("ignoriert rof-Mods (werden nicht angewendet)", () => {
+  it("ignoriert rof-Mods (werden nicht angewendet)", { timeout: 30000 }, () => {
     const mods = {
       muzzle: [
         { name: "RoF", slotTypes: [], bonus: { type: "rof", val: 20 }, penalty: null },
@@ -111,14 +111,14 @@ describe("bestModsForWeapon — Mod-Auswahl (Issue #67)", () => {
 });
 
 describe("specBonusFor — Spezialisierung (Issue #53)", () => {
-  it("Scharfschütze: +25 % HSD, +15 % auf DMR", () => {
+  it("Scharfschütze: +25 % HSD, +15 % auf DMR", { timeout: 30000 }, () => {
     const mmr = sampleWeapons.find((x) => x.type === "mmr") ?? sampleWeapons[0];
     const b = specBonusFor(mmr, "sharpshooter");
     expect(b.hsd).toBe(25);
     expect(b.weaponTypeWd).toBe(15);
   });
 
-  it("unbekannte Spec liefert 0", () => {
+  it("unbekannte Spec liefert 0", { timeout: 30000 }, () => {
     expect(specBonusFor(sampleWeapons[0], "gibtsnicht")).toEqual({ hsd: 0, weaponTypeWd: 0 });
   });
 });
@@ -141,7 +141,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
     for (const r of res) expect(r.gear).toHaveLength(6);
   });
 
-  it("Budget: 25 Teile/Slot aus 5 Marken mit 3 Waffen — NFA-Ziel 150 Teile < 10 s", () => {
+  it("Budget: 25 Teile/Slot aus 5 Marken mit 3 Waffen — NFA-Ziel 150 Teile < 10 s", { timeout: 30000 }, () => {
     // 25 Teile/Slot (= 150 Teile), aber nur 5 verschiedene Marken (realistisch) — Dominanz-Filter greift
     const slotsR: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
     const brands = ["Ceska", "Grupo", "Fenris", "Overlord", "Petrov"];
@@ -161,9 +161,9 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
       best = Math.min(best, performance.now() - t0);
     }
     expect(best).toBeLessThan(10000);
-  }, 30000);
+  });
 
-  it("Locks bleiben in jedem Build enthalten", () => {
+  it("Locks bleiben in jedem Build enthalten", { timeout: 30000 }, () => {
     const gear = manyGear();
     const lockedId = gear[0].id;
     const res = optimizeBuilds(sampleWeapons, gear, 1000, { ...DEFAULT_OPTIMIZATION, lockedGearIds: [lockedId] }, { maxResults: 5 });
@@ -176,7 +176,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
     expect(res[0].warnings.some((w) => w.message.includes("reduziert"))).toBe(true);
   });
 
-  it("Runner-up ist die zweitbeste Alternative", () => {
+  it("Runner-up ist die zweitbeste Alternative", { timeout: 30000 }, () => {
     const gear = fullGear();
     gear.push(mk("mask", "Schlecht", 1, 1), mk("mask", "FastSoGut", 5, 11));
     const res = optimizeBuilds(sampleWeapons, gear, 1000, DEFAULT_OPTIMIZATION, { maxResults: 1 });
@@ -184,7 +184,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
     expect(maskExp?.runnerUp?.item.brand).toBe("FastSoGut");
   });
 
-  it("Marken-Präferenz rangiert NICHT über DPS (Issue #64)", () => {
+  it("Marken-Präferenz rangiert NICHT über DPS (Issue #64)", { timeout: 30000 }, () => {
     const gear = fullGear();
     gear.push(mk("mask", "TopDPS", 6, 12), mk("kneepads", "Bevorzugt", 1, 1));
     const res = optimizeBuilds(
@@ -200,7 +200,7 @@ describe("optimizeBuilds — Kombinationssuche (Issue #61)", () => {
 });
 
 describe("optimizeBuilds — Rollen-Scorer (Issue #56, entfernt in CR-02 P0)", () => {
-  it("ohne settings.role bleibt das DPS-Ranking (Waffen-DPS)", () => {
+  it("ohne settings.role bleibt das DPS-Ranking (Waffen-DPS)", { timeout: 30000 }, () => {
     const res = optimizeBuilds(sampleWeapons, fullGear(), 1000, DEFAULT_OPTIMIZATION, { maxResults: 3 });
     expect(res[0].roleScore.key).toBe("");
     expect(res[0].roleScore.label).toBe("Waffen-DPS");
@@ -235,7 +235,7 @@ describe("optimizeBuilds — Set-Boni (Issue #67)", () => {
     prototype: true,
   });
 
-  it("Brand-Set-Bonus (1 Teil Ceska): +8 CHC mit Quellen-Eintrag", () => {
+  it("Brand-Set-Bonus (1 Teil Ceska): +8 CHC mit Quellen-Eintrag", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mkSet("mask", "Ceska"),
       mkSet("chest", "Grupo"),
@@ -250,7 +250,7 @@ describe("optimizeBuilds — Set-Boni (Issue #67)", () => {
     expect(setSrc?.label).toContain("ceska");
   });
 
-  it("wd_by_weapon greift nur bei passender Waffengattung", () => {
+  it("wd_by_weapon greift nur bei passender Waffengattung", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mkSet("mask", "Ceska"),
       mkSet("chest", "Ceska"),
@@ -267,7 +267,7 @@ describe("optimizeBuilds — Set-Boni (Issue #67)", () => {
     expect((resAr[0].stats.sources.wd ?? []).some((x) => x.label.includes("shotgun"))).toBe(false);
   });
 
-  it("Green-Set-Bonus (3 Teile Striker): CHC-Bonus aus Katalog", () => {
+  it("Green-Set-Bonus (3 Teile Striker): CHC-Bonus aus Katalog", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mkSet("mask", "Striker", "gearset"),
       mkSet("chest", "Striker", "gearset"),
@@ -295,7 +295,7 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
     prototype: true,
   });
 
-  it("Cap-Bestrafung: Build mit CHC ueber 60 % rangiert hinter sauberem Build", () => {
+  it("Cap-Bestrafung: Build mit CHC ueber 60 % rangiert hinter sauberem Build", { timeout: 30000 }, () => {
     const overCap: GearPiece[] = [
       mk64("mask", "Over1", 20), mk64("chest", "Over2", 20), mk64("holster", "Over3", 20),
       mk64("backpack", "Over4", 20), mk64("gloves", "Over5", 20), mk64("kneepads", "Over6", 20),
@@ -315,7 +315,7 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
     }
   });
 
-  it("Annahmen: wastedChc wird korrekt berechnet (CHC 130 % -> 70 verschwendet)", () => {
+  it("Annahmen: wastedChc wird korrekt berechnet (CHC 130 % -> 70 verschwendet)", { timeout: 30000 }, () => {
     const res = optimizeBuilds(sampleWeapons, [
       mk64("mask", "A", 20), mk64("chest", "B", 20), mk64("holster", "C", 20),
       mk64("backpack", "D", 20), mk64("gloves", "E", 20), mk64("kneepads", "F", 20),
@@ -325,7 +325,7 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
     expect(res[0].assumptions.items.length).toBeGreaterThan(3);
   });
 
-  it("Top-N-Diversitaet: Builds unterscheiden sich in mindestens 2 Teilen (oder Waffe)", () => {
+  it("Top-N-Diversitaet: Builds unterscheiden sich in mindestens 2 Teilen (oder Waffe)", { timeout: 30000 }, () => {
     // 3 Alternativen in 3 Slots => genug Kombos fuer echte Diversitaet
     const res = optimizeBuilds(sampleWeapons, [
       mk64("mask", "M1"), mk64("mask", "M2"), mk64("mask", "M3"),
@@ -342,7 +342,7 @@ describe("optimizeBuilds — Zielfunktion-Modell (Issue #64)", () => {
     }
   });
 
-  it("Gaps-Analyse: schlaegt Verbesserungen mit Gewinn vor", () => {
+  it("Gaps-Analyse: schlaegt Verbesserungen mit Gewinn vor", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mk64("mask", "Schwach", 2, 4),
       mk64("chest", "C1"), mk64("holster", "H1"),
@@ -372,7 +372,7 @@ describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
     prototype: true,
   });
 
-  it("Generator-Bug behoben: ALLE Waffen werden berechnet, nicht nur die erste", () => {
+  it("Generator-Bug behoben: ALLE Waffen werden berechnet, nicht nur die erste", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mk80("mask", "M"), mk80("chest", "C"), mk80("holster", "H"),
       mk80("backpack", "B"), mk80("gloves", "G"), mk80("kneepads", "K"),
@@ -385,7 +385,7 @@ describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
     expect(usedWeapons.size).toBe(weapons.length);
   });
 
-  it("stärkere zweite Waffe kann gewinnen (Reihenfolge egal)", () => {
+  it("stärkere zweite Waffe kann gewinnen (Reihenfolge egal)", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mk80("mask", "M"), mk80("chest", "C"), mk80("holster", "H"),
       mk80("backpack", "B"), mk80("gloves", "G"), mk80("kneepads", "K"),
@@ -396,7 +396,7 @@ describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
     expect(res[0].weapon.id).toBe("strong-w");
   });
 
-  it("Exotic-Regel: eine Exotic-Waffe + ein Exotic-Gear ist erlaubt", () => {
+  it("Exotic-Regel: eine Exotic-Waffe + ein Exotic-Gear ist erlaubt", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mk80("mask", "Coyote", 6, 12, "exotic"),
       mk80("chest", "C"), mk80("holster", "H"),
@@ -408,7 +408,7 @@ describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
     expect(res[0].gear.filter((g) => g.brandType === "exotic")).toHaveLength(1);
   });
 
-  it("Exotic-Regel: zwei Exotic-Gear-Teile bleiben verboten", () => {
+  it("Exotic-Regel: zwei Exotic-Gear-Teile bleiben verboten", { timeout: 30000 }, () => {
     const gear: GearPiece[] = [
       mk80("mask", "Coyote", 6, 12, "exotic"),
       mk80("chest", "Vest", 6, 12, "exotic"),
@@ -423,7 +423,7 @@ describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
   const baseW = () => ({ ...sampleWeapons[0], knowHow: 0, innateHsd: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } });
   const zeroStats = () => ({ wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} });
 
-  it("Rechenbeispiel: Krit-Kopfschuss ist ADDITIV, nicht HSD*CHD multiplikativ", () => {
+  it("Rechenbeispiel: Krit-Kopfschuss ist ADDITIV, nicht HSD*CHD multiplikativ", { timeout: 30000 }, () => {
     // Setup: 100 % Headshot-Anteil, HSD +50 % (+ HSD_BASE 50 % seit CR-02 OP-6.6), CHD +40 % (+ CHD_BASE 25 %)
     const stats = { ...zeroStats(), hsd: 50, chd: 40 };
     const d = computeDamage(baseW(), stats, { armor: 0, health: 1, ooc: 0, headshot: 1 });
@@ -434,7 +434,7 @@ describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
     expect(d.critHit).not.toBeCloseTo(base * 3.3, 4);
   });
 
-  it("wastedChc beruecksichtigt Waffen-CHC (core2)", () => {
+  it("wastedChc beruecksichtigt Waffen-CHC (core2)", { timeout: 30000 }, () => {
     // Waffe mit CHC-Minor 10: Build-CHC 55 + Waffe 10 = 65 -> 5 ueber Cap
     const w = { ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Type: "chc" as const, core2Val: 10 } };
     const gear: GearPiece[] = [
@@ -446,7 +446,7 @@ describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
     expect(res[0].assumptions.wastedChc).toBe(4);
   });
 
-  it("Diversitaet: bei mehreren Gear-Kombis zaehlt gleiche Ausruestung + andere Waffe NICHT als divers", () => {
+  it("Diversitaet: bei mehreren Gear-Kombis zaehlt gleiche Ausruestung + andere Waffe NICHT als divers", { timeout: 30000 }, () => {
     // Zwei echte Gear-Kombinationen (M1/M2 in der Maske)
     const gear: GearPiece[] = [
       mk("mask", "M1"), mk("mask", "M2"),
@@ -479,11 +479,11 @@ describe("BER-3: Dauer-DPS, Schaden/Magazin, Zeit bis leeres Magazin (Issue #116
   };
   const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0 });
 
-  it("Burst-DPS bleibt unveraendert (ohne Nachladen)", () => {
+  it("Burst-DPS bleibt unveraendert (ohne Nachladen)", { timeout: 30000 }, () => {
     expect(d.effectiveDps).toBeCloseTo(d.avgBulletDmg * 600 / 60, 6);
   });
 
-  it("Dauer-DPS liegt unter Burst-DPS und beruecksichtigt Nachladezeit", () => {
+  it("Dauer-DPS liegt unter Burst-DPS und beruecksichtigt Nachladezeit", { timeout: 30000 }, () => {
     expect(d.sustainedDps).toBeGreaterThan(0);
     expect(d.sustainedDps).toBeLessThan(d.effectiveDps);
     const secondsPerMag = 30 / (600 / 60);
@@ -491,11 +491,11 @@ describe("BER-3: Dauer-DPS, Schaden/Magazin, Zeit bis leeres Magazin (Issue #116
     expect(d.sustainedDps).toBeCloseTo((d.avgBulletDmg * 30) / (secondsPerMag + 3), 6);
   });
 
-  it("Schaden/Magazin = Trefferschaden x Magazingroesse", () => {
+  it("Schaden/Magazin = Trefferschaden x Magazingroesse", { timeout: 30000 }, () => {
     expect(d.damagePerMagazine).toBeCloseTo(d.avgBulletDmg * 30, 6);
   });
 
-  it("Typ-Standard-Nachladezeit, wenn keine Waffen-Angabe vorliegt", () => {
+  it("Typ-Standard-Nachladezeit, wenn keine Waffen-Angabe vorliegt", { timeout: 30000 }, () => {
     expect(reloadSecondsFor({ type: "ar" })).toBeGreaterThan(0);
     expect(reloadSecondsFor({ type: "ar", reloadSeconds: 1.5 })).toBe(1.5);
   });

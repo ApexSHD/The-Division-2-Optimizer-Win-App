@@ -53,6 +53,14 @@ export interface ModeContext {
   };
 }
 
+/** CR-02: effektive Gearset-Optionen — explizit gesetzt oder aus settings.targetGearSet. */
+export function effectiveGearSetOptions(ctx: ModeContext): { targetSet?: string; requireSetChest?: boolean; requireSetBackpack?: boolean } {
+  if (ctx.gearSetOptions?.targetSet) return ctx.gearSetOptions;
+  const fromSettings = ctx.settings.targetGearSet?.trim();
+  if (!fromSettings) return ctx.gearSetOptions ?? {};
+  return { targetSet: fromSettings, requireSetChest: ctx.gearSetOptions?.requireSetChest, requireSetBackpack: ctx.gearSetOptions?.requireSetBackpack };
+}
+
 export interface WeaponSlot {
   slot: "primary1" | "primary2" | "pistol";
   weapon: Weapon | null;
@@ -292,7 +300,7 @@ export function buildCandidatesFromOptimizer(
       applyGearModsToStats(r.stats, ctx, role),
       r.weapon,
     );
-    const setRuleOk = enforceGearSetRule(r.gear, ctx.gearSetOptions ?? {});
+    const setRuleOk = enforceGearSetRule(r.gear, effectiveGearSetOptions(ctx));
     const adm = !setRuleOk
       ? { admissible: false, violations: [{ kind: "team_buff_source" as const, label: "Gearset-Regel: 4 Set-Teile bzw. Set-Weste/-Rucksack fehlen", actual: null, required: null }] }
       : exoticAdmissible(r.gear)
@@ -476,7 +484,7 @@ export const DEFAULT_SLOT_BUDGET = 25;
 export function beamCombosBySlot(
   bySlot: Map<GearSlot, GearPiece[]>,
   lockedGear: GearPiece[] = [],
-  opts: { beamWidth?: number; slotBudget?: number; score?: (combo: GearPiece[]) => number; onProgress?: (doneSlots: number, totalSlots: number) => void; shouldAbort?: () => boolean; exoticCap?: number } = {},
+  opts: { beamWidth?: number; slotBudget?: number; score?: (combo: GearPiece[]) => number; onProgress?: (doneSlots: number, totalSlots: number) => void; shouldAbort?: () => boolean; exoticCap?: number; targetSet?: string } = {},
 ): { combos: GearPiece[][]; warnings: string[] } {
   const beamWidth = opts.beamWidth ?? DEFAULT_BEAM_WIDTH;
   const slotBudget = opts.slotBudget ?? DEFAULT_SLOT_BUDGET;
@@ -609,13 +617,22 @@ export function beamCombosBySlot(
     }
     opts.onProgress?.(si + 1, slotListsFree.length);
   }
-  const lockedIdsFinal = new Set(lockedInBeam.map((g) => g.id));
-  const combos = beam.map((b) => {
+  // CR-02: targetSet hart erzwingen — Combos ohne 4 Teile des Ziel-Sets fallen raus
+  let combosAll = beam.map((b) => {
     const missing = lockedInBeam.filter((g) => !b.combo.some((x) => x.id === g.id));
     return missing.length > 0 ? [...b.combo, ...missing] : b.combo;
   });
-  void lockedIdsFinal;
-  return { combos, warnings };
+  if (opts.targetSet) {
+    const setLower = opts.targetSet.toLowerCase();
+    const withSet = combosAll.filter((c) => c.filter((g) => isSetPiece(g, setLower)).length >= 4);
+    if (withSet.length > 0) {
+      combosAll = withSet;
+      warnings.push(`Gearset-Ziel „${opts.targetSet}“: ${combosAll.length} Kandidaten mit 4 Set-Teilen.`);
+    } else {
+      warnings.push(`Gearset-Ziel „${opts.targetSet}“ nicht mit 4 Teilen erreichbar — alle Kandidaten behalten (Fallback).`);
+    }
+  }
+  return { combos: combosAll, warnings };
 }
 
 export function optimizeV4(
@@ -683,6 +700,7 @@ export function optimizeV4(
       beamWidth,
       slotBudget: opts.budgetPerSlot ?? DEFAULT_SLOT_BUDGET,
       exoticCap: 1,
+      targetSet: effectiveGearSetOptions(ctx).targetSet,
       onProgress: (done, total) => opts.onProgress?.("beam", done, total),
       shouldAbort: opts.shouldAbort,
     });
