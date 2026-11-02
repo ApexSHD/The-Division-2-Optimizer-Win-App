@@ -9,7 +9,8 @@ import { computeInventoryCheck } from "./inventoryCheck";
 import { setBonusCatalogFromDb } from "../../data/db";
 import modsJson from "../../db/mod.json";
 import type { ModeContext } from "../../data/operatingModes";
-import { analyzeInventory, type GapRecommendationEntry } from "../../data/inventoryAnalysis";
+import { dbGearPool, type GapRecommendationEntry } from "../../data/inventoryAnalysis";
+import { computeGapRecommendations } from "../../data/gapRecommendations";
 
 export function OptimizerViewNew() {
   const store = useStore();
@@ -65,25 +66,24 @@ export function OptimizerViewNew() {
 
   const onResult = (fp: string) => {
     store.setLastOptimizerFingerprint(fp);
-    const inv = run.result;
-    if (inv) {
-      const analysis = analyzeInventory({
-        gear: store.gear,
+    if (run.result) {
+      const ctx: ModeContext = {
+        mode: "inventar",
+        roleKey: req.roleKey,
+        skills: [],
+        teamSize: req.teamSize,
+        shdLevel: store.agent.shdLevel,
+        settings: { ...store.optimization, targetMetric: req.targetMetric, targetChc: req.targetChc, difficultyKey: req.difficultyKey, gameMode: req.gameMode, enemyTeamSize: req.teamSize, lockedGearIds: req.lockedGearIds, excludedGearIds: req.excludedGearIds, excludedWeaponIds: req.excludedWeaponIds },
+        threatStatusShare: 0.3,
+        spec: req.spec,
+      };
+      setImprovements(computeGapRecommendations({
         weapons: store.weapons,
-        builds: store.builds,
-        roleId: req.roleKey,
-        ctx: {
-          mode: "inventar",
-          roleKey: req.roleKey,
-          skills: [],
-          teamSize: req.teamSize,
-          shdLevel: store.agent.shdLevel,
-          settings: { ...store.optimization, targetMetric: req.targetMetric, targetChc: req.targetChc, difficultyKey: req.difficultyKey, gameMode: req.gameMode, enemyTeamSize: req.teamSize, lockedGearIds: req.lockedGearIds, excludedGearIds: req.excludedGearIds, excludedWeaponIds: req.excludedWeaponIds },
-          threatStatusShare: 0.3,
-          spec: req.spec,
-        },
-      });
-      setImprovements(analysis.gapRecommendations);
+        inventarGear: store.gear,
+        fullGear: dbGearPool(store.gear),
+        ctx,
+        roleKey: req.roleKey,
+      }));
     }
   };
 

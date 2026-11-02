@@ -78,7 +78,8 @@ Schwächen, die das Redesign adressiert: Abhängigkeit vom Browser-Speicher (Dat
 - Build-Karte mit allen Waffen-Slots (2 Primärwaffen + optionale Pistole), Gear-Tabelle, Kennzahlen (DPS, CHC, CHD, WD, Rüstung) mit Δ zum aktiven Build, Begründung und Übernahme (Loadout speichern mit allen Waffen/Gear/Mods, Zwischenablage teilen).
 - Waffen-Setup: 2 Primärwaffen + optionale Pistole, Exotic-Limit ≤ 1 exotische Waffe und ≤ 1 exotisches Gear; Zielmetrik um „Rotation“ (50/50-Mix beider Primärwaffen) erweitert. Sperren und Ausschlüsse (`excludedGearIds`/`excludedWeaponIds`) wirken hart vor der Suche.
 - Berechnung im eigenen Web Worker (`optimizerWorker.ts` + `optimizerClient.ts`): immer nur ein aktiver Run, Abbruch per `terminate()` wirkt sofort (< 1 s), Fortschritt pro Run-ID; UI bleibt bedienbar. Worker-Fehler fallen auf synchrone Berechnung zurück.
-- Verbesserungen (OP-4.7/OP-6.1) rechnen gegen den Ziel-Pool (`dbGearPool`) — gemeinsame Logik mit dem Reiter „Lücken“ der Inventaranalyse.
+- Verbesserungen (OP-4.7/OP-6.1) rechnen gegen den Ziel-Pool (`dbGearPool`). Gemeinsames Modul `src/data/gapRecommendations.ts` (`computeGapRecommendations`) liefert Inventaranalyse („Lücken“) und Optimierer („Verbesserungen“) identische, nach Gewinn sortierte Empfehlungen mit Bezugsquelle (AK-11).
+- AK-10 (Laufzeit mit Waffenpaar): synthetisches 150-Gear/50-Waffen-Inventar per Beam < 10 s (gemessen ~0,7 s lokal).
 
 ### 4.4a Optimierer-Performance & Hintergrundberechnung (Issue #61, TA-5)
 

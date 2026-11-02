@@ -5,7 +5,7 @@ import { GEAR_INVENTORY_CSV_1, WEAPON_INVENTORY_CSV_1 } from "./fixtures/cr02Fix
 import { optimizeV4, type ModeContext } from "../operatingModes";
 import { computeInventoryCheck } from "../../views/optimizer/inventoryCheck";
 import { DEFAULT_OPTIMIZATION } from "../../store";
-import type { GearPiece, Weapon } from "../sampleData";
+import { sampleWeapons, type GearPiece, type GearSlot, type Weapon } from "../sampleData";
 
 const gearCsv = GEAR_INVENTORY_CSV_1;
 const weaponCsv = WEAPON_INVENTORY_CSV_1;
@@ -113,4 +113,46 @@ describe("CR-02 AK-1/AK-8: Inventar-Check + Maßnahmenliste", () => {
       expect(r.noAdmissibleHint).toBeTruthy();
     }
   });
+});
+
+describe("CR-02 AK-10: Laufzeit mit Waffenpaar (150 Gear / 50 Waffen)", () => {
+  it("AK-10: synthetisches 150/50-Inventar per Beam mit Waffenpaar < 10 s", () => {
+    const slotsR: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
+    const brands = ["Ceska", "Grupo", "Fenris", "Overlord", "Petrov"];
+    const gearBig: GearPiece[] = [];
+    for (const sl of slotsR) {
+      for (let i = 0; i < 25; i++) {
+        gearBig.push({
+          id: `${sl}-big-${i}`,
+          slot: sl,
+          brand: brands[i % 5],
+          brandType: "brand",
+          core: "wd",
+          coreValue: 15,
+          attributes: [
+            { type: "chc" as never, value: 1 + (i % 10) },
+            { type: "chd" as never, value: 1 + (i % 12) },
+          ],
+          talent: null,
+          prototype: true,
+        });
+      }
+    }
+    const weaponTypes: Weapon["type"][] = ["ar", "smg", "lmg", "rifle", "mmr", "shotgun", "pistol"];
+    const weaponsBig: Weapon[] = [];
+    for (let i = 0; i < 50; i++) {
+      const base = sampleWeapons[i % sampleWeapons.length];
+      weaponsBig.push({ ...base, id: `big-w-${i}`, name: `${base.name} #${i}`, type: weaponTypes[i % 7] });
+    }
+    let best = Infinity;
+    for (let run = 0; run < 2; run++) {
+      const t0 = performance.now();
+      const r = optimizeV4(weaponsBig, gearBig, ctx(), { maxResults: 10 });
+      best = Math.min(best, performance.now() - t0);
+      expect(r.candidates.length).toBeGreaterThan(0);
+      expect(r.candidates[0].weapons.filter((w) => w.weapon && w.slot.startsWith("primary"))).toHaveLength(2);
+    }
+    console.log(`AK-10 Waffenpaar 150/50: best=${best.toFixed(0)}ms`);
+    expect(best).toBeLessThan(10000);
+  }, 60000);
 });

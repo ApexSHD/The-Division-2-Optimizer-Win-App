@@ -11,11 +11,9 @@ import {
 import type { GearAttrKey } from "./sampleData";
 import { SOURCES, type SourceEntry } from "./v4Data";
 import { computeInventoryKpis } from "./dashboardData";
-import { normalizeAxes, roleProfile, scoreBuild } from "./roleProfiles";
-import { axisContextFor, optimizeV4, defaultSetBonusCatalog, type ModeContext, V4_ALL_SLOTS } from "./operatingModes";
-import { computeEffectVector, vectorToRecord } from "./axes";
-import { enemyProfileFromSettings, evaluateBuild } from "./damage";
-import type { AxisKey } from "./v4Data";
+
+import { optimizeV4, type ModeContext } from "./operatingModes";
+import { computeGapRecommendations } from "./gapRecommendations";
 
 export const ANALYSIS_SLOTS: GearSlot[] = ["mask", "chest", "holster", "backpack", "gloves", "kneepads"];
 export const ANALYSIS_WEAPON_TYPES: WeaponType[] = ["ar", "smg", "lmg", "rifle", "mmr", "shotgun", "pistol"];
@@ -557,7 +555,6 @@ export function analyzeInventory(input: InventoryAnalysisInput): InventoryAnalys
     const profileKeys: string[] = input.roleId ? [profileRoleKeyFor(input.roleId)] : profileRoleKeys;
     const fullGear = input.fullGear ?? dbGearPool(gear);
     for (const roleKey of profileKeys) {
-      const role = roleProfile(roleKey);
       const inv = optimizeV4(weapons, gear, { ...ctx, roleKey, mode: "inventar" }, { maxResults: 50, budgetPerSlot: 25, beamWidth: 4000, onProgress: input.onProgress, shouldAbort: input.shouldAbort });
       if (input.shouldAbort?.()) break;
       const invTopWeapon = inv.candidates[0]?.weapon ?? weapons[0];
@@ -572,66 +569,16 @@ export function analyzeInventory(input: InventoryAnalysisInput): InventoryAnalys
       const pct = invScore !== null && zielScore !== null && zielScore > 0 ? (100 * invScore) / zielScore : null;
       reachabilityByRole.push({ roleId: roleKey, reachabilityPercent: pct === null ? null : Math.round(pct * 10) / 10 });
 
-      if (roleKey === profileRoleKeyFor(input.roleId || "dps_krit") && inv.candidates.length > 0 && ziel.candidates.length > 0) {
-        const invCand = (invBest && inv.candidates.find((c) => c.id === invBest.id)) || inv.candidates[0];
-        const zielCand = (zielBest && ziel.candidates.find((c) => c.id === zielBest.id)) || ziel.candidates[0];
-        if (invCand && zielCand) {
-          const zielBySlot = new Map(zielCand.gear.map((g) => [g.slot, g]));
-          const invWeaponId = invCand.weapon.id;
-          const invVecs = inv.candidates.filter((c) => c.weapon.id === invWeaponId).map((c) => vectorToRecord(c.vector));
-          const zielVecs = ziel.candidates.filter((c) => c.weapon.id === invWeaponId).map((c) => vectorToRecord(c.vector));
-          const hybridVectors: Record<AxisKey, number>[] = [];
-          const slots: GearSlot[] = [];
-          const ideals: GearPiece[] = [];
-          for (const slot of V4_ALL_SLOTS) {
-            const current = invCand.gear.find((g) => g.slot === slot);
-            const ideal = zielBySlot.get(slot);
-            if (!ideal || !current || current.id === ideal.id) continue;
-            const withIdeal = invCand.gear.map((g) => (g.slot === slot ? ideal : g));
-            const { damage: hybridDamage } = evaluateBuild(invCand.weapon, withIdeal, {
-              shdLevel: ctx.shdLevel,
-              profile: enemyProfileFromSettings(ctx.settings),
-              spec: ctx.spec,
-              setBonusCatalog: defaultSetBonusCatalog(),
-            });
-            const hybridDps = ctx.settings.targetMetric === "burst" ? hybridDamage.effectiveDps : hybridDamage.sustainedDps;
-            const v = computeEffectVector(axisContextFor(withIdeal, hybridDps, ctx, role));
-            hybridVectors.push(vectorToRecord(v));
-            slots.push(slot);
-            ideals.push(ideal);
-          }
-          const allVectors = [
-            ...zielVecs,
-            ...invVecs,
-            ...hybridVectors,
-            vectorToRecord(invCand.vector),
-          ];
-          const normalized = normalizeAxes(allVectors);
-          const invScoreNorm = scoreBuild(role, normalized[normalized.length - 1]);
-          const entries: GapRecommendationEntry[] = [];
-          for (let i = 0; i < slots.length; i++) {
-            const hybridIdx = zielVecs.length + invVecs.length + i;
-            const gainScore = scoreBuild(role, normalized[hybridIdx]) - invScoreNorm;
-            if (!Number.isFinite(gainScore) || gainScore <= 1e-9) continue;
-            const gainPercent = invScoreNorm > 0 ? (100 * gainScore) / invScoreNorm : null;
-            const src = sourceForItem(ideals[i].brand);
-            entries.push({
-              rank: 0,
-              slot: slots[i],
-              targetName: ideals[i].brand,
-              targetBrand: ideals[i].brand,
-              gainPercent: gainPercent === null ? null : Math.round(gainPercent * 10) / 10,
-              gainScore: Math.round(gainScore * 100) / 100,
-              source: src,
-              stage: src.stage,
-            });
-          }
-          entries.sort((a, b) => (b.gainPercent ?? -1) - (a.gainPercent ?? -1));
-          entries.forEach((e, i) => {
-            e.rank = i + 1;
-          });
-          gapRecommendations.push(...entries);
-        }
+      if (roleKey === profileRoleKeyFor(input.roleId || "dps_krit")) {
+        gapRecommendations.push(...computeGapRecommendations({
+          weapons,
+          inventarGear: gear,
+          fullGear,
+          ctx,
+          roleKey,
+          onProgress: input.onProgress,
+          shouldAbort: input.shouldAbort,
+        }));
       }
     }
   }
