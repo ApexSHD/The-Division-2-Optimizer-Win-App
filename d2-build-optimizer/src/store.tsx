@@ -34,6 +34,8 @@ export interface OptimizerRequest {
   weaponTypeFilter: OptimizationSettings["weaponTypeFilter"];
   anchorWeaponId: string;
   playStyle: { playStyle?: string; reloadBehavior?: string; buildPriority?: string };
+  requireSetChest: boolean;
+  requireSetBackpack: boolean;
 }
 
 export const DEFAULT_OPTIMIZER_REQUEST: OptimizerRequest = {
@@ -53,6 +55,8 @@ export const DEFAULT_OPTIMIZER_REQUEST: OptimizerRequest = {
   weaponTypeFilter: "",
   anchorWeaponId: "",
   playStyle: {},
+  requireSetChest: true,
+  requireSetBackpack: true,
 };
 
 export interface OptimizationSettings {
@@ -232,6 +236,8 @@ export function sanitize(raw: unknown): UserData {
       if (!Array.isArray(q.excludedWeaponIds)) q.excludedWeaponIds = [];
       if (!Array.isArray(q.skills)) q.skills = [];
       if (typeof q.playStyle !== "object" || q.playStyle === null) q.playStyle = {};
+      if (typeof q.requireSetChest !== "boolean") q.requireSetChest = true;
+      if (typeof q.requireSetBackpack !== "boolean") q.requireSetBackpack = true;
       return q;
     })(),
     weapons: Array.isArray(r.weapons)

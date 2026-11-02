@@ -172,6 +172,18 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
             ))}
           </select>
         </label>
+        {request.targetGearSet && (
+          <>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={request.requireSetChest} onChange={(e) => set({ requireSetChest: e.target.checked })} />
+              <span>{o.requireSetChest}</span>
+            </label>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={request.requireSetBackpack} onChange={(e) => set({ requireSetBackpack: e.target.checked })} />
+              <span>{o.requireSetBackpack}</span>
+            </label>
+          </>
+        )}
       </Section>
 
       <Section title={o.sectionAdvanced} summary={`${o.targetMetric} · CHC ${request.targetChc} · HSD ${request.targetHsd} · Talente ${considerFlags}`}>

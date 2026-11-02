@@ -178,3 +178,35 @@ describe("CR-02 E2E-Feedback: Waffentyp-Filter begrenzt Primärwaffen", () => {
     }
   });
 });
+
+describe("CR-02: Bevorzugtes Set erzwingt 4 Set-Teile (AK-Gearset-Regel)", () => {
+  it("targetGearSet=Striker's Battlegear: Top-Ergebnisse enthalten 4 Striker's-Teile inkl. Weste+Rucksack", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, ctx({ targetGearSet: "Striker's Battlegear" }), { maxResults: 10 });
+    expect(r.candidates.length).toBeGreaterThan(0);
+    const top = r.candidates[0];
+    const striker = top.gear.filter((g) => g.brandType === "gearset" && g.brand.toLowerCase().includes("striker"));
+    expect(striker.length).toBeGreaterThanOrEqual(4);
+    expect(striker.some((g) => g.slot === "chest")).toBe(true);
+    expect(striker.some((g) => g.slot === "backpack")).toBe(true);
+    // alle Kandidaten erfüllen die Regel
+    for (const c of r.candidates) {
+      const n = c.gear.filter((g) => g.brandType === "gearset" && g.brand.toLowerCase().includes("striker")).length;
+      expect(n).toBeGreaterThanOrEqual(4);
+    }
+    expect(r.warnings.some((w) => w.includes("Gearset-Ziel"))).toBe(true);
+  }, 120000);
+
+  it("requireSetChest=false: 4 Set-Teile ohne Weste-Pflicht möglich", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, {
+      ...ctx({ targetGearSet: "Striker's Battlegear" }),
+      gearSetOptions: { targetSet: "Striker's Battlegear", requireSetChest: false, requireSetBackpack: true },
+    }, { maxResults: 10 });
+    for (const c of r.candidates) {
+      const striker = c.gear.filter((g) => g.brandType === "gearset" && g.brand.toLowerCase().includes("striker"));
+      expect(striker.length).toBeGreaterThanOrEqual(4);
+      expect(striker.some((g) => g.slot === "backpack")).toBe(true);
+    }
+  }, 120000);
+});

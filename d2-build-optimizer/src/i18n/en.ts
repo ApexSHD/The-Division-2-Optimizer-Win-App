@@ -266,6 +266,8 @@ export const en: Translation = {
     computedFor: "computed for",
     gameModes: { openworld: "Open World", raid: "Raid", incursion: "Incursion", pve: "PvE", pvp: "PvP" },
     gearsetGroups: { dps: "DPS gearsets", skill: "Skill gearsets (skill tiers)", armour: "Defensive gearsets (armor)", other: "Other" },
+    requireSetChest: "Set chest required",
+    requireSetBackpack: "Set backpack required",
     talentsLabel: "Calculate talents / perks",
     talentsWeapons: "Weapon talents",
     talentsGear: "Gear talents (chest/backpack)",

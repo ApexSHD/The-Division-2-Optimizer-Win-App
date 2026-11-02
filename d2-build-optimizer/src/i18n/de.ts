@@ -264,6 +264,8 @@ export const de = {
     computedFor: "berechnet für",
     gameModes: { openworld: "Offene Welt", raid: "Raid", incursion: "Incursion", pve: "PvE", pvp: "PvP" },
     gearsetGroups: { dps: "DPS-Gearsets", skill: "Skill-Gearsets (Fertigkeitsränge)", armour: "Defensiv-Gearsets (Rüstung)", other: "Sonstige" },
+    requireSetChest: "Set-Weste (Chest) Pflicht",
+    requireSetBackpack: "Set-Rucksack (Backpack) Pflicht",
     talentsLabel: "Talente / Perks berechnen",
     talentsWeapons: "Waffentalente",
     talentsGear: "Gear-Talente (Weste/Rucksack)",
