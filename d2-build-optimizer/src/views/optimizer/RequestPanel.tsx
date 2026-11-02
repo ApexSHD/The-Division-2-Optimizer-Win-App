@@ -7,6 +7,8 @@ import { SKILLS, SPECIALIZATIONS } from "../../data/v4Data";
 import { DIFFICULTIES, GAME_MODE_DIFFICULTIES, defaultDifficultyFor } from "../../data/difficultyProfiles";
 import type { WeaponType } from "../../data/sampleData";
 import { computeInventoryCheck } from "./inventoryCheck";
+import { PLAY_STYLE_QUESTIONS, weightsWithPlayStyle, metricHintFromAnswers, type PlayStyleAnswers } from "../../data/playStyle";
+import { roleProfile as rp } from "../../data/roleProfiles";
 import gearJson from "../../db/gear.json";
 
 const gearSetOptions: { key: string; name: string; group: string }[] = Object.entries(
@@ -218,6 +220,32 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
             </label>
           </span>
         </label>
+        <div style={{ display: "grid", gap: 8, marginTop: 4 }}>
+          <strong>{o.playStyleLabel}</strong>
+          {PLAY_STYLE_QUESTIONS.map((q) => {
+            const current = request.playStyle?.[q.key as keyof PlayStyleAnswers];
+            return (
+              <label key={q.key} style={{ display: "grid", gap: 4 }}>
+                <span>{store.lang === "de" ? q.labelDe : q.labelEn}</span>
+                <select
+                  value={current ?? ""}
+                  onChange={(e) => set({ playStyle: { ...request.playStyle, [q.key]: e.target.value || undefined } })}
+                >
+                  <option value="">—</option>
+                  {q.options.map((opt) => (
+                    <option key={opt.key} value={opt.key}>{store.lang === "de" ? opt.labelDe : opt.labelEn}</option>
+                  ))}
+                </select>
+              </label>
+            );
+          })}
+          <WeightPreview roleKey={request.roleKey} answers={request.playStyle ?? {}} lang={store.lang} />
+          {metricHintFromAnswers(request.playStyle ?? {}) && (
+            <div className="hint">
+              {o.metricHint}: {request.targetMetric === "rotation" ? o.metricRotation : request.targetMetric === "burst" ? o.metricBurst : o.metricSustained}
+            </div>
+          )}
+        </div>
         <label style={{ display: "grid", gap: 4 }}>
           <span>{o.spec} ({o.specFromGlobal}: {store.agent.spec})</span>
           <select value={request.spec} onChange={(e) => set({ spec: e.target.value })}>
@@ -227,6 +255,32 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
           </select>
         </label>
       </Section>
+    </div>
+  );
+}
+
+function WeightPreview({ roleKey, answers, lang }: { roleKey: string; answers: PlayStyleAnswers; lang: "de" | "en" }) {
+  const base = rp(roleKey).weights;
+  const eff = weightsWithPlayStyle(roleKey, answers);
+  const axes: { key: string; label: string }[] = [
+    { key: "dps", label: "DPS" }, { key: "skl", label: lang === "de" ? "Skill" : "Skill" },
+    { key: "ehp", label: "EHP" }, { key: "cc", label: "CC" }, { key: "buf", label: "Buff" }, { key: "upt", label: lang === "de" ? "Verfügbarkeit" : "Uptime" },
+  ];
+  return (
+    <div style={{ display: "grid", gap: 4 }}>
+      <span style={{ fontSize: 12, color: "var(--text-dim, #aaa)" }}>{lang === "de" ? "Gewichte-Vorschau" : "Weight preview"}</span>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {axes.map((a) => {
+          const b = base[a.key as keyof typeof base] ?? 0;
+          const e = eff[a.key as keyof typeof eff] ?? 0;
+          const changed = Math.abs(e - b) > 1e-9;
+          return (
+            <span key={a.key} className="badge" style={changed ? { color: "var(--accent, #e8862e)" } : undefined}>
+              {a.label}: {e.toFixed(2)}{changed ? ` (Δ ${(e - b >= 0 ? "+" : "")}${(e - b).toFixed(2)})` : ""}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

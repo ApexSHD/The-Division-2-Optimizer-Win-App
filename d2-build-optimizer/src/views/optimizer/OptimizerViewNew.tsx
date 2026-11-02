@@ -53,6 +53,7 @@ export function OptimizerViewNew() {
       },
       threatStatusShare: 0.3,
       spec: req.spec,
+      userAssumptions: { playStyle: req.playStyle },
     };
     const modsBySlot = (modsJson as unknown as {
       slots: Record<string, Array<{ name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }>>;

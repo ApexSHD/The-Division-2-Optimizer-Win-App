@@ -33,6 +33,7 @@ export interface OptimizerRequest {
   targetGearSet: string;
   weaponTypeFilter: OptimizationSettings["weaponTypeFilter"];
   anchorWeaponId: string;
+  playStyle: { playStyle?: string; reloadBehavior?: string; buildPriority?: string };
 }
 
 export const DEFAULT_OPTIMIZER_REQUEST: OptimizerRequest = {
@@ -51,6 +52,7 @@ export const DEFAULT_OPTIMIZER_REQUEST: OptimizerRequest = {
   targetGearSet: "",
   weaponTypeFilter: "",
   anchorWeaponId: "",
+  playStyle: {},
 };
 
 export interface OptimizationSettings {
@@ -229,6 +231,7 @@ export function sanitize(raw: unknown): UserData {
       if (!Array.isArray(q.excludedGearIds)) q.excludedGearIds = [];
       if (!Array.isArray(q.excludedWeaponIds)) q.excludedWeaponIds = [];
       if (!Array.isArray(q.skills)) q.skills = [];
+      if (typeof q.playStyle !== "object" || q.playStyle === null) q.playStyle = {};
       return q;
     })(),
     weapons: Array.isArray(r.weapons)

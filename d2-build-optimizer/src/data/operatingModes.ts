@@ -1,4 +1,5 @@
 import type { Weapon, GearPiece, GearSlot } from "./sampleData";
+import { weightsWithPlayStyle } from "./playStyle";
 import type { OptimizationSettings } from "../store";
 import {
   optimizeBuilds,
@@ -44,7 +45,7 @@ export interface ModeContext {
   settings: OptimizationSettings;
   threatStatusShare: number;
   spec: string;
-  userAssumptions?: Record<string, number>;
+  userAssumptions?: Record<string, number | Record<string, string | undefined>>;
   gearSetOptions?: {
     targetSet?: string;
     requireSetChest?: boolean;
@@ -233,7 +234,7 @@ export function axisContextFor(
     teamSize: ctx.teamSize,
     threat: { statusShare: ctx.threatStatusShare },
     specializationKey: ctx.spec || undefined,
-    userAssumptions: ctx.userAssumptions,
+    userAssumptions: ctx.userAssumptions as Record<string, number> | undefined,
   };
 }
 
@@ -819,6 +820,10 @@ export function optimizeV4(
 
   const candidates = buildCandidatesFromOptimizer(optimizerResults, ctx, role);
   const chcTarget = role.chcTarget ?? ctx.settings.targetChc;
+  const playStyleWeights = weightsWithPlayStyle(ctx.roleKey, (ctx.userAssumptions?.playStyle as never) ?? {});
+  const weightShift = Object.fromEntries(
+    Object.entries(playStyleWeights).filter(([axis, w]) => w !== role.weights[axis as AxisKey]),
+  ) as Partial<Record<AxisKey, number>>;
   const ranking = rankBuilds(
     role,
     candidates.map((c) => ({
@@ -829,6 +834,7 @@ export function optimizeV4(
       violationCount: c.violationCount,
       meetsTargetChc: c.damage.cappedChc >= chcTarget,
     })),
+    weightShift,
   );
 
   const best = ranking.bestAdmissible;
