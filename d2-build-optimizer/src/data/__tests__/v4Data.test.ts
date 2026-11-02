@@ -18,7 +18,7 @@ import {
 
 describe("V4-Datenbasis (Issue #89)", () => {
   it("enthält alle Datenbanken mit Datenversion", () => {
-    expect(DATA_VERSION_V4.skills).toBe("skills_v1");
+    expect(DATA_VERSION_V4.skills).toBe("v3");
     expect(DATA_VERSION_V4.specializations).toBe("specializations_v1");
     expect(DATA_VERSION_V4.attributeRules).toBe("attribute_rules_v1");
     expect(DATA_VERSION_V4.sources).toBe("sources_v1");
