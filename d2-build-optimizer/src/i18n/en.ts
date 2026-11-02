@@ -249,6 +249,11 @@ export const en: Translation = {
     candidates: "candidates",
     computedFor: "computed for",
     gameModes: { openworld: "Open World", raid: "Raid", incursion: "Incursion", pve: "PvE", pvp: "PvP" },
+    gearsetGroups: { dps: "DPS gearsets", skill: "Skill gearsets (skill tiers)", armour: "Defensive gearsets (armor)", other: "Other" },
+    talentsLabel: "Calculate talents / perks",
+    talentsWeapons: "Weapon talents",
+    talentsGear: "Gear talents (chest/backpack)",
+    talentsPerks: "Exotic perks (modeled where possible, else flagged)",
   },
   analysis: {
     title: "Inventory Analysis",

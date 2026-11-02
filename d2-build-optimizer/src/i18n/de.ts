@@ -247,6 +247,11 @@ export const de = {
     candidates: "Kandidaten",
     computedFor: "berechnet für",
     gameModes: { openworld: "Offene Welt", raid: "Raid", incursion: "Incursion", pve: "PvE", pvp: "PvP" },
+    gearsetGroups: { dps: "DPS-Gearsets", skill: "Skill-Gearsets (Fertigkeitsränge)", armour: "Defensiv-Gearsets (Rüstung)", other: "Sonstige" },
+    talentsLabel: "Talente / Perks berechnen",
+    talentsWeapons: "Waffentalente",
+    talentsGear: "Gear-Talente (Weste/Rucksack)",
+    talentsPerks: "Exotic-Perks (modelliert wo möglich, sonst gekennzeichnet)",
   },
   analysis: {
     title: "Inventaranalyse",

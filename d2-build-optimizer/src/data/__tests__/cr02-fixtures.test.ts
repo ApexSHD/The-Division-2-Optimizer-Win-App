@@ -156,3 +156,25 @@ describe("CR-02 AK-10: Laufzeit mit Waffenpaar (150 Gear / 50 Waffen)", () => {
     expect(best).toBeLessThan(10000);
   }, 60000);
 });
+
+describe("CR-02 E2E-Feedback: Waffentyp-Filter begrenzt Primärwaffen", () => {
+  it("weaponTypeFilter=ar: beide Primärwaffen sind ARs", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, ctx({ weaponTypeFilter: "ar" }), { maxResults: 5 });
+    expect(r.candidates.length).toBeGreaterThan(0);
+    for (const c of r.candidates.slice(0, 5)) {
+      const primaries = c.weapons.filter((w) => w.slot.startsWith("primary") && w.weapon);
+      expect(primaries.length).toBe(2);
+      for (const p of primaries) expect(p.weapon!.type).toBe("ar");
+    }
+  });
+
+  it("weaponTypeFilter=lmg: beide Primärwaffen sind LMGs", () => {
+    const { gear, weapons } = load();
+    const r = optimizeV4(weapons, gear, ctx({ weaponTypeFilter: "lmg" }), { maxResults: 5 });
+    for (const c of r.candidates.slice(0, 5)) {
+      const primaries = c.weapons.filter((w) => w.slot.startsWith("primary") && w.weapon);
+      for (const p of primaries) expect(p.weapon!.type).toBe("lmg");
+    }
+  });
+});

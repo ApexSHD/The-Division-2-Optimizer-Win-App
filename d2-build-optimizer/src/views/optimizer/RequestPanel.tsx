@@ -7,6 +7,11 @@ import { SKILLS, SPECIALIZATIONS } from "../../data/v4Data";
 import { DIFFICULTIES, GAME_MODE_DIFFICULTIES, defaultDifficultyFor } from "../../data/difficultyProfiles";
 import type { WeaponType } from "../../data/sampleData";
 import { computeInventoryCheck } from "./inventoryCheck";
+import gearJson from "../../db/gear.json";
+
+const gearSetOptions: { key: string; name: string; group: string }[] = Object.entries(
+  (gearJson as unknown as { green_set_info: Record<string, { name?: string; group?: string }> }).green_set_info,
+).map(([key, v]) => ({ key, name: v.name ?? key, group: v.group ?? "other" }));
 
 function Section({
   title,
@@ -45,6 +50,12 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
   const o = t.optimizer;
   const check = useMemo(() => computeInventoryCheck(store.gear, store.weapons), [store.gear, store.weapons]);
   const role = roleProfile(request.roleKey);
+  const considerFlags = [
+    store.optimization.considerWeaponTalents ? "W" : "–",
+    store.optimization.considerGearTalents ? "G" : "–",
+    store.optimization.considerExoticPerks ? "P" : "–",
+  ].join("");
+  const roleNeedsSkills = role.sklKind === "heal" || role.minima.some((m) => m.kind === "cores" && m.core === "skill") || role.weights.skl > 0.5 || role.weights.cc > 0.5;
 
   const difficulties = DIFFICULTIES.filter((d) => GAME_MODE_DIFFICULTIES[request.gameMode as keyof typeof GAME_MODE_DIFFICULTIES]?.includes(d.key) ?? true);
   const set = (patch: Partial<OptimizerRequest>) => onChange({ ...request, ...patch });
@@ -108,6 +119,7 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
         </label>
       </Section>
 
+      {roleNeedsSkills && (
       <Section title={o.sectionSkills} summary={request.skills.length > 0 ? request.skills.join(", ") : "—"}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 6 }}>
           {SKILLS.map((s) => {
@@ -127,6 +139,7 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
           })}
         </div>
       </Section>
+      )}
 
       <Section
         title={o.sectionRules}
@@ -136,10 +149,6 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
           {o.locked}: {request.lockedGearIds.length} · {o.excluded}: {request.excludedGearIds.length} · {request.excludedWeaponIds.length} {o.weapons}
         </div>
         <label style={{ display: "grid", gap: 4 }}>
-          <span>{o.targetGearSet}</span>
-          <input value={request.targetGearSet} onChange={(e) => set({ targetGearSet: e.target.value })} placeholder="z. B. Striker's Battlegear" />
-        </label>
-        <label style={{ display: "grid", gap: 4 }}>
           <span>{o.weaponType}</span>
           <select value={request.weaponTypeFilter} onChange={(e) => set({ weaponTypeFilter: e.target.value as WeaponType | "" })}>
             <option value="">—</option>
@@ -148,9 +157,22 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
             ))}
           </select>
         </label>
+        <label style={{ display: "grid", gap: 4 }}>
+          <span>{o.targetGearSet}</span>
+          <select value={request.targetGearSet} onChange={(e) => set({ targetGearSet: e.target.value })}>
+            <option value="">—</option>
+            {(["dps", "skill", "armour"] as const).map((grp) => (
+              <optgroup key={grp} label={o.gearsetGroups[grp]}>
+                {gearSetOptions.filter((g) => g.group === grp).map((g) => (
+                  <option key={g.key} value={g.name}>{g.name}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
       </Section>
 
-      <Section title={o.sectionAdvanced} summary={`${o.targetMetric} · CHC ${request.targetChc} · HSD ${request.targetHsd}`}>
+      <Section title={o.sectionAdvanced} summary={`${o.targetMetric} · CHC ${request.targetChc} · HSD ${request.targetHsd} · Talente ${considerFlags}`}>
         <label style={{ display: "grid", gap: 4 }}>
           <span>{o.targetMetric}</span>
           <select value={request.targetMetric} onChange={(e) => set({ targetMetric: e.target.value as OptimizerRequest["targetMetric"] })}>
@@ -167,29 +189,34 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
           <span>{o.targetHsd} (%)</span>
           <input type="number" min={0} value={request.targetHsd} onChange={(e) => set({ targetHsd: Number(e.target.value) })} />
         </label>
-        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <input
-            type="checkbox"
-            checked={store.optimization.considerWeaponTalents}
-            onChange={(e) => store.setOptimization({ ...store.optimization, considerWeaponTalents: e.target.checked })}
-          />
-          <span>Waffentalente berechnen</span>
-        </label>
-        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <input
-            type="checkbox"
-            checked={store.optimization.considerGearTalents}
-            onChange={(e) => store.setOptimization({ ...store.optimization, considerGearTalents: e.target.checked })}
-          />
-          <span>Gear-Talente berechnen</span>
-        </label>
-        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <input
-            type="checkbox"
-            checked={store.optimization.considerExoticPerks}
-            onChange={(e) => store.setOptimization({ ...store.optimization, considerExoticPerks: e.target.checked })}
-          />
-          <span>Exotic-Perks berechnen (nur gekennzeichnet, nicht modelliert)</span>
+        <label style={{ display: "grid", gap: 4 }}>
+          <span>{o.talentsLabel}</span>
+          <span style={{ display: "grid", gap: 4 }}>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={store.optimization.considerWeaponTalents}
+                onChange={(e) => store.setOptimization({ ...store.optimization, considerWeaponTalents: e.target.checked })}
+              />
+              <span>{o.talentsWeapons}</span>
+            </label>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={store.optimization.considerGearTalents}
+                onChange={(e) => store.setOptimization({ ...store.optimization, considerGearTalents: e.target.checked })}
+              />
+              <span>{o.talentsGear}</span>
+            </label>
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={store.optimization.considerExoticPerks}
+                onChange={(e) => store.setOptimization({ ...store.optimization, considerExoticPerks: e.target.checked })}
+              />
+              <span>{o.talentsPerks}</span>
+            </label>
+          </span>
         </label>
         <label style={{ display: "grid", gap: 4 }}>
           <span>{o.spec} ({o.specFromGlobal}: {store.agent.spec})</span>
