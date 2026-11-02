@@ -45,9 +45,10 @@ const fullGear = (): GearPiece[] => [
 describe("computeDamage — Formel (Issue #67)", () => {
   it("wendet HSD linear an, nicht quadratisch", () => {
     const stats = { wd: 0, chc: 0, chd: 0, hsd: 50, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} };
-    const w = { ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } };
+    const w = { ...sampleWeapons[0], knowHow: 0, innateHsd: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } };
     const d = computeDamage(w, stats, { armor: 0, health: 1, ooc: 0, headshot: 0.5 });
-    const expected = sampleWeapons[0].baseDamage * (1 + (50 / 100) * 0.5);
+    // CR-02 OP-6.6: HSD_BASE (50 %) ist jetzt Teil des HSD-Topfs
+    const expected = sampleWeapons[0].baseDamage * (1 + ((50 + 50) / 100) * 0.5);
     expect(d.nonCritHit).toBeCloseTo(expected, 6);
   });
 
@@ -419,18 +420,18 @@ describe("optimizeBuilds — Multi-Waffe & Exotic (Issue #80)", () => {
 });
 
 describe("computeDamage - CHD+HSD additiv (Issue #82)", () => {
-  const baseW = () => ({ ...sampleWeapons[0], knowHow: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } });
+  const baseW = () => ({ ...sampleWeapons[0], knowHow: 0, innateHsd: 0, attributes: { ...sampleWeapons[0].attributes, core1: 0, core2Val: 0 } });
   const zeroStats = () => ({ wd: 0, chc: 0, chd: 0, hsd: 0, dta: 0, dth: 0, dttooc: 0, totalWd: 0, amp: [], sources: {} });
 
   it("Rechenbeispiel: Krit-Kopfschuss ist ADDITIV, nicht HSD*CHD multiplikativ", () => {
-    // Setup: 100 % Headshot-Anteil, HSD +50 %, CHD +40 % (+ CHD_BASE 25 % seit Kalibrierung 31.10.)
+    // Setup: 100 % Headshot-Anteil, HSD +50 % (+ HSD_BASE 50 % seit CR-02 OP-6.6), CHD +40 % (+ CHD_BASE 25 %)
     const stats = { ...zeroStats(), hsd: 50, chd: 40 };
     const d = computeDamage(baseW(), stats, { armor: 0, health: 1, ooc: 0, headshot: 1 });
     const base = sampleWeapons[0].baseDamage;
-    // Erwartung (additiver Topf inkl. Basis-CHD): Krit-Kopfschuss = base * (1 + 0.5 + 0.4 + 0.25) = base * 2.15
-    // Falsch (multiplikativ): base * 1.5 * 1.65 = base * 2.475
-    expect(d.critHit).toBeCloseTo(base * 2.15, 6);
-    expect(d.critHit).not.toBeCloseTo(base * 2.475, 4);
+    // Erwartung (additiver Topf inkl. Basis-CHD und Basis-HSD): Krit-Kopfschuss = base * (1 + 1.0 + 0.4 + 0.25) = base * 2.65
+    // Falsch (multiplikativ): base * 2.0 * 1.65 = base * 3.3
+    expect(d.critHit).toBeCloseTo(base * 2.65, 6);
+    expect(d.critHit).not.toBeCloseTo(base * 3.3, 4);
   });
 
   it("wastedChc beruecksichtigt Waffen-CHC (core2)", () => {

@@ -387,6 +387,7 @@ export function buildWeaponSlots(
   spec: string,
   setBonusCatalog?: unknown,
   modsBySlot?: unknown,
+  considerTalents = false,
 ): WeaponSlotPick[] {
   const metricOf = (w: Weapon) => {
     const { damage } = evaluateBuild(w, [], {
@@ -395,6 +396,7 @@ export function buildWeaponSlots(
       spec,
       modsBySlot: modsBySlot as never,
       setBonusCatalog: setBonusCatalog as never,
+      considerTalents,
     });
     return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
   };
@@ -426,6 +428,7 @@ export function combinedWeaponDps(
   spec: string,
   setBonusCatalog?: unknown,
   modsBySlot?: unknown,
+  considerTalents = false,
 ): number {
   const dpsOf = (w: Weapon | null) => {
     if (!w) return 0;
@@ -435,6 +438,7 @@ export function combinedWeaponDps(
       spec,
       modsBySlot: modsBySlot as never,
       setBonusCatalog: setBonusCatalog as never,
+      considerTalents,
     });
     return targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps;
   };
@@ -685,13 +689,14 @@ export function optimizeV4(
         spec: ctx.spec,
         modsBySlot: opts.modsBySlot as never,
         setBonusCatalog: setBonusCatalog as never,
+      considerTalents: ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents,
       });
       weaponDpsCache.set(w.id, ctx.settings.targetMetric === "burst" ? damage.effectiveDps : damage.sustainedDps);
     }
     const sortedWeapons = [...candidateWeapons].sort((a, b) => (weaponDpsCache.get(b.id) ?? 0) - (weaponDpsCache.get(a.id) ?? 0));
-    const weaponSlots = buildWeaponSlots(sortedWeapons, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot);
+    const weaponSlots = buildWeaponSlots(sortedWeapons, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot, ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents);
     const leadWeapon = weaponSlots.find((x) => x.slot === "primary1")?.weapon ?? sortedWeapons[0] ?? null;
-    const comboWeaponDps = combinedWeaponDps(weaponSlots, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot);
+    const comboWeaponDps = combinedWeaponDps(weaponSlots, ctx.settings.targetMetric, profile, ctx.shdLevel, ctx.spec, setBonusCatalog, opts.modsBySlot, ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents);
     opts.onProgress?.("evaluate", 0, combos.length);
     for (const combo of combos) {
       if (opts.shouldAbort?.()) {
@@ -712,6 +717,7 @@ export function optimizeV4(
           spec: ctx.spec,
           modsBySlot: opts.modsBySlot as never,
           setBonusCatalog: setBonusCatalog as never,
+          considerTalents: ctx.settings.considerWeaponTalents || ctx.settings.considerGearTalents,
         });
         const meetsTargetChc = damage.cappedChc >= chcTarget;
         optimizerResults.push({
