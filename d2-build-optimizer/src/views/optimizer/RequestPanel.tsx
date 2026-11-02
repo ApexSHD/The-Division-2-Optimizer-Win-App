@@ -167,6 +167,30 @@ export function RequestPanel({ request, onChange }: { request: OptimizerRequest;
           <span>{o.targetHsd} (%)</span>
           <input type="number" min={0} value={request.targetHsd} onChange={(e) => set({ targetHsd: Number(e.target.value) })} />
         </label>
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={store.optimization.considerWeaponTalents}
+            onChange={(e) => store.setOptimization({ ...store.optimization, considerWeaponTalents: e.target.checked })}
+          />
+          <span>Waffentalente berechnen</span>
+        </label>
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={store.optimization.considerGearTalents}
+            onChange={(e) => store.setOptimization({ ...store.optimization, considerGearTalents: e.target.checked })}
+          />
+          <span>Gear-Talente berechnen</span>
+        </label>
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={store.optimization.considerExoticPerks}
+            onChange={(e) => store.setOptimization({ ...store.optimization, considerExoticPerks: e.target.checked })}
+          />
+          <span>Exotic-Perks berechnen (nur gekennzeichnet, nicht modelliert)</span>
+        </label>
         <label style={{ display: "grid", gap: 4 }}>
           <span>{o.spec} ({o.specFromGlobal}: {store.agent.spec})</span>
           <select value={request.spec} onChange={(e) => set({ spec: e.target.value })}>

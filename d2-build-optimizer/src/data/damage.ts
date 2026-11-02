@@ -1,4 +1,5 @@
 import type { Weapon, GearSlot, GearAttr, GearAttrKey } from "./sampleData";
+import { collectTalentContributions } from "./talentEffects";
 import type { GearPiece } from "./sampleData";
 import { GEAR_ATTR_TYPES, gearAttrMax, reloadSecondsFor } from "./sampleData";
 import type { OptimizationSettings } from "../store";
@@ -54,6 +55,8 @@ const CHC_CAP = 60;
 // Nutzervorgabe/Community-verifiziert 31.10.: Basis-Kritschaden des Agenten (nicht im Charakterblatt
 // als solcher ausgewiesen, aber wirksam - Schießstand-Verifikation 164,4 % CHD).
 export const CHD_BASE = 25;
+// CR-02 OP-6.6: Basis-HSD des Agenten (Community-Wert 50 %, gegen Spielwerte zu prüfen, Issue #62).
+export const HSD_BASE = 50;
 
 export type SpecId = "demolitionist" | "gunner" | "sharpshooter" | "survivalist" | "technician" | "firewall";
 
@@ -254,7 +257,7 @@ export function computeDamage(
   // Minor-Attribute zaehlen in ihre Kategorie (additiv)
   const totalChc = build.chc + weaponChc;
   const finalChdBase = CHD_BASE + build.chd + weaponChd;
-  const totalHsd = (weapon.innateHsd ?? 0) + build.hsd + weaponHsd;
+  const totalHsd = HSD_BASE + (weapon.innateHsd ?? 0) + build.hsd + weaponHsd;
   const dttoocTotal = build.dttooc + weaponDttooc;
   const dthTotal = build.dth + weaponDth;
   const dtaTotal = build.dta + weaponDta;
@@ -420,6 +423,7 @@ export interface EvaluateContext {
   spec?: string;
   modsBySlot?: Record<string, { name: string; slotTypes: string[]; bonus: { type: string; val: number } | null; penalty?: { type: string; val: number } | null }[]>;
   setBonusCatalog?: SetBonusCatalog | null;
+  considerTalents?: boolean;
 }
 
 /**
@@ -455,6 +459,21 @@ export function evaluateBuild(
     }
   }
   stats = applySetBonuses(stats, gear, weapon, ctx.setBonusCatalog ?? null);
+  if (ctx.considerTalents) {
+    const tc = collectTalentContributions(weapon, gear);
+    if (tc.wdPercent > 0) {
+      stats.wd += tc.wdPercent;
+      addStatSource(stats, "wd", `Talent: ${tc.weaponTalent?.name ?? "Gear-Talent"}`, tc.wdPercent, "talent");
+    }
+    if (tc.chdPercent > 0) {
+      stats.chd += tc.chdPercent;
+      addStatSource(stats, "chd", `Talent: ${tc.weaponTalent?.name ?? "Gear-Talent"}`, tc.chdPercent, "talent");
+    }
+    if (tc.ampPercents.length > 0) {
+      stats.amp = [...stats.amp, ...tc.ampPercents];
+      addStatSource(stats, "amp", `Talent-Amp: ${tc.weaponTalent?.name ?? "Gear-Talent"}`, tc.ampPercents.reduce((a, b) => a + b, 0), "talent");
+    }
+  }
   const damage = computeDamage(weapon, stats, ctx.profile, { weaponTypeWd: 0 });
   return { stats, damage, modsUsed };
 }

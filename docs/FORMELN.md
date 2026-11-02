@@ -106,11 +106,11 @@ DTA (Rüstungsschaden), DTH (Lebenspunktschaden) und DTTOOC (Schaden gg. ungedec
 
 Diese im Spiel existierenden Effekte sind in der Engine derzeit **nicht** enthalten und sollen gegen Ingame-Werte geprüft werden (#62):
 
-1. **Basis-Kopfschuss-Multiplikator** (im Spiel hat jede Waffe einen eingebauten HSD-Grundwert, z. B. +55 % bei ARs — die Waffen-DB führt „HSD" als Stat, `computeDamage` nutzt ihn nicht)
-2. **Basis-CHD** (im Spiel +25 % Grundwert auf jedem Crit)
+1. ~~**Basis-Kopfschuss-Multiplikator**~~ **umgesetzt (CR-02 OP-6.6):** `HSD_BASE = 50` in `damage.ts` ist Teil des HSD-Topfs; Waffen-`innateHsd` (z. B. +55 % AR) wird weiterhin zusätzlich gerechnet. Gegen Spielwerte zu prüfen (#62).
+2. ~~**Basis-CHD**~~ **umgesetzt:** `CHD_BASE = 25` (bereits seit Kalibrierung 31.10. aktiv).
 3. **RPM-Preis-Multiplikatoren** und Waffenhandling-Effekte auf realen DPS
-4. **Talente** (`talentTotalWd`/`talentAmps` existieren als Parameter, werden aber nie übergeben — Schalter ohne Wirkung bis zur Umsetzung)
-5. **Exotic-Perks** (Catharsis, Memento, Coyote's Mask usw.)
+4. ~~**Talente**~~ **teilweise umgesetzt (CR-02 P4):** `src/data/talentEffects.ts` modelliert Wirkungsklassen (permanent/stack/bedingt/team/unmodelliert) für priorisierte Talente (Strapaziert, Killer, Raserei, Unhinged, Overwhelm, Rifleman, Measured, Brazen, Finisher, Precision Strike) mit Standard-Annahmen (Stack-Uptime 0,8, bedingte Uptime). Schalter `considerWeaponTalents`/`considerGearTalents` wirken jetzt in `evaluateBuild` (`considerTalents`). Nicht modellierte Talente werden in der Build-Karte als „nicht berechnet“ gekennzeichnet.
+5. **Exotic-Perks** (Catharsis, Memento, Coyote's Mask usw.) — Schalter `considerExoticPerks` vorhanden, Perks selbst werden nur gekennzeichnet, nicht modelliert.
 
 Sobald ein Punkt implementiert wird, ist dieses Dokument fortzuschreiben und der Test in `src/data/__tests__/damage.test.ts` zu ergänzen.
 

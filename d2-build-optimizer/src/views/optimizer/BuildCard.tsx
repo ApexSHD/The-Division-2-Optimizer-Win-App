@@ -7,6 +7,7 @@ import { DB_VERSION, type Loadout, type WeaponMod } from "../../data/sampleData"
 import { bestGearModsForRole } from "../../data/operatingModes";
 import { bestModsForWeapon } from "../../data/damage";
 import { weaponFingerprint, gearFingerprint } from "../../data/loadoutIntegrity";
+import { collectTalentContributions } from "../../data/talentEffects";
 import modsJson from "../../db/mod.json";
 import type { ScoredBuild } from "../../data/roleProfiles";
 
@@ -72,6 +73,8 @@ export function BuildCard({
   };
 
   const weaponSlots = cand.weapons;
+  const talentContrib = collectTalentContributions(cand.weapon, cand.gear);
+  const talentUnmodelled = talentContrib.unmodelled;
 
   return (
     <section className="field" style={{ padding: 14, display: "grid", gap: 12 }}>
@@ -93,7 +96,12 @@ export function BuildCard({
                 {ws.slot === "primary1" ? o.primary1 : ws.slot === "primary2" ? o.primary2 : o.pistol}
               </span>
               {ws.weapon ? (
-                <span>{ws.weapon.name} <small>({ws.weapon.type.toUpperCase()})</small></span>
+                <span>
+                  {ws.weapon.name} <small>({ws.weapon.type.toUpperCase()})</small>
+                  {ws.weapon.talent && (
+                    <small style={{ color: "var(--text-dim, #aaa)" }}> · {ws.weapon.talent}</small>
+                  )}
+                </span>
               ) : (
                 <span style={{ color: "var(--warn, #e6a23c)" }}>— {o.noPistolHint}</span>
               )}
@@ -151,7 +159,14 @@ export function BuildCard({
                     {g.core === "wd" ? `WD ${g.coreValue}` : g.core === "armour" ? `Rüstung ${fmt(g.coreValue)}` : "Skill-Tier"}
                     {" · "}
                     {g.attributes.map((a) => `${a.type} ${a.value}`).join(", ")}
-                    {g.talent ? ` · ${g.talent}` : ""}
+                    {g.talent && (
+                      <span>
+                        {" · "}{g.talent}
+                        {talentUnmodelled.includes(g.talent) && (
+                          <small style={{ color: "var(--warn, #e6a23c)" }}> — nicht berechnet</small>
+                        )}
+                      </span>
+                    )}
                   </td>
                 </tr>
               );
@@ -167,6 +182,12 @@ export function BuildCard({
           {cand.meetsTargetChc && <li>CHC-Ziel erreicht ({fmt(cand.damage.cappedChc, 1)} %)</li>}
           {cand.gear.some((g) => g.brandType === "gearset") && (
             <li>Set-Teile: {cand.gear.filter((g) => g.brandType === "gearset").map((g) => g.brand).join(", ")}</li>
+          )}
+          {talentContrib.wdPercent > 0 && <li>Talent-WD: +{talentContrib.wdPercent} %</li>}
+          {talentContrib.chdPercent > 0 && <li>Talent-CHD: +{talentContrib.chdPercent} %</li>}
+          {talentContrib.ampPercents.length > 0 && <li>Talent-Amp: +{talentContrib.ampPercents.join(" %, +")} %</li>}
+          {talentUnmodelled.length > 0 && (
+            <li style={{ color: "var(--warn, #e6a23c)" }}>Nicht modelliert: {talentUnmodelled.join(", ")}</li>
           )}
         </ul>
       </div>
