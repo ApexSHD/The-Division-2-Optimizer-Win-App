@@ -268,6 +268,8 @@ export const de = {
     talentsWeapons: "Waffentalente",
     talentsGear: "Gear-Talente (Weste/Rucksack)",
     talentsPerks: "Exotic-Perks (modelliert wo möglich, sonst gekennzeichnet)",
+    playStyleLabel: "Spielstil (optional)",
+    metricHint: "Vorschlag Zielmetrik",
   },
   analysis: {
     title: "Inventaranalyse",

@@ -417,7 +417,11 @@ export interface RankingResult {
 export function rankBuilds(
   role: RoleProfile,
   candidates: NormalizationSetInput[],
+  weightOverrides?: Partial<Record<AxisKey, number>>,
 ): RankingResult {
+  const effRole: RoleProfile = weightOverrides
+    ? { ...role, weights: { ...role.weights, ...weightOverrides } }
+    : role;
   const admissibleVectors = candidates
     .filter((c) => c.admissible)
     .map((c) => axisRecord(c.vector));
@@ -439,13 +443,13 @@ export function rankBuilds(
       admissible: c.admissible,
       violations: c.violations,
       normalized,
-      score: scoreBuild(role, normalized),
+      score: scoreBuild(effRole, normalized),
       violationCount: c.violationCount,
       meetsTargetChc: c.meetsTargetChc ?? false,
     };
   });
 
-  scored.sort((a, b) => compareBuilds(a, b, role));
+  scored.sort((a, b) => compareBuilds(a, b, effRole));
 
   const bestAdmissible = scored.find((b) => b.admissible) ?? null;
   const violationCounts = new Map<string, number>();

@@ -11,6 +11,7 @@ export interface EnemyProfile {
   health: number;
   ooc: number;
   headshot: number;
+  difficultyKey?: string;
 }
 
 export interface StatSource {
@@ -163,6 +164,7 @@ export function enemyProfileFromSettings(o: OptimizationSettings): EnemyProfile 
     health: h,
     ooc: Math.max(0, Math.min(100, o.enemyOocShare)) / 100,
     headshot: Math.max(0, Math.min(100, o.enemyHeadshotShare)) / 100,
+    difficultyKey: o.difficultyKey,
   };
 }
 

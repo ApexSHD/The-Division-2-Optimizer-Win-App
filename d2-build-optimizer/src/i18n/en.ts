@@ -270,6 +270,8 @@ export const en: Translation = {
     talentsWeapons: "Weapon talents",
     talentsGear: "Gear talents (chest/backpack)",
     talentsPerks: "Exotic perks (modeled where possible, else flagged)",
+    playStyleLabel: "Play style (optional)",
+    metricHint: "Suggested target metric",
   },
   analysis: {
     title: "Inventory Analysis",
